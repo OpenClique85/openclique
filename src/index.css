@@ -53,6 +53,14 @@
     --input: 220 20% 90%;
     --ring: 174 84% 40%;
 
+    /* Navy - for Work With Us */
+    --navy: 220 60% 25%;
+    --navy-foreground: 0 0% 100%;
+
+    /* Sunset Orange - for Partner With Us */
+    --sunset: 25 95% 53%;
+    --sunset-foreground: 0 0% 100%;
+
     /* Radius */
     --radius: 0.75rem;
 
@@ -95,6 +103,14 @@
     --border: 220 40% 20%;
     --input: 220 40% 20%;
     --ring: 174 84% 45%;
+
+    /* Navy - for Work With Us (dark mode) */
+    --navy: 220 50% 35%;
+    --navy-foreground: 0 0% 100%;
+
+    /* Sunset Orange - for Partner With Us (dark mode) */
+    --sunset: 25 95% 58%;
+    --sunset-foreground: 0 0% 100%;
 
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;

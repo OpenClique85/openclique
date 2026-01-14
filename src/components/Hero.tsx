@@ -31,10 +31,10 @@ export function Hero() {
             <Button size="lg" asChild className="w-full sm:w-auto text-base px-8">
               <Link to="/pilot">{HERO.primaryCta}</Link>
             </Button>
-            <Button size="lg" asChild className="w-full sm:w-auto text-base px-8 bg-accent text-accent-foreground hover:bg-accent/90">
+            <Button size="lg" asChild className="w-full sm:w-auto text-base px-8 bg-sunset text-sunset-foreground hover:bg-sunset/90">
               <Link to="/partners">{HERO.secondaryCta}</Link>
             </Button>
-            <Button size="lg" asChild className="w-full sm:w-auto text-base px-8 bg-secondary text-secondary-foreground hover:bg-secondary/80">
+            <Button size="lg" asChild className="w-full sm:w-auto text-base px-8 bg-navy text-navy-foreground hover:bg-navy/90">
               <Link to="/work-with-us">{HERO.tertiaryCta}</Link>
             </Button>
           </div>

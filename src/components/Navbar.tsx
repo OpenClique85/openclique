@@ -47,14 +47,14 @@ export function Navbar() {
             <Button
               size="sm"
               asChild
-              className="bg-accent text-accent-foreground hover:bg-accent/80 hover:scale-105 transition-all"
+              className="bg-sunset text-sunset-foreground hover:bg-sunset/80 hover:scale-105 transition-all"
             >
               <Link to="/partners">Partner With Us</Link>
             </Button>
             <Button
               size="sm"
               asChild
-              className="bg-secondary text-secondary-foreground hover:bg-secondary/70 hover:scale-105 transition-all"
+              className="bg-navy text-navy-foreground hover:bg-navy/80 hover:scale-105 transition-all"
             >
               <Link to="/work-with-us">Work With Us</Link>
             </Button>
@@ -97,14 +97,14 @@ export function Navbar() {
                 <Button
                   size="sm"
                   asChild
-                  className="justify-start bg-accent text-accent-foreground"
+                  className="justify-start bg-sunset text-sunset-foreground"
                 >
                   <Link to="/partners" onClick={() => setIsOpen(false)}>Partner With Us</Link>
                 </Button>
                 <Button
                   size="sm"
                   asChild
-                  className="justify-start bg-secondary text-secondary-foreground"
+                  className="justify-start bg-navy text-navy-foreground"
                 >
                   <Link to="/work-with-us" onClick={() => setIsOpen(false)}>Work With Us</Link>
                 </Button>
