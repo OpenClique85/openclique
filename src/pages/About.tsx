@@ -7,7 +7,7 @@ import { Shield, Heart, Target } from "lucide-react";
 import anthonyCami from "@/assets/team/anthony-cami.jpeg";
 import andrewPoss from "@/assets/team/andrew-poss.jpeg";
 import tvlSemifinalists from "@/assets/traction/tvl-semifinalists.jpeg";
-import aclWinners from "@/assets/traction/acl-winners.png";
+import aclWinners from "@/assets/traction/acl-winners.jpeg";
 import kendraScottAccelerator from "@/assets/traction/kendra-scott-accelerator.jpeg";
 
 const teamPhotos: Record<string, string> = {
@@ -77,7 +77,7 @@ export default function About() {
                       <img
                         src={teamPhotos[member.photo]}
                         alt={member.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover object-top"
                       />
                     </div>
                     <h3 className="font-display text-xl font-semibold text-foreground">
@@ -116,7 +116,7 @@ export default function About() {
                       <img
                         src={tractionPhotos[item.image]}
                         alt={item.title}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover object-top"
                       />
                     </div>
                     <div className="p-5">
