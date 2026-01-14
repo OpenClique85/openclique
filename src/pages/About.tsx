@@ -116,7 +116,7 @@ export default function About() {
                       <img
                         src={tractionPhotos[item.image]}
                         alt={item.title}
-                        className="w-full h-full object-cover object-top"
+                        className={`w-full h-full object-cover ${item.image === 'acl-winners' ? 'object-[center_70%]' : 'object-top'}`}
                       />
                     </div>
                     <div className="p-5">

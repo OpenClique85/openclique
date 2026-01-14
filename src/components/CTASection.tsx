@@ -22,9 +22,8 @@ export function CTASection() {
             </Button>
             <Button
               size="lg"
-              variant="outline"
               asChild
-              className="w-full sm:w-auto text-base px-8 border-background/30 text-background hover:bg-background/10"
+              className="w-full sm:w-auto text-base px-8 bg-sunset text-sunset-foreground hover:bg-sunset/90"
             >
               <Link to="/partners">Partner With Us</Link>
             </Button>
