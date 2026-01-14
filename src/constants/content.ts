@@ -64,7 +64,7 @@ export const SOCIAL_LINKS = {
 
 export const HERO = {
   headline: "The invite that plans itself.",
-  subheadline: "Join small squads. Complete AI-curated quests. Show up and connect — no awkward planning required.",
+  subheadline: "Join small squads. Complete AI-assisted quests. Show up and connect — no awkward planning required.",
   primaryCta: "Join the Pilot",
   secondaryCta: "Partner With Us",
   tertiaryCta: "Work With Us",
@@ -85,7 +85,7 @@ export const BENEFITS = [
   },
   {
     title: "Guided Quests",
-    description: "AI-curated adventures designed to break the ice and create shared memories.",
+    description: "AI-assisted adventures designed to break the ice and create shared memories.",
     icon: "compass",
   },
   {
@@ -305,7 +305,7 @@ export const FOOTER = {
     { label: "Privacy", href: "/privacy" },
     { label: "Terms", href: "/terms" },
   ],
-  contactEmail: "hello@openclique.com",
+  contactEmail: "Andrew.poss@openclique.net",
 };
 
 // =============================================================================
