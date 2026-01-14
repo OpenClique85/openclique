@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { HERO, SOCIAL_PROOF, BRAND } from "@/constants/content";
+import { HERO, SOCIAL_PROOF } from "@/constants/content";
+import logo from "@/assets/logo.png";
 
 export function Hero() {
   return (
@@ -10,13 +11,9 @@ export function Hero() {
       
       <div className="container mx-auto px-4 py-16 md:py-24 lg:py-32">
         <div className="max-w-3xl mx-auto text-center">
-          {/* Launch badge */}
-          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-8 animate-fade-in">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-            </span>
-            {SOCIAL_PROOF.badge}
+          {/* Logo badge */}
+          <div className="flex justify-center mb-8 animate-fade-in">
+            <img src={logo} alt="OpenClique" className="h-16 md:h-20" />
           </div>
 
           {/* Headline */}
@@ -34,10 +31,10 @@ export function Hero() {
             <Button size="lg" asChild className="w-full sm:w-auto text-base px-8">
               <Link to="/pilot">{HERO.primaryCta}</Link>
             </Button>
-            <Button size="lg" variant="outline" asChild className="w-full sm:w-auto text-base px-8">
+            <Button size="lg" asChild className="w-full sm:w-auto text-base px-8 bg-accent text-accent-foreground hover:bg-accent/90">
               <Link to="/partners">{HERO.secondaryCta}</Link>
             </Button>
-            <Button size="lg" variant="ghost" asChild className="w-full sm:w-auto text-base">
+            <Button size="lg" asChild className="w-full sm:w-auto text-base px-8 bg-secondary text-secondary-foreground hover:bg-secondary/80">
               <Link to="/work-with-us">{HERO.tertiaryCta}</Link>
             </Button>
           </div>
