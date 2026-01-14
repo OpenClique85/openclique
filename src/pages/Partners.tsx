@@ -2,7 +2,6 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { PARTNERS_PAGE, FORM_URLS } from "@/constants/content";
-import { trackFormRedirect } from "@/lib/tracking";
 import { ArrowRight, Building2, Sparkles, Users } from "lucide-react";
 
 const iconMap = {
@@ -13,7 +12,6 @@ const iconMap = {
 
 export default function Partners() {
   const handleCTAClick = () => {
-    trackFormRedirect("partners", "/partners");
     window.open(FORM_URLS.partners, "_blank");
   };
 

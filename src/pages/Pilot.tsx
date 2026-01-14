@@ -1,14 +1,11 @@
-import { useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { PILOT_PAGE, FORM_URLS } from "@/constants/content";
-import { trackFormRedirect } from "@/lib/tracking";
 import { ArrowRight, Check } from "lucide-react";
 
 export default function Pilot() {
   const handleCTAClick = () => {
-    trackFormRedirect("pilot", "/pilot");
     window.open(FORM_URLS.pilot, "_blank");
   };
 

@@ -2,7 +2,6 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { WORK_WITH_US_PAGE, FORM_URLS } from "@/constants/content";
-import { trackFormRedirect } from "@/lib/tracking";
 import { ArrowRight, Palette, Mic, Code } from "lucide-react";
 
 const iconMap = {
@@ -13,7 +12,6 @@ const iconMap = {
 
 export default function WorkWithUs() {
   const handleCTAClick = () => {
-    trackFormRedirect("work_with_us", "/work-with-us");
     window.open(FORM_URLS.workWithUs, "_blank");
   };
 
