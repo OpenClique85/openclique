@@ -37,16 +37,27 @@ export function Navbar() {
 
           {/* Desktop CTAs */}
           <div className="hidden md:flex items-center gap-3">
-            {CTA_NAV_LINKS.map((link) => (
-              <Button
-                key={link.href}
-                variant={link.variant === "primary" ? "default" : link.variant === "secondary" ? "outline" : "ghost"}
-                size="sm"
-                asChild
-              >
-                <Link to={link.href}>{link.label}</Link>
-              </Button>
-            ))}
+            <Button
+              size="sm"
+              asChild
+              className="bg-primary text-primary-foreground hover:bg-primary/80 hover:scale-105 transition-all"
+            >
+              <Link to="/pilot">Join the Pilot</Link>
+            </Button>
+            <Button
+              size="sm"
+              asChild
+              className="bg-accent text-accent-foreground hover:bg-accent/80 hover:scale-105 transition-all"
+            >
+              <Link to="/partners">Partner With Us</Link>
+            </Button>
+            <Button
+              size="sm"
+              asChild
+              className="bg-secondary text-secondary-foreground hover:bg-secondary/70 hover:scale-105 transition-all"
+            >
+              <Link to="/work-with-us">Work With Us</Link>
+            </Button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -76,19 +87,27 @@ export function Navbar() {
                 </Link>
               ))}
               <div className="flex flex-col gap-2 pt-4 border-t border-border">
-                {CTA_NAV_LINKS.map((link) => (
-                  <Button
-                    key={link.href}
-                    variant={link.variant === "primary" ? "default" : link.variant === "secondary" ? "outline" : "ghost"}
-                    size="sm"
-                    asChild
-                    className="justify-start"
-                  >
-                    <Link to={link.href} onClick={() => setIsOpen(false)}>
-                      {link.label}
-                    </Link>
-                  </Button>
-                ))}
+                <Button
+                  size="sm"
+                  asChild
+                  className="justify-start bg-primary text-primary-foreground"
+                >
+                  <Link to="/pilot" onClick={() => setIsOpen(false)}>Join the Pilot</Link>
+                </Button>
+                <Button
+                  size="sm"
+                  asChild
+                  className="justify-start bg-accent text-accent-foreground"
+                >
+                  <Link to="/partners" onClick={() => setIsOpen(false)}>Partner With Us</Link>
+                </Button>
+                <Button
+                  size="sm"
+                  asChild
+                  className="justify-start bg-secondary text-secondary-foreground"
+                >
+                  <Link to="/work-with-us" onClick={() => setIsOpen(false)}>Work With Us</Link>
+                </Button>
               </div>
             </div>
           </div>
