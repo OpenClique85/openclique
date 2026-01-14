@@ -40,13 +40,12 @@ export const CTA_NAV_LINKS = [
 
 // =============================================================================
 // GOOGLE FORM URLS
-// Replace these with your actual Google Form URLs
 // =============================================================================
 
 export const FORM_URLS = {
-  pilot: "https://forms.google.com/your-pilot-form-url",
-  partners: "https://forms.google.com/your-partners-form-url",
-  workWithUs: "https://forms.google.com/your-work-with-us-form-url",
+  pilot: "https://docs.google.com/forms/d/e/1FAIpQLSd9skqXpY1BsmLy4SGro8cItzQd5O486j0MySJzUxeoNd5l0w/viewform",
+  partners: "https://docs.google.com/forms/d/e/1FAIpQLSdz0Y2tYSrFsSuiJEtbXFLcAsfsxa5-9KAOSgtYDU8UwRolzA/viewform",
+  workWithUs: "https://docs.google.com/forms/d/e/1FAIpQLScSbXEuiYfLBc5p9p-1SJ-rwBE_duj85rW8kDAt8z-KSJqdjw/viewform",
 };
 
 // =============================================================================
@@ -58,13 +57,6 @@ export const SOCIAL_LINKS = {
   linkedin: "https://linkedin.com/company/openclique",
   tiktok: "https://tiktok.com/@openclique",
 };
-
-// =============================================================================
-// ZAPIER WEBHOOK
-// Replace with your actual Zapier webhook URL for tracking
-// =============================================================================
-
-export const ZAPIER_WEBHOOK_URL = "https://hooks.zapier.com/hooks/catch/YOUR_WEBHOOK_ID";
 
 // =============================================================================
 // HOMEPAGE CONTENT
