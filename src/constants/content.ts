@@ -171,13 +171,13 @@ export const ABOUT = {
     {
       name: "Anthony Cami",
       role: "Co-Founder",
-      bio: "Former Teach For America corps member passionate about bringing people together through shared experiences.",
+      bio: "Former Naval Officer with a background in Operations, passionate about teamwork, excellence, and bringing people together.",
       photo: "anthony",
     },
     {
       name: "Andrew Poss",
       role: "Co-Founder",
-      bio: "U.S. Navy veteran focused on building the systems that help communities thrive.",
+      bio: "Former Teach For America corps member and MIINT Impact Investment Competition Winner, driven to build community through shared quests and connection.",
       photo: "andrew",
     },
   ],
@@ -186,14 +186,35 @@ export const ABOUT = {
     {
       title: "Safety First",
       description: "Every quest is designed with safety in mind. We vet participants and create trusted environments.",
+      icon: "shield",
     },
     {
       title: "Radical Inclusivity",
       description: "OpenClique is for everyone. We celebrate diversity and design for accessibility.",
+      icon: "heart",
     },
     {
       title: "Real-World Impact",
       description: "We measure success in friendships formed, not just app downloads.",
+      icon: "target",
+    },
+  ],
+  
+  traction: [
+    {
+      image: "tvl-semifinalists",
+      title: "Texas Venture Labs Semi-Finalists",
+      description: "Selected for the Texas Venture Labs Venture Pitch Competition Semi-Finals at UT Austin McCombs.",
+    },
+    {
+      image: "acl-winners",
+      title: "McCombs Marketing Case Competition Winners",
+      description: "Won the McCombs Marketing Case Competition for C3 Presents: Austin City Limits.",
+    },
+    {
+      image: "kendra-scott-accelerator",
+      title: "Kendra Scott WELI Spark Accelerator",
+      description: "Participants in the Kendra Scott Women's Entrepreneurial Leadership Institute Spark Founders Accelerator Program.",
     },
   ],
 };
