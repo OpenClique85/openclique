@@ -164,28 +164,21 @@ export const ABOUT = {
   
   story: {
     title: "Our Story",
-    description: "OpenClique was born from a simple observation: making friends as an adult is hard. Not because people don't want connection, but because the structures that used to bring us together — schools, clubs, neighborhoods — have eroded. We're building those structures back, powered by AI and designed for the way we live now.",
+    description: "We're two UT Austin MBAs who believe that community shouldn't be this hard. With backgrounds in Teach For America and the U.S. Navy, we've seen firsthand how powerful it is when people come together around shared purpose. But somewhere along the way, our cities lost the structures that used to bring us together — the block parties, the neighborhood hangouts, the organic ways we used to meet. OpenClique is our answer: rebuilding the village our cities forgot, one quest at a time.",
   },
   
   team: [
     {
-      name: "Andy",
+      name: "Anthony Cami",
       role: "Co-Founder",
-      bio: "Passionate about building communities and bringing people together.",
-      // Add photo path when you have team photos
-      photo: "",
+      bio: "Former Teach For America corps member passionate about bringing people together through shared experiences.",
+      photo: "anthony",
     },
     {
-      name: "Rick",
+      name: "Andrew Poss",
       role: "Co-Founder",
-      bio: "Engineer and builder focused on creating seamless experiences.",
-      photo: "",
-    },
-    {
-      name: "Anthony",
-      role: "Co-Founder",
-      bio: "Strategic thinker driving growth and partnerships.",
-      photo: "",
+      bio: "U.S. Navy veteran focused on building the systems that help communities thrive.",
+      photo: "andrew",
     },
   ],
   
