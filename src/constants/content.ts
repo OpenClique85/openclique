@@ -17,8 +17,8 @@
 
 export const BRAND = {
   name: "OpenClique",
-  tagline: "The invite that plans itself.",
-  description: "AI-powered group quests that bring people together for real-world adventures.",
+  tagline: "Build the village you've been missing — One Quest at a time.",
+  description: "OpenClique brings people together in small, guided groups through real-world quests — curated activities that help turn shared interests into real friendships.",
   launchCity: "Austin",
 };
 
@@ -53,9 +53,8 @@ export const FORM_URLS = {
 // =============================================================================
 
 export const SOCIAL_LINKS = {
-  instagram: "https://instagram.com/openclique",
-  linkedin: "https://linkedin.com/company/openclique",
-  tiktok: "https://tiktok.com/@openclique",
+  instagram: "https://www.instagram.com/openclique/",
+  linkedin: "https://www.linkedin.com/company/open-clique/",
 };
 
 // =============================================================================
@@ -63,8 +62,8 @@ export const SOCIAL_LINKS = {
 // =============================================================================
 
 export const HERO = {
-  headline: "The invite that plans itself.",
-  subheadline: "Join small squads. Complete AI-assisted quests. Show up and connect — no awkward planning required.",
+  headline: "Build the village you've been missing — One Quest at a time.",
+  subheadline: "OpenClique brings people together in small, guided groups through real-world quests — curated activities that help turn shared interests into real friendships.",
   primaryCta: "Join the Pilot",
   secondaryCta: "Partner With Us",
   tertiaryCta: "Work With Us",
@@ -180,16 +179,16 @@ export const ABOUT = {
   
   team: [
     {
-      name: "Anthony Cami",
-      role: "Co-Founder",
-      bio: "Former Naval Officer with a background in Operations, passionate about teamwork, excellence, and bringing people together.",
-      photo: "anthony",
-    },
-    {
       name: "Andrew Poss",
-      role: "Co-Founder",
+      role: "CEO & Co-Founder",
       bio: "Former Teach For America corps member and MIINT Impact Investment Competition Winner, driven to build community through shared quests and connection.",
       photo: "andrew",
+    },
+    {
+      name: "Anthony Cami",
+      role: "COO & Co-Founder",
+      bio: "Former Naval Officer with a background in Operations, passionate about teamwork, excellence, and bringing people together.",
+      photo: "anthony",
     },
   ],
   
