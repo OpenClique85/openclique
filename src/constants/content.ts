@@ -141,6 +141,17 @@ export const HOW_IT_WORKS = {
     },
   ],
   
+  shep: {
+    title: "Meet Shep, Your AI Wingman",
+    description: "Every squad has a secret weapon. Shep is our AI shepherd — a friendly guide who's there when you need a nudge, never when you don't.",
+    features: [
+      "Conversation starters when things get quiet",
+      "Gentle reminders so no one forgets the details",
+      "Suggestions when plans need a backup",
+      "Always helpful, never awkward",
+    ],
+  },
+
   whyItWorks: {
     title: "Why It Works",
     reasons: [

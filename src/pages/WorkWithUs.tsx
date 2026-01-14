@@ -41,8 +41,8 @@ export default function WorkWithUs() {
                       key={role.title}
                       className="bg-card rounded-xl p-6 border border-border text-center"
                     >
-                      <div className="w-12 h-12 rounded-lg bg-accent/20 flex items-center justify-center mx-auto mb-4">
-                        <Icon className="w-6 h-6 text-accent" />
+                      <div className="w-12 h-12 rounded-lg bg-navy/10 flex items-center justify-center mx-auto mb-4">
+                        <Icon className="w-6 h-6 text-navy" />
                       </div>
                       <h3 className="font-display text-lg font-semibold text-foreground mb-2">
                         {role.title}
@@ -60,7 +60,7 @@ export default function WorkWithUs() {
                 <Button
                   size="lg"
                   onClick={handleCTAClick}
-                  className="text-base px-8 gap-2"
+                  className="bg-navy text-navy-foreground hover:bg-navy/90 text-base px-8 gap-2"
                 >
                   {WORK_WITH_US_PAGE.ctaText}
                   <ArrowRight className="w-4 h-4" />
