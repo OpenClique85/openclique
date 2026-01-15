@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 40" fill="currentColor">
+  <style>
+    .wordmark { font-family: 'Sora', system-ui, sans-serif; font-weight: 600; font-size: 28px; }
+  </style>
+  <!-- openclique wordmark with custom q -->
+  <text x="0" y="30" class="wordmark">
+    <tspan>openc</tspan>
+    <tspan>l</tspan>
+    <tspan>i</tspan>
+  </text>
+  <!-- Custom "que" with quest marker q -->
+  <g transform="translate(127, 0)">
+    <!-- q body -->
+    <circle cx="14" cy="18" r="10" fill="none" stroke="currentColor" stroke-width="3.5"/>
+    <!-- q tail curving into pin -->
+    <path d="M24 18 Q28 28, 22 38 Q20 42, 18 40" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
+    <!-- pin dot -->
+    <circle cx="18" cy="40" r="3" fill="currentColor"/>
+    <!-- ue -->
+    <text x="32" y="30" class="wordmark">ue</text>
+  </g>
+</svg>

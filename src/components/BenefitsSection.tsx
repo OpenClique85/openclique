@@ -26,11 +26,11 @@ export function BenefitsSection() {
             return (
               <div
                 key={benefit.title}
-                className="group relative bg-card rounded-xl p-6 border border-border hover:border-primary/50 hover:shadow-lg transition-all duration-300"
+                className="group relative bg-card rounded-xl p-6 border border-border hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
-                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                  <Icon className="w-6 h-6 text-primary" />
+                <div className="w-12 h-12 rounded-lg bg-secondary/20 flex items-center justify-center mb-4 group-hover:bg-secondary/30 transition-colors">
+                  <Icon className="w-6 h-6 text-secondary" />
                 </div>
                 <h3 className="font-display text-xl font-semibold text-foreground mb-2">
                   {benefit.title}

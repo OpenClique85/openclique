@@ -4,62 +4,63 @@
 @tailwind components;
 @tailwind utilities;
 
-/* OpenClique Design System
+/* OpenClique Design System — Zilker Sunset
    All colors MUST be HSL.
    
    Brand Colors:
-   - Primary Teal: #14B8A6 → 174 84% 40%
-   - Ink (Dark): #0B1220 → 220 55% 8%
-   - Accent Amber: #F59E0B → 43 96% 50%
-   - Warm White: #FAFAF9 → 40 20% 98%
+   - Electric Coral: #FF6B4A → 11 100% 64%
+   - Festival Teal: #2DD4BF → 168 76% 50%
+   - Warm White: #FFFBF7 → 30 100% 98%
+   - Charcoal: #2D2D2D → 0 0% 18%
+   - Golden Hour: #FFAA33 → 38 100% 60%
 */
 
 @layer base {
   :root {
     /* Base */
-    --background: 40 20% 98%;
-    --foreground: 220 55% 8%;
+    --background: 30 100% 98%;
+    --foreground: 0 0% 18%;
 
     /* Card */
     --card: 0 0% 100%;
-    --card-foreground: 220 55% 8%;
+    --card-foreground: 0 0% 18%;
 
     /* Popover */
     --popover: 0 0% 100%;
-    --popover-foreground: 220 55% 8%;
+    --popover-foreground: 0 0% 18%;
 
-    /* Primary - Teal */
-    --primary: 174 84% 40%;
+    /* Primary - Electric Coral */
+    --primary: 11 100% 64%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary - Light gray */
-    --secondary: 220 20% 96%;
-    --secondary-foreground: 220 55% 8%;
+    /* Secondary - Festival Teal */
+    --secondary: 168 76% 50%;
+    --secondary-foreground: 0 0% 100%;
 
     /* Muted */
-    --muted: 220 20% 96%;
-    --muted-foreground: 220 15% 45%;
+    --muted: 30 20% 94%;
+    --muted-foreground: 0 0% 40%;
 
-    /* Accent - Amber */
-    --accent: 43 96% 50%;
-    --accent-foreground: 220 55% 8%;
+    /* Accent - Golden Hour */
+    --accent: 38 100% 60%;
+    --accent-foreground: 0 0% 18%;
 
     /* Destructive */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
     /* Border & Input */
-    --border: 220 20% 90%;
-    --input: 220 20% 90%;
-    --ring: 174 84% 40%;
+    --border: 30 20% 88%;
+    --input: 30 20% 88%;
+    --ring: 11 100% 64%;
 
-    /* Navy - for Work With Us */
-    --navy: 220 60% 25%;
-    --navy-foreground: 0 0% 100%;
+    /* Teal - for secondary actions */
+    --teal: 168 76% 50%;
+    --teal-foreground: 0 0% 100%;
 
-    /* Sunset Orange - for Partner With Us */
-    --sunset: 25 95% 53%;
-    --sunset-foreground: 0 0% 100%;
+    /* Gold - for accents and highlights */
+    --gold: 38 100% 60%;
+    --gold-foreground: 0 0% 18%;
 
     /* Radius */
     --radius: 0.75rem;
@@ -76,41 +77,41 @@
   }
 
   .dark {
-    --background: 220 55% 8%;
-    --foreground: 40 20% 98%;
+    --background: 0 0% 10%;
+    --foreground: 30 100% 98%;
 
-    --card: 220 50% 12%;
-    --card-foreground: 40 20% 98%;
+    --card: 0 0% 14%;
+    --card-foreground: 30 100% 98%;
 
-    --popover: 220 50% 12%;
-    --popover-foreground: 40 20% 98%;
+    --popover: 0 0% 14%;
+    --popover-foreground: 30 100% 98%;
 
-    --primary: 174 84% 45%;
-    --primary-foreground: 220 55% 8%;
+    --primary: 11 100% 68%;
+    --primary-foreground: 0 0% 10%;
 
-    --secondary: 220 40% 18%;
-    --secondary-foreground: 40 20% 98%;
+    --secondary: 168 76% 55%;
+    --secondary-foreground: 0 0% 10%;
 
-    --muted: 220 40% 18%;
-    --muted-foreground: 220 15% 65%;
+    --muted: 0 0% 20%;
+    --muted-foreground: 30 20% 70%;
 
-    --accent: 43 96% 55%;
-    --accent-foreground: 220 55% 8%;
+    --accent: 38 100% 65%;
+    --accent-foreground: 0 0% 10%;
 
     --destructive: 0 62% 30%;
-    --destructive-foreground: 40 20% 98%;
+    --destructive-foreground: 30 100% 98%;
 
-    --border: 220 40% 20%;
-    --input: 220 40% 20%;
-    --ring: 174 84% 45%;
+    --border: 0 0% 22%;
+    --input: 0 0% 22%;
+    --ring: 11 100% 68%;
 
-    /* Navy - for Work With Us (dark mode) */
-    --navy: 220 50% 35%;
-    --navy-foreground: 0 0% 100%;
+    /* Teal - for secondary actions (dark mode) */
+    --teal: 168 76% 55%;
+    --teal-foreground: 0 0% 10%;
 
-    /* Sunset Orange - for Partner With Us (dark mode) */
-    --sunset: 25 95% 58%;
-    --sunset-foreground: 0 0% 100%;
+    /* Gold - for accents (dark mode) */
+    --gold: 38 100% 65%;
+    --gold-foreground: 0 0% 10%;
 
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
