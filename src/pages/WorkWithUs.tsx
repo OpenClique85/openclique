@@ -3,6 +3,12 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { WORK_WITH_US_PAGE, FORM_URLS } from "@/constants/content";
 import { ArrowRight, Palette, Mic, Code } from "lucide-react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const iconMap = {
   0: Palette,
@@ -53,6 +59,42 @@ export default function WorkWithUs() {
                     </div>
                   );
                 })}
+              </div>
+
+              {/* Who We Look For */}
+              <div className="text-center mb-12">
+                <h2 className="font-display text-xl font-semibold text-foreground mb-4">
+                  Who We Look For
+                </h2>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {WORK_WITH_US_PAGE.whoWeLookFor.map((trait) => (
+                    <span
+                      key={trait}
+                      className="px-4 py-2 bg-navy/10 text-navy rounded-full text-sm font-medium"
+                    >
+                      {trait}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* FAQ */}
+              <div className="mb-12">
+                <h2 className="font-display text-xl font-semibold text-foreground mb-6 text-center">
+                  Questions?
+                </h2>
+                <Accordion type="single" collapsible className="w-full">
+                  {WORK_WITH_US_PAGE.faq.map((item, index) => (
+                    <AccordionItem key={index} value={`item-${index}`}>
+                      <AccordionTrigger className="text-left">
+                        {item.question}
+                      </AccordionTrigger>
+                      <AccordionContent className="text-muted-foreground">
+                        {item.answer}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
               </div>
 
               {/* CTA */}
