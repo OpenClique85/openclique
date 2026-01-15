@@ -348,19 +348,42 @@ export const PARTNERS_PAGE = {
 
 export const WORK_WITH_US_PAGE = {
   title: "Work With Us",
-  subtitle: "Help us build the future of real-world connection. We're looking for passionate collaborators.",
+  subtitle: "Join our community of creators helping people find belonging — on your schedule.",
   roles: [
     {
       title: "Quest Creators",
-      description: "Design and host unique adventures in your city.",
+      description: "Design experiences that bring strangers together. Build a reputation, get hired by brand partners.",
     },
     {
       title: "Community Hosts",
-      description: "Lead quests and help squads connect.",
+      description: "Be the friendly face that welcomes squads. Guide conversations, keep the energy warm.",
     },
     {
       title: "Contributors",
-      description: "Bring your skills — from design to engineering to marketing.",
+      description: "Help us grow — design, code, content, marketing. Real startup experience, flexible hours.",
+    },
+  ],
+  whoWeLookFor: ["Collaborative", "Creative", "Communicates quickly", "Scrappy", "Loves building community"],
+  faq: [
+    {
+      question: "Is this paid?",
+      answer: "We're a pre-seed startup, so most roles are volunteer-based. But quest creators can be hired directly by our brand partners — you build your reputation, they pay for your expertise. OpenClique takes a small coordination fee.",
+    },
+    {
+      question: "What skills will I gain?",
+      answer: "Event planning, community management, brand partnerships, UX design, marketing, and hands-on startup operations. Great for your resume or portfolio.",
+    },
+    {
+      question: "Can I get college credit?",
+      answer: "Yes! We're happy to work with your school's internship or independent study program.",
+    },
+    {
+      question: "How much time do I need to commit?",
+      answer: "Totally flexible. Some folks help a few hours a month, others dive deeper. You set your pace.",
+    },
+    {
+      question: "What's the path to getting paid?",
+      answer: "Quest creators build a reputation like Airbnb hosts. As brands sponsor quests, they hire top creators directly. Priority for future full-time roles as we grow.",
     },
   ],
   ctaText: "Get Involved",
