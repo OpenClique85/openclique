@@ -280,6 +280,7 @@ export const PILOT_PAGE = {
 export const PARTNERS_PAGE = {
   title: "Partner With OpenClique",
   subtitle: "Join us in bringing people together. We're looking for brands, venues, and organizations who share our mission.",
+  explainer: "We bring small groups (3-6 people) to your venue or brand activation for curated, real-world experiences.",
   partnerTypes: [
     {
       title: "Venue Partners",
@@ -292,6 +293,53 @@ export const PARTNERS_PAGE = {
     {
       title: "Community Organizations",
       description: "Partner with us to bring structured connection to your members or constituents.",
+    },
+  ],
+  partnerProcess: [
+    {
+      step: 1,
+      title: "Tell Us About You",
+      description: "Quick form about your venue, product, or community.",
+    },
+    {
+      step: 2,
+      title: "Co-Design a Quest",
+      description: "We follow up to create a custom experience together.",
+    },
+    {
+      step: 3,
+      title: "Host a Squad",
+      description: "A group of 3-6 people shows up ready to connect.",
+    },
+  ],
+  venueValue: {
+    title: "For Venues",
+    points: [
+      "New foot traffic from groups ready to engage",
+      "Repeat visits through quest-chains at your location",
+      "Optional rewards drive loyalty at low cost",
+      "User feedback and content from real customers",
+    ],
+  },
+  brandValue: {
+    title: "For Brands",
+    points: [
+      "60-90 minutes of dwell time with engaged customers",
+      "Quest rewards work like influencer kits — for real users",
+      "User-generated content as quest completion steps",
+      "Quest-chains build repeat engagement and loyalty",
+    ],
+  },
+  venueFAQ: [
+    {
+      question: "What do I need to provide?",
+      answer: "Just your space and hospitality. Optionally, offer a small reward (drink, discount, swag) to drive repeat visits. We handle the rest.",
+    },
+  ],
+  brandFAQ: [
+    {
+      question: "What does a brand quest look like?",
+      answer: "Think: Nike offering exclusive gear for a first 5K, or a local roaster sponsoring a coffee crawl. Users complete the quest, earn your reward, and share their experience.",
     },
   ],
   ctaText: "Let's Talk",
