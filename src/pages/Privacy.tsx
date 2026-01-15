@@ -89,6 +89,66 @@ export default function Privacy() {
 
                 <section>
                   <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
+                    Data Deletion Requests
+                  </h2>
+                  <p>
+                    You may request deletion of your personal data at any time by emailing{' '}
+                    <a href="mailto:hello@openclique.com" className="text-primary hover:underline">
+                      hello@openclique.com
+                    </a> with the subject line "Data Deletion Request."
+                  </p>
+                  <ul className="list-disc pl-6 space-y-2 mt-4">
+                    <li>We will acknowledge your request within 48 hours</li>
+                    <li>Deletion will be completed within 30 days</li>
+                    <li>You will receive confirmation once your data has been removed</li>
+                    <li>Some data may be retained if required by law or for legitimate business purposes (e.g., fraud prevention)</li>
+                  </ul>
+                </section>
+
+                <section>
+                  <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
+                    Data Retention
+                  </h2>
+                  <p>We retain your information only as long as necessary:</p>
+                  <ul className="list-disc pl-6 space-y-2 mt-4">
+                    <li>
+                      <strong>Pilot program data:</strong> Retained during the pilot and up to 12 months after your last activity, unless you request earlier deletion
+                    </li>
+                    <li>
+                      <strong>Email subscriptions:</strong> Until you unsubscribe or request removal
+                    </li>
+                    <li>
+                      <strong>Analytics data:</strong> Anonymized and aggregated — contains no personal identifiers
+                    </li>
+                  </ul>
+                  <p className="mt-4">
+                    <strong>We do not sell, rent, or share your personal information with third parties for marketing purposes.</strong>
+                  </p>
+                </section>
+
+                <section>
+                  <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
+                    Third-Party Services
+                  </h2>
+                  <p>We use the following third-party services that may process your data:</p>
+                  <ul className="list-disc pl-6 space-y-2 mt-4">
+                    <li>
+                      <strong>Google Forms & Workspace:</strong> For collecting and storing form submissions (pilot signups, partnerships, etc.)
+                    </li>
+                    <li>
+                      <strong>Hosting provider:</strong> For serving this website
+                    </li>
+                    <li>
+                      <strong>Analytics:</strong> Privacy-respecting analytics that collect only anonymized, aggregated data
+                    </li>
+                  </ul>
+                  <p className="mt-4">
+                    Each of these services has their own privacy policies. We choose partners who prioritize data protection.
+                  </p>
+                </section>
+
+                <section>
+                  <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
                     Contact Us
                   </h2>
                   <p>
