@@ -61,6 +61,41 @@ export default function Terms() {
 
                 <section>
                   <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
+                    Community Guidelines
+                  </h2>
+                  <p className="mb-4">
+                    {BRAND.name} exists to help people make meaningful connections. To keep our community welcoming and safe, we expect all participants to follow these guidelines:
+                  </p>
+                  <ul className="list-disc pl-6 space-y-2 mt-4">
+                    <li>
+                      <strong>Be respectful:</strong> Treat every participant with kindness, regardless of background, identity, or beliefs
+                    </li>
+                    <li>
+                      <strong>Be reliable:</strong> If you commit to a quest, show up. If you can't make it, let your squad know in advance
+                    </li>
+                    <li>
+                      <strong>Be appropriate:</strong> No harassment, discrimination, hate speech, or unwanted advances of any kind
+                    </li>
+                    <li>
+                      <strong>Be honest:</strong> Use your real name and accurate information. No catfishing or misrepresentation
+                    </li>
+                    <li>
+                      <strong>Be safe:</strong> Don't promote illegal activities, controlled substances, or put others at risk
+                    </li>
+                  </ul>
+                  <p className="mt-4">
+                    <strong>Violations:</strong> We reserve the right to remove anyone from the pilot or platform without notice if they violate these guidelines or create an unsafe environment for others.
+                  </p>
+                  <p className="mt-4">
+                    <strong>Reporting:</strong> If you experience or witness concerning behavior, please email us immediately at{' '}
+                    <a href="mailto:hello@openclique.com" className="text-primary hover:underline">
+                      hello@openclique.com
+                    </a>. We review every report and take them seriously.
+                  </p>
+                </section>
+
+                <section>
+                  <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
                     Safety
                   </h2>
                   <p>
