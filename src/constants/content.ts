@@ -348,7 +348,7 @@ export const PARTNERS_PAGE = {
 
 export const WORK_WITH_US_PAGE = {
   title: "Work With Us",
-  subtitle: "Join our community of creators helping people find belonging — on your schedule.",
+  subtitle: "Help people find belonging. Build your reputation. On your schedule.",
   roles: [
     {
       title: "Quest Creators",
@@ -363,11 +363,11 @@ export const WORK_WITH_US_PAGE = {
       description: "Help us grow — design, code, content, marketing. Real startup experience, flexible hours.",
     },
   ],
-  whoWeLookFor: ["Collaborative", "Creative", "Communicates quickly", "Scrappy", "Loves building community"],
+  whoWeLookFor: ["Collaborative", "Creative", "Communicates quickly", "Scrappy", "Community-Driven"],
   faq: [
     {
       question: "Is this paid?",
-      answer: "We're a pre-seed startup, so most roles are volunteer-based. But quest creators can be hired directly by our brand partners — you build your reputation, they pay for your expertise. OpenClique takes a small coordination fee.",
+      answer: "Most roles are volunteer-based. Quest creators can be hired directly by brand partners — you build your reputation, they pay for your expertise.",
     },
     {
       question: "What skills will I gain?",
@@ -386,8 +386,8 @@ export const WORK_WITH_US_PAGE = {
       answer: "Quest creators build a reputation like Airbnb hosts. As brands sponsor quests, they hire top creators directly. Priority for future full-time roles as we grow.",
     },
   ],
-  ctaText: "Get Involved",
-  note: "You'll be redirected to our collaborator application.",
+  ctaText: "Join the Team",
+  note: "No pressure. Apply in 2 minutes.",
 };
 
 // =============================================================================
