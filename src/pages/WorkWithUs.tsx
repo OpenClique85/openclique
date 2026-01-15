@@ -2,7 +2,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { WORK_WITH_US_PAGE, FORM_URLS } from "@/constants/content";
-import { ArrowRight, Palette, Mic, Code } from "lucide-react";
+import { ArrowRight, Compass, Users, Sparkles } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -11,9 +11,9 @@ import {
 } from "@/components/ui/accordion";
 
 const iconMap = {
-  0: Palette,
-  1: Mic,
-  2: Code,
+  0: Compass,
+  1: Users,
+  2: Sparkles,
 };
 
 export default function WorkWithUs() {
@@ -41,7 +41,7 @@ export default function WorkWithUs() {
               {/* Roles */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                 {WORK_WITH_US_PAGE.roles.map((role, index) => {
-                  const Icon = iconMap[index as keyof typeof iconMap] || Code;
+                  const Icon = iconMap[index as keyof typeof iconMap] || Sparkles;
                   return (
                     <div
                       key={role.title}
