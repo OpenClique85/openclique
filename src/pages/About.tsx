@@ -32,58 +32,48 @@ export default function About() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1">
-        {/* Mission */}
-        <section className="py-16 md:py-24 bg-gradient-to-br from-primary/5 via-background to-accent/5">
+        {/* Mission + Story + Team (combined for flow) */}
+        <section className="py-12 md:py-16 bg-gradient-to-br from-primary/5 via-background to-accent/5">
           <div className="container mx-auto px-4">
-            <div className="max-w-3xl mx-auto text-center">
-              <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-6">
+            <div className="max-w-3xl mx-auto text-center mb-12">
+              <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">
                 {ABOUT.mission.title}
               </h1>
-              <p className="text-lg text-muted-foreground leading-relaxed">
+              <p className="text-lg text-muted-foreground leading-relaxed mb-8">
                 {ABOUT.mission.description}
               </p>
+              <div className="bg-card/60 backdrop-blur-sm rounded-xl p-6 border border-border/50 text-left">
+                <h2 className="font-display text-xl font-semibold text-foreground mb-3">
+                  {ABOUT.story.title}
+                </h2>
+                <p className="text-muted-foreground leading-relaxed">
+                  {ABOUT.story.description}
+                </p>
+              </div>
             </div>
-          </div>
-        </section>
 
-        {/* Story */}
-        <section className="py-16 md:py-24">
-          <div className="container mx-auto px-4">
-            <div className="max-w-3xl mx-auto">
-              <h2 className="font-display text-3xl font-bold text-foreground mb-6 text-center">
-                {ABOUT.story.title}
-              </h2>
-              <p className="text-lg text-muted-foreground text-center leading-relaxed">
-                {ABOUT.story.description}
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Team */}
-        <section className="py-16 md:py-24 bg-muted/50">
-          <div className="container mx-auto px-4">
-            <div className="max-w-3xl mx-auto">
-              <h2 className="font-display text-3xl font-bold text-foreground mb-12 text-center">
+            {/* Team - immediately after story */}
+            <div className="max-w-2xl mx-auto">
+              <h2 className="font-display text-2xl font-bold text-foreground mb-8 text-center">
                 Meet the Team
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-2xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {ABOUT.team.map((member) => (
                   <div
                     key={member.name}
                     className="bg-card rounded-xl p-6 border border-border text-center hover:shadow-lg transition-shadow"
                   >
-                    <div className="w-28 h-28 rounded-full overflow-hidden mx-auto mb-4 border-4 border-primary/20">
+                    <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-4 border-primary/20">
                       <img
                         src={teamPhotos[member.photo]}
                         alt={member.name}
                         className="w-full h-full object-cover object-top"
                       />
                     </div>
-                    <h3 className="font-display text-xl font-semibold text-foreground">
+                    <h3 className="font-display text-lg font-semibold text-foreground">
                       {member.name}
                     </h3>
-                    <p className="text-primary text-sm font-medium mb-3">
+                    <p className="text-primary text-sm font-medium mb-2">
                       {member.role}
                     </p>
                     <p className="text-muted-foreground text-sm">
@@ -97,7 +87,7 @@ export default function About() {
         </section>
 
         {/* Traction */}
-        <section className="py-16 md:py-24">
+        <section className="py-12 md:py-16">
           <div className="container mx-auto px-4">
             <div className="max-w-5xl mx-auto">
               <h2 className="font-display text-3xl font-bold text-foreground mb-4 text-center">
@@ -135,7 +125,7 @@ export default function About() {
         </section>
 
         {/* Values */}
-        <section className="py-16 md:py-24 bg-muted/50">
+        <section className="py-12 md:py-16 bg-muted/50">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
               <h2 className="font-display text-3xl font-bold text-foreground mb-12 text-center">
