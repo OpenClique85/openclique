@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { Instagram, Linkedin } from "lucide-react";
 import { FOOTER, SOCIAL_LINKS, BRAND } from "@/constants/content";
-import wordmark from "@/assets/openclique-wordmark.svg";
 
 export function Footer() {
   return (
@@ -10,7 +9,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="md:col-span-2">
-            <img src={wordmark} alt={BRAND.name} className="h-6 mb-3 invert" />
+            <h3 className="font-display text-xl font-bold mb-3">{BRAND.name}</h3>
             <p className="text-background/70 text-sm max-w-md">
               {BRAND.description}
             </p>
