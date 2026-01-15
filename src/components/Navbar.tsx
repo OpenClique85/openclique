@@ -2,8 +2,8 @@ import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { NAV_LINKS, CTA_NAV_LINKS, BRAND } from "@/constants/content";
-import logo from "@/assets/logo.png";
+import { NAV_LINKS, BRAND } from "@/constants/content";
+import wordmark from "@/assets/openclique-wordmark.svg";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,9 +15,9 @@ export function Navbar() {
     <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo */}
+          {/* Wordmark */}
           <Link to="/" className="flex items-center gap-2">
-            <img src={logo} alt={BRAND.name} className="h-8 md:h-10 w-auto" />
+            <img src={wordmark} alt={BRAND.name} className="h-6 md:h-8 w-auto text-foreground" />
           </Link>
 
           {/* Desktop Navigation */}
@@ -47,14 +47,14 @@ export function Navbar() {
             <Button
               size="sm"
               asChild
-              className="bg-sunset text-sunset-foreground hover:bg-sunset/80 hover:scale-105 transition-all"
+              className="bg-secondary text-secondary-foreground hover:bg-secondary/80 hover:scale-105 transition-all"
             >
               <Link to="/partners">Partner With Us</Link>
             </Button>
             <Button
               size="sm"
               asChild
-              className="bg-navy text-navy-foreground hover:bg-navy/80 hover:scale-105 transition-all"
+              className="bg-gold text-gold-foreground hover:bg-gold/80 hover:scale-105 transition-all"
             >
               <Link to="/work-with-us">Work With Us</Link>
             </Button>
@@ -97,14 +97,14 @@ export function Navbar() {
                 <Button
                   size="sm"
                   asChild
-                  className="justify-start bg-sunset text-sunset-foreground"
+                  className="justify-start bg-secondary text-secondary-foreground"
                 >
                   <Link to="/partners" onClick={() => setIsOpen(false)}>Partner With Us</Link>
                 </Button>
                 <Button
                   size="sm"
                   asChild
-                  className="justify-start bg-navy text-navy-foreground"
+                  className="justify-start bg-gold text-gold-foreground"
                 >
                   <Link to="/work-with-us" onClick={() => setIsOpen(false)}>Work With Us</Link>
                 </Button>
