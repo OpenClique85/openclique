@@ -244,7 +244,8 @@ export const FAQ = [
   },
   {
     question: "Is it safe?",
-    answer: "Safety is our top priority. All participants go through a verification process, quests happen in public spaces, and we have community guidelines that everyone agrees to. You can also rate your experience and report any concerns.",
+    answer: "Safety is our top priority. All participants go through a verification process, quests happen in public spaces, and we have Community Guidelines that everyone agrees to. You can also rate your experience and report any concerns.",
+    link: { text: "Read our Community Guidelines", href: "/terms#community-guidelines" },
   },
   {
     question: "What cities are you in?",
@@ -399,6 +400,7 @@ export const FOOTER = {
   links: [
     { label: "Privacy", href: "/privacy" },
     { label: "Terms", href: "/terms" },
+    { label: "Community Guidelines", href: "/terms#community-guidelines" },
   ],
   contactEmail: "Andrew.poss@openclique.net",
 };

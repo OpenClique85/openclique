@@ -5,6 +5,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { FAQ as FAQContent } from "@/constants/content";
+import { Link } from "react-router-dom";
 
 export function FAQ() {
   return (
@@ -28,6 +29,14 @@ export function FAQ() {
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground">
                   {item.answer}
+                  {item.link && (
+                    <Link
+                      to={item.link.href}
+                      className="block mt-2 text-primary hover:underline font-medium"
+                    >
+                      {item.link.text} →
+                    </Link>
+                  )}
                 </AccordionContent>
               </AccordionItem>
             ))}

@@ -59,7 +59,7 @@ export default function Terms() {
                   </ul>
                 </section>
 
-                <section>
+                <section id="community-guidelines">
                   <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
                     Community Guidelines
                   </h2>
