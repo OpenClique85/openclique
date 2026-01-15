@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { HERO, SOCIAL_PROOF } from "@/constants/content";
-import logo from "@/assets/logo.png";
+import logoStylized from "@/assets/logo-stylized.png";
 
 export function Hero() {
   return (
@@ -10,10 +10,10 @@ export function Hero() {
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5 -z-10" />
       
       <div className="container mx-auto px-4 py-16 md:py-24 lg:py-32">
-        <div className="max-w-3xl mx-auto text-center">
-          {/* Logo badge */}
-          <div className="flex justify-center mb-8 animate-fade-in">
-            <img src={logo} alt="OpenClique" className="h-16 md:h-20" />
+        <div className="max-w-4xl mx-auto text-center">
+          {/* Stylized Logo with tagline */}
+          <div className="flex justify-center mb-10 animate-fade-in">
+            <img src={logoStylized} alt="OpenClique - Real People. Real Quests." className="h-32 md:h-44 lg:h-52 rounded-2xl" />
           </div>
 
           {/* Headline */}
