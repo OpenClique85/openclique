@@ -98,13 +98,15 @@ export default function HowItWorks() {
               <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-2xl p-8 md:p-12 border border-primary/10">
                 {/* Centered BUGGS illustration */}
                 <div className="flex flex-col items-center text-center">
-                  {/* BUGGS Mascot - larger and centered */}
-                  <div className="mb-8">
-                    <img 
-                      src={buggsFront} 
-                      alt="BUGGS - Behavioral Utility for Group Guidance & Structure"
-                      className="w-40 h-40 md:w-48 md:h-48 object-contain mx-auto"
-                    />
+                  {/* BUGGS Mascot - centered in rounded white container */}
+                  <div className="mb-8 flex justify-center">
+                    <div className="w-36 h-36 md:w-44 md:h-44 rounded-3xl bg-white shadow-lg border border-border/50 flex items-center justify-center">
+                      <img 
+                        src={buggsFront} 
+                        alt="BUGGS - Behavioral Utility for Group Guidance & Structure"
+                        className="w-28 h-28 md:w-36 md:h-36 object-contain"
+                      />
+                    </div>
                   </div>
                   
                   {/* Content */}

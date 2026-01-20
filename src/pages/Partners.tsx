@@ -12,6 +12,8 @@ import { PARTNERS_PAGE, FORM_URLS } from "@/constants/content";
 import { ArrowRight, Building2, Sparkles, Users, Check } from "lucide-react";
 import buggsSitting from "@/assets/buggs-sitting.png";
 import concertCrowd from "@/assets/austin/concert-crowd.jpg";
+import friendsLaughing from "@/assets/austin/friends-laughing.jpg";
+import zilkerPark from "@/assets/austin/zilker-park.jpg";
 
 const iconMap = {
   0: Building2,
@@ -66,17 +68,28 @@ export default function Partners() {
                   return (
                     <div
                       key={type.title}
-                      className="bg-card rounded-xl p-6 border border-border text-center"
+                      className="group bg-card rounded-xl p-6 border border-border text-center relative overflow-hidden hover:border-sunset/50 hover:shadow-lg transition-all duration-300"
                     >
-                      <div className="w-12 h-12 rounded-lg bg-sunset/10 flex items-center justify-center mx-auto mb-4">
-                        <Icon className="w-6 h-6 text-sunset" />
+                      {/* Hover background image */}
+                      <div 
+                        className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500"
+                        style={{
+                          backgroundImage: `url(${friendsLaughing})`,
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                        }}
+                      />
+                      <div className="relative z-10">
+                        <div className="w-12 h-12 rounded-lg bg-sunset/10 flex items-center justify-center mx-auto mb-4 group-hover:bg-sunset/20 transition-colors">
+                          <Icon className="w-6 h-6 text-sunset" />
+                        </div>
+                        <h3 className="font-display text-lg font-semibold text-foreground mb-2">
+                          {type.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {type.description}
+                        </p>
                       </div>
-                      <h3 className="font-display text-lg font-semibold text-foreground mb-2">
-                        {type.title}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {type.description}
-                      </p>
                     </div>
                   );
                 })}
@@ -95,16 +108,16 @@ export default function Partners() {
                   How Partnering Works
                 </h2>
                 <div className="relative flex flex-col md:flex-row md:items-start md:justify-between gap-8 md:gap-4">
-                  {/* Connecting line for desktop */}
-                  <div className="hidden md:block absolute top-6 left-[calc(16.67%+24px)] right-[calc(16.67%+24px)] h-0.5 bg-border" />
+                  {/* Connecting line for desktop - now orange */}
+                  <div className="hidden md:block absolute top-6 left-[calc(16.67%+24px)] right-[calc(16.67%+24px)] h-0.5 bg-sunset/30" />
                   
                   {PARTNERS_PAGE.partnerProcess.map((step, index) => (
                     <div
                       key={step.step}
                       className="flex md:flex-col items-start md:items-center md:text-center flex-1 gap-4 md:gap-3"
                     >
-                      {/* Step number */}
-                      <div className="relative z-10 w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-display font-bold text-lg shrink-0">
+                      {/* Step number - now orange */}
+                      <div className="relative z-10 w-12 h-12 rounded-full bg-sunset text-sunset-foreground flex items-center justify-center font-display font-bold text-lg shrink-0">
                         {step.step}
                       </div>
                       <div className="flex-1 md:flex-none">
@@ -120,8 +133,17 @@ export default function Partners() {
                 </div>
               </div>
 
-              {/* Value Props with Tabs */}
-              <div className="mb-12">
+              {/* Value Props with Tabs - with subtle background */}
+              <div className="mb-12 relative">
+                <div 
+                  className="absolute inset-0 -mx-4 rounded-2xl opacity-5"
+                  style={{
+                    backgroundImage: `url(${zilkerPark})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                  }}
+                />
+                <div className="relative z-10">
                 <Tabs defaultValue="venues" className="w-full">
                   <TabsList className="grid w-full grid-cols-2 mb-6">
                     <TabsTrigger value="venues">{PARTNERS_PAGE.venueValue.title}</TabsTrigger>
@@ -174,6 +196,7 @@ export default function Partners() {
                     </Accordion>
                   </TabsContent>
                 </Tabs>
+                </div>
               </div>
 
               {/* CTA */}
