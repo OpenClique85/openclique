@@ -415,30 +415,90 @@ export const CREATORS_PAGE = {
       icon: "users",
     },
     {
-      title: "Earn & Track Impact",
-      description: "Revenue share on quest participation + analytics showing real engagement.",
+      title: "Track Your Impact",
+      description: "See real engagement from your audience — not just likes, but lasting connections.",
       icon: "trending-up",
     },
   ],
   
   useCases: [
     {
-      title: "Fitness Creators",
+      title: "Fitness & Wellness",
       description: "City-wide workout challenges that turn online followers into running buddies.",
       icon: "dumbbell",
       image: "running",
+      expandedDescription: "Transform your fitness community from passive followers to active workout partners who push each other IRL.",
+      exampleQuests: [
+        "5K training squad with weekly group runs",
+        "Yoga in the park sunrise sessions",
+        "CrossFit challenge with local box partnerships"
+      ],
+      perfectFor: "Trainers, fitness influencers, running coaches, yoga instructors"
     },
     {
       title: "Food & Lifestyle",
       description: "Local food tours & experience trails curated by your taste.",
       icon: "utensils",
       image: "food-truck",
+      expandedDescription: "Turn your food recs into shared experiences. Your followers don't just see your content — they taste it together.",
+      exampleQuests: [
+        "Hidden gem restaurant crawl",
+        "Farmers market cooking challenge",
+        "Coffee shop tour with latte art contest"
+      ],
+      perfectFor: "Food bloggers, lifestyle influencers, travel content creators"
+    },
+    {
+      title: "Musicians & Bands",
+      description: "Fan meetups, listening parties, and local music experiences.",
+      icon: "music",
+      image: "concert",
+      expandedDescription: "Connect your fans beyond the show. Build a community that shares your music IRL, not just in their headphones.",
+      exampleQuests: [
+        "Album release listening party",
+        "Pre-show fan meetup and hangout",
+        "Local venue discovery crawl"
+      ],
+      perfectFor: "Independent artists, bands building local scenes, DJs with dedicated followers"
+    },
+    {
+      title: "Podcasters",
+      description: "Live recordings, listener meetups, and topic-based discussions.",
+      icon: "mic",
+      image: "coffee-shop",
+      expandedDescription: "Your listeners already feel like they know you. Give them a chance to know each other too.",
+      exampleQuests: [
+        "Live podcast recording with audience",
+        "Book club for podcast episodes",
+        "Topic deep-dive discussion groups"
+      ],
+      perfectFor: "Podcast hosts, audio creators, interview-style content makers"
+    },
+    {
+      title: "Hobby & Nerd Groups",
+      description: "Board game nights, book clubs, crafting circles, and cosplay meetups.",
+      icon: "gamepad",
+      image: "rooftop",
+      expandedDescription: "Your niche community is already passionate. Help them find each other and geek out together.",
+      exampleQuests: [
+        "Board game tournament night",
+        "Book club with themed snacks",
+        "Crafting circle with skill shares"
+      ],
+      perfectFor: "Gaming streamers, book reviewers, craft tutorials, fandom creators"
     },
     {
       title: "Educators & Coaches",
       description: "Learning squads & project groups that bring your lessons to life.",
       icon: "graduation-cap",
-      image: "coffee-shop",
+      image: "mural",
+      expandedDescription: "Move your students from passive learning to active practice. Real skills stick when learned together.",
+      exampleQuests: [
+        "Photography walk with peer feedback",
+        "Language practice conversation circles",
+        "Business mastermind lunch sessions"
+      ],
+      perfectFor: "Course creators, skill teachers, coaches, mentorship programs"
     },
   ],
   
@@ -474,15 +534,15 @@ export const CREATORS_PAGE = {
   faq: [
     {
       question: "What kind of creators is this for?",
-      answer: "Any creator with an engaged audience who wants to help followers connect IRL. Fitness coaches, food bloggers, educators, lifestyle influencers, hobby communities — if your audience shares an interest, you can build a quest around it.",
-    },
-    {
-      question: "How does revenue sharing work?",
-      answer: "You earn a percentage of quest participation fees. The more your audience engages, the more you earn. We handle payments, logistics, and customer support.",
+      answer: "Any creator with an engaged audience who wants to help followers connect IRL. Fitness coaches, musicians, podcasters, food bloggers, hobby groups, educators — if your audience shares an interest, you can build a quest around it.",
     },
     {
       question: "Do I need to be there in person?",
       answer: "No! Your quests run independently with BUGGS guiding the squads. You design the experience once, and it can run in any city where you have followers.",
+    },
+    {
+      question: "How do I get started?",
+      answer: "Apply through our form. We'll review your audience and reach out within 48 hours to discuss next steps and how we can work together.",
     },
     {
       question: "What's the creator studio?",
