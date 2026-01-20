@@ -5,6 +5,9 @@
  * Each quest has card-level info and full modal details.
  */
 
+import mysteryConcertImg from '@/assets/quests/mystery-concert.jpg';
+import couchTo5kImg from '@/assets/quests/couch-to-5k.jpg';
+
 export interface QuestSection {
   title: string;
   content: string | string[];
@@ -15,6 +18,8 @@ export interface Quest {
   id: string;
   icon: string;
   title: string;
+  image: string;
+  imageAlt: string;
   status: 'pilot' | 'coming-soon';
   statusLabel: string;
   theme: string;
@@ -34,6 +39,8 @@ export const QUESTS: Quest[] = [
     id: 'mystery-concert-ladies-night',
     icon: '🎸',
     title: 'Mystery Concert — Ladies Night',
+    image: mysteryConcertImg,
+    imageAlt: 'Crowd at a live concert with hands raised and colorful stage lights',
     status: 'pilot',
     statusLabel: 'Pilot - Limited Spots',
     theme: 'Ladies Night',
@@ -124,6 +131,8 @@ export const QUESTS: Quest[] = [
     id: 'couch-to-5k-squad',
     icon: '👟',
     title: 'Couch to 5K Squad',
+    image: couchTo5kImg,
+    imageAlt: 'Runner on a trail at sunrise with mountains in background',
     status: 'coming-soon',
     statusLabel: 'Coming Soon',
     theme: 'Beginner Runners',
