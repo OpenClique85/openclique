@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { HERO, SOCIAL_PROOF } from "@/constants/content";
 import logo from "@/assets/logo.png";
-import buggsIcon from "@/assets/buggs-icon.png";
 import concertCrowd from "@/assets/austin/concert-crowd.jpg";
 
 export function Hero() {
@@ -49,9 +48,8 @@ export function Hero() {
             </Button>
           </div>
 
-          {/* Social proof message with BUGGS */}
-          <div className="flex items-center justify-center gap-2 mt-8 animate-fade-in [animation-delay:400ms]">
-            <img src={buggsIcon} alt="" className="w-5 h-5 object-contain" />
+          {/* Social proof message */}
+          <div className="mt-8 animate-fade-in [animation-delay:400ms]">
             <p className="text-sm text-muted-foreground">
               {SOCIAL_PROOF.message}
             </p>
