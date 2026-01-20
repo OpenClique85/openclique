@@ -1,0 +1,48 @@
+# OpenClique - Quest with Us
+
+> OpenClique is a social platform launching in Austin that helps people make real-world friendships through small squad activities called "quests."
+
+## What is OpenClique?
+
+OpenClique matches you with 3-5 compatible people based on your interests, vibe, and availability. Our AI curates fun activities ("quests") like trying a new coffee shop, playing pickleball, or exploring a local brewery. You just show up—no awkward planning required.
+
+## How It Works
+
+1. **Take the Quiz** - Answer questions about your interests, personality, and availability
+2. **Get Matched** - Our AI groups you with compatible people into small squads
+3. **Receive Quests** - Get curated activity suggestions based on your squad's shared interests
+4. **Show Up & Connect** - Meet your squad, complete quests, and build real friendships
+
+## Key Features
+
+- **Small Squads**: Groups of 3-5 people for meaningful connections
+- **AI-Curated Quests**: Activities matched to your group's interests
+- **No Planning Required**: Just show up at the suggested time and place
+- **Austin Launch**: Currently piloting in Austin, Texas
+
+## Who It's For
+
+- People new to Austin looking to make friends
+- Anyone tired of superficial networking events
+- Young professionals seeking genuine connections
+- People who want to try new activities with compatible strangers
+
+## Current Status
+
+OpenClique is currently in pilot phase, launching in Austin, Texas. Users can sign up for early access through the pilot program.
+
+## Contact
+
+- Website: https://openclique.lovable.app
+- Email: hello@openclique.com
+- Instagram: @openclique
+- LinkedIn: OpenClique
+
+## Pages
+
+- Home: https://openclique.lovable.app/
+- About Us: https://openclique.lovable.app/about
+- How It Works: https://openclique.lovable.app/how-it-works
+- Join the Pilot: https://openclique.lovable.app/pilot
+- Partner With Us: https://openclique.lovable.app/partners
+- Work With Us: https://openclique.lovable.app/work-with-us
