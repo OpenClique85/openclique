@@ -3,6 +3,7 @@ import { Hero } from "@/components/Hero";
 import { BenefitsSection } from "@/components/BenefitsSection";
 import { TestimonialsSection } from "@/components/TestimonialsSection";
 import { FAQ } from "@/components/FAQ";
+import { CTASection } from "@/components/CTASection";
 import { Footer } from "@/components/Footer";
 import BuggsFloating from "@/components/BuggsFloating";
 
@@ -15,6 +16,7 @@ const Index = () => {
         <BenefitsSection />
         <TestimonialsSection />
         <FAQ />
+        <CTASection />
       </main>
       <Footer />
       <BuggsFloating message="Ready to find your squad?" />
