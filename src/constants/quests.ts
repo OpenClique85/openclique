@@ -72,7 +72,7 @@ export const QUESTS: Quest[] = [
       {
         title: 'How It Works',
         type: 'text',
-        content: "You'll join a private WhatsApp group with your squad and BUGGS (Behavioral Utility for Group Guidance & Structure).",
+        content: "You'll be connected with your squad through BUGGS (Behavioral Utility for Group Guidance & Structure) — our friendly AI guide that keeps everyone in sync.",
       },
       {
         title: 'BUGGS keeps the experience flowing by:',
@@ -176,7 +176,7 @@ export const QUESTS: Quest[] = [
         ],
       },
       {
-        title: "BUGGS manages your squad's WhatsApp group with:",
+        title: "BUGGS keeps your squad connected with:",
         type: 'list',
         content: [
           'Training reminders and motivation',
@@ -191,7 +191,7 @@ export const QUESTS: Quest[] = [
         content: [
           'Structured 8-week training plan (app-guided)',
           '16 group training sessions',
-          'Squad WhatsApp group with BUGGS',
+          'Squad coordination with BUGGS',
           'OpenClique running shirt',
           'Celebration 5K race entry',
           'Access to alumni running community',

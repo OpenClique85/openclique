@@ -4,6 +4,7 @@ import { Footer } from '@/components/Footer';
 import QuestCard from '@/components/QuestCard';
 import QuestModal from '@/components/QuestModal';
 import { QUESTS, QUESTS_PAGE, type Quest } from '@/constants/quests';
+import buggsIcon from '@/assets/buggs-icon.png';
 
 const Quests = () => {
   const [selectedQuest, setSelectedQuest] = useState<Quest | null>(null);
@@ -42,6 +43,12 @@ const Quests = () => {
                   onClick={() => handleQuestClick(quest)}
                 />
               ))}
+            </div>
+            
+            {/* BUGGS hint */}
+            <div className="mt-12 flex items-center justify-center gap-3 text-muted-foreground">
+              <img src={buggsIcon} alt="" className="w-8 h-8 object-contain" />
+              <p className="text-sm">BUGGS guides every quest — you just show up!</p>
             </div>
           </div>
         </section>

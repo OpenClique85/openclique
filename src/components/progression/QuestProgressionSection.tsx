@@ -1,5 +1,6 @@
 import HexBadge from './HexBadge';
 import LockedQuestCard from './LockedQuestCard';
+import TeasedQuestCard from './TeasedQuestCard';
 import { PROGRESSION_TREES } from '@/constants/progressionTrees';
 
 interface QuestProgressionSectionProps {
@@ -8,6 +9,7 @@ interface QuestProgressionSectionProps {
 
 const QuestProgressionSection = ({ treeId }: QuestProgressionSectionProps) => {
   const tree = PROGRESSION_TREES[treeId];
+  const { unlockables } = tree;
 
   return (
     <section className="space-y-6 pt-6 border-t border-border">
@@ -19,16 +21,25 @@ const QuestProgressionSection = ({ treeId }: QuestProgressionSectionProps) => {
         {/* Hex Badge */}
         <HexBadge tree={tree} />
 
-        {/* Locked Cards */}
-        <div className="flex items-center justify-center gap-3">
-          <LockedQuestCard variant={0} />
-          <LockedQuestCard variant={1} />
-          <LockedQuestCard variant={2} />
+        {/* Unlockable Cards - mix of teased and locked */}
+        <div className="flex items-center justify-center gap-3 flex-wrap">
+          {unlockables.map((quest, index) => (
+            quest.isTeased ? (
+              <TeasedQuestCard 
+                key={quest.id}
+                title={quest.title}
+                teaser={quest.teaser}
+                icon={quest.icon}
+              />
+            ) : (
+              <LockedQuestCard key={quest.id} variant={index} />
+            )
+          ))}
         </div>
 
         {/* Unlock message */}
         <p className="text-sm text-muted-foreground text-center">
-          Come back together. See what opens.
+          Choices during your quest shape what opens next.
         </p>
 
         {/* Affinity line */}
