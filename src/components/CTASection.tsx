@@ -1,5 +1,12 @@
 import { Link } from "react-router-dom";
+import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import sunsetGathering from "@/assets/austin/sunset-gathering.jpg";
 
 export function CTASection() {
@@ -33,13 +40,34 @@ export function CTASection() {
             >
               <Link to="/pilot">Join the Pilot</Link>
             </Button>
-            <Button
-              size="lg"
-              asChild
-              className="w-full sm:w-auto text-base px-8 bg-sunset text-sunset-foreground hover:bg-sunset/90"
-            >
-              <Link to="/partners">Partner With Us</Link>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  size="lg"
+                  className="w-full sm:w-auto text-base px-8 bg-sunset text-sunset-foreground hover:bg-sunset/90"
+                >
+                  Get Involved
+                  <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center" className="w-48">
+                <DropdownMenuItem asChild>
+                  <Link to="/creators" className="w-full cursor-pointer">
+                    For Creators
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/partners" className="w-full cursor-pointer">
+                    Partner With Us
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/work-with-us" className="w-full cursor-pointer">
+                    Work With Us
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
