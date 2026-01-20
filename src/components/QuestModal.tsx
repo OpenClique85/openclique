@@ -5,8 +5,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
 import type { Quest } from '@/constants/quests';
 import QuestProgressionSection from './progression/QuestProgressionSection';
+import { FORM_URLS } from '@/constants/content';
 
 interface QuestModalProps {
   quest: Quest | null;
@@ -82,6 +84,22 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
 
               {/* Progression Section */}
               <QuestProgressionSection treeId={quest.progressionTree} />
+
+              {/* CTA for Pilot Quests */}
+              {quest.status === 'pilot' && (
+                <div className="pt-4 border-t border-border">
+                  <Button
+                    size="lg"
+                    className="w-full"
+                    onClick={() => window.open(FORM_URLS.pilot, '_blank')}
+                  >
+                    Join This Quest — Apply Now
+                  </Button>
+                  <p className="text-xs text-muted-foreground text-center mt-2">
+                    Limited spots available for the Austin pilot
+                  </p>
+                </div>
+              )}
             </div>
           </ScrollArea>
         </DialogContent>
