@@ -141,9 +141,10 @@ export const HOW_IT_WORKS = {
     },
   ],
   
-  shep: {
-    title: "Meet Shep, Your AI Wingman",
-    description: "Every squad has a secret weapon. Shep is our AI shepherd — a friendly guide who's there when you need a nudge, never when you don't.",
+  buggs: {
+    title: "Meet BUGGS, Your Squad Guide",
+    subtitle: "Behavioral Utility for Group Guidance & Structure",
+    description: "Every squad has a secret weapon. BUGGS is our friendly rabbit guide — there when you need a nudge, never when you don't.",
     features: [
       "Conversation starters when things get quiet",
       "Gentle reminders so no one forgets the details",

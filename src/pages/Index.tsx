@@ -3,6 +3,7 @@ import { Hero } from "@/components/Hero";
 import { BenefitsSection } from "@/components/BenefitsSection";
 import { FAQ } from "@/components/FAQ";
 import { Footer } from "@/components/Footer";
+import BuggsFloating from "@/components/BuggsFloating";
 
 const Index = () => {
   return (
@@ -14,6 +15,7 @@ const Index = () => {
         <FAQ />
       </main>
       <Footer />
+      <BuggsFloating message="Ready to find your squad?" />
     </div>
   );
 };

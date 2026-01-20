@@ -9,6 +9,7 @@ import andrewPoss from "@/assets/team/andrew-poss.jpeg";
 import tvlSemifinalists from "@/assets/traction/tvl-semifinalists.jpeg";
 import aclWinners from "@/assets/traction/acl-winners.jpeg";
 import kendraScottAccelerator from "@/assets/traction/kendra-scott-accelerator.jpeg";
+import buggsMascot from "@/assets/buggs-mascot.png";
 
 const teamPhotos: Record<string, string> = {
   anthony: anthonyCami,
@@ -57,7 +58,7 @@ export default function About() {
               <h2 className="font-display text-2xl font-bold text-foreground mb-8 text-center">
                 Meet the Team
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {ABOUT.team.map((member) => (
                   <div
                     key={member.name}
@@ -81,6 +82,26 @@ export default function About() {
                     </p>
                   </div>
                 ))}
+                
+                {/* BUGGS as team member */}
+                <div className="bg-card rounded-xl p-6 border border-border text-center hover:shadow-lg transition-shadow">
+                  <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-4 border-primary/20 bg-primary/5 flex items-center justify-center">
+                    <img
+                      src={buggsMascot}
+                      alt="BUGGS the rabbit mascot"
+                      className="w-20 h-20 object-contain"
+                    />
+                  </div>
+                  <h3 className="font-display text-lg font-semibold text-foreground">
+                    BUGGS
+                  </h3>
+                  <p className="text-primary text-sm font-medium mb-2">
+                    Chief Vibes Officer
+                  </p>
+                  <p className="text-muted-foreground text-sm">
+                    Your AI squad guide. Keeps the conversation flowing and the logistics sorted.
+                  </p>
+                </div>
               </div>
             </div>
           </div>

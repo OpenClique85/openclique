@@ -1,7 +1,7 @@
 import { Lock } from 'lucide-react';
 
 interface LockedQuestCardProps {
-  variant?: 0 | 1 | 2;
+  variant?: number;
 }
 
 const LockedQuestCard = ({ variant = 0 }: LockedQuestCardProps) => {
@@ -16,7 +16,7 @@ const LockedQuestCard = ({ variant = 0 }: LockedQuestCardProps) => {
     <div
       className={`
         relative w-24 h-28 rounded-xl 
-        bg-gradient-to-br ${gradients[variant]}
+        bg-gradient-to-br ${gradients[variant % 3]}
         border border-dashed border-border/60
         backdrop-blur-sm
         flex items-center justify-center
