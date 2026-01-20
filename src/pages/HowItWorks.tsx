@@ -3,10 +3,8 @@ import { Footer } from "@/components/Footer";
 import { CTASection } from "@/components/CTASection";
 import { HOW_IT_WORKS } from "@/constants/content";
 import { Check } from "lucide-react";
-import HexBadge from "@/components/progression/HexBadge";
-import LockedQuestCard from "@/components/progression/LockedQuestCard";
-import { PROGRESSION_TREES } from "@/constants/progressionTrees";
-import buggsMascot from "@/assets/buggs-mascot.png";
+import PathCarousel from "@/components/progression/PathCarousel";
+import buggsFront from "@/assets/buggs-front.png";
 
 export default function HowItWorks() {
   return (
@@ -90,7 +88,7 @@ export default function HowItWorks() {
                   {/* BUGGS Mascot */}
                   <div className="flex-shrink-0">
                     <img 
-                      src={buggsMascot} 
+                      src={buggsFront} 
                       alt="BUGGS - Behavioral Utility for Group Guidance & Structure"
                       className="w-24 h-24 md:w-32 md:h-32 object-contain"
                     />
@@ -157,10 +155,10 @@ export default function HowItWorks() {
           </div>
         </section>
 
-        {/* Your Quest Journey */}
+        {/* Your Quest Journey - RPG Branching Trees */}
         <section className="py-16 md:py-24">
           <div className="container mx-auto px-4">
-            <div className="max-w-3xl mx-auto">
+            <div className="max-w-4xl mx-auto">
               <div className="text-center mb-12">
                 <h2 className="font-display text-3xl font-bold text-foreground mb-4">
                   Your Quest Journey
@@ -170,51 +168,15 @@ export default function HowItWorks() {
                 </p>
               </div>
 
-              {/* Example progression visualization */}
-              <div className="bg-card rounded-2xl border border-border p-8 md:p-12">
-                <div className="flex flex-col items-center gap-8">
-                  {/* Hex Badge example */}
-                  <HexBadge tree={PROGRESSION_TREES.culture} />
+              {/* Interactive Path Carousel with Branching Trees */}
+              <PathCarousel />
 
-                  {/* Unlockable preview */}
-                  <div className="flex items-center justify-center gap-3 flex-wrap">
-                    {PROGRESSION_TREES.culture.unlockables.map((quest, index) => (
-                      quest.isTeased ? (
-                        <div 
-                          key={quest.id}
-                          className="relative w-[100px] h-[120px] rounded-xl border-2 border-dashed border-primary/40 bg-gradient-to-br from-primary/10 to-accent/10 flex flex-col items-center justify-center p-3"
-                        >
-                          <span className="text-2xl mb-2">{quest.icon}</span>
-                          <p className="text-xs font-medium text-foreground text-center">{quest.title}</p>
-                          <p className="text-[10px] text-muted-foreground text-center mt-1">{quest.teaser}</p>
-                        </div>
-                      ) : (
-                        <LockedQuestCard key={quest.id} variant={index} />
-                      )
-                    ))}
-                  </div>
-
-                  {/* Caption */}
-                  <div className="text-center space-y-3">
-                    <p className="text-muted-foreground">
-                      Come back together. See what opens.
-                    </p>
-                    <div className="flex items-center justify-center gap-2 text-sm">
-                      <span role="img" aria-hidden="true">🎶</span>
-                      <span className="text-muted-foreground">
-                        Culture affinity growing
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Explanation */}
-                <div className="mt-8 pt-8 border-t border-border text-center">
-                  <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                    Each quest builds your squad's affinity in different paths. Decisions during experiences 
-                    determine which exclusive quests unlock for your group.
-                  </p>
-                </div>
+              {/* Explanation footer */}
+              <div className="mt-8 text-center">
+                <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                  Each decision your squad makes opens different doors. 
+                  Come back together to discover your unique path.
+                </p>
               </div>
             </div>
           </div>
