@@ -1,14 +1,33 @@
-import buggsIcon from '@/assets/buggs-icon.png';
+import buggsFace from '@/assets/buggs-face.png';
+import buggsSitting from '@/assets/buggs-sitting.png';
+import buggsFront from '@/assets/buggs-front.png';
+import buggsHopping from '@/assets/buggs-hopping.png';
+
+type BuggsPose = 'face' | 'sitting' | 'front' | 'hopping';
 
 interface BuggsFloatingProps {
   position?: 'bottom-right' | 'bottom-left';
   message?: string;
+  pose?: BuggsPose;
 }
 
-const BuggsFloating = ({ position = 'bottom-right', message }: BuggsFloatingProps) => {
+const poseImages: Record<BuggsPose, string> = {
+  face: buggsFace,
+  sitting: buggsSitting,
+  front: buggsFront,
+  hopping: buggsHopping,
+};
+
+const BuggsFloating = ({ 
+  position = 'bottom-right', 
+  message,
+  pose = 'face',
+}: BuggsFloatingProps) => {
   const positionClasses = position === 'bottom-right' 
     ? 'right-4 bottom-4' 
     : 'left-4 bottom-4';
+
+  const buggsImage = poseImages[pose];
 
   return (
     <div className={`fixed ${positionClasses} z-40 flex items-end gap-2`}>
@@ -18,11 +37,11 @@ const BuggsFloating = ({ position = 'bottom-right', message }: BuggsFloatingProp
           <div className="absolute -bottom-1 right-4 w-3 h-3 bg-card border-r border-b border-border transform rotate-45" />
         </div>
       )}
-      <div className="w-12 h-12 rounded-full bg-background border-2 border-primary/20 shadow-lg flex items-center justify-center hover:scale-110 transition-transform cursor-pointer group">
+      <div className="w-14 h-14 rounded-full bg-background border-2 border-primary/20 shadow-lg flex items-center justify-center hover:scale-110 transition-transform cursor-pointer group overflow-hidden">
         <img 
-          src={buggsIcon} 
+          src={buggsImage} 
           alt="BUGGS - Your squad guide"
-          className="w-10 h-10 object-contain"
+          className="w-12 h-12 object-contain"
         />
         <div className="absolute -top-8 bg-foreground text-background text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
           Hi! I'm BUGGS 🐰

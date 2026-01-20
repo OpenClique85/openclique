@@ -1,15 +1,15 @@
 import HexBadge from './HexBadge';
-import LockedQuestCard from './LockedQuestCard';
-import TeasedQuestCard from './TeasedQuestCard';
-import { PROGRESSION_TREES } from '@/constants/progressionTrees';
+import TreeNode from './TreeNode';
+import { PROGRESSION_TREES, getChildNodes, getRootNode } from '@/constants/progressionTrees';
 
 interface QuestProgressionSectionProps {
-  treeId: 'culture' | 'wellness';
+  treeId: 'culture' | 'wellness' | 'connector';
 }
 
 const QuestProgressionSection = ({ treeId }: QuestProgressionSectionProps) => {
   const tree = PROGRESSION_TREES[treeId];
-  const { unlockables } = tree;
+  const rootNode = getRootNode(tree);
+  const tier1Nodes = rootNode ? getChildNodes(tree, rootNode.id) : [];
 
   return (
     <section className="space-y-6 pt-6 border-t border-border">
@@ -23,17 +23,13 @@ const QuestProgressionSection = ({ treeId }: QuestProgressionSectionProps) => {
 
         {/* Unlockable Cards - mix of teased and locked */}
         <div className="flex items-center justify-center gap-3 flex-wrap">
-          {unlockables.map((quest, index) => (
-            quest.isTeased ? (
-              <TeasedQuestCard 
-                key={quest.id}
-                title={quest.title}
-                teaser={quest.teaser}
-                icon={quest.icon}
-              />
-            ) : (
-              <LockedQuestCard key={quest.id} variant={index} />
-            )
+          {tier1Nodes.slice(0, 3).map((node) => (
+            <TreeNode 
+              key={node.id} 
+              node={node} 
+              colorTheme={tree.colorTheme} 
+              size="md"
+            />
           ))}
         </div>
 
