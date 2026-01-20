@@ -69,6 +69,10 @@ export default {
           DEFAULT: "hsl(var(--sunset))",
           foreground: "hsl(var(--sunset-foreground))",
         },
+        creator: {
+          DEFAULT: "hsl(var(--creator))",
+          foreground: "hsl(var(--creator-foreground))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
