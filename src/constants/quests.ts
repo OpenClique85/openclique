@@ -32,6 +32,7 @@ export interface Quest {
   };
   shortDescription: string;
   sections: QuestSection[];
+  progressionTree: 'culture' | 'wellness';
 }
 
 export const QUESTS: Quest[] = [
@@ -52,6 +53,7 @@ export const QUESTS: Quest[] = [
       squadSize: '5-6 people',
     },
     shortDescription: 'Guided dinner, group walk, mystery concert reveal. BUGGS handles the vibes.',
+    progressionTree: 'culture',
     sections: [
       {
         title: 'When & Where',
@@ -144,6 +146,7 @@ export const QUESTS: Quest[] = [
       squadSize: '4-5 people',
     },
     shortDescription: 'Zero to 5K with your squad. GPS art challenges. BUGGS-guided accountability.',
+    progressionTree: 'wellness',
     sections: [
       {
         title: 'When & Where',

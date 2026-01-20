@@ -3,6 +3,9 @@ import { Footer } from "@/components/Footer";
 import { CTASection } from "@/components/CTASection";
 import { HOW_IT_WORKS } from "@/constants/content";
 import { Bot, Check } from "lucide-react";
+import HexBadge from "@/components/progression/HexBadge";
+import LockedQuestCard from "@/components/progression/LockedQuestCard";
+import { PROGRESSION_TREES } from "@/constants/progressionTrees";
 
 export default function HowItWorks() {
   return (
@@ -144,6 +147,58 @@ export default function HowItWorks() {
                   </li>
                 ))}
               </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* Your Quest Journey */}
+        <section className="py-16 md:py-24">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto">
+              <div className="text-center mb-12">
+                <h2 className="font-display text-3xl font-bold text-foreground mb-4">
+                  Your Quest Journey
+                </h2>
+                <p className="text-lg text-muted-foreground">
+                  Complete experiences with your squad. As you return together, new paths reveal themselves.
+                </p>
+              </div>
+
+              {/* Example progression visualization */}
+              <div className="bg-card rounded-2xl border border-border p-8 md:p-12">
+                <div className="flex flex-col items-center gap-8">
+                  {/* Hex Badge example */}
+                  <HexBadge tree={PROGRESSION_TREES.culture} />
+
+                  {/* Locked cards */}
+                  <div className="flex items-center justify-center gap-3">
+                    <LockedQuestCard variant={0} />
+                    <LockedQuestCard variant={1} />
+                    <LockedQuestCard variant={2} />
+                  </div>
+
+                  {/* Caption */}
+                  <div className="text-center space-y-3">
+                    <p className="text-muted-foreground">
+                      Come back together. See what opens.
+                    </p>
+                    <div className="flex items-center justify-center gap-2 text-sm">
+                      <span role="img" aria-hidden="true">🎶</span>
+                      <span className="text-muted-foreground">
+                        Culture affinity growing
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Explanation */}
+                <div className="mt-8 pt-8 border-t border-border text-center">
+                  <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                    Each quest builds your affinity in different paths. The more you explore together, 
+                    the more exclusive experiences unlock for your squad.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
