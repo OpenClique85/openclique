@@ -11,6 +11,7 @@ import classicFilmImg from '@/assets/quests/classic-film.jpg';
 import dndDadsImg from '@/assets/quests/dnd-dads.jpg';
 import sxswCrowdImg from '@/assets/quests/sxsw-crowd.jpg';
 import trailOfLightsImg from '@/assets/quests/trail-of-lights.jpg';
+import aclFestivalImg from '@/assets/quests/acl-festival.jpg';
 
 export interface QuestSection {
   title: string;
@@ -707,6 +708,146 @@ export const QUESTS: Quest[] = [
         title: 'Dress Code',
         type: 'text',
         content: 'Festive encouraged! Ugly sweaters, Santa hats, reindeer antlers — the more holiday spirit, the better. Best dressed wins a prize voted by the squad.',
+      },
+    ],
+  },
+  {
+    id: 'acl-festival-prep',
+    icon: '🎪',
+    title: 'ACL Festival Prep Squad',
+    image: aclFestivalImg,
+    imageAlt: 'Friends at Austin City Limits festival holding a colorful totem flag with Austin skyline at sunset',
+    status: 'coming-soon',
+    statusLabel: 'Coming Soon - Fall 2025',
+    theme: 'Festival Crew',
+    themeColor: 'green',
+    rewards: 'Festival survival kit + $25 ACL merch credit + squad photo canvas',
+    metadata: {
+      date: '4 weeks before ACL (Sept 2025)',
+      cost: '$85 total (4 prep sessions)',
+      duration: '4 weeks prep + festival weekend',
+      squadSize: '5-6 people',
+    },
+    shortDescription: 'Turn strangers into your festival squad. Discover artists, scout Zilker, build a totem, and hit ACL as a crew.',
+    progressionTree: 'culture',
+    sections: [
+      {
+        title: 'When & Where',
+        type: 'timeline',
+        content: [
+          'Week 1: Artist Discovery Night at The ABGB (Sept 6)',
+          'Week 2: Zilker Park Recon Mission (Sept 13)',
+          'Week 3: Festival Prep Workshop at craft space (Sept 20)',
+          'Week 4: Pre-Festival Kickoff Party (Sept 27)',
+          'Festival Weekend: ACL Fest (Oct 4-6 / 11-13)',
+          'Reunion: Post-Festival Debrief (Oct 19)',
+        ],
+      },
+      {
+        title: 'The Journey',
+        type: 'text',
+        content: "ACL is better with a crew. But finding people who want to see YOUR artists? That's the hard part. This quest matches you with 5-6 strangers who share your music taste, then spends 4 weeks turning you into a festival-ready squad. By the time you walk through those gates, you'll have inside jokes, a custom totem, and a plan.",
+      },
+      {
+        title: 'Week-by-Week Breakdown',
+        type: 'list',
+        content: [
+          'Week 1 - Artist Discovery: Listen to undercard artists together. Claim your must-sees. Build a squad playlist.',
+          'Week 2 - Zilker Recon: Walk the festival grounds. Learn stage locations, water stations, and best viewing spots.',
+          'Week 3 - Prep Workshop: Build your squad totem. Gear check. Safety briefing. Outfit coordination.',
+          'Week 4 - Kickoff Party: Finalize schedule. Exchange contacts. Hype playlist. Totem reveal.',
+        ],
+      },
+      {
+        title: 'Festival Weekend Coordination',
+        type: 'list',
+        content: [
+          'BUGGS morning check-ins each day',
+          'Designated meetup points between sets',
+          'Photo challenges throughout the weekend',
+          'Emergency contact tree',
+          'Post-day debrief texts',
+        ],
+      },
+      {
+        title: "What You'll Learn",
+        type: 'list',
+        content: [
+          'How to navigate Zilker like a local',
+          'Festival safety and hydration basics',
+          'What to bring (and what to leave behind)',
+          'How to find your crew when cell service dies',
+          'Discovering artists outside your usual rotation',
+        ],
+      },
+      {
+        title: 'BUGGS keeps your squad synced with:',
+        type: 'list',
+        content: [
+          'Shared artist discovery prompts',
+          'Festival packing checklist',
+          'Day-of coordination and meetup reminders',
+          'Emergency protocols if someone gets separated',
+          'Post-festival photo sharing and memories',
+        ],
+      },
+      {
+        title: "What's Included",
+        type: 'list',
+        content: [
+          '4 pre-festival sessions (venues reserved)',
+          'Totem-building materials and craft supplies',
+          'Festival survival kit (camelback, bandana, sunscreen, earplugs, portable charger)',
+          'Squad coordination throughout festival weekend',
+          'Post-festival reunion brunch',
+        ],
+      },
+      {
+        title: "What You'll Earn",
+        type: 'list',
+        content: [
+          '$25 credit toward ACL merch booth',
+          'Squad photo printed on canvas (shipped after festival)',
+          'Custom "ACL Squad 2025" enamel pin',
+          "Priority access to next year's prep quest",
+          'Invitation to Festival Crew alumni group',
+        ],
+      },
+      {
+        title: 'Cost',
+        type: 'text',
+        content: "$85 total. Covers all 4 prep sessions, craft materials, survival kit, festival coordination, reunion brunch, and rewards. ACL ticket NOT included — you bring your own wristband.",
+      },
+      {
+        title: 'Best For',
+        type: 'list',
+        content: [
+          'First-time ACL goers who want to learn the ropes',
+          'Solo festival-goers who want a crew',
+          "People whose friends don't share their music taste",
+          "Anyone who's gotten lost or overwhelmed at festivals before",
+          'Music lovers who want to discover new artists',
+        ],
+      },
+      {
+        title: 'Not For',
+        type: 'list',
+        content: [
+          'Festival veterans who already have a crew',
+          'People who prefer to wander solo',
+          "Those who can't commit to 4 prep sessions",
+          "Anyone without an ACL wristband (we don't provide tickets)",
+        ],
+      },
+      {
+        title: 'Safety & Logistics',
+        type: 'text',
+        content: "Festival safety is no joke. You'll learn hydration strategies, how to spot heat exhaustion, where medical tents are located, and what to do if separated. We also establish a 'buddy system' and emergency contact tree before the festival.",
+      },
+      {
+        title: 'The Totem Tradition',
+        type: 'text',
+        content: "Every great festival squad has a totem — that ridiculous flag or sign you hold up so your crew can find you in a sea of 75,000 people. Week 3 is dedicated to designing and building yours together. Past squads have done inflatable dinosaurs, LED signs, and a very large banana. Get creative.",
       },
     ],
   },
