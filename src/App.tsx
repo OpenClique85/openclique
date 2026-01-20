@@ -9,6 +9,7 @@ import About from "./pages/About";
 import Pilot from "./pages/Pilot";
 import Partners from "./pages/Partners";
 import WorkWithUs from "./pages/WorkWithUs";
+import Creators from "./pages/Creators";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Quests from "./pages/Quests";
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/pilot" element={<Pilot />} />
           <Route path="/partners" element={<Partners />} />
           <Route path="/work-with-us" element={<WorkWithUs />} />
+          <Route path="/creators" element={<Creators />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/quests" element={<Quests />} />

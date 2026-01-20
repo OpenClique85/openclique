@@ -61,6 +61,10 @@
     --sunset: 25 95% 53%;
     --sunset-foreground: 0 0% 100%;
 
+    /* Creator Purple - for Creators page */
+    --creator: 280 80% 55%;
+    --creator-foreground: 0 0% 100%;
+
     /* Radius */
     --radius: 0.75rem;
 
@@ -111,6 +115,10 @@
     /* Sunset Orange - for Partner With Us (dark mode) */
     --sunset: 25 95% 58%;
     --sunset-foreground: 0 0% 100%;
+
+    /* Creator Purple - for Creators page (dark mode) */
+    --creator: 280 80% 60%;
+    --creator-foreground: 0 0% 100%;
 
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;

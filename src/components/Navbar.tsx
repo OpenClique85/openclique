@@ -47,6 +47,13 @@ export function Navbar() {
             <Button
               size="sm"
               asChild
+              className="bg-creator text-creator-foreground hover:bg-creator/80 hover:scale-105 transition-all"
+            >
+              <Link to="/creators">For Creators</Link>
+            </Button>
+            <Button
+              size="sm"
+              asChild
               className="bg-sunset text-sunset-foreground hover:bg-sunset/80 hover:scale-105 transition-all"
             >
               <Link to="/partners">Partner With Us</Link>
@@ -93,6 +100,13 @@ export function Navbar() {
                   className="justify-start bg-primary text-primary-foreground"
                 >
                   <Link to="/pilot" onClick={() => setIsOpen(false)}>Join the Pilot</Link>
+                </Button>
+                <Button
+                  size="sm"
+                  asChild
+                  className="justify-start bg-creator text-creator-foreground"
+                >
+                  <Link to="/creators" onClick={() => setIsOpen(false)}>For Creators</Link>
                 </Button>
                 <Button
                   size="sm"

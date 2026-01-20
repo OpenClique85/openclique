@@ -30,6 +30,7 @@ export const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "Quests", href: "/quests" },
   { label: "How It Works", href: "/how-it-works" },
+  { label: "For Creators", href: "/creators" },
   { label: "About", href: "/about" },
 ];
 
@@ -47,6 +48,7 @@ export const FORM_URLS = {
   pilot: "https://docs.google.com/forms/d/e/1FAIpQLSd9skqXpY1BsmLy4SGro8cItzQd5O486j0MySJzUxeoNd5l0w/viewform",
   partners: "https://docs.google.com/forms/d/e/1FAIpQLSdz0Y2tYSrFsSuiJEtbXFLcAsfsxa5-9KAOSgtYDU8UwRolzA/viewform",
   workWithUs: "https://docs.google.com/forms/d/e/1FAIpQLScSbXEuiYfLBc5p9p-1SJ-rwBE_duj85rW8kDAt8z-KSJqdjw/viewform",
+  creators: "https://docs.google.com/forms/d/e/1FAIpQLSd9skqXpY1BsmLy4SGro8cItzQd5O486j0MySJzUxeoNd5l0w/viewform",
 };
 
 // =============================================================================
@@ -391,6 +393,105 @@ export const WORK_WITH_US_PAGE = {
   ],
   ctaText: "Join the Team",
   note: "No pressure. Apply in 2 minutes.",
+};
+
+// =============================================================================
+// CREATORS PAGE CONTENT
+// =============================================================================
+
+export const CREATORS_PAGE = {
+  title: "Turn Your Followers Into Real-World Communities",
+  subtitle: "Create custom quests for your audience. Watch them form lasting friendships around what you teach.",
+  
+  valueProps: [
+    {
+      title: "Design Your Quest",
+      description: "Use our templates to create branded experiences for your audience in any city.",
+      icon: "palette",
+    },
+    {
+      title: "Activate Your Community",
+      description: "Give followers a structured way to connect IRL around your content.",
+      icon: "users",
+    },
+    {
+      title: "Earn & Track Impact",
+      description: "Revenue share on quest participation + analytics showing real engagement.",
+      icon: "trending-up",
+    },
+  ],
+  
+  useCases: [
+    {
+      title: "Fitness Creators",
+      description: "City-wide workout challenges that turn online followers into running buddies.",
+      icon: "dumbbell",
+      image: "running",
+    },
+    {
+      title: "Food & Lifestyle",
+      description: "Local food tours & experience trails curated by your taste.",
+      icon: "utensils",
+      image: "food-truck",
+    },
+    {
+      title: "Educators & Coaches",
+      description: "Learning squads & project groups that bring your lessons to life.",
+      icon: "graduation-cap",
+      image: "coffee-shop",
+    },
+  ],
+  
+  howItWorks: [
+    {
+      step: 1,
+      title: "Build Your Quest",
+      description: "Use our creator studio to design experiences that match your brand.",
+    },
+    {
+      step: 2,
+      title: "Share With Your Audience",
+      description: "Promote via email, social, or link in bio. We handle the rest.",
+    },
+    {
+      step: 3,
+      title: "Followers Form Squads",
+      description: "Your audience gets matched into small groups and completes challenges.",
+    },
+    {
+      step: 4,
+      title: "Track & Earn",
+      description: "See real engagement analytics and earn from participation.",
+    },
+  ],
+  
+  buggs: {
+    title: "Your Secret Weapon: BUGGS",
+    subtitle: "Your quests run on autopilot",
+    description: "While you focus on creating content, BUGGS — our AI squad guide — handles the logistics. Conversation starters, gentle reminders, and backup plans so every squad has a great experience.",
+  },
+  
+  faq: [
+    {
+      question: "What kind of creators is this for?",
+      answer: "Any creator with an engaged audience who wants to help followers connect IRL. Fitness coaches, food bloggers, educators, lifestyle influencers, hobby communities — if your audience shares an interest, you can build a quest around it.",
+    },
+    {
+      question: "How does revenue sharing work?",
+      answer: "You earn a percentage of quest participation fees. The more your audience engages, the more you earn. We handle payments, logistics, and customer support.",
+    },
+    {
+      question: "Do I need to be there in person?",
+      answer: "No! Your quests run independently with BUGGS guiding the squads. You design the experience once, and it can run in any city where you have followers.",
+    },
+    {
+      question: "What's the creator studio?",
+      answer: "A simple tool to design quests using templates. Set the activity, challenges, rewards, and branding — no technical skills required.",
+    },
+  ],
+  
+  ctaText: "Become a Creator Partner",
+  note: "Apply in 2 minutes. We'll reach out within 48 hours.",
 };
 
 // =============================================================================
