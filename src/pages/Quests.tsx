@@ -4,6 +4,8 @@ import { Footer } from '@/components/Footer';
 import QuestCard from '@/components/QuestCard';
 import QuestModal from '@/components/QuestModal';
 import { QUESTS, QUESTS_PAGE, type Quest } from '@/constants/quests';
+import { FORM_URLS } from '@/constants/content';
+import { Button } from '@/components/ui/button';
 import buggsFace from '@/assets/buggs-face.png';
 import foodTruckScene from '@/assets/austin/food-truck-scene.jpg';
 
@@ -38,8 +40,11 @@ const Quests = () => {
             <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">
               {QUESTS_PAGE.heroTitle}
             </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-4">
               {QUESTS_PAGE.heroSubtitle}
+            </p>
+            <p className="text-sm text-muted-foreground/80 max-w-xl mx-auto">
+              {QUESTS_PAGE.heroExplainer}
             </p>
           </div>
         </section>
@@ -64,6 +69,22 @@ const Quests = () => {
             <div className="mt-12 flex items-center justify-center gap-3 text-muted-foreground">
               <img src={buggsFace} alt="" className="w-8 h-8 object-contain" />
               <p className="text-sm">BUGGS guides every quest — you just show up!</p>
+            </div>
+
+            {/* Bottom CTA */}
+            <div className="mt-16 text-center p-8 bg-card rounded-xl border border-border">
+              <h3 className="font-display text-xl font-semibold text-foreground mb-2">
+                Ready to join?
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                Start with the Austin pilot and be among the first to experience OpenClique.
+              </p>
+              <Button
+                size="lg"
+                onClick={() => window.open(FORM_URLS.pilot, '_blank')}
+              >
+                Apply for the Pilot
+              </Button>
             </div>
           </div>
         </section>
