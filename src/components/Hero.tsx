@@ -2,12 +2,22 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { HERO, SOCIAL_PROOF } from "@/constants/content";
 import logo from "@/assets/logo.png";
+import buggsIcon from "@/assets/buggs-icon.png";
+import concertCrowd from "@/assets/austin/concert-crowd.jpg";
 
 export function Hero() {
   return (
     <section className="relative overflow-hidden">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5 -z-10" />
+      {/* Background image with gradient overlay */}
+      <div 
+        className="absolute inset-0 opacity-20 -z-10"
+        style={{
+          backgroundImage: `url(${concertCrowd})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center top',
+        }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background/95 to-accent/10 -z-10" />
       
       <div className="container mx-auto px-4 py-16 md:py-24 lg:py-32">
         <div className="max-w-3xl mx-auto text-center">
@@ -39,10 +49,13 @@ export function Hero() {
             </Button>
           </div>
 
-          {/* Social proof message */}
-          <p className="text-sm text-muted-foreground mt-8 animate-fade-in [animation-delay:400ms]">
-            {SOCIAL_PROOF.message}
-          </p>
+          {/* Social proof message with BUGGS */}
+          <div className="flex items-center justify-center gap-2 mt-8 animate-fade-in [animation-delay:400ms]">
+            <img src={buggsIcon} alt="" className="w-5 h-5 object-contain" />
+            <p className="text-sm text-muted-foreground">
+              {SOCIAL_PROOF.message}
+            </p>
+          </div>
         </div>
       </div>
     </section>

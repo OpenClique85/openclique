@@ -9,7 +9,8 @@ import andrewPoss from "@/assets/team/andrew-poss.jpeg";
 import tvlSemifinalists from "@/assets/traction/tvl-semifinalists.jpeg";
 import aclWinners from "@/assets/traction/acl-winners.jpeg";
 import kendraScottAccelerator from "@/assets/traction/kendra-scott-accelerator.jpeg";
-import buggsMascot from "@/assets/buggs-mascot.png";
+import buggsReal from "@/assets/team/buggs-real.jpeg";
+import zilkerPark from "@/assets/austin/zilker-park.jpg";
 
 const teamPhotos: Record<string, string> = {
   anthony: anthonyCami,
@@ -83,13 +84,13 @@ export default function About() {
                   </div>
                 ))}
                 
-                {/* BUGGS as team member */}
+                {/* BUGGS as team member with real photo */}
                 <div className="bg-card rounded-xl p-6 border border-border text-center hover:shadow-lg transition-shadow">
-                  <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-4 border-primary/20 bg-primary/5 flex items-center justify-center">
+                  <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-4 border-primary/20">
                     <img
-                      src={buggsMascot}
-                      alt="BUGGS the rabbit mascot"
-                      className="w-20 h-20 object-contain"
+                      src={buggsReal}
+                      alt="BUGGS the rabbit"
+                      className="w-full h-full object-cover object-top"
                     />
                   </div>
                   <h3 className="font-display text-lg font-semibold text-foreground">
@@ -107,9 +108,20 @@ export default function About() {
           </div>
         </section>
 
-        {/* Traction */}
-        <section className="py-12 md:py-16">
-          <div className="container mx-auto px-4">
+        {/* Traction with Zilker Park background */}
+        <section className="py-12 md:py-16 relative overflow-hidden">
+          {/* Background image with overlay */}
+          <div 
+            className="absolute inset-0 opacity-10"
+            style={{
+              backgroundImage: `url(${zilkerPark})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
+          
+          <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-5xl mx-auto">
               <h2 className="font-display text-3xl font-bold text-foreground mb-4 text-center">
                 Building Momentum

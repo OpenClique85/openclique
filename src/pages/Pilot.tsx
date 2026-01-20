@@ -3,6 +3,8 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { PILOT_PAGE, FORM_URLS } from "@/constants/content";
 import { ArrowRight, Check } from "lucide-react";
+import buggsFace from "@/assets/buggs-face.png";
+import zilkerPark from "@/assets/austin/zilker-park.jpg";
 
 export default function Pilot() {
   const handleCTAClick = () => {
@@ -13,11 +15,29 @@ export default function Pilot() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1">
-        <section className="py-16 md:py-24">
-          <div className="container mx-auto px-4">
+        <section className="py-16 md:py-24 relative overflow-hidden">
+          {/* Background image */}
+          <div 
+            className="absolute inset-0 opacity-10"
+            style={{
+              backgroundImage: `url(${zilkerPark})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
+          
+          <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-2xl mx-auto">
-              {/* Header */}
+              {/* Header with BUGGS */}
               <div className="text-center mb-12">
+                <div className="flex justify-center mb-6">
+                  <img 
+                    src={buggsFace} 
+                    alt="" 
+                    className="w-16 h-16 object-contain"
+                  />
+                </div>
                 <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>

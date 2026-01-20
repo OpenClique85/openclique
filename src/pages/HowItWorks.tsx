@@ -5,15 +5,27 @@ import { HOW_IT_WORKS } from "@/constants/content";
 import { Check } from "lucide-react";
 import PathCarousel from "@/components/progression/PathCarousel";
 import buggsFront from "@/assets/buggs-front.png";
+import runningGroup from "@/assets/austin/running-group.jpg";
 
 export default function HowItWorks() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1">
-        {/* Hero */}
-        <section className="py-16 md:py-24 bg-gradient-to-br from-primary/5 via-background to-accent/5">
-          <div className="container mx-auto px-4">
+        {/* Hero with running background */}
+        <section className="py-16 md:py-24 relative overflow-hidden">
+          {/* Background image */}
+          <div 
+            className="absolute inset-0 opacity-15"
+            style={{
+              backgroundImage: `url(${runningGroup})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-accent/10" />
+          
+          <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-6">
                 {HOW_IT_WORKS.heroTitle}
@@ -79,35 +91,36 @@ export default function HowItWorks() {
           </div>
         </section>
 
-        {/* Meet BUGGS */}
+        {/* Meet BUGGS - Centered layout */}
         <section className="py-16 md:py-24">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto">
               <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-2xl p-8 md:p-12 border border-primary/10">
-                <div className="flex flex-col md:flex-row items-center gap-8">
-                  {/* BUGGS Mascot */}
-                  <div className="flex-shrink-0">
+                {/* Centered BUGGS illustration */}
+                <div className="flex flex-col items-center text-center">
+                  {/* BUGGS Mascot - larger and centered */}
+                  <div className="mb-8">
                     <img 
                       src={buggsFront} 
                       alt="BUGGS - Behavioral Utility for Group Guidance & Structure"
-                      className="w-24 h-24 md:w-32 md:h-32 object-contain"
+                      className="w-40 h-40 md:w-48 md:h-48 object-contain mx-auto"
                     />
                   </div>
                   
                   {/* Content */}
-                  <div className="flex-1 text-center md:text-left">
+                  <div>
                     <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-1">
                       {HOW_IT_WORKS.buggs.title}
                     </h2>
                     <p className="text-sm text-primary font-medium mb-3">
                       {HOW_IT_WORKS.buggs.subtitle}
                     </p>
-                    <p className="text-muted-foreground mb-6">
+                    <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
                       {HOW_IT_WORKS.buggs.description}
                     </p>
-                    <ul className="space-y-3">
+                    <ul className="space-y-3 inline-block text-left">
                       {HOW_IT_WORKS.buggs.features.map((feature, index) => (
-                        <li key={index} className="flex items-center gap-3 justify-center md:justify-start">
+                        <li key={index} className="flex items-center gap-3">
                           <div className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
                             <Check className="w-3 h-3 text-primary" />
                           </div>

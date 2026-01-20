@@ -5,6 +5,7 @@ import QuestCard from '@/components/QuestCard';
 import QuestModal from '@/components/QuestModal';
 import { QUESTS, QUESTS_PAGE, type Quest } from '@/constants/quests';
 import buggsIcon from '@/assets/buggs-icon.png';
+import foodTruckScene from '@/assets/austin/food-truck-scene.jpg';
 
 const Quests = () => {
   const [selectedQuest, setSelectedQuest] = useState<Quest | null>(null);
@@ -20,9 +21,20 @@ const Quests = () => {
       <Navbar />
       
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="py-16 md:py-24 px-4">
-          <div className="max-w-4xl mx-auto text-center">
+        {/* Hero Section with food truck background */}
+        <section className="py-16 md:py-24 px-4 relative overflow-hidden">
+          {/* Background image */}
+          <div 
+            className="absolute inset-0 opacity-15"
+            style={{
+              backgroundImage: `url(${foodTruckScene})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/90 to-background" />
+          
+          <div className="max-w-4xl mx-auto text-center relative z-10">
             <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">
               {QUESTS_PAGE.heroTitle}
             </h1>

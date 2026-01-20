@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/accordion";
 import { PARTNERS_PAGE, FORM_URLS } from "@/constants/content";
 import { ArrowRight, Building2, Sparkles, Users, Check } from "lucide-react";
+import buggsSitting from "@/assets/buggs-sitting.png";
+import concertCrowd from "@/assets/austin/concert-crowd.jpg";
 
 const iconMap = {
   0: Building2,
@@ -26,11 +28,29 @@ export default function Partners() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1">
-        <section className="py-16 md:py-24">
-          <div className="container mx-auto px-4">
+        <section className="py-16 md:py-24 relative overflow-hidden">
+          {/* Background image */}
+          <div 
+            className="absolute inset-0 opacity-10"
+            style={{
+              backgroundImage: `url(${concertCrowd})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center top',
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
+          
+          <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-3xl mx-auto">
-              {/* Header */}
+              {/* Header with BUGGS */}
               <div className="text-center mb-12">
+                <div className="flex justify-center mb-6">
+                  <img 
+                    src={buggsSitting} 
+                    alt="" 
+                    className="w-16 h-16 object-contain"
+                  />
+                </div>
                 <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">
                   {PARTNERS_PAGE.title}
                 </h1>
