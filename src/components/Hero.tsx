@@ -3,6 +3,13 @@ import { Button } from "@/components/ui/button";
 import { HERO, SOCIAL_PROOF } from "@/constants/content";
 import logo from "@/assets/logo.png";
 import concertCrowd from "@/assets/austin/concert-crowd.jpg";
+import { ChevronDown } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function Hero() {
   return (
@@ -35,17 +42,41 @@ export function Hero() {
             {HERO.subheadline}
           </p>
 
-          {/* CTAs */}
+          {/* CTAs - Prominent Join + Get Involved Dropdown */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in [animation-delay:300ms]">
-            <Button size="lg" asChild className="w-full sm:w-auto text-base px-8">
+            <Button size="lg" asChild className="w-full sm:w-auto text-base px-10 py-6 text-lg font-semibold">
               <Link to="/pilot">{HERO.primaryCta}</Link>
             </Button>
-            <Button size="lg" asChild className="w-full sm:w-auto text-base px-8 bg-sunset text-sunset-foreground hover:bg-sunset/90">
-              <Link to="/partners">{HERO.secondaryCta}</Link>
-            </Button>
-            <Button size="lg" asChild className="w-full sm:w-auto text-base px-8 bg-navy text-navy-foreground hover:bg-navy/90">
-              <Link to="/work-with-us">{HERO.tertiaryCta}</Link>
-            </Button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="w-full sm:w-auto text-base px-6 gap-2"
+                >
+                  Get Involved
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center" className="w-48 bg-background border border-border z-50">
+                <DropdownMenuItem asChild>
+                  <Link to="/creators" className="w-full cursor-pointer text-creator">
+                    For Creators
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/partners" className="w-full cursor-pointer text-sunset">
+                    Partner With Us
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/work-with-us" className="w-full cursor-pointer text-navy">
+                    Work With Us
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Social proof message */}
