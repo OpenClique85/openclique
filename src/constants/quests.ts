@@ -9,6 +9,8 @@ import mysteryConcertImg from '@/assets/quests/mystery-concert.jpg';
 import couchTo5kImg from '@/assets/quests/couch-to-5k.jpg';
 import classicFilmImg from '@/assets/quests/classic-film.jpg';
 import dndDadsImg from '@/assets/quests/dnd-dads.jpg';
+import sxswCrowdImg from '@/assets/quests/sxsw-crowd.jpg';
+import trailOfLightsImg from '@/assets/quests/trail-of-lights.jpg';
 
 export interface QuestSection {
   title: string;
@@ -456,6 +458,255 @@ export const QUESTS: Quest[] = [
         title: 'Partner Perks',
         type: 'text',
         content: 'This quest is supported by local dad-focused brands. Complete the campaign to unlock exclusive gear and discounts from our partners.',
+      },
+    ],
+  },
+  {
+    id: 'sxsw-grad-insider',
+    icon: '🎫',
+    title: 'SXSW Insider — Grad Student Edition',
+    image: sxswCrowdImg,
+    imageAlt: 'Graduate students at SXSW festival in downtown Austin with neon lights and badges',
+    status: 'coming-soon',
+    statusLabel: 'Coming Soon - March 2025',
+    theme: 'UT Grad Students',
+    themeColor: 'amber',
+    rewards: 'UT exhibit VIP access + exclusive swag bundle + secret show invites',
+    metadata: {
+      date: 'SXSW Week (March 7-15, 2025)',
+      cost: '$45 (coordination + swag)',
+      duration: '9 days of guided exploration',
+      squadSize: '4-6 grad students',
+    },
+    shortDescription: 'Navigate SXSW like a local. QR scavenger hunts, secret shows, and insider access — designed for UT grad students.',
+    progressionTree: 'culture',
+    sections: [
+      {
+        title: 'When & Where',
+        type: 'timeline',
+        content: [
+          'Pre-SXSW Kickoff: March 1 @ UT campus',
+          'Interactive Week: March 7-9',
+          'Film Week: March 10-12',
+          'Music Week: March 13-15',
+          'Wrap Party: March 16',
+        ],
+      },
+      {
+        title: 'The Journey',
+        type: 'text',
+        content: "SXSW is overwhelming. 400+ panels, 2000+ artists, and activations on every corner. This quest gives UT grad students a curated path through the chaos — plus insider access most badge-holders never find. You'll hunt for hidden QR codes at brand activations, unlock secret shows, and earn exclusive swag for exploring.",
+      },
+      {
+        title: 'How the QR Scavenger Hunt Works',
+        type: 'list',
+        content: [
+          "Download the SXSW GO app (we'll walk you through setup)",
+          'Each day, BUGGS sends you 3-5 activation locations with hidden QR codes',
+          'Scan the code to check in and earn points',
+          'Hit point milestones to unlock rewards (swag, secret show invites, VIP access)',
+          'Leaderboard for your squad + all participating squads',
+        ],
+      },
+      {
+        title: 'Daily BUGGS Guidance',
+        type: 'list',
+        content: [
+          "Morning: \"Today's hot panels\" based on your interests",
+          'Afternoon: QR hunt locations + tips for free stuff at activations',
+          'Evening: Secret show alerts + meetup coordination',
+          'Night: Check-in prompts + next day preview',
+        ],
+      },
+      {
+        title: "What You'll Unlock",
+        type: 'list',
+        content: [
+          '5 QR scans: Custom SXSW bandana + sticker pack',
+          '10 QR scans: Invite to UT alumni/grad student exhibit',
+          '15 QR scans: Secret show invite (artist TBA)',
+          '20 QR scans: VIP access to one premium panel',
+          '25+ scans: "SXSW Insider" title + exclusive end-of-fest swag bundle',
+        ],
+      },
+      {
+        title: 'UT Grad Student Perks',
+        type: 'list',
+        content: [
+          'Private viewing of UT exhibit at SXSW',
+          'Meetups with UT alumni in tech/film/music industries',
+          'Study break coordination (yes, even during SXSW)',
+          'Grad student-only happy hours',
+        ],
+      },
+      {
+        title: "What's Included",
+        type: 'list',
+        content: [
+          'Pre-festival orientation session',
+          'Daily BUGGS coordination throughout SXSW',
+          'QR scavenger hunt game access',
+          'Squad coordination and meetup planning',
+          'Wrap party with all participating squads',
+          'All unlocked swag and rewards',
+        ],
+      },
+      {
+        title: "What You'll Earn",
+        type: 'list',
+        content: [
+          'SXSW survival kit (portable charger, badge holder, hand sanitizer)',
+          'Tiered swag based on QR scans (bandana, pins, exclusive merch)',
+          'Secret show invites (based on participation)',
+          'UT exhibit VIP access',
+          "Priority for next year's quest",
+        ],
+      },
+      {
+        title: 'Cost',
+        type: 'text',
+        content: "$45 total. Covers orientation, daily coordination, scavenger hunt access, swag, and wrap party. SXSW badge/wristband NOT included — most events are free for grad students anyway.",
+      },
+      {
+        title: 'Best For',
+        type: 'list',
+        content: [
+          'UT grad students new to Austin or SXSW',
+          'Anyone overwhelmed by the SXSW schedule',
+          'People who want to discover hidden gems, not just headline acts',
+          'Grad students who want to network while having fun',
+          'Gamers who love a good scavenger hunt',
+        ],
+      },
+      {
+        title: 'Pro Tips from Past Squads',
+        type: 'list',
+        content: [
+          'Comfortable shoes are non-negotiable',
+          'The best free stuff is at smaller activations',
+          'Secret shows > official showcases',
+          'Always have a backup phone charger',
+          'The real SXSW happens between 11pm and 2am',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'trail-of-lights',
+    icon: '✨',
+    title: 'Trail of Lights Squad',
+    image: trailOfLightsImg,
+    imageAlt: 'Friends walking through illuminated holiday light tunnel at Austin Trail of Lights',
+    status: 'coming-soon',
+    statusLabel: 'Coming Soon - December 2025',
+    theme: 'Holiday Magic',
+    themeColor: 'pink',
+    rewards: 'Trail of Lights ticket + hot cocoa crawl + squad photo ornament',
+    metadata: {
+      date: 'December 2025 (date TBD)',
+      cost: '$35 (tickets + cocoa + activities)',
+      duration: 'One magical evening',
+      squadSize: '5-6 people',
+    },
+    shortDescription: "Walk Austin's famous Trail of Lights with a squad. Hot cocoa stops, photo challenges, and holiday vibes.",
+    progressionTree: 'connector',
+    sections: [
+      {
+        title: 'When & Where',
+        type: 'timeline',
+        content: [
+          '5:30 PM — Meet at Zilker Park entrance',
+          '6:00 PM — Trail walk begins (golden hour lighting!)',
+          '7:30 PM — Hot cocoa stop at Zilker Café',
+          '8:30 PM — Post-trail gathering at nearby venue',
+          '9:30 PM — Squad photo exchange + goodbyes',
+        ],
+      },
+      {
+        title: 'The Journey',
+        type: 'text',
+        content: "The Trail of Lights is an Austin holiday tradition — but wandering alone through 2 million lights isn't the vibe. Join a squad of fellow holiday lovers for the full experience: walking the trail together, stopping for hot cocoa, completing photo challenges, and ending with a cozy post-trail hangout.",
+      },
+      {
+        title: 'Trail Experience',
+        type: 'list',
+        content: [
+          'BUGGS-guided walk through all displays',
+          'Photo challenges at key installations',
+          'Hot cocoa stop included',
+          'Squad voting: best display of the year',
+          'Holiday music playlist for the walk',
+        ],
+      },
+      {
+        title: 'Photo Challenges',
+        type: 'list',
+        content: [
+          'Squad selfie at the Zilker Tree',
+          '"Most creative pose" at the tunnel of lights',
+          "Candid shot of someone's genuine reaction",
+          'Best attempt at a "jumping photo"',
+          'Holiday outfit coordination award',
+        ],
+      },
+      {
+        title: 'BUGGS keeps the holiday spirit with:',
+        type: 'list',
+        content: [
+          'Trail navigation and timing',
+          'Photo challenge prompts at each zone',
+          'Hot cocoa order coordination',
+          'Holiday icebreakers and conversation starters',
+          'Weather updates and backup plans',
+        ],
+      },
+      {
+        title: "What's Included",
+        type: 'list',
+        content: [
+          'Trail of Lights admission ticket',
+          'Hot cocoa at Zilker Café',
+          'Post-trail venue reservation',
+          'Squad photo printed as ornament (mailed after)',
+          'Holiday treat bag',
+        ],
+      },
+      {
+        title: "What You'll Earn",
+        type: 'list',
+        content: [
+          'Custom squad photo ornament',
+          'Trail of Lights commemorative pin',
+          '$10 off next OpenClique quest',
+          "Priority invite to New Year's Eve quest",
+          'Access to Holiday Squad alumni group',
+        ],
+      },
+      {
+        title: 'Cost',
+        type: 'text',
+        content: "$35 total. Covers Trail of Lights ticket, hot cocoa, treat bag, ornament, and post-trail gathering. Additional food/drinks at the post-trail venue are on you.",
+      },
+      {
+        title: 'Best For',
+        type: 'list',
+        content: [
+          'Austin newcomers experiencing their first Trail of Lights',
+          'People who love holiday activities but hate going alone',
+          'Anyone who wants photos but needs someone to take them',
+          'Holiday enthusiasts who want to spread the cheer',
+          "Those who've always wanted to go but never had a group",
+        ],
+      },
+      {
+        title: 'Weather Note',
+        type: 'text',
+        content: "Texas weather is unpredictable. If it's below 40°F, we'll coordinate hot drink stops throughout the trail. If it rains, we'll reschedule to an alternate date (you'll get first pick).",
+      },
+      {
+        title: 'Dress Code',
+        type: 'text',
+        content: 'Festive encouraged! Ugly sweaters, Santa hats, reindeer antlers — the more holiday spirit, the better. Best dressed wins a prize voted by the squad.',
       },
     ],
   },
