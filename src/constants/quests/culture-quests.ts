@@ -1,47 +1,17 @@
 /**
- * OpenClique Quest Data
+ * Culture Path Quests
  * 
- * This file contains all quest information displayed on the Quests page.
- * Each quest has card-level info and full modal details.
+ * Quests focused on arts, entertainment, and cultural experiences.
+ * Includes: Mystery Concert, Classic Film Buffs, SXSW Insider, ACL Festival Prep
  */
 
+import type { Quest } from './types';
 import mysteryConcertImg from '@/assets/quests/mystery-concert.jpg';
-import couchTo5kImg from '@/assets/quests/couch-to-5k.jpg';
 import classicFilmImg from '@/assets/quests/classic-film.jpg';
-import dndDadsImg from '@/assets/quests/dnd-dads.jpg';
 import sxswCrowdImg from '@/assets/quests/sxsw-crowd.jpg';
-import trailOfLightsImg from '@/assets/quests/trail-of-lights.jpg';
 import aclFestivalImg from '@/assets/quests/acl-festival.jpg';
 
-export interface QuestSection {
-  title: string;
-  content: string | string[];
-  type?: 'text' | 'list' | 'timeline';
-}
-
-export interface Quest {
-  id: string;
-  icon: string;
-  title: string;
-  image: string;
-  imageAlt: string;
-  status: 'pilot' | 'coming-soon';
-  statusLabel: string;
-  theme: string;
-  themeColor: 'pink' | 'green' | 'amber' | 'purple';
-  rewards: string;
-  metadata: {
-    date: string;
-    cost: string;
-    duration: string;
-    squadSize: string;
-  };
-  shortDescription: string;
-  sections: QuestSection[];
-  progressionTree: 'culture' | 'wellness' | 'connector';
-}
-
-export const QUESTS: Quest[] = [
+export const CULTURE_QUESTS: Quest[] = [
   {
     id: 'mystery-concert-ladies-night',
     icon: '🎸',
@@ -133,121 +103,6 @@ export const QUESTS: Quest[] = [
         title: 'Safety Note',
         type: 'text',
         content: 'All activities take place in public venues. Participation is voluntary, and personal safety decisions are up to you. OpenClique provides coordination and structure but is not responsible for individual behavior. Use your judgment and communicate if you need support.',
-      },
-    ],
-  },
-  {
-    id: 'couch-to-5k-squad',
-    icon: '👟',
-    title: 'Couch to 5K Squad',
-    image: couchTo5kImg,
-    imageAlt: 'Runner on a trail at sunrise with mountains in background',
-    status: 'coming-soon',
-    statusLabel: 'Coming Soon',
-    theme: 'Beginner Runners',
-    themeColor: 'green',
-    rewards: '$25 running store gift card + race entry + OpenClique swag',
-    metadata: {
-      date: 'Starting February',
-      cost: '$40 total (2 months)',
-      duration: '8 weeks, 2x/week',
-      squadSize: '4-5 people',
-    },
-    shortDescription: 'Zero to 5K with your squad. GPS art challenges. BUGGS-guided accountability.',
-    progressionTree: 'wellness',
-    sections: [
-      {
-        title: 'When & Where',
-        type: 'list',
-        content: [
-          'Start Date: February 2025 (exact date TBD)',
-          'Schedule: 8 weeks, 2 sessions per week',
-          'Time Options: Morning track (7-8am) OR Evening track (6-7pm)',
-          'Locations: Rotating Austin running spots (confirmed upon signup)',
-        ],
-      },
-      {
-        title: 'How It Works',
-        type: 'text',
-        content: "Go from non-runner to 5K finisher with a squad of beginners matched to your pace. Follow a proven training program with fun challenges and built-in accountability.",
-      },
-      {
-        title: 'Experience Flow',
-        type: 'list',
-        content: [
-          'Pre-quest fitness assessment and goal-setting',
-          'Meet your squad (matched by pace and schedule preference)',
-          '16 group training sessions over 8 weeks',
-          'Weekly GPS art challenges (run routes that draw shapes on Strava)',
-          'Milestone celebrations every 2 weeks',
-          'Final celebration 5K race together',
-        ],
-      },
-      {
-        title: "BUGGS keeps your squad connected with:",
-        type: 'list',
-        content: [
-          'Training reminders and motivation',
-          'GPS art challenge prompts',
-          'Encouraging messages when you need them',
-          '"Surprise support" coordination along routes',
-        ],
-      },
-      {
-        title: "What's Included",
-        type: 'list',
-        content: [
-          'Structured 8-week training plan (app-guided)',
-          '16 group training sessions',
-          'Squad coordination with BUGGS',
-          'OpenClique running shirt',
-          'Celebration 5K race entry',
-          'Access to alumni running community',
-        ],
-      },
-      {
-        title: "What You'll Earn",
-        type: 'list',
-        content: [
-          '$25 local running store gift card (upon completion)',
-          '20% off future 10K race entries',
-          'Invitations to alumni running groups',
-          'Graduation celebration brunch',
-        ],
-      },
-      {
-        title: 'Cost',
-        type: 'text',
-        content: '$40 total ($20/month for 2 months). Covers training plan, group coordination, swag, race entry, and rewards.',
-      },
-      {
-        title: 'Best For',
-        type: 'list',
-        content: [
-          'Complete beginners (truly never-runners)',
-          "People who've failed at running alone",
-          'Anyone wanting fitness accountability without judgment',
-          'Morning or evening people with consistent schedules',
-        ],
-      },
-      {
-        title: 'Not For',
-        type: 'list',
-        content: [
-          'Current runners (try our 10K or half-marathon quests instead)',
-          'People with highly unpredictable schedules',
-          'Those preferring solo fitness activities',
-        ],
-      },
-      {
-        title: 'Logistics',
-        type: 'list',
-        content: [
-          'New cohorts start monthly',
-          'Choose morning (7-8am) or evening (6-7pm) track upon signup',
-          'Rain = indoor alternative workout',
-          'Miss 3+ sessions = offer to join next cohort',
-        ],
       },
     ],
   },
@@ -348,117 +203,6 @@ export const QUESTS: Quest[] = [
         title: 'Dress Code for Finale',
         type: 'text',
         content: 'Week 6 is costume required! Come as your favorite classic film character. Best costume wins a special prize voted by the squad.',
-      },
-    ],
-  },
-  {
-    id: 'dungeons-and-daddies',
-    icon: '🐉',
-    title: 'Dungeons & Daddies',
-    image: dndDadsImg,
-    imageAlt: 'Group of dads laughing and playing tabletop games at a cozy tavern',
-    status: 'coming-soon',
-    statusLabel: 'Coming Soon',
-    theme: 'New Dads',
-    themeColor: 'purple',
-    rewards: 'Dad gear bundle + D&D starter set + $30 tavern credits',
-    metadata: {
-      date: 'Starting February 2025',
-      cost: '$75 total (8 sessions)',
-      duration: '8 weeks, 1 session/week',
-      squadSize: '4-5 dads',
-    },
-    shortDescription: 'New dads escape reality with beginner D&D at Emerald Tavern. Complete campaign, earn dad gear.',
-    progressionTree: 'connector',
-    sections: [
-      {
-        title: 'When & Where',
-        type: 'timeline',
-        content: [
-          'Saturdays, 2:00 PM at Emerald Tavern Games & Café',
-          '8-week beginner campaign (dates confirmed upon signup)',
-          'Private table reserved for your party',
-        ],
-      },
-      {
-        title: 'The Journey',
-        type: 'text',
-        content: "Being a new dad is an adventure — why not have another one? Join a party of fellow Austin dads for a beginner-friendly D&D campaign. No experience needed. We'll teach you to roll dice, build characters, and escape into a fantasy world while bonding with guys who get the sleep deprivation.",
-      },
-      {
-        title: 'Experience Flow',
-        type: 'list',
-        content: [
-          'Session 1: Character creation & tavern meetup',
-          'Sessions 2-6: Campaign chapters (beginner-friendly story)',
-          'Session 7: Epic boss battle',
-          'Session 8: Finale feast & loot distribution',
-        ],
-      },
-      {
-        title: 'BUGGS keeps your party synced with:',
-        type: 'list',
-        content: [
-          'Session reminders (because dad brain is real)',
-          'Character sheet management help',
-          'Quick rules refreshers before each session',
-          '"Dad joke of the week" to break the ice',
-          'Coordination if someone needs to miss (baby duty)',
-        ],
-      },
-      {
-        title: "What's Included",
-        type: 'list',
-        content: [
-          '8 sessions with experienced Dungeon Master',
-          'All dice, character sheets, and materials provided',
-          'Reserved private table at Emerald Tavern',
-          'Drinks credit each session ($10/person)',
-          'Campaign designed for beginners',
-        ],
-      },
-      {
-        title: "What You'll Earn",
-        type: 'list',
-        content: [
-          'D&D Starter Set (yours to keep)',
-          'Custom "Dad Party" dice bag',
-          '$30 Emerald Tavern gift card',
-          'First-time dad care package from brand partners:',
-          '  • Tactical-style diaper bag',
-          '  • "Dad Mode" t-shirt',
-          '  • Coffee shop gift card',
-          'Priority invite to advanced campaigns',
-        ],
-      },
-      {
-        title: 'Cost',
-        type: 'text',
-        content: '$75 total for the 8-week campaign. Covers DM, materials, table reservation, drink credits, and all rewards. Additional food/drinks on you.',
-      },
-      {
-        title: 'Best For',
-        type: 'list',
-        content: [
-          'New dads (0-3 years) wanting to meet other dads',
-          'Anyone curious about D&D but intimidated to start',
-          'Guys who need a scheduled excuse to leave the house',
-          'Dads who loved gaming pre-kids and want to reconnect',
-        ],
-      },
-      {
-        title: 'Not For',
-        type: 'list',
-        content: [
-          'Experienced D&D players (try our advanced campaigns)',
-          'Anyone not open to fantasy/roleplay themes',
-          'Those who can\'t commit to most Saturday afternoons',
-        ],
-      },
-      {
-        title: 'Partner Perks',
-        type: 'text',
-        content: 'This quest is supported by local dad-focused brands. Complete the campaign to unlock exclusive gear and discounts from our partners.',
       },
     ],
   },
@@ -589,125 +333,6 @@ export const QUESTS: Quest[] = [
           'Always have a backup phone charger',
           'The real SXSW happens between 11pm and 2am',
         ],
-      },
-    ],
-  },
-  {
-    id: 'trail-of-lights',
-    icon: '✨',
-    title: 'Trail of Lights Squad',
-    image: trailOfLightsImg,
-    imageAlt: 'Friends walking through illuminated holiday light tunnel at Austin Trail of Lights',
-    status: 'coming-soon',
-    statusLabel: 'Coming Soon - December 2025',
-    theme: 'Holiday Magic',
-    themeColor: 'pink',
-    rewards: 'Trail of Lights ticket + hot cocoa crawl + squad photo ornament',
-    metadata: {
-      date: 'December 2025 (date TBD)',
-      cost: '$35 (tickets + cocoa + activities)',
-      duration: 'One magical evening',
-      squadSize: '5-6 people',
-    },
-    shortDescription: "Walk Austin's famous Trail of Lights with a squad. Hot cocoa stops, photo challenges, and holiday vibes.",
-    progressionTree: 'connector',
-    sections: [
-      {
-        title: 'When & Where',
-        type: 'timeline',
-        content: [
-          '5:30 PM — Meet at Zilker Park entrance',
-          '6:00 PM — Trail walk begins (golden hour lighting!)',
-          '7:30 PM — Hot cocoa stop at Zilker Café',
-          '8:30 PM — Post-trail gathering at nearby venue',
-          '9:30 PM — Squad photo exchange + goodbyes',
-        ],
-      },
-      {
-        title: 'The Journey',
-        type: 'text',
-        content: "The Trail of Lights is an Austin holiday tradition — but wandering alone through 2 million lights isn't the vibe. Join a squad of fellow holiday lovers for the full experience: walking the trail together, stopping for hot cocoa, completing photo challenges, and ending with a cozy post-trail hangout.",
-      },
-      {
-        title: 'Trail Experience',
-        type: 'list',
-        content: [
-          'BUGGS-guided walk through all displays',
-          'Photo challenges at key installations',
-          'Hot cocoa stop included',
-          'Squad voting: best display of the year',
-          'Holiday music playlist for the walk',
-        ],
-      },
-      {
-        title: 'Photo Challenges',
-        type: 'list',
-        content: [
-          'Squad selfie at the Zilker Tree',
-          '"Most creative pose" at the tunnel of lights',
-          "Candid shot of someone's genuine reaction",
-          'Best attempt at a "jumping photo"',
-          'Holiday outfit coordination award',
-        ],
-      },
-      {
-        title: 'BUGGS keeps the holiday spirit with:',
-        type: 'list',
-        content: [
-          'Trail navigation and timing',
-          'Photo challenge prompts at each zone',
-          'Hot cocoa order coordination',
-          'Holiday icebreakers and conversation starters',
-          'Weather updates and backup plans',
-        ],
-      },
-      {
-        title: "What's Included",
-        type: 'list',
-        content: [
-          'Trail of Lights admission ticket',
-          'Hot cocoa at Zilker Café',
-          'Post-trail venue reservation',
-          'Squad photo printed as ornament (mailed after)',
-          'Holiday treat bag',
-        ],
-      },
-      {
-        title: "What You'll Earn",
-        type: 'list',
-        content: [
-          'Custom squad photo ornament',
-          'Trail of Lights commemorative pin',
-          '$10 off next OpenClique quest',
-          "Priority invite to New Year's Eve quest",
-          'Access to Holiday Squad alumni group',
-        ],
-      },
-      {
-        title: 'Cost',
-        type: 'text',
-        content: "$35 total. Covers Trail of Lights ticket, hot cocoa, treat bag, ornament, and post-trail gathering. Additional food/drinks at the post-trail venue are on you.",
-      },
-      {
-        title: 'Best For',
-        type: 'list',
-        content: [
-          'Austin newcomers experiencing their first Trail of Lights',
-          'People who love holiday activities but hate going alone',
-          'Anyone who wants photos but needs someone to take them',
-          'Holiday enthusiasts who want to spread the cheer',
-          "Those who've always wanted to go but never had a group",
-        ],
-      },
-      {
-        title: 'Weather Note',
-        type: 'text',
-        content: "Texas weather is unpredictable. If it's below 40°F, we'll coordinate hot drink stops throughout the trail. If it rains, we'll reschedule to an alternate date (you'll get first pick).",
-      },
-      {
-        title: 'Dress Code',
-        type: 'text',
-        content: 'Festive encouraged! Ugly sweaters, Santa hats, reindeer antlers — the more holiday spirit, the better. Best dressed wins a prize voted by the squad.',
       },
     ],
   },
@@ -852,8 +477,3 @@ export const QUESTS: Quest[] = [
     ],
   },
 ];
-
-export const QUESTS_PAGE = {
-  heroTitle: 'Explore Quests',
-  heroSubtitle: 'Curated adventures designed for small groups. Pick a quest, join a squad, and make real connections.',
-};
