@@ -7,15 +7,13 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { CreatorTypeCard } from "@/components/CreatorTypeCard";
 import { CREATORS_PAGE, FORM_URLS } from "@/constants/content";
 import { 
   ArrowRight, 
   Palette, 
   Users, 
   TrendingUp, 
-  Dumbbell, 
-  Utensils, 
-  GraduationCap,
   Sparkles 
 } from "lucide-react";
 import rooftopGathering from "@/assets/austin/rooftop-gathering.jpg";
@@ -23,6 +21,7 @@ import runningGroup from "@/assets/austin/running-group.jpg";
 import foodTruckScene from "@/assets/austin/food-truck-scene.jpg";
 import coffeeShopFriends from "@/assets/austin/coffee-shop-friends.jpg";
 import muralWall from "@/assets/austin/mural-wall.jpg";
+import concertCrowd from "@/assets/austin/concert-crowd.jpg";
 import buggsFront from "@/assets/buggs-front.png";
 import buggsFace from "@/assets/buggs-face.png";
 
@@ -32,16 +31,13 @@ const valuePropIcons = {
   "trending-up": TrendingUp,
 };
 
-const useCaseIcons = {
-  dumbbell: Dumbbell,
-  utensils: Utensils,
-  "graduation-cap": GraduationCap,
-};
-
-const useCaseImages = {
+const useCaseImages: Record<string, string> = {
   running: runningGroup,
   "food-truck": foodTruckScene,
   "coffee-shop": coffeeShopFriends,
+  concert: concertCrowd,
+  rooftop: rooftopGathering,
+  mural: muralWall,
 };
 
 export default function Creators() {
@@ -150,42 +146,23 @@ export default function Creators() {
               </h2>
               <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
                 Whether you're building a fitness empire or teaching a craft, your audience wants to connect.
+                <span className="block text-sm mt-1 text-creator">Click any card to learn more.</span>
               </p>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {CREATORS_PAGE.useCases.map((useCase) => {
-                  const Icon = useCaseIcons[useCase.icon as keyof typeof useCaseIcons] || Dumbbell;
-                  const image = useCaseImages[useCase.image as keyof typeof useCaseImages];
+                  const image = useCaseImages[useCase.image as keyof typeof useCaseImages] || runningGroup;
                   return (
-                    <div
+                    <CreatorTypeCard
                       key={useCase.title}
-                      className="group bg-card rounded-xl overflow-hidden border border-border hover:border-creator/50 hover:shadow-lg transition-all duration-300"
-                    >
-                      {/* Image */}
-                      <div className="h-40 relative overflow-hidden">
-                        <img 
-                          src={image} 
-                          alt={useCase.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-card to-transparent" />
-                        <div className="absolute bottom-3 left-3">
-                          <div className="w-10 h-10 rounded-lg bg-creator/90 flex items-center justify-center">
-                            <Icon className="w-5 h-5 text-creator-foreground" />
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Content */}
-                      <div className="p-5">
-                        <h3 className="font-display text-lg font-semibold text-foreground mb-2">
-                          {useCase.title}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          {useCase.description}
-                        </p>
-                      </div>
-                    </div>
+                      title={useCase.title}
+                      description={useCase.description}
+                      icon={useCase.icon}
+                      image={image}
+                      expandedDescription={(useCase as any).expandedDescription}
+                      exampleQuests={(useCase as any).exampleQuests}
+                      perfectFor={(useCase as any).perfectFor}
+                    />
                   );
                 })}
               </div>
@@ -206,7 +183,7 @@ export default function Creators() {
                 <div className="absolute left-6 top-6 bottom-6 w-0.5 bg-creator/30 hidden md:block" />
                 
                 <div className="space-y-8">
-                  {CREATORS_PAGE.howItWorks.map((step, index) => (
+                  {CREATORS_PAGE.howItWorks.map((step) => (
                     <div
                       key={step.step}
                       className="flex gap-6 items-start"

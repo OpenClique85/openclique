@@ -1,8 +1,14 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { NAV_LINKS, CTA_NAV_LINKS, BRAND } from "@/constants/content";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { NAV_LINKS, BRAND } from "@/constants/content";
 import logo from "@/assets/logo.png";
 
 export function Navbar() {
@@ -16,17 +22,17 @@ export function Navbar() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
-            <img src={logo} alt={BRAND.name} className="h-8 md:h-10 w-auto" />
+          <Link to="/" className="flex items-center gap-2 shrink-0">
+            <img src={logo} alt={BRAND.name} className="h-10 md:h-12 w-auto" />
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-6">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 to={link.href}
-                className={`text-sm font-medium transition-colors hover:text-primary ${
+                className={`text-sm font-medium transition-colors hover:text-primary whitespace-nowrap ${
                   isActive(link.href) ? "text-primary" : "text-muted-foreground"
                 }`}
               >
@@ -40,31 +46,52 @@ export function Navbar() {
             <Button
               size="sm"
               asChild
-              className="bg-primary text-primary-foreground hover:bg-primary/80 hover:scale-105 transition-all"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all px-4"
             >
               <Link to="/pilot">Join the Pilot</Link>
             </Button>
-            <Button
-              size="sm"
-              asChild
-              className="bg-creator text-creator-foreground hover:bg-creator/80 hover:scale-105 transition-all"
-            >
-              <Link to="/creators">For Creators</Link>
-            </Button>
-            <Button
-              size="sm"
-              asChild
-              className="bg-sunset text-sunset-foreground hover:bg-sunset/80 hover:scale-105 transition-all"
-            >
-              <Link to="/partners">Partner With Us</Link>
-            </Button>
-            <Button
-              size="sm"
-              asChild
-              className="bg-navy text-navy-foreground hover:bg-navy/80 hover:scale-105 transition-all"
-            >
-              <Link to="/work-with-us">Work With Us</Link>
-            </Button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="gap-1 px-4"
+                >
+                  Get Involved
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem asChild>
+                  <Link 
+                    to="/creators" 
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <span className="w-2 h-2 rounded-full bg-creator" />
+                    For Creators
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link 
+                    to="/partners" 
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <span className="w-2 h-2 rounded-full bg-sunset" />
+                    Partner With Us
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link 
+                    to="/work-with-us" 
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <span className="w-2 h-2 rounded-full bg-navy" />
+                    Work With Us
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Mobile Menu Button */}
@@ -101,26 +128,39 @@ export function Navbar() {
                 >
                   <Link to="/pilot" onClick={() => setIsOpen(false)}>Join the Pilot</Link>
                 </Button>
+                <p className="text-xs text-muted-foreground pt-2 pb-1">Get Involved</p>
                 <Button
                   size="sm"
+                  variant="ghost"
                   asChild
-                  className="justify-start bg-creator text-creator-foreground"
+                  className="justify-start gap-2"
                 >
-                  <Link to="/creators" onClick={() => setIsOpen(false)}>For Creators</Link>
+                  <Link to="/creators" onClick={() => setIsOpen(false)}>
+                    <span className="w-2 h-2 rounded-full bg-creator" />
+                    For Creators
+                  </Link>
                 </Button>
                 <Button
                   size="sm"
+                  variant="ghost"
                   asChild
-                  className="justify-start bg-sunset text-sunset-foreground"
+                  className="justify-start gap-2"
                 >
-                  <Link to="/partners" onClick={() => setIsOpen(false)}>Partner With Us</Link>
+                  <Link to="/partners" onClick={() => setIsOpen(false)}>
+                    <span className="w-2 h-2 rounded-full bg-sunset" />
+                    Partner With Us
+                  </Link>
                 </Button>
                 <Button
                   size="sm"
+                  variant="ghost"
                   asChild
-                  className="justify-start bg-navy text-navy-foreground"
+                  className="justify-start gap-2"
                 >
-                  <Link to="/work-with-us" onClick={() => setIsOpen(false)}>Work With Us</Link>
+                  <Link to="/work-with-us" onClick={() => setIsOpen(false)}>
+                    <span className="w-2 h-2 rounded-full bg-navy" />
+                    Work With Us
+                  </Link>
                 </Button>
               </div>
             </div>
