@@ -6,6 +6,7 @@ import {
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { Quest } from '@/constants/quests';
+import QuestProgressionSection from './progression/QuestProgressionSection';
 
 interface QuestModalProps {
   quest: Quest | null;
@@ -77,11 +78,14 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
                   </p>
                 )}
               </section>
-            ))}
-          </div>
-        </ScrollArea>
-      </DialogContent>
-    </Dialog>
+              ))}
+
+              {/* Progression Section */}
+              <QuestProgressionSection treeId={quest.progressionTree} />
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
   );
 };
 
