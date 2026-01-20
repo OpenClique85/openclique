@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/accordion";
 import { PARTNERS_PAGE, FORM_URLS } from "@/constants/content";
 import { ArrowRight, Building2, Sparkles, Users, Check } from "lucide-react";
-import buggsSitting from "@/assets/buggs-sitting.png";
 import concertCrowd from "@/assets/austin/concert-crowd.jpg";
 import friendsLaughing from "@/assets/austin/friends-laughing.jpg";
 import zilkerPark from "@/assets/austin/zilker-park.jpg";
@@ -44,15 +43,8 @@ export default function Partners() {
           
           <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-3xl mx-auto">
-              {/* Header with BUGGS */}
+              {/* Header */}
               <div className="text-center mb-12">
-                <div className="flex justify-center mb-6">
-                  <img 
-                    src={buggsSitting} 
-                    alt="" 
-                    className="w-16 h-16 object-contain"
-                  />
-                </div>
                 <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">
                   {PARTNERS_PAGE.title}
                 </h1>
