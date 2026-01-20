@@ -1,4 +1,4 @@
-import { Calendar, DollarSign, Clock, Users } from 'lucide-react';
+import { Calendar, DollarSign, Clock, Users, Gift } from 'lucide-react';
 import type { Quest } from '@/constants/quests';
 
 interface QuestCardProps {
@@ -6,14 +6,19 @@ interface QuestCardProps {
   onClick: () => void;
 }
 
+const themeColorStyles: Record<Quest['themeColor'], string> = {
+  pink: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300',
+  green: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
+  amber: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+  purple: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
+};
+
 const QuestCard = ({ quest, onClick }: QuestCardProps) => {
   const statusStyles = quest.status === 'pilot' 
     ? 'bg-sunset/10 text-sunset border-sunset/20' 
     : 'bg-muted text-muted-foreground border-border';
 
-  const themeStyles = quest.themeColor === 'pink'
-    ? 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300'
-    : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300';
+  const themeStyles = themeColorStyles[quest.themeColor];
 
   return (
     <button
@@ -73,6 +78,12 @@ const QuestCard = ({ quest, onClick }: QuestCardProps) => {
         <p className="text-muted-foreground text-sm mb-3">
           {quest.shortDescription}
         </p>
+
+        {/* Rewards Preview */}
+        <div className="flex items-start gap-2 text-sm font-medium text-primary mb-3 bg-primary/5 rounded-lg p-2.5">
+          <Gift className="w-4 h-4 shrink-0 mt-0.5" />
+          <span>{quest.rewards}</span>
+        </div>
 
         {/* View Details Link */}
         <span className="text-primary font-medium text-sm inline-flex items-center gap-1">
