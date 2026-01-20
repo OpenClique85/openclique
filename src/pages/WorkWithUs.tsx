@@ -9,12 +9,17 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import runningGroup from "@/assets/austin/running-group.jpg";
+import coffeeShopFriends from "@/assets/austin/coffee-shop-friends.jpg";
+import rooftopGathering from "@/assets/austin/rooftop-gathering.jpg";
 
 const iconMap = {
   0: Compass,
   1: Users,
   2: Sparkles,
 };
+
+const roleImages = [runningGroup, coffeeShopFriends, rooftopGathering];
 
 export default function WorkWithUs() {
   const handleCTAClick = () => {
@@ -25,8 +30,19 @@ export default function WorkWithUs() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1">
-        <section className="py-16 md:py-24">
-          <div className="container mx-auto px-4">
+        <section className="py-16 md:py-24 relative overflow-hidden">
+          {/* Background image */}
+          <div 
+            className="absolute inset-0 opacity-10"
+            style={{
+              backgroundImage: `url(${runningGroup})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
+          
+          <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-3xl mx-auto">
               {/* Header */}
               <div className="text-center mb-12">
@@ -42,20 +58,32 @@ export default function WorkWithUs() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                 {WORK_WITH_US_PAGE.roles.map((role, index) => {
                   const Icon = iconMap[index as keyof typeof iconMap] || Sparkles;
+                  const bgImage = roleImages[index];
                   return (
                     <div
                       key={role.title}
-                      className="bg-card rounded-xl p-6 border border-border text-center"
+                      className="group bg-card rounded-xl p-6 border border-border text-center relative overflow-hidden hover:border-navy/50 hover:shadow-lg transition-all duration-300"
                     >
-                      <div className="w-12 h-12 rounded-lg bg-navy/10 flex items-center justify-center mx-auto mb-4">
-                        <Icon className="w-6 h-6 text-navy" />
+                      {/* Hover background image */}
+                      <div 
+                        className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500"
+                        style={{
+                          backgroundImage: `url(${bgImage})`,
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                        }}
+                      />
+                      <div className="relative z-10">
+                        <div className="w-12 h-12 rounded-lg bg-navy/10 flex items-center justify-center mx-auto mb-4 group-hover:bg-navy/20 transition-colors">
+                          <Icon className="w-6 h-6 text-navy" />
+                        </div>
+                        <h3 className="font-display text-lg font-semibold text-foreground mb-2">
+                          {role.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {role.description}
+                        </p>
                       </div>
-                      <h3 className="font-display text-lg font-semibold text-foreground mb-2">
-                        {role.title}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {role.description}
-                      </p>
                     </div>
                   );
                 })}

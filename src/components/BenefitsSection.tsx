@@ -37,7 +37,7 @@ export function BenefitsSection() {
             return (
               <div
                 key={benefit.title}
-                className="group relative bg-card rounded-xl overflow-hidden border border-border hover:border-primary/50 hover:shadow-lg transition-all duration-300"
+                className="group relative bg-card rounded-xl overflow-hidden border border-border hover:border-primary/50 hover:shadow-lg transition-all duration-300 flex flex-col"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 {/* Background image accent */}
@@ -50,7 +50,7 @@ export function BenefitsSection() {
                   }}
                 />
                 
-                <div className="relative z-10 p-6">
+                <div className="relative z-10 p-6 flex-grow">
                   <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
                     <Icon className="w-6 h-6 text-primary" />
                   </div>
@@ -62,8 +62,8 @@ export function BenefitsSection() {
                   </p>
                 </div>
 
-                {/* Bottom image strip */}
-                <div className="h-24 overflow-hidden">
+                {/* Bottom image strip - now aligned with mt-auto */}
+                <div className="h-24 overflow-hidden mt-auto">
                   <img 
                     src={backgroundImage}
                     alt=""

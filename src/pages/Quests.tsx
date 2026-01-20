@@ -4,7 +4,7 @@ import { Footer } from '@/components/Footer';
 import QuestCard from '@/components/QuestCard';
 import QuestModal from '@/components/QuestModal';
 import { QUESTS, QUESTS_PAGE, type Quest } from '@/constants/quests';
-import buggsIcon from '@/assets/buggs-icon.png';
+import buggsFace from '@/assets/buggs-face.png';
 import foodTruckScene from '@/assets/austin/food-truck-scene.jpg';
 
 const Quests = () => {
@@ -45,8 +45,11 @@ const Quests = () => {
         </section>
 
         {/* Quest Cards Grid */}
-        <section className="pb-16 md:pb-24 px-4">
-          <div className="max-w-4xl mx-auto">
+        <section className="pb-16 md:pb-24 px-4 relative">
+          {/* Subtle background gradient */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-muted/30 to-transparent pointer-events-none" />
+          
+          <div className="max-w-4xl mx-auto relative z-10">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               {QUESTS.map((quest) => (
                 <QuestCard
@@ -59,7 +62,7 @@ const Quests = () => {
             
             {/* BUGGS hint */}
             <div className="mt-12 flex items-center justify-center gap-3 text-muted-foreground">
-              <img src={buggsIcon} alt="" className="w-8 h-8 object-contain" />
+              <img src={buggsFace} alt="" className="w-8 h-8 object-contain" />
               <p className="text-sm">BUGGS guides every quest — you just show up!</p>
             </div>
           </div>
