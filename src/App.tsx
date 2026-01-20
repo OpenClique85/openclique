@@ -11,6 +11,7 @@ import Partners from "./pages/Partners";
 import WorkWithUs from "./pages/WorkWithUs";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import Quests from "./pages/Quests";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/work-with-us" element={<WorkWithUs />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
+          <Route path="/quests" element={<Quests />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
