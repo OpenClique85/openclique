@@ -40,7 +40,7 @@ export const QUESTS: Quest[] = [
     icon: '🎸',
     title: 'Mystery Concert — Ladies Night',
     image: mysteryConcertImg,
-    imageAlt: 'Crowd at a live concert with hands raised and colorful stage lights',
+    imageAlt: 'Group of women friends dressed up heading to a concert at night',
     status: 'pilot',
     statusLabel: 'Pilot - Limited Spots',
     theme: 'Ladies Night',
