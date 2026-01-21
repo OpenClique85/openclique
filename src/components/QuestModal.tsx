@@ -7,6 +7,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import type { Quest } from '@/constants/quests';
+import { QUEST_STATUS_CONFIG } from '@/constants/quests/types';
 import QuestProgressionSection from './progression/QuestProgressionSection';
 import { FORM_URLS } from '@/constants/content';
 
@@ -16,12 +17,35 @@ interface QuestModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
+const statusColorStyles: Record<string, string> = {
+  green: 'bg-emerald-100 text-emerald-700 border-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700',
+  yellow: 'bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700',
+  red: 'bg-red-100 text-red-700 border-red-300 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700',
+  gray: 'bg-gray-100 text-gray-500 border-gray-300 dark:bg-gray-800/50 dark:text-gray-400 dark:border-gray-600',
+  muted: 'bg-muted text-muted-foreground border-border',
+};
+
+const ctaColorStyles: Record<string, string> = {
+  green: 'bg-emerald-600 hover:bg-emerald-700 text-white',
+  yellow: 'bg-amber-500 hover:bg-amber-600 text-white',
+  red: 'bg-red-400 text-white cursor-not-allowed opacity-60',
+  gray: 'bg-gray-400 text-white cursor-not-allowed opacity-60',
+  muted: 'bg-primary hover:bg-primary/90 text-primary-foreground',
+};
+
 const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
   if (!quest) return null;
 
-  const statusStyles = quest.status === 'pilot'
-    ? 'bg-sunset/10 text-sunset border-sunset/20'
-    : 'bg-muted text-muted-foreground border-border';
+  const statusConfig = QUEST_STATUS_CONFIG[quest.status];
+  const statusLabel = quest.statusLabel || statusConfig.label;
+  const statusStyles = statusColorStyles[statusConfig.color];
+  const ctaStyles = ctaColorStyles[statusConfig.color];
+
+  const handleCTAClick = () => {
+    if (!statusConfig.ctaDisabled) {
+      window.open(FORM_URLS.pilot, '_blank');
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -36,7 +60,7 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
                 {quest.title}
               </DialogTitle>
               <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${statusStyles}`}>
-                {quest.statusLabel}
+                {statusLabel}
               </span>
             </div>
           </div>
@@ -85,21 +109,26 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
               {/* Progression Section */}
               <QuestProgressionSection treeId={quest.progressionTree} />
 
-              {/* CTA for Pilot Quests */}
-              {quest.status === 'pilot' && (
-                <div className="pt-4 border-t border-border">
-                  <Button
-                    size="lg"
-                    className="w-full"
-                    onClick={() => window.open(FORM_URLS.pilot, '_blank')}
-                  >
-                    Join This Quest — Apply Now
-                  </Button>
+              {/* CTA Section */}
+              <div className="pt-4 border-t border-border">
+                <Button
+                  size="lg"
+                  className={`w-full ${ctaStyles}`}
+                  onClick={handleCTAClick}
+                  disabled={statusConfig.ctaDisabled}
+                >
+                  {statusConfig.ctaText}
+                </Button>
+                {quest.status === 'open' || quest.status === 'limited' ? (
                   <p className="text-xs text-muted-foreground text-center mt-2">
-                    Limited spots available for the Austin pilot
+                    {quest.status === 'limited' ? 'Only a few spots remaining!' : 'Spots available for the Austin pilot'}
                   </p>
-                </div>
-              )}
+                ) : quest.status === 'coming-soon' ? (
+                  <p className="text-xs text-muted-foreground text-center mt-2">
+                    Sign up to be notified when this quest opens
+                  </p>
+                ) : null}
+              </div>
             </div>
           </ScrollArea>
         </DialogContent>

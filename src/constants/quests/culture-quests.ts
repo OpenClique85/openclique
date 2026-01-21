@@ -15,17 +15,17 @@ export const CULTURE_QUESTS: Quest[] = [
   {
     id: 'mystery-concert-ladies-night',
     icon: '🎸',
-    title: 'Mystery Concert — Ladies Night',
+    title: 'Mystery Concert: Ladies Night',
     image: mysteryConcertImg,
     imageAlt: 'Group of women friends dressed up heading to a concert at night',
-    status: 'pilot',
-    statusLabel: 'Pilot - Limited Spots',
+    status: 'limited',
+    statusLabel: 'Limited Spots',
     theme: 'Ladies Night',
     themeColor: 'pink',
     rewards: 'Free concert ticket + potential drink discounts',
     metadata: {
       date: 'Thu, Jan 22, 5:00 PM',
-      cost: 'Dinner on you, concert free',
+      cost: 'Dinner on you, concert sponsored',
       duration: '3 hours',
       squadSize: '5-6 people',
     },
@@ -36,9 +36,9 @@ export const CULTURE_QUESTS: Quest[] = [
         title: 'When & Where',
         type: 'timeline',
         content: [
-          '5:00 PM — Meet at Sapori Italian Roots (800 Brazos St)',
-          '6:45 PM — Group walk to concert venue (revealed during dinner)',
-          '7:00 PM — Mystery concert begins',
+          '5:00 PM: Meet at Sapori Italian Roots (800 Brazos St)',
+          '6:45 PM: Group walk to concert venue (revealed during dinner)',
+          '7:00 PM: Mystery concert begins',
         ],
       },
       {
@@ -49,7 +49,7 @@ export const CULTURE_QUESTS: Quest[] = [
       {
         title: 'How It Works',
         type: 'text',
-        content: "You'll be connected with your squad through BUGGS (Behavioral Utility for Group Guidance & Structure) — our friendly AI guide that keeps everyone in sync.",
+        content: "You'll be connected with your squad through BUGGS (Behavioral Utility for Group Guidance & Structure). Our friendly AI guide keeps everyone in sync.",
       },
       {
         title: 'BUGGS keeps the experience flowing by:',
@@ -70,7 +70,7 @@ export const CULTURE_QUESTS: Quest[] = [
         title: "What You'll Pay",
         type: 'list',
         content: [
-          'Concert: Free (covered by OpenClique)',
+          'Concert: Free (sponsored by OpenClique)',
           'Dinner & drinks: On you (order what you like)',
           'Some objectives may unlock free drinks or discounts (not guaranteed)',
         ],
@@ -81,7 +81,7 @@ export const CULTURE_QUESTS: Quest[] = [
         content: [
           'Stay with the group for the full experience',
           'Communicate in the group if plans change or you need accommodations',
-          'This is a learning pilot — honest feedback helps us improve',
+          'This is a learning pilot. Honest feedback helps us improve',
         ],
       },
       {
@@ -113,7 +113,6 @@ export const CULTURE_QUESTS: Quest[] = [
     image: classicFilmImg,
     imageAlt: 'Friends watching a classic black and white film in an art deco theater',
     status: 'coming-soon',
-    statusLabel: 'Coming Soon',
     theme: 'Film Lovers',
     themeColor: 'amber',
     rewards: 'Free finale screening + $20 Alamo gift card + film swag',
@@ -130,7 +129,7 @@ export const CULTURE_QUESTS: Quest[] = [
         title: 'When & Where',
         type: 'timeline',
         content: [
-          'Wednesdays, 7:00 PM at Alamo Drafthouse South Lamar',
+          'Wednesdays, 7:00 PM: Alamo Drafthouse South Lamar',
           '6-week series (exact dates TBD upon signup)',
           'Final week: Costume watch party at special venue',
         ],
@@ -138,7 +137,7 @@ export const CULTURE_QUESTS: Quest[] = [
       {
         title: 'The Journey',
         type: 'text',
-        content: 'Experience cinema history with a curated 6-film journey through Hollywood\'s golden age. Each week, your squad watches a classic together, then discusses over drinks. Week 6 is the grand finale — a costume party screening where you dress as your favorite classic film character.',
+        content: 'Experience cinema history with a curated 6-film journey through Hollywood\'s golden age. Each week, your squad watches a classic together, then discusses over drinks. Week 6 is the grand finale: a costume party screening where you dress as your favorite classic film character.',
       },
       {
         title: 'Film Series Preview',
@@ -209,11 +208,11 @@ export const CULTURE_QUESTS: Quest[] = [
   {
     id: 'sxsw-grad-insider',
     icon: '🎫',
-    title: 'SXSW Insider — Grad Student Edition',
+    title: 'SXSW Insider: Grad Student Edition',
     image: sxswCrowdImg,
     imageAlt: 'Graduate students at SXSW festival in downtown Austin with neon lights and badges',
     status: 'coming-soon',
-    statusLabel: 'Coming Soon - March 2025',
+    statusLabel: 'Coming Soon: March 2025',
     theme: 'UT Grad Students',
     themeColor: 'amber',
     rewards: 'UT exhibit VIP access + exclusive swag bundle + secret show invites',
@@ -223,7 +222,7 @@ export const CULTURE_QUESTS: Quest[] = [
       duration: '9 days of guided exploration',
       squadSize: '4-6 grad students',
     },
-    shortDescription: 'Navigate SXSW like a local. QR scavenger hunts, secret shows, and insider access — designed for UT grad students.',
+    shortDescription: 'Navigate SXSW like a local. QR scavenger hunts, secret shows, and insider access. Designed for UT grad students.',
     progressionTree: 'culture',
     sections: [
       {
@@ -240,7 +239,7 @@ export const CULTURE_QUESTS: Quest[] = [
       {
         title: 'The Journey',
         type: 'text',
-        content: "SXSW is overwhelming. 400+ panels, 2000+ artists, and activations on every corner. This quest gives UT grad students a curated path through the chaos — plus insider access most badge-holders never find. You'll hunt for hidden QR codes at brand activations, unlock secret shows, and earn exclusive swag for exploring.",
+        content: "SXSW is overwhelming. 400+ panels, 2000+ artists, and activations on every corner. This quest gives UT grad students a curated path through the chaos, plus insider access most badge-holders never find. You'll hunt for hidden QR codes at brand activations, unlock secret shows, and earn exclusive swag for exploring.",
       },
       {
         title: 'How the QR Scavenger Hunt Works',
@@ -343,7 +342,7 @@ export const CULTURE_QUESTS: Quest[] = [
     image: aclFestivalImg,
     imageAlt: 'Friends at Austin City Limits festival holding a colorful totem flag with Austin skyline at sunset',
     status: 'coming-soon',
-    statusLabel: 'Coming Soon - Fall 2025',
+    statusLabel: 'Coming Soon: Fall 2025',
     theme: 'Festival Crew',
     themeColor: 'green',
     rewards: 'Festival survival kit + $25 ACL merch credit + squad photo canvas',

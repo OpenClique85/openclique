@@ -7,6 +7,15 @@ import {
 import { FAQ as FAQContent } from "@/constants/content";
 import { Link } from "react-router-dom";
 
+interface FAQItem {
+  question: string;
+  answer: string;
+  link?: {
+    text: string;
+    href: string;
+  };
+}
+
 export function FAQ() {
   return (
     <section className="py-16 md:py-24">
@@ -22,7 +31,7 @@ export function FAQ() {
           </div>
 
           <Accordion type="single" collapsible className="w-full">
-            {FAQContent.map((item, index) => (
+            {(FAQContent as FAQItem[]).map((item, index) => (
               <AccordionItem key={index} value={`item-${index}`}>
                 <AccordionTrigger className="text-left font-display font-medium">
                   {item.question}

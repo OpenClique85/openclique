@@ -94,20 +94,42 @@ export default function Terms() {
                   </p>
                 </section>
 
-                <section>
+                <section id="safety">
                   <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
-                    Safety
+                    Safety & Trust
                   </h2>
-                  <p>
-                    While we design quests with safety in mind, {BRAND.name} is a platform that facilitates 
-                    real-world meetups. You are responsible for your own safety and should:
+                  <p className="mb-4">
+                    Safety is our top priority. While we design quests with safety in mind, {BRAND.name} facilitates 
+                    real-world meetups, and you are responsible for your own safety.
                   </p>
-                  <ul className="list-disc pl-6 space-y-2 mt-4">
-                    <li>Meet in public spaces</li>
-                    <li>Share your plans with someone you trust</li>
-                    <li>Trust your instincts — if something feels wrong, leave</li>
-                    <li>Report any concerning behavior to our team</li>
+                  <h3 className="font-display text-lg font-semibold text-foreground mt-6 mb-3">
+                    What We Do
+                  </h3>
+                  <ul className="list-disc pl-6 space-y-2">
+                    <li>All participants go through a verification process</li>
+                    <li>Quests happen in public spaces with clear meetup points</li>
+                    <li>BUGGS provides real-time coordination and check-ins</li>
+                    <li>Community Guidelines that everyone agrees to before joining</li>
+                    <li>Rating and feedback system after each quest</li>
+                    <li>Dedicated reporting channel for concerns</li>
                   </ul>
+                  <h3 className="font-display text-lg font-semibold text-foreground mt-6 mb-3">
+                    What You Should Do
+                  </h3>
+                  <ul className="list-disc pl-6 space-y-2">
+                    <li>Meet in public spaces for your first interactions</li>
+                    <li>Share your plans with someone you trust</li>
+                    <li>Trust your instincts. If something feels wrong, leave</li>
+                    <li>Keep your phone charged and accessible</li>
+                    <li>Report any concerning behavior immediately</li>
+                  </ul>
+                  <p className="mt-4">
+                    <strong>Reporting concerns:</strong> Email us at{' '}
+                    <a href="mailto:hello@openclique.com" className="text-primary hover:underline">
+                      hello@openclique.com
+                    </a>{' '}
+                    or use the in-app reporting feature. We review every report within 24 hours.
+                  </p>
                 </section>
 
                 <section>

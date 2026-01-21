@@ -17,7 +17,6 @@ export const CONNECTOR_QUESTS: Quest[] = [
     image: dndDadsImg,
     imageAlt: 'Group of dads laughing and playing tabletop games at a cozy tavern',
     status: 'coming-soon',
-    statusLabel: 'Coming Soon',
     theme: 'New Dads',
     themeColor: 'purple',
     rewards: 'Dad gear bundle + D&D starter set + $30 tavern credits',
@@ -34,7 +33,7 @@ export const CONNECTOR_QUESTS: Quest[] = [
         title: 'When & Where',
         type: 'timeline',
         content: [
-          'Saturdays, 2:00 PM at Emerald Tavern Games & Café',
+          'Saturdays, 2:00 PM: Emerald Tavern Games & Café',
           '8-week beginner campaign (dates confirmed upon signup)',
           'Private table reserved for your party',
         ],
@@ -42,7 +41,7 @@ export const CONNECTOR_QUESTS: Quest[] = [
       {
         title: 'The Journey',
         type: 'text',
-        content: "Being a new dad is an adventure — why not have another one? Join a party of fellow Austin dads for a beginner-friendly D&D campaign. No experience needed. We'll teach you to roll dice, build characters, and escape into a fantasy world while bonding with guys who get the sleep deprivation.",
+        content: "Being a new dad is an adventure. Why not have another one? Join a party of fellow Austin dads for a beginner-friendly D&D campaign. No experience needed. We'll teach you to roll dice, build characters, and escape into a fantasy world while bonding with guys who get the sleep deprivation.",
       },
       {
         title: 'Experience Flow',
@@ -128,7 +127,7 @@ export const CONNECTOR_QUESTS: Quest[] = [
     image: trailOfLightsImg,
     imageAlt: 'Friends walking through illuminated holiday light tunnel at Austin Trail of Lights',
     status: 'coming-soon',
-    statusLabel: 'Coming Soon - December 2025',
+    statusLabel: 'Coming Soon: December 2025',
     theme: 'Holiday Magic',
     themeColor: 'pink',
     rewards: 'Trail of Lights ticket + hot cocoa crawl + squad photo ornament',
@@ -145,17 +144,17 @@ export const CONNECTOR_QUESTS: Quest[] = [
         title: 'When & Where',
         type: 'timeline',
         content: [
-          '5:30 PM — Meet at Zilker Park entrance',
-          '6:00 PM — Trail walk begins (golden hour lighting!)',
-          '7:30 PM — Hot cocoa stop at Zilker Café',
-          '8:30 PM — Post-trail gathering at nearby venue',
-          '9:30 PM — Squad photo exchange + goodbyes',
+          '5:30 PM: Meet at Zilker Park entrance',
+          '6:00 PM: Trail walk begins (golden hour lighting!)',
+          '7:30 PM: Hot cocoa stop at Zilker Café',
+          '8:30 PM: Post-trail gathering at nearby venue',
+          '9:30 PM: Squad photo exchange + goodbyes',
         ],
       },
       {
         title: 'The Journey',
         type: 'text',
-        content: "The Trail of Lights is an Austin holiday tradition — but wandering alone through 2 million lights isn't the vibe. Join a squad of fellow holiday lovers for the full experience: walking the trail together, stopping for hot cocoa, completing photo challenges, and ending with a cozy post-trail hangout.",
+        content: "The Trail of Lights is an Austin holiday tradition. But wandering alone through 2 million lights isn't the vibe. Join a squad of fellow holiday lovers for the full experience: walking the trail together, stopping for hot cocoa, completing photo challenges, and ending with a cozy post-trail hangout.",
       },
       {
         title: 'Trail Experience',
