@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { 
   GraduationCap, 
   MapPin, 
@@ -6,7 +7,8 @@ import {
   Briefcase, 
   Heart,
   Building2,
-  ClipboardList
+  ClipboardList,
+  ArrowRight
 } from "lucide-react";
 
 const individualPersonas = [
@@ -109,9 +111,10 @@ export function WhoItsForSection() {
               {organizationPersonas.map((persona) => {
                 const Icon = persona.icon;
                 return (
-                  <div
+                  <Link
                     key={persona.label}
-                    className="group bg-card border border-border rounded-xl p-5 transition-all duration-200 hover:border-accent/30 hover:shadow-md hover:shadow-accent/5"
+                    to="/partners"
+                    className="group bg-card border border-border rounded-xl p-5 transition-all duration-200 hover:border-accent/30 hover:shadow-md hover:shadow-accent/5 hover:scale-[1.02] cursor-pointer"
                   >
                     <div className="flex items-start gap-4">
                       {/* Icon */}
@@ -120,18 +123,35 @@ export function WhoItsForSection() {
                       </div>
                       
                       {/* Text */}
-                      <div>
-                        <h3 className="font-display font-semibold text-foreground mb-0.5">
-                          {persona.label}
-                        </h3>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-display font-semibold text-foreground mb-0.5">
+                            {persona.label}
+                          </h3>
+                          <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:text-accent-foreground transition-all -translate-x-1 group-hover:translate-x-0" />
+                        </div>
                         <p className="text-sm text-muted-foreground leading-snug">
                           {persona.description}
                         </p>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
+            </div>
+            
+            {/* B2B Callout */}
+            <div className="text-center mt-6">
+              <Link 
+                to="/partners" 
+                className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-accent-foreground transition-colors group"
+              >
+                <span>Own a venue or brand?</span>
+                <span className="font-medium underline underline-offset-2 decoration-accent/50 group-hover:decoration-accent">
+                  See how we partner
+                </span>
+                <ArrowRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </Link>
             </div>
           </div>
         </div>
