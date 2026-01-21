@@ -4,6 +4,7 @@ import { CTASection } from "@/components/CTASection";
 import { HOW_IT_WORKS } from "@/constants/content";
 import { Check } from "lucide-react";
 import PathCarousel from "@/components/progression/PathCarousel";
+import { UserJourneySection } from "@/components/UserJourneySection";
 import buggsFront from "@/assets/buggs-front.png";
 import runningGroup from "@/assets/austin/running-group.jpg";
 
@@ -103,6 +104,9 @@ export default function HowItWorks() {
             </div>
           </div>
         </section>
+
+        {/* Your Progression - User Journey */}
+        <UserJourneySection />
 
         {/* Meet BUGGS - Centered layout */}
         <section className="py-16 md:py-24 bg-muted/50">

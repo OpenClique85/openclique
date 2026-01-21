@@ -14,8 +14,8 @@ const steps = [
   },
   {
     icon: Users,
-    title: "Show up & connect",
-    description: "Meet your squad. Make real friends.",
+    title: "Show up & earn",
+    description: "Complete quests. Unlock rewards.",
   },
 ];
 
