@@ -541,6 +541,7 @@ export const CREATORS_PAGE = {
 export const FOOTER = {
   copyright: `© ${new Date().getFullYear()} OpenClique. All rights reserved.`,
   links: [
+    { label: "For Businesses", href: "/partners" },
     { label: "Privacy", href: "/privacy" },
     { label: "Terms", href: "/terms" },
     { label: "Community Guidelines", href: "/terms#community-guidelines" },
