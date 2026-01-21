@@ -80,10 +80,16 @@ export function Hero() {
           </div>
 
           {/* Social proof message */}
-          <div className="mt-8 animate-fade-in [animation-delay:400ms]">
+          <div className="mt-8 animate-fade-in [animation-delay:400ms] flex flex-col items-center gap-2">
             <p className="text-sm text-muted-foreground">
               {SOCIAL_PROOF.message}
             </p>
+            <Link 
+              to="/quests" 
+              className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
+            >
+              See what adventures await →
+            </Link>
           </div>
         </div>
       </div>

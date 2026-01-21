@@ -23,10 +23,10 @@ export function BenefitsSection() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Why Quests Work
+            Built for Real Connection
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            No more awkward group chats that never lead anywhere. OpenClique handles the hard part so you can focus on showing up.
+            No more awkward group chats that never lead anywhere. We handle the hard part so you can focus on showing up.
           </p>
         </div>
 
