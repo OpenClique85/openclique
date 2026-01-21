@@ -1,28 +1,51 @@
+import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { PartnerCategoryModal } from "@/components/PartnerCategoryModal";
 import { PARTNERS_PAGE, FORM_URLS } from "@/constants/content";
-import { ArrowRight, Building2, Sparkles, Users, Check } from "lucide-react";
+import { 
+  ArrowRight, 
+  Beer, 
+  Gift, 
+  Building, 
+  Briefcase, 
+  Users, 
+  Rocket,
+  Clock,
+  Home,
+  LucideIcon
+} from "lucide-react";
 import concertCrowd from "@/assets/austin/concert-crowd.jpg";
-import friendsLaughing from "@/assets/austin/friends-laughing.jpg";
-import zilkerPark from "@/assets/austin/zilker-park.jpg";
 
-const iconMap = {
-  0: Building2,
-  1: Sparkles,
-  2: Users,
+// Icon mapping for categories
+const categoryIconMap: Record<string, LucideIcon> = {
+  Beer,
+  Gift,
+  Building,
+  Briefcase,
+  Users,
+  Rocket,
+};
+
+// Icon mapping for concepts
+const conceptIconMap: Record<string, LucideIcon> = {
+  Clock,
+  Home,
+  Gift,
 };
 
 export default function Partners() {
+  const [selectedCategory, setSelectedCategory] = useState<typeof PARTNERS_PAGE.categories[0] | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+
   const handleCTAClick = () => {
     window.open(FORM_URLS.partners, "_blank");
+  };
+
+  const handleCategoryClick = (category: typeof PARTNERS_PAGE.categories[0]) => {
+    setSelectedCategory(category);
+    setModalOpen(true);
   };
 
   return (
@@ -42,73 +65,101 @@ export default function Partners() {
           <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
           
           <div className="container mx-auto px-4 relative z-10">
-            <div className="max-w-3xl mx-auto">
+            <div className="max-w-4xl mx-auto">
               {/* Header */}
-              <div className="text-center mb-12">
+              <div className="text-center mb-8">
                 <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">
                   {PARTNERS_PAGE.title}
                 </h1>
-                <p className="text-lg text-muted-foreground">
+                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                   {PARTNERS_PAGE.subtitle}
                 </p>
               </div>
 
-              {/* Partner Types */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                {PARTNERS_PAGE.partnerTypes.map((type, index) => {
-                  const Icon = iconMap[index as keyof typeof iconMap] || Building2;
-                  return (
-                    <div
-                      key={type.title}
-                      className="group bg-card rounded-xl p-6 border border-border text-center relative overflow-hidden hover:border-sunset/50 hover:shadow-lg transition-all duration-300"
-                    >
-                      {/* Hover background image */}
-                      <div 
-                        className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500"
-                        style={{
-                          backgroundImage: `url(${friendsLaughing})`,
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center',
-                        }}
-                      />
-                      <div className="relative z-10">
-                        <div className="w-12 h-12 rounded-lg bg-sunset/10 flex items-center justify-center mx-auto mb-4 group-hover:bg-sunset/20 transition-colors">
-                          <Icon className="w-6 h-6 text-sunset" />
-                        </div>
-                        <h3 className="font-display text-lg font-semibold text-foreground mb-2">
-                          {type.title}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          {type.description}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
+              {/* Problem Hook */}
+              <div className="text-center mb-12">
+                <p className="text-base md:text-lg text-foreground/80 italic max-w-xl mx-auto">
+                  "{PARTNERS_PAGE.problemHook}"
+                </p>
               </div>
 
-              {/* Explainer */}
-              <div className="text-center mb-12">
-                <p className="text-lg text-muted-foreground italic">
-                  "{PARTNERS_PAGE.explainer}"
-                </p>
+              {/* Partner Categories Grid */}
+              <div className="mb-16">
+                <h2 className="font-display text-xl font-semibold text-foreground text-center mb-6">
+                  Who We Work With
+                </h2>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {PARTNERS_PAGE.categories.map((category) => {
+                    const Icon = categoryIconMap[category.icon] || Users;
+                    return (
+                      <button
+                        key={category.id}
+                        onClick={() => handleCategoryClick(category)}
+                        className="group bg-card rounded-xl p-5 border border-border text-left relative overflow-hidden hover:border-sunset/50 hover:shadow-lg transition-all duration-300 cursor-pointer"
+                      >
+                        <div className="relative z-10">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="w-10 h-10 rounded-lg bg-sunset/10 flex items-center justify-center group-hover:bg-sunset/20 transition-colors">
+                              <Icon className="w-5 h-5 text-sunset" />
+                            </div>
+                            <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </div>
+                          <h3 className="font-display text-base font-semibold text-foreground mb-1">
+                            {category.title}
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            {category.tagline}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Why It Works - Concept Cards */}
+              <div className="mb-16">
+                <h2 className="font-display text-xl font-semibold text-foreground text-center mb-6">
+                  Why It Works
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {PARTNERS_PAGE.concepts.map((concept) => {
+                    const Icon = conceptIconMap[concept.icon] || Clock;
+                    return (
+                      <div
+                        key={concept.title}
+                        className="bg-muted/30 rounded-xl p-5 border border-border/50"
+                      >
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
+                          <Icon className="w-5 h-5 text-primary" />
+                        </div>
+                        <h3 className="font-display font-semibold text-foreground mb-2">
+                          {concept.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {concept.description}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* How Partnering Works */}
               <div className="mb-16">
-                <h2 className="font-display text-2xl font-bold text-foreground text-center mb-8">
-                  How Partnering Works
+                <h2 className="font-display text-xl font-semibold text-foreground text-center mb-8">
+                  How It Works
                 </h2>
                 <div className="relative flex flex-col md:flex-row md:items-start md:justify-between gap-8 md:gap-4">
-                  {/* Connecting line for desktop - now orange */}
+                  {/* Connecting line for desktop */}
                   <div className="hidden md:block absolute top-6 left-[calc(16.67%+24px)] right-[calc(16.67%+24px)] h-0.5 bg-sunset/30" />
                   
-                  {PARTNERS_PAGE.partnerProcess.map((step, index) => (
+                  {PARTNERS_PAGE.partnerProcess.map((step) => (
                     <div
                       key={step.step}
                       className="flex md:flex-col items-start md:items-center md:text-center flex-1 gap-4 md:gap-3"
                     >
-                      {/* Step number - now orange */}
+                      {/* Step number */}
                       <div className="relative z-10 w-12 h-12 rounded-full bg-sunset text-sunset-foreground flex items-center justify-center font-display font-bold text-lg shrink-0">
                         {step.step}
                       </div>
@@ -122,72 +173,6 @@ export default function Partners() {
                       </div>
                     </div>
                   ))}
-                </div>
-              </div>
-
-              {/* Value Props with Tabs - with subtle background */}
-              <div className="mb-12 relative">
-                <div 
-                  className="absolute inset-0 -mx-4 rounded-2xl opacity-5"
-                  style={{
-                    backgroundImage: `url(${zilkerPark})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                  }}
-                />
-                <div className="relative z-10">
-                <Tabs defaultValue="venues" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 mb-6">
-                    <TabsTrigger value="venues">{PARTNERS_PAGE.venueValue.title}</TabsTrigger>
-                    <TabsTrigger value="brands">{PARTNERS_PAGE.brandValue.title}</TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="venues" className="space-y-6">
-                    <ul className="space-y-3">
-                      {PARTNERS_PAGE.venueValue.points.map((point, index) => (
-                        <li key={index} className="flex items-start gap-3">
-                          <Check className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                          <span className="text-foreground">{point}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <Accordion type="single" collapsible className="w-full">
-                      {PARTNERS_PAGE.venueFAQ.map((faq, index) => (
-                        <AccordionItem key={index} value={`venue-faq-${index}`}>
-                          <AccordionTrigger className="text-left">
-                            {faq.question}
-                          </AccordionTrigger>
-                          <AccordionContent className="text-muted-foreground">
-                            {faq.answer}
-                          </AccordionContent>
-                        </AccordionItem>
-                      ))}
-                    </Accordion>
-                  </TabsContent>
-                  
-                  <TabsContent value="brands" className="space-y-6">
-                    <ul className="space-y-3">
-                      {PARTNERS_PAGE.brandValue.points.map((point, index) => (
-                        <li key={index} className="flex items-start gap-3">
-                          <Check className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                          <span className="text-foreground">{point}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <Accordion type="single" collapsible className="w-full">
-                      {PARTNERS_PAGE.brandFAQ.map((faq, index) => (
-                        <AccordionItem key={index} value={`brand-faq-${index}`}>
-                          <AccordionTrigger className="text-left">
-                            {faq.question}
-                          </AccordionTrigger>
-                          <AccordionContent className="text-muted-foreground">
-                            {faq.answer}
-                          </AccordionContent>
-                        </AccordionItem>
-                      ))}
-                    </Accordion>
-                  </TabsContent>
-                </Tabs>
                 </div>
               </div>
 
@@ -210,6 +195,13 @@ export default function Partners() {
         </section>
       </main>
       <Footer />
+
+      {/* Category Modal */}
+      <PartnerCategoryModal
+        category={selectedCategory}
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+      />
     </div>
   );
 }

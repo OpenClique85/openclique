@@ -263,23 +263,142 @@ export const PILOT_PAGE = {
 };
 
 export const PARTNERS_PAGE = {
-  title: "Partner With OpenClique",
-  subtitle: "Join us in bringing people together. We're looking for brands, venues, and organizations who share our mission.",
-  explainer: "We bring small groups (3-6 people) to your venue or brand activation for curated, real-world experiences.",
-  partnerTypes: [
+  title: "Turn Foot Traffic Into Belonging",
+  subtitle: "Solve the cold start problem for your community. We help people show up, connect, and come back.",
+  problemHook: "People show up. But they don't connect. Third places are dying. We help you ritualize repeat visits.",
+  
+  // Partner categories with example quests
+  categories: [
     {
-      title: "Venue Partners",
-      description: "Host quests at your location and connect with engaged, adventurous customers.",
+      id: "venues",
+      title: "Venues",
+      icon: "Beer",
+      tagline: "Turn regulars into community",
+      exampleQuest: {
+        name: "Trivia Tuesday Regulars",
+        emoji: "🧠",
+        description: "4-week trivia league. Same squad, same table, same night. Strangers become regulars.",
+        reward: "Tab credit for season winners",
+        whyItWorks: "Repeat visits become ritual. Strangers become crew.",
+      },
+      valuePoints: [
+        "Groups of 3-6 show up ready to stay 60-90 minutes",
+        "Quest-chains drive repeat visits to your location",
+        "Real engagement, not just foot traffic",
+      ],
     },
     {
-      title: "Brand Sponsors",
-      description: "Sponsor quests and create memorable experiences that build authentic brand affinity.",
+      id: "brands",
+      title: "Brands",
+      icon: "Gift",
+      tagline: "Dwell time > impressions",
+      exampleQuest: {
+        name: "First 5K Crew",
+        emoji: "🏃",
+        description: "Sponsor a Couch-to-5K squad. 8 weeks of training, real friendships, your gear.",
+        reward: "Exclusive gear drop for finishers",
+        whyItWorks: "60-90 min of real engagement vs. 3-second scroll.",
+      },
+      valuePoints: [
+        "60-90 minutes of genuine brand engagement",
+        "Quest rewards work like influencer kits — for real users",
+        "User-generated content as quest completion steps",
+      ],
     },
     {
-      title: "Community Organizations",
-      description: "Partner with us to bring structured connection to your members or constituents.",
+      id: "apartments",
+      title: "Apartments & HOAs",
+      icon: "Building",
+      tagline: "Turn neighbors into friends",
+      exampleQuest: {
+        name: "Coffee Crawl Neighbors",
+        emoji: "☕",
+        description: "Residents explore 4 local cafes together. Build the hallway wave into real friendship.",
+        reward: "Gift card to the winning cafe",
+        whyItWorks: "Resident retention through belonging, not just amenities.",
+      },
+      valuePoints: [
+        "Boost resident retention through real community",
+        "Reduce turnover costs with social stickiness",
+        "Differentiate your property with unique programming",
+      ],
+    },
+    {
+      id: "corporate",
+      title: "Corporate Teams",
+      icon: "Briefcase",
+      tagline: "Bond before the first Monday",
+      exampleQuest: {
+        name: "New Hire Explorer Squad",
+        emoji: "🗺️",
+        description: "Onboarding cohort discovers the city together. Team bonds before the first standup.",
+        reward: "Team lunch on the company",
+        whyItWorks: "Remote-first teams need IRL rituals to stick.",
+      },
+      valuePoints: [
+        "Onboard remote employees with real connection",
+        "Build team culture across distributed offices",
+        "Reduce early attrition through belonging",
+      ],
+    },
+    {
+      id: "communities",
+      title: "Community Orgs",
+      icon: "Users",
+      tagline: "From members to friends",
+      exampleQuest: {
+        name: "Alumni Happy Hour Chain",
+        emoji: "🍻",
+        description: "Monthly rotating venue. Same crew shows up. Network becomes friendship.",
+        reward: "First round on the alumni association",
+        whyItWorks: "Membership means nothing without showing up.",
+      },
+      valuePoints: [
+        "Activate passive members into engaged participants",
+        "Create sticky rituals that drive renewals",
+        "Build real community, not just email lists",
+      ],
+    },
+    {
+      id: "founders",
+      title: "Creators & Founders",
+      icon: "Rocket",
+      tagline: "Test with real users",
+      exampleQuest: {
+        name: "Beta Tester Breakfast",
+        emoji: "🍳",
+        description: "Host 6 early adopters for feedback brunch. Real users, real insights, real conversation.",
+        reward: "Free product + founding member status",
+        whyItWorks: "Eager adventurers give honest feedback over good food.",
+      },
+      valuePoints: [
+        "Recruit engaged beta testers for your product",
+        "Get qualitative feedback in a structured setting",
+        "Build a founding community of early advocates",
+      ],
     },
   ],
+  
+  // Educational concept cards
+  concepts: [
+    {
+      title: "Dwell Time",
+      icon: "Clock",
+      description: "60-90 minutes of real engagement vs. 3-second scroll. Attention you can't buy.",
+    },
+    {
+      title: "Ritualized Third Places",
+      icon: "Home",
+      description: "Regular spots + regular crews = belonging. The coffee shop becomes their coffee shop.",
+    },
+    {
+      title: "Low-Stakes Activation",
+      icon: "Gift",
+      description: "Reward kits for real users, not just influencers. Authentic advocacy at scale.",
+    },
+  ],
+  
+  // Process steps (keeping similar structure)
   partnerProcess: [
     {
       step: 1,
@@ -297,36 +416,7 @@ export const PARTNERS_PAGE = {
       description: "A group of 3-6 people shows up ready to connect.",
     },
   ],
-  venueValue: {
-    title: "For Venues",
-    points: [
-      "New foot traffic from groups ready to engage",
-      "Repeat visits through quest-chains at your location",
-      "Optional rewards drive loyalty at low cost",
-      "User feedback and content from real customers",
-    ],
-  },
-  brandValue: {
-    title: "For Brands",
-    points: [
-      "60-90 minutes of dwell time with engaged customers",
-      "Quest rewards work like influencer kits — for real users",
-      "User-generated content as quest completion steps",
-      "Quest-chains build repeat engagement and loyalty",
-    ],
-  },
-  venueFAQ: [
-    {
-      question: "What do I need to provide?",
-      answer: "Just your space and hospitality. Optionally, offer a small reward (drink, discount, swag) to drive repeat visits. We handle the rest.",
-    },
-  ],
-  brandFAQ: [
-    {
-      question: "What does a brand quest look like?",
-      answer: "Think: Nike offering exclusive gear for a first 5K, or a local roaster sponsoring a coffee crawl. Users complete the quest, earn your reward, and share their experience.",
-    },
-  ],
+  
   ctaText: "Let's Talk",
   note: "You'll be redirected to our partnership inquiry form.",
 };
