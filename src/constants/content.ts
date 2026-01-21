@@ -544,23 +544,23 @@ export const WORK_WITH_US_PAGE = {
   subtitle: "Help people find belonging. Build your reputation. On your schedule.",
   roles: [
     {
-      title: "Quest Creators",
-      description: "Design experiences that bring strangers together. Build a reputation, get hired by brand partners.",
-    },
-    {
       title: "Community Hosts",
       description: "Be the friendly face that welcomes squads. Guide conversations, keep the energy warm.",
     },
     {
       title: "Contributors",
-      description: "Help us grow — design, code, content, marketing. Real startup experience, flexible hours.",
+      description: "Help us grow: design, code, content, marketing. Real startup experience, flexible hours.",
+    },
+    {
+      title: "Campus Ambassadors",
+      description: "Represent OpenClique at your university. Build community, gain leadership experience.",
     },
   ],
   whoWeLookFor: ["Collaborative", "Creative", "Communicates quickly", "Scrappy", "Community-Driven"],
   faq: [
     {
       question: "Is this paid?",
-      answer: "Most roles are volunteer-based. Quest creators can be hired directly by brand partners — you build your reputation, they pay for your expertise.",
+      answer: "Most roles are volunteer-based with priority for future full-time positions as we grow. Looking to create paid experiences? Check out our Quest Creator program on the Creators page.",
     },
     {
       question: "What skills will I gain?",
@@ -575,12 +575,13 @@ export const WORK_WITH_US_PAGE = {
       answer: "Totally flexible. Some folks help a few hours a month, others dive deeper. You set your pace.",
     },
     {
-      question: "What's the path to getting paid?",
-      answer: "Quest creators build a reputation like Airbnb hosts. As brands sponsor quests, they hire top creators directly. Priority for future full-time roles as we grow.",
+      question: "Want to design and lead quests?",
+      answer: "Check out our Quest Creator program on the Creators page. Build your reputation, get discovered by brands, and earn from your experiences.",
     },
   ],
   ctaText: "Join the Team",
   note: "No pressure. Apply in 2 minutes.",
+  creatorsLink: "/creators",
 };
 
 // =============================================================================
@@ -740,6 +741,58 @@ export const CREATORS_PAGE = {
   
   ctaText: "Become a Creator Partner",
   note: "Apply in 2 minutes. We'll reach out within 48 hours.",
+  
+  // Quest Creator Marketplace Section
+  questCreators: {
+    sectionTitle: "For Quest Creators",
+    subtitle: "The Airbnb of Local Experiences",
+    description: "You don't need a following. You just need great ideas. Build your reputation through incredible quests, and let brands discover you.",
+    hook: "The best quests make the community feel alive. Top creators get hired directly by brands to craft unique, niche experiences from a local perspective.",
+    pathSteps: [
+      {
+        step: 1,
+        title: "Lead Your First Quest",
+        description: "Start small. Host a coffee crawl, a park cleanup, or a sunset photo walk."
+      },
+      {
+        step: 2,
+        title: "Collect Reviews",
+        description: "Squad members rate their experience. Great hosts build great reputations."
+      },
+      {
+        step: 3,
+        title: "Build Your Portfolio",
+        description: "Your completed quests become your resume. Showcase what you do best."
+      },
+      {
+        step: 4,
+        title: "Get Discovered",
+        description: "High-rated creators get matched with brand sponsors looking for local activations."
+      },
+    ],
+    benefits: [
+      {
+        title: "Reviews & Ratings",
+        description: "Every squad member rates their experience. Build social proof.",
+        icon: "star",
+      },
+      {
+        title: "Quest Portfolio",
+        description: "Showcase completed experiences. Your track record is your resume.",
+        icon: "briefcase",
+      },
+      {
+        title: "Audience Tags",
+        description: "Get tagged for your niche: fitness, nightlife, food, art, wellness.",
+        icon: "tag",
+      },
+      {
+        title: "Brand Matching",
+        description: "Top performers get hired by sponsors for paid activations.",
+        icon: "handshake",
+      },
+    ],
+  },
 };
 
 // =============================================================================
