@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { 
   GraduationCap, 
@@ -8,56 +9,50 @@ import {
   Heart,
   Building2,
   ClipboardList,
-  ArrowRight
+  ArrowRight,
+  LucideIcon
 } from "lucide-react";
+import { WHO_ITS_FOR } from "@/constants/content";
+import { PersonaModal, type PersonaData } from "@/components/PersonaModal";
 
-const individualPersonas = [
-  {
-    icon: GraduationCap,
-    label: "Students",
-    description: "Finding your people beyond the lecture hall",
-  },
-  {
-    icon: MapPin,
-    label: "Newcomers",
-    description: "New to Austin, ready for real connections",
-  },
-  {
-    icon: Home,
-    label: "Remote Workers",
-    description: "Craving IRL when your office is your couch",
-  },
-  {
-    icon: Palette,
-    label: "Hobby Explorers",
-    description: "Meet people who share your niche interests",
-  },
-  {
-    icon: Briefcase,
-    label: "Coworkers",
-    description: "Bond with your team outside the Slack channel",
-  },
-  {
-    icon: Heart,
-    label: "Empty Nesters",
-    description: "Kids left. Time to build your next chapter",
-  },
-];
-
-const organizationPersonas = [
-  {
-    icon: Building2,
-    label: "Communities",
-    description: "Keep members engaged between meetups",
-  },
-  {
-    icon: ClipboardList,
-    label: "Clubs & Orgs",
-    description: "Structured rituals that reward commitment",
-  },
-];
+// Icon mapping for dynamic icon resolution
+const iconMap: Record<string, LucideIcon> = {
+  GraduationCap,
+  MapPin,
+  Home,
+  Palette,
+  Briefcase,
+  Heart,
+  Building2,
+  ClipboardList,
+};
 
 export function WhoItsForSection() {
+  const [selectedPersona, setSelectedPersona] = useState<PersonaData | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const handlePersonaClick = (persona: typeof WHO_ITS_FOR.individualPersonas[0]) => {
+    const Icon = iconMap[persona.icon];
+    if (Icon) {
+      setSelectedPersona({
+        ...persona,
+        icon: Icon,
+      });
+      setModalOpen(true);
+    }
+  };
+
+  const handleOrgPersonaClick = (persona: typeof WHO_ITS_FOR.organizationPersonas[0]) => {
+    const Icon = iconMap[persona.icon];
+    if (Icon) {
+      setSelectedPersona({
+        ...persona,
+        icon: Icon,
+      });
+      setModalOpen(true);
+    }
+  };
+
   return (
     <section className="py-16 md:py-20 bg-muted/50">
       <div className="container mx-auto px-4">
@@ -74,12 +69,14 @@ export function WhoItsForSection() {
 
           {/* Individual Personas Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-            {individualPersonas.map((persona) => {
-              const Icon = persona.icon;
+            {WHO_ITS_FOR.individualPersonas.map((persona) => {
+              const Icon = iconMap[persona.icon];
+              if (!Icon) return null;
               return (
-                <div
-                  key={persona.label}
-                  className="group bg-card border border-border rounded-xl p-5 transition-all duration-200 hover:border-primary/30 hover:shadow-md hover:shadow-primary/5"
+                <button
+                  key={persona.id}
+                  onClick={() => handlePersonaClick(persona)}
+                  className="group bg-card border border-border rounded-xl p-5 transition-all duration-200 hover:border-primary/30 hover:shadow-md hover:shadow-primary/5 text-left cursor-pointer"
                 >
                   <div className="flex items-start gap-4">
                     {/* Icon */}
@@ -88,16 +85,19 @@ export function WhoItsForSection() {
                     </div>
                     
                     {/* Text */}
-                    <div>
-                      <h3 className="font-display font-semibold text-foreground mb-0.5">
-                        {persona.label}
-                      </h3>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-display font-semibold text-foreground mb-0.5">
+                          {persona.label}
+                        </h3>
+                        <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:text-primary transition-all -translate-x-1 group-hover:translate-x-0" />
+                      </div>
                       <p className="text-sm text-muted-foreground leading-snug">
                         {persona.description}
                       </p>
                     </div>
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>
@@ -108,13 +108,14 @@ export function WhoItsForSection() {
               For Organizations
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl mx-auto">
-              {organizationPersonas.map((persona) => {
-                const Icon = persona.icon;
+              {WHO_ITS_FOR.organizationPersonas.map((persona) => {
+                const Icon = iconMap[persona.icon];
+                if (!Icon) return null;
                 return (
-                  <Link
-                    key={persona.label}
-                    to="/partners"
-                    className="group bg-card border border-border rounded-xl p-5 transition-all duration-200 hover:border-accent/30 hover:shadow-md hover:shadow-accent/5 hover:scale-[1.02] cursor-pointer"
+                  <button
+                    key={persona.id}
+                    onClick={() => handleOrgPersonaClick(persona)}
+                    className="group bg-card border border-border rounded-xl p-5 transition-all duration-200 hover:border-accent/30 hover:shadow-md hover:shadow-accent/5 hover:scale-[1.02] cursor-pointer text-left"
                   >
                     <div className="flex items-start gap-4">
                       {/* Icon */}
@@ -135,7 +136,7 @@ export function WhoItsForSection() {
                         </p>
                       </div>
                     </div>
-                  </Link>
+                  </button>
                 );
               })}
             </div>
@@ -156,6 +157,13 @@ export function WhoItsForSection() {
           </div>
         </div>
       </div>
+
+      {/* Persona Modal */}
+      <PersonaModal
+        persona={selectedPersona}
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+      />
     </section>
   );
 }

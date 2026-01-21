@@ -61,6 +61,129 @@ export const SOCIAL_LINKS = {
 };
 
 // =============================================================================
+// WHO'S OPENCLIQUE FOR - PERSONA DATA
+// =============================================================================
+
+export const WHO_ITS_FOR = {
+  individualPersonas: [
+    {
+      id: "students",
+      icon: "GraduationCap",
+      label: "Students",
+      description: "Finding your people beyond the lecture hall",
+      relatableHook: "Class friends disappear after finals. You want something that sticks.",
+      whatToExpect: [
+        "Squads that meet weekly, not just once",
+        "Activities beyond bars and parties",
+        "Built-in icebreakers (no awkward small talk)",
+        "Friends who actually text back",
+      ],
+      perfectIf: "you're tired of surface-level campus connections.",
+    },
+    {
+      id: "newcomers",
+      icon: "MapPin",
+      label: "Newcomers",
+      description: "New to Austin, ready for real connections",
+      relatableHook: "You moved here excited. Now you're eating dinner alone... again.",
+      whatToExpect: [
+        "Pre-formed groups so you're not showing up solo",
+        "Locals who know the hidden gems",
+        "A reason to explore beyond your apartment radius",
+        "Connections that feel organic, not forced",
+      ],
+      perfectIf: "you're new in town and tired of apps that don't deliver.",
+    },
+    {
+      id: "remote-workers",
+      icon: "Home",
+      label: "Remote Workers",
+      description: "Craving IRL when your office is your couch",
+      relatableHook: "Slack is great, but it doesn't grab a beer with you.",
+      whatToExpect: [
+        "Midday coffee breaks with other remote folks",
+        "Coworking buddy system",
+        "Happy hours that aren't networking events",
+        "IRL accountability partners",
+      ],
+      perfectIf: "your social life has become your calendar's afterthought.",
+    },
+    {
+      id: "hobby-explorers",
+      icon: "Palette",
+      label: "Hobby Explorers",
+      description: "Meet people who share your niche interests",
+      relatableHook: "Your niche interest? Other people have it too.",
+      whatToExpect: [
+        "Find your weird (board games, birding, vintage vinyl)",
+        "Small groups who actually show up",
+        "Skill-sharing without judgment",
+        "Turn solo hobbies into social ones",
+      ],
+      perfectIf: "you've been doing your thing alone and want company.",
+    },
+    {
+      id: "coworkers",
+      icon: "Briefcase",
+      label: "Coworkers",
+      description: "Bond with your team outside the Slack channel",
+      relatableHook: "Team building shouldn't feel like team building.",
+      whatToExpect: [
+        "Off-site activities that don't feel corporate",
+        "Bond over shared interests, not just deadlines",
+        "Optional, low-pressure participation",
+        "Actually get to know the people you Slack daily",
+      ],
+      perfectIf: "you want to know your teammates beyond their job titles.",
+    },
+    {
+      id: "empty-nesters",
+      icon: "Heart",
+      label: "Empty Nesters",
+      description: "Kids left. Time to build your next chapter",
+      relatableHook: "Kids left. Now what?",
+      whatToExpect: [
+        "Meet others in the same life chapter",
+        "Rediscover old hobbies or try new ones",
+        "Daytime activities (not just evening bar crawls)",
+        "Build your next friend group intentionally",
+      ],
+      perfectIf: "you're ready to invest in yourself again.",
+    },
+  ],
+  organizationPersonas: [
+    {
+      id: "communities",
+      icon: "Building2",
+      label: "Communities",
+      description: "Keep members engaged between meetups",
+      relatableHook: "Events get attendance. But not community.",
+      whatToExpect: [
+        "Turn one-time attendees into regulars",
+        "Gamified engagement between meetups",
+        "Member retention through shared progression",
+        "Analytics on who's actually connecting",
+      ],
+      perfectIf: "your members show up once and disappear.",
+    },
+    {
+      id: "clubs-orgs",
+      icon: "ClipboardList",
+      label: "Clubs & Orgs",
+      description: "Structured rituals that reward commitment",
+      relatableHook: "Membership is easy. Showing up consistently is hard.",
+      whatToExpect: [
+        "Quest-chains that reward commitment",
+        "Ritualized gatherings that stick",
+        "New member onboarding that actually integrates",
+        "Reduce churn with structured belonging",
+      ],
+      perfectIf: "you want members who engage, not just enroll.",
+    },
+  ],
+};
+
+// =============================================================================
 // HOMEPAGE CONTENT
 // =============================================================================
 
