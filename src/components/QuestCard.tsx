@@ -1,5 +1,6 @@
 import { Calendar, DollarSign, Clock, Users, Gift } from 'lucide-react';
 import type { Quest } from '@/constants/quests';
+import { QUEST_STATUS_CONFIG } from '@/constants/quests/types';
 
 interface QuestCardProps {
   quest: Quest;
@@ -13,11 +14,18 @@ const themeColorStyles: Record<Quest['themeColor'], string> = {
   purple: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
 };
 
-const QuestCard = ({ quest, onClick }: QuestCardProps) => {
-  const statusStyles = quest.status === 'pilot' 
-    ? 'bg-sunset/10 text-sunset border-sunset/20' 
-    : 'bg-muted text-muted-foreground border-border';
+const statusColorStyles: Record<string, string> = {
+  green: 'bg-emerald-100 text-emerald-700 border-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700',
+  yellow: 'bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700',
+  red: 'bg-red-100 text-red-700 border-red-300 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700',
+  gray: 'bg-gray-100 text-gray-500 border-gray-300 dark:bg-gray-800/50 dark:text-gray-400 dark:border-gray-600',
+  muted: 'bg-muted text-muted-foreground border-border',
+};
 
+const QuestCard = ({ quest, onClick }: QuestCardProps) => {
+  const statusConfig = QUEST_STATUS_CONFIG[quest.status];
+  const statusLabel = quest.statusLabel || statusConfig.label;
+  const statusStyles = statusColorStyles[statusConfig.color];
   const themeStyles = themeColorStyles[quest.themeColor];
 
   return (
@@ -35,7 +43,7 @@ const QuestCard = ({ quest, onClick }: QuestCardProps) => {
         />
         {/* Status Badge Overlay */}
         <span className={`absolute top-3 right-3 text-xs font-medium px-2.5 py-1 rounded-full border backdrop-blur-sm ${statusStyles}`}>
-          {quest.statusLabel}
+          {statusLabel}
         </span>
         {/* Theme Tag Overlay */}
         <span className={`absolute bottom-3 left-3 text-xs font-medium px-2.5 py-1 rounded-full backdrop-blur-sm ${themeStyles}`}>

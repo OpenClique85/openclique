@@ -47,8 +47,18 @@ export function UserJourneySection() {
           <div className="relative">
             {/* Desktop: Horizontal layout */}
             <div className="hidden md:block">
-              {/* Connector line */}
-              <div className="absolute top-8 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/20 via-primary/40 to-accent/40" />
+              {/* Connector line - now more prominent */}
+              <div className="absolute top-8 left-[10%] right-[10%] h-1 bg-gradient-to-r from-primary via-primary/80 to-accent rounded-full shadow-sm" />
+              
+              {/* Connector dots at each node */}
+              <div className="absolute top-8 left-[10%] right-[10%] flex justify-between">
+                {journeySteps.map((_, index) => (
+                  <div 
+                    key={index}
+                    className="w-3 h-3 -mt-1 rounded-full bg-primary border-2 border-background shadow-md"
+                  />
+                ))}
+              </div>
               
               <div className="grid grid-cols-5 gap-4">
                 {journeySteps.map((step, index) => {
@@ -59,12 +69,12 @@ export function UserJourneySection() {
                       className="relative flex flex-col items-center text-center"
                     >
                       {/* Icon node */}
-                      <div className="relative z-10 w-16 h-16 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 border-2 border-primary/20 flex items-center justify-center mb-4 shadow-sm">
+                      <div className="relative z-10 w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 border-3 border-primary/40 flex items-center justify-center mb-4 shadow-lg">
                         <Icon className="w-7 h-7 text-primary" />
                       </div>
                       
                       {/* Step number badge */}
-                      <span className="absolute top-0 right-1/2 translate-x-8 -translate-y-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">
+                      <span className="absolute top-0 right-1/2 translate-x-8 -translate-y-1 w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center shadow-md">
                         {index + 1}
                       </span>
                       
@@ -84,8 +94,8 @@ export function UserJourneySection() {
             {/* Mobile: Vertical layout */}
             <div className="md:hidden">
               <div className="relative">
-                {/* Vertical connector line */}
-                <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary/20 via-primary/40 to-accent/40" />
+                {/* Vertical connector line - now more prominent */}
+                <div className="absolute left-6 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-primary/80 to-accent rounded-full" />
                 
                 <div className="space-y-6">
                   {journeySteps.map((step, index) => {
@@ -96,12 +106,12 @@ export function UserJourneySection() {
                         className="relative flex items-start gap-4 pl-2"
                       >
                         {/* Icon node */}
-                        <div className="relative z-10 flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 border-2 border-primary/20 flex items-center justify-center shadow-sm">
+                        <div className="relative z-10 flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 border-2 border-primary/40 flex items-center justify-center shadow-lg">
                           <Icon className="w-5 h-5 text-primary" />
                         </div>
                         
                         {/* Step number badge */}
-                        <span className="absolute top-0 left-8 w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">
+                        <span className="absolute top-0 left-8 w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center shadow-md">
                           {index + 1}
                         </span>
                         

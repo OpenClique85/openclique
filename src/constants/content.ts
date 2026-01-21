@@ -204,7 +204,7 @@ export const VIDEO_SECTION = {
 
 export const BENEFITS = [
   {
-    title: "Small Squads",
+    title: "Small, Easy to Join Squads",
     description: "Groups of 3-6 people. Finish together, unlock rewards together.",
     icon: "users",
   },
@@ -214,7 +214,7 @@ export const BENEFITS = [
     icon: "compass",
   },
   {
-    title: "Less Planning, More Showing Up",
+    title: "Less Planning,\nMore Showing Up",
     description: "We handle the logistics. You just show up and enjoy the experience.",
     icon: "calendar",
   },
@@ -257,9 +257,9 @@ export const HOW_IT_WORKS = {
   ],
   
   buggs: {
-    title: "Meet BUGGS, Your Squad Guide",
-    subtitle: "Behavioral Utility for Group Guidance & Structure",
-    description: "BUGGS is your squad's guide — there when you need a nudge, never when you don't.",
+    title: "Meet BUGGS, Your AI Guide",
+    subtitle: "The rabbit pulling levers behind the curtain",
+    description: "BUGGS is your squad's guide: there when you need a nudge, never when you don't.",
     features: [
       "Conversation starters when things get quiet",
       "Gentle reminders so no one forgets the details",
@@ -348,11 +348,6 @@ export const FAQ = [
   {
     question: "How does matching work?",
     answer: "Our AI considers your interests, availability, location, and adventure preferences to match you with compatible squad members. We optimize for shared interests while also introducing you to people you might not otherwise meet.",
-  },
-  {
-    question: "Is it safe?",
-    answer: "Safety is our top priority. All participants go through a verification process, quests happen in public spaces, and we have Community Guidelines that everyone agrees to. You can also rate your experience and report any concerns.",
-    link: { text: "Read our Community Guidelines", href: "/terms#community-guidelines" },
   },
   {
     question: "What cities are you in?",
@@ -720,8 +715,8 @@ export const CREATORS_PAGE = {
   
   buggs: {
     title: "Your Secret Weapon: BUGGS",
-    subtitle: "Your quests run on autopilot",
-    description: "While you focus on creating content, BUGGS — our AI squad guide — handles the logistics. Conversation starters, gentle reminders, and backup plans so every squad has a great experience.",
+    subtitle: "The rabbit pulling levers behind the curtain",
+    description: "While you focus on creating content, BUGGS handles the logistics. Conversation starters, gentle reminders, and backup plans so every squad has a great experience.",
   },
   
   faq: [

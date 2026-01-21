@@ -6,7 +6,8 @@
  */
 
 // Types
-export type { Quest, QuestSection } from './types';
+export type { Quest, QuestSection, QuestStatus } from './types';
+export { QUEST_STATUS_CONFIG } from './types';
 
 // Page configuration
 export { QUESTS_PAGE } from './page-config';
