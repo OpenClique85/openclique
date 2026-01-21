@@ -37,21 +37,7 @@ export default function HowItWorks() {
           </div>
         </section>
 
-        {/* What's a Quest */}
-        <section className="py-16 md:py-24">
-          <div className="container mx-auto px-4">
-            <div className="max-w-3xl mx-auto">
-              <h2 className="font-display text-3xl font-bold text-foreground mb-6 text-center">
-                {HOW_IT_WORKS.whatIsQuest.title}
-              </h2>
-              <p className="text-lg text-muted-foreground text-center leading-relaxed">
-                {HOW_IT_WORKS.whatIsQuest.description}
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Steps */}
+        {/* Steps - The Journey */}
         <section className="py-16 md:py-24 bg-muted/50">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
@@ -64,7 +50,7 @@ export default function HowItWorks() {
                 <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-border hidden md:block" />
                 
                 <div className="space-y-8">
-                  {HOW_IT_WORKS.steps.map((step, index) => (
+                  {HOW_IT_WORKS.steps.map((step) => (
                     <div
                       key={step.number}
                       className="relative flex gap-6 items-start"
@@ -91,8 +77,35 @@ export default function HowItWorks() {
           </div>
         </section>
 
-        {/* Meet BUGGS - Centered layout */}
+        {/* Your Quest Journey - RPG Branching Trees */}
         <section className="py-16 md:py-24">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto">
+              <div className="text-center mb-12">
+                <h2 className="font-display text-3xl font-bold text-foreground mb-4">
+                  Your Quest Journey
+                </h2>
+                <p className="text-lg text-muted-foreground">
+                  Complete experiences with your squad. Choices you make together shape what opens next.
+                </p>
+              </div>
+
+              {/* Interactive Path Carousel with Branching Trees */}
+              <PathCarousel />
+
+              {/* Explanation footer */}
+              <div className="mt-8 text-center">
+                <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                  Each decision your squad makes opens different doors. 
+                  Come back together to discover your unique path.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Meet BUGGS - Centered layout */}
+        <section className="py-16 md:py-24 bg-muted/50">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto">
               <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-2xl p-8 md:p-12 border border-primary/10">
@@ -132,66 +145,6 @@ export default function HowItWorks() {
                     </ul>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Why It Works */}
-        <section className="py-16 md:py-24 bg-muted/50">
-          <div className="container mx-auto px-4">
-            <div className="max-w-3xl mx-auto text-center">
-              <h2 className="font-display text-3xl font-bold text-foreground mb-8">
-                {HOW_IT_WORKS.whyItWorks.title}
-              </h2>
-              <ul className="space-y-4 text-left max-w-xl mx-auto">
-                {HOW_IT_WORKS.whyItWorks.reasons.map((reason, index) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
-                      <svg
-                        className="w-3.5 h-3.5 text-primary"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <span className="text-muted-foreground">{reason}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        {/* Your Quest Journey - RPG Branching Trees */}
-        <section className="py-16 md:py-24">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto">
-              <div className="text-center mb-12">
-                <h2 className="font-display text-3xl font-bold text-foreground mb-4">
-                  Your Quest Journey
-                </h2>
-                <p className="text-lg text-muted-foreground">
-                  Complete experiences with your squad. Choices you make together shape what opens next.
-                </p>
-              </div>
-
-              {/* Interactive Path Carousel with Branching Trees */}
-              <PathCarousel />
-
-              {/* Explanation footer */}
-              <div className="mt-8 text-center">
-                <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                  Each decision your squad makes opens different doors. 
-                  Come back together to discover your unique path.
-                </p>
               </div>
             </div>
           </div>

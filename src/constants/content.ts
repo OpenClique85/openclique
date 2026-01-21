@@ -66,7 +66,7 @@ export const SOCIAL_LINKS = {
 
 export const HERO = {
   headline: "Build the village you've been missing — One Quest at a time.",
-  subheadline: "OpenClique brings people together in small, guided groups through real-world quests — curated activities that help turn shared interests into real friendships.",
+  subheadline: "Join a small squad. Complete a curated adventure. Make real friends.",
   primaryCta: "Join the Pilot",
   secondaryCta: "Partner With Us",
   tertiaryCta: "Work With Us",
@@ -86,8 +86,8 @@ export const BENEFITS = [
     icon: "users",
   },
   {
-    title: "Guided Quests",
-    description: "AI-assisted adventures designed to break the ice and create shared memories.",
+    title: "Curated Quests",
+    description: "Thoughtfully designed adventures that spark conversation and create shared memories.",
     icon: "compass",
   },
   {
@@ -99,7 +99,7 @@ export const BENEFITS = [
 
 export const SOCIAL_PROOF = {
   badge: "Now launching in Austin",
-  message: "Be among the first to experience connection, reimagined.",
+  message: "Now accepting applications for the Austin pilot.",
 };
 
 // =============================================================================
@@ -108,60 +108,40 @@ export const SOCIAL_PROOF = {
 
 export const HOW_IT_WORKS = {
   heroTitle: "How OpenClique Works",
-  heroSubtitle: "From sign-up to your first adventure in 5 simple steps.",
-  
-  whatIsQuest: {
-    title: "What's a Quest?",
-    description: "A quest is a curated, time-boxed adventure designed for small groups. Think: sunrise hike with strangers who become friends, a secret speakeasy crawl, or a collaborative art project. Each quest has a clear goal, a small group, and zero awkward planning.",
-  },
+  heroSubtitle: "From sign-up to your first adventure in 4 simple steps.",
   
   steps: [
     {
       number: 1,
-      title: "Opt In",
-      description: "Sign up and tell us a bit about yourself — your interests, availability, and adventure comfort level.",
+      title: "Sign Up",
+      description: "Tell us your interests, availability, and adventure comfort level.",
     },
     {
       number: 2,
       title: "Get Matched",
-      description: "Our AI matches you with a small squad (3-6 people) based on shared interests and schedules.",
+      description: "We pair you with a small squad (3-6 people) based on shared interests.",
     },
     {
       number: 3,
       title: "Receive Your Quest",
-      description: "Get a curated adventure delivered to your phone — complete with time, place, and what to expect.",
+      description: "A curated adventure lands in your inbox — time, place, and what to expect.",
     },
     {
       number: 4,
-      title: "Show Up & Connect",
-      description: "Meet your squad, complete the quest together, and make real connections in the real world.",
-    },
-    {
-      number: 5,
-      title: "Unlock More Adventures",
-      description: "Complete quests to unlock new adventures, meet new people, and level up your social life.",
+      title: "Show Up & Unlock",
+      description: "Complete the quest with your squad. Unlock the next adventure.",
     },
   ],
   
   buggs: {
     title: "Meet BUGGS, Your Squad Guide",
     subtitle: "Behavioral Utility for Group Guidance & Structure",
-    description: "Every squad has a secret weapon. BUGGS is our friendly rabbit guide — there when you need a nudge, never when you don't.",
+    description: "BUGGS is your squad's guide — there when you need a nudge, never when you don't.",
     features: [
       "Conversation starters when things get quiet",
       "Gentle reminders so no one forgets the details",
       "Suggestions when plans need a backup",
       "Always helpful, never awkward",
-    ],
-  },
-
-  whyItWorks: {
-    title: "Why It Works",
-    reasons: [
-      "Structure reduces the friction of 'what should we do?'",
-      "Shared purpose creates instant common ground",
-      "Small groups mean everyone participates",
-      "Low commitment makes it easy to say yes",
     ],
   },
 };

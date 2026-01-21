@@ -30,7 +30,7 @@ export function CTASection() {
             Ready for your first quest?
           </h2>
           <p className="text-background/70 text-lg mb-8 max-w-2xl mx-auto">
-            Join the Austin pilot and be among the first to experience connection, reimagined.
+            Join the Austin pilot. Your first quest is waiting.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button
