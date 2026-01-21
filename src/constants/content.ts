@@ -82,7 +82,7 @@ export const VIDEO_SECTION = {
 export const BENEFITS = [
   {
     title: "Small Squads",
-    description: "Groups of 3-6 people, perfectly sized for real conversation and connection.",
+    description: "Groups of 3-6 people. Finish together, unlock rewards together.",
     icon: "users",
   },
   {
@@ -129,7 +129,7 @@ export const HOW_IT_WORKS = {
     {
       number: 4,
       title: "Show Up & Unlock",
-      description: "Complete the quest with your squad. Unlock the next adventure.",
+      description: "Complete the quest. Earn rewards. Unlock what's next.",
     },
   ],
   
