@@ -9,7 +9,9 @@ import About from "./pages/About";
 import Pilot from "./pages/Pilot";
 import Partners from "./pages/Partners";
 import WorkWithUs from "./pages/WorkWithUs";
-import Creators from "./pages/Creators";
+import CreatorsHub from "./pages/CreatorsHub";
+import ContentCreatorsPage from "./pages/ContentCreatorsPage";
+import QuestCreatorsPage from "./pages/QuestCreatorsPage";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Quests from "./pages/Quests";
@@ -30,7 +32,9 @@ const App = () => (
           <Route path="/pilot" element={<Pilot />} />
           <Route path="/partners" element={<Partners />} />
           <Route path="/work-with-us" element={<WorkWithUs />} />
-          <Route path="/creators" element={<Creators />} />
+          <Route path="/creators" element={<CreatorsHub />} />
+          <Route path="/creators/content-creators" element={<ContentCreatorsPage />} />
+          <Route path="/creators/quest-creators" element={<QuestCreatorsPage />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/quests" element={<Quests />} />
