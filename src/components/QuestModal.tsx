@@ -12,8 +12,9 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import type { Quest } from '@/hooks/useQuests';
+import { useQuestRating } from '@/hooks/useQuestRatings';
 import QuestProgressionSection from './progression/QuestProgressionSection';
-import { MapPin, Calendar, DollarSign, Users, Gift } from 'lucide-react';
+import { MapPin, Calendar, DollarSign, Users, Gift, Star } from 'lucide-react';
 
 interface QuestModalProps {
   quest: Quest | null;
@@ -47,6 +48,9 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isJoining, setIsJoining] = useState(false);
+  
+  // Fetch rating for this quest
+  const { rating, reviewCount } = useQuestRating(quest?.id);
 
   if (!quest) return null;
 
@@ -136,7 +140,7 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
               <DialogTitle className="font-display text-2xl font-bold text-foreground mb-2">
                 {quest.title}
               </DialogTitle>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${statusStyles}`}>
                   {statusConfig.label}
                 </span>
@@ -144,6 +148,14 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
                   <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-primary/10 text-primary">
                     {quest.theme}
                   </span>
+                )}
+                {/* Star Rating */}
+                {reviewCount > 0 && rating !== null && (
+                  <div className="flex items-center gap-1 text-sm ml-1">
+                    <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                    <span className="font-medium text-foreground">{rating.toFixed(1)}</span>
+                    <span className="text-muted-foreground text-xs">({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})</span>
+                  </div>
                 )}
               </div>
             </div>
