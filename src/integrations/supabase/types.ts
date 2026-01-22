@@ -85,15 +85,115 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_invites: {
+        Row: {
+          application_id: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          redeemed_at: string | null
+          token: string
+        }
+        Insert: {
+          application_id?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by: string
+          redeemed_at?: string | null
+          token?: string
+        }
+        Update: {
+          application_id?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          redeemed_at?: string | null
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_invites_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "creator_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      creator_profiles: {
+        Row: {
+          bio: string | null
+          city: string | null
+          created_at: string
+          display_name: string
+          id: string
+          invited_at: string | null
+          onboarded_at: string | null
+          payout_placeholder: Json | null
+          photo_url: string | null
+          socials: Json | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bio?: string | null
+          city?: string | null
+          created_at?: string
+          display_name: string
+          id?: string
+          invited_at?: string | null
+          onboarded_at?: string | null
+          payout_placeholder?: Json | null
+          photo_url?: string | null
+          socials?: Json | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bio?: string | null
+          city?: string | null
+          created_at?: string
+          display_name?: string
+          id?: string
+          invited_at?: string | null
+          onboarded_at?: string | null
+          payout_placeholder?: Json | null
+          photo_url?: string | null
+          socials?: Json | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feedback: {
         Row: {
           belonging_delta: number | null
           best_part: string | null
           friction_point: string | null
           id: string
+          is_testimonial_approved: boolean | null
+          private_notes: string | null
           quest_id: string
           rating_1_5: number | null
           submitted_at: string
+          testimonial_text: string | null
           user_id: string
           would_do_again: boolean | null
         }
@@ -102,9 +202,12 @@ export type Database = {
           best_part?: string | null
           friction_point?: string | null
           id?: string
+          is_testimonial_approved?: boolean | null
+          private_notes?: string | null
           quest_id: string
           rating_1_5?: number | null
           submitted_at?: string
+          testimonial_text?: string | null
           user_id: string
           would_do_again?: boolean | null
         }
@@ -113,9 +216,12 @@ export type Database = {
           best_part?: string | null
           friction_point?: string | null
           id?: string
+          is_testimonial_approved?: boolean | null
+          private_notes?: string | null
           quest_id?: string
           rating_1_5?: number | null
           submitted_at?: string
+          testimonial_text?: string | null
           user_id?: string
           would_do_again?: boolean | null
         }
@@ -326,10 +432,12 @@ export type Database = {
       }
       quests: {
         Row: {
+          admin_notes: string | null
           briefing_html: string | null
           capacity_total: number | null
           cost_description: string | null
           created_at: string
+          creator_id: string | null
           creator_name: string | null
           creator_social_url: string | null
           creator_type: string | null
@@ -341,11 +449,15 @@ export type Database = {
           meeting_location_name: string | null
           objectives: string | null
           progression_tree: string | null
+          published_at: string | null
+          review_status: Database["public"]["Enums"]["review_status"] | null
+          revision_count: number | null
           rewards: string | null
           short_description: string | null
           slug: string
           start_datetime: string | null
           status: Database["public"]["Enums"]["quest_status"] | null
+          submitted_at: string | null
           success_criteria: string | null
           tags: string[] | null
           theme: string | null
@@ -355,10 +467,12 @@ export type Database = {
           whatsapp_invite_link: string | null
         }
         Insert: {
+          admin_notes?: string | null
           briefing_html?: string | null
           capacity_total?: number | null
           cost_description?: string | null
           created_at?: string
+          creator_id?: string | null
           creator_name?: string | null
           creator_social_url?: string | null
           creator_type?: string | null
@@ -370,11 +484,15 @@ export type Database = {
           meeting_location_name?: string | null
           objectives?: string | null
           progression_tree?: string | null
+          published_at?: string | null
+          review_status?: Database["public"]["Enums"]["review_status"] | null
+          revision_count?: number | null
           rewards?: string | null
           short_description?: string | null
           slug: string
           start_datetime?: string | null
           status?: Database["public"]["Enums"]["quest_status"] | null
+          submitted_at?: string | null
           success_criteria?: string | null
           tags?: string[] | null
           theme?: string | null
@@ -384,10 +502,12 @@ export type Database = {
           whatsapp_invite_link?: string | null
         }
         Update: {
+          admin_notes?: string | null
           briefing_html?: string | null
           capacity_total?: number | null
           cost_description?: string | null
           created_at?: string
+          creator_id?: string | null
           creator_name?: string | null
           creator_social_url?: string | null
           creator_type?: string | null
@@ -399,11 +519,15 @@ export type Database = {
           meeting_location_name?: string | null
           objectives?: string | null
           progression_tree?: string | null
+          published_at?: string | null
+          review_status?: Database["public"]["Enums"]["review_status"] | null
+          revision_count?: number | null
           rewards?: string | null
           short_description?: string | null
           slug?: string
           start_datetime?: string | null
           status?: Database["public"]["Enums"]["quest_status"] | null
+          submitted_at?: string | null
           success_criteria?: string | null
           tags?: string[] | null
           theme?: string | null
@@ -412,7 +536,15 @@ export type Database = {
           updated_at?: string
           whatsapp_invite_link?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "quests_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       referrals: {
         Row: {
