@@ -6,6 +6,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { ProfileModal } from '@/components/ProfileModal';
 import { CancelModal } from '@/components/CancelModal';
+import { MySquadsSection } from '@/components/squads/MySquadsSection';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -120,6 +121,9 @@ export default function MyQuests() {
             </Link>
           </Button>
         </div>
+        
+        {/* My Squads Section */}
+        {user && <MySquadsSection userId={user.id} />}
         
         {/* Upcoming Quests */}
         <section className="mb-12">

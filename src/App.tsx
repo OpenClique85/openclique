@@ -51,6 +51,7 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Quests from "./pages/Quests";
 import QuestDetail from "./pages/QuestDetail";
+import SquadDetail from "./pages/SquadDetail";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import MyQuests from "./pages/MyQuests";
@@ -87,6 +88,7 @@ const App = () => (
             {/* AUTH */}
             <Route path="/auth" element={<Auth />} />
             <Route path="/my-quests" element={<ProtectedRoute><MyQuests /></ProtectedRoute>} />
+            <Route path="/squads/:squadId" element={<ProtectedRoute><SquadDetail /></ProtectedRoute>} />
             <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute requireAdmin><Admin /></ProtectedRoute>} />
             <Route path="/feedback/:questId" element={<ProtectedRoute><Feedback /></ProtectedRoute>} />

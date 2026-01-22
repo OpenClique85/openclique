@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Star, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { ReenlistPrompt } from '@/components/squads/ReenlistPrompt';
 
 export default function Feedback() {
   const { questId } = useParams<{ questId: string }>();
@@ -23,6 +24,8 @@ export default function Feedback() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [alreadySubmitted, setAlreadySubmitted] = useState(false);
+  const [showReenlistPrompt, setShowReenlistPrompt] = useState(false);
+  const [reenlistAnswered, setReenlistAnswered] = useState(false);
   
   // Form state
   const [rating, setRating] = useState<number>(0);
@@ -104,6 +107,12 @@ export default function Feedback() {
     }
     
     setIsSubmitted(true);
+    setShowReenlistPrompt(true);
+  };
+
+  const handleReenlistResponse = (wantsReenlist: boolean) => {
+    setReenlistAnswered(true);
+    setShowReenlistPrompt(false);
   };
 
   if (isLoading) {
@@ -129,7 +138,7 @@ export default function Feedback() {
     );
   }
 
-  if (alreadySubmitted || isSubmitted) {
+  if (alreadySubmitted) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <Navbar />
@@ -137,19 +146,52 @@ export default function Feedback() {
           <Card className="text-center">
             <CardContent className="py-12">
               <CheckCircle2 className="h-16 w-16 text-primary mx-auto mb-4" />
-              <h1 className="text-2xl font-display font-bold mb-2">
-                {isSubmitted ? 'Thanks for your feedback!' : 'Already submitted'}
-              </h1>
+              <h1 className="text-2xl font-display font-bold mb-2">Already submitted</h1>
               <p className="text-muted-foreground mb-6">
-                {isSubmitted 
-                  ? 'Your feedback helps us create better experiences for everyone.'
-                  : 'You\'ve already submitted feedback for this quest.'}
+                You've already submitted feedback for this quest.
               </p>
               <Button asChild>
                 <Link to="/my-quests">Back to My Quests</Link>
               </Button>
             </CardContent>
           </Card>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (isSubmitted) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar />
+        <main className="flex-1 container mx-auto px-4 py-12 max-w-lg">
+          <Card className="text-center mb-6">
+            <CardContent className="py-12">
+              <CheckCircle2 className="h-16 w-16 text-primary mx-auto mb-4" />
+              <h1 className="text-2xl font-display font-bold mb-2">Thanks for your feedback!</h1>
+              <p className="text-muted-foreground">
+                Your feedback helps us create better experiences for everyone.
+              </p>
+            </CardContent>
+          </Card>
+          
+          {/* Re-enlist Prompt */}
+          {showReenlistPrompt && user && questId && !reenlistAnswered && (
+            <div className="mb-6">
+              <ReenlistPrompt 
+                questId={questId} 
+                userId={user.id} 
+                onResponse={handleReenlistResponse}
+              />
+            </div>
+          )}
+          
+          <div className="text-center">
+            <Button asChild>
+              <Link to="/my-quests">Back to My Quests</Link>
+            </Button>
+          </div>
         </main>
         <Footer />
       </div>

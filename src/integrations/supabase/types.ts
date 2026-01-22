@@ -242,30 +242,36 @@ export type Database = {
           id: string
           notes_private: string | null
           quest_id: string
+          reenlist_answered_at: string | null
           signed_up_at: string
           status: Database["public"]["Enums"]["signup_status"] | null
           updated_at: string
           user_id: string
+          wants_reenlist: boolean | null
         }
         Insert: {
           cancellation_reason?: string | null
           id?: string
           notes_private?: string | null
           quest_id: string
+          reenlist_answered_at?: string | null
           signed_up_at?: string
           status?: Database["public"]["Enums"]["signup_status"] | null
           updated_at?: string
           user_id: string
+          wants_reenlist?: boolean | null
         }
         Update: {
           cancellation_reason?: string | null
           id?: string
           notes_private?: string | null
           quest_id?: string
+          reenlist_answered_at?: string | null
           signed_up_at?: string
           status?: Database["public"]["Enums"]["signup_status"] | null
           updated_at?: string
           user_id?: string
+          wants_reenlist?: boolean | null
         }
         Relationships: [
           {
@@ -440,29 +446,77 @@ export type Database = {
           },
         ]
       }
+      squad_leader_votes: {
+        Row: {
+          created_at: string
+          id: string
+          squad_id: string
+          voted_for_id: string
+          voter_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          squad_id: string
+          voted_for_id: string
+          voter_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          squad_id?: string
+          voted_for_id?: string
+          voter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "squad_leader_votes_squad_id_fkey"
+            columns: ["squad_id"]
+            isOneToOne: false
+            referencedRelation: "squads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       squad_members: {
         Row: {
           added_at: string
           id: string
+          persistent_squad_id: string | null
+          role: string | null
           signup_id: string | null
           squad_id: string
+          status: string | null
           user_id: string
         }
         Insert: {
           added_at?: string
           id?: string
+          persistent_squad_id?: string | null
+          role?: string | null
           signup_id?: string | null
           squad_id: string
+          status?: string | null
           user_id: string
         }
         Update: {
           added_at?: string
           id?: string
+          persistent_squad_id?: string | null
+          role?: string | null
           signup_id?: string | null
           squad_id?: string
+          status?: string | null
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "squad_members_persistent_squad_id_fkey"
+            columns: ["persistent_squad_id"]
+            isOneToOne: false
+            referencedRelation: "squads"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "squad_members_signup_id_fkey"
             columns: ["signup_id"]
@@ -475,6 +529,115 @@ export type Database = {
             columns: ["squad_id"]
             isOneToOne: false
             referencedRelation: "quest_squads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      squad_quest_invites: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          proposed_by: string
+          quest_id: string
+          squad_id: string
+          status: string | null
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          proposed_by: string
+          quest_id: string
+          squad_id: string
+          status?: string | null
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          proposed_by?: string
+          quest_id?: string
+          squad_id?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "squad_quest_invites_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "squad_quest_invites_squad_id_fkey"
+            columns: ["squad_id"]
+            isOneToOne: false
+            referencedRelation: "squads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      squad_quest_rsvps: {
+        Row: {
+          id: string
+          invite_id: string
+          responded_at: string | null
+          response: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          invite_id: string
+          responded_at?: string | null
+          response?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          invite_id?: string
+          responded_at?: string | null
+          response?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "squad_quest_rsvps_invite_id_fkey"
+            columns: ["invite_id"]
+            isOneToOne: false
+            referencedRelation: "squad_quest_invites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      squads: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          origin_quest_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name?: string
+          origin_quest_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          origin_quest_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "squads_origin_quest_id_fkey"
+            columns: ["origin_quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
             referencedColumns: ["id"]
           },
         ]

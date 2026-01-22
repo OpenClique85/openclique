@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -11,6 +10,7 @@ import { SignupsManager } from '@/components/admin/SignupsManager';
 import { MessagingCenter } from '@/components/admin/MessagingCenter';
 import { WhatsAppManager } from '@/components/admin/WhatsAppManager';
 import { Analytics } from '@/components/admin/Analytics';
+import { PersistentSquadsManager } from '@/components/admin/PersistentSquadsManager';
 
 export default function Admin() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
@@ -48,9 +48,10 @@ export default function Admin() {
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:inline-grid">
             <TabsTrigger value="quests">Quests</TabsTrigger>
             <TabsTrigger value="signups">Signups</TabsTrigger>
+            <TabsTrigger value="squads">Squads</TabsTrigger>
             <TabsTrigger value="messaging">Messaging</TabsTrigger>
             <TabsTrigger value="whatsapp">WhatsApp</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
@@ -62,6 +63,10 @@ export default function Admin() {
           
           <TabsContent value="signups">
             <SignupsManager />
+          </TabsContent>
+          
+          <TabsContent value="squads">
+            <PersistentSquadsManager />
           </TabsContent>
           
           <TabsContent value="messaging">
