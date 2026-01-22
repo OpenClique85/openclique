@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, MapPin, Star, Briefcase, Tag, Sparkles, Users, Calendar, Clock, Quote, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowRight, MapPin, Star, Briefcase, Tag, Sparkles, Users, Calendar, Clock, Quote, ChevronDown, ChevronUp, ChevronLeft, Check } from "lucide-react";
 import { FORM_URLS } from "@/constants/content";
+import buggsFace from "@/assets/buggs-face.png";
 import {
   Accordion,
   AccordionContent,
@@ -219,10 +221,18 @@ export default function QuestCreatorsPage() {
           
           <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-3xl mx-auto text-center">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-sunset/10 rounded-full mb-6">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-sunset/10 rounded-full mb-4">
                 <MapPin className="w-4 h-4 text-sunset" />
                 <span className="text-sm font-medium text-sunset">Quest Creators</span>
               </div>
+              
+              <Link 
+                to="/creators" 
+                className="flex items-center justify-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                Back to Creator Hub
+              </Link>
               
               <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6">
                 Turn Your Local Knowledge Into a Side Hustle
@@ -315,7 +325,7 @@ export default function QuestCreatorsPage() {
                 Example Quests
               </h2>
               <p className="text-muted-foreground text-center mb-10">
-                <span className="text-sunset">Tap any card</span> to see the details
+                <span className="text-sunset">Click any card</span> to see the details
               </p>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -386,6 +396,47 @@ export default function QuestCreatorsPage() {
                     </div>
                   );
                 })}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* BUGGS Callout */}
+        <section className="py-16 bg-muted/30">
+          <div className="container mx-auto px-4">
+            <div className="max-w-2xl mx-auto">
+              <div className="bg-card rounded-2xl p-8 border border-border shadow-lg text-center">
+                <div className="w-20 h-20 mx-auto mb-6 bg-white rounded-full p-2 shadow-sm border border-border/50">
+                  <img 
+                    src={buggsFace} 
+                    alt="BUGGS mascot" 
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                
+                <h3 className="font-display text-2xl font-bold text-foreground mb-2">
+                  Meet BUGGS, Your AI Guide
+                </h3>
+                <p className="text-sunset font-medium mb-4">
+                  Behavioral Utility for Group Guidance & Structure
+                </p>
+                <p className="text-muted-foreground max-w-lg mx-auto mb-6">
+                  BUGGS helps you design better quests, suggests optimal timing, and connects you with the right audience.
+                </p>
+                <ul className="space-y-3 inline-block text-left">
+                  {[
+                    "Quest templates to get started fast",
+                    "Audience matching for your niche",
+                    "Smart scheduling suggestions"
+                  ].map((feature, index) => (
+                    <li key={index} className="flex items-center gap-3">
+                      <div className="flex-shrink-0 w-5 h-5 rounded-full bg-sunset/20 flex items-center justify-center">
+                        <Check className="w-3 h-3 text-sunset" />
+                      </div>
+                      <span className="text-sm text-muted-foreground">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
           </div>
