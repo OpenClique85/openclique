@@ -14,16 +14,258 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      comms_log: {
+        Row: {
+          id: string
+          provider_message_id: string | null
+          quest_id: string | null
+          sent_at: string
+          subject: string | null
+          type: Database["public"]["Enums"]["comms_type"]
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          provider_message_id?: string | null
+          quest_id?: string | null
+          sent_at?: string
+          subject?: string | null
+          type: Database["public"]["Enums"]["comms_type"]
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          provider_message_id?: string | null
+          quest_id?: string | null
+          sent_at?: string
+          subject?: string | null
+          type?: Database["public"]["Enums"]["comms_type"]
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comms_log_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback: {
+        Row: {
+          belonging_delta: number | null
+          best_part: string | null
+          friction_point: string | null
+          id: string
+          quest_id: string
+          rating_1_5: number | null
+          submitted_at: string
+          user_id: string
+          would_do_again: boolean | null
+        }
+        Insert: {
+          belonging_delta?: number | null
+          best_part?: string | null
+          friction_point?: string | null
+          id?: string
+          quest_id: string
+          rating_1_5?: number | null
+          submitted_at?: string
+          user_id: string
+          would_do_again?: boolean | null
+        }
+        Update: {
+          belonging_delta?: number | null
+          best_part?: string | null
+          friction_point?: string | null
+          id?: string
+          quest_id?: string
+          rating_1_5?: number | null
+          submitted_at?: string
+          user_id?: string
+          would_do_again?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          consent_given_at: string | null
+          created_at: string
+          display_name: string
+          email: string | null
+          id: string
+          preferences: Json | null
+          updated_at: string
+        }
+        Insert: {
+          consent_given_at?: string | null
+          created_at?: string
+          display_name: string
+          email?: string | null
+          id: string
+          preferences?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          consent_given_at?: string | null
+          created_at?: string
+          display_name?: string
+          email?: string | null
+          id?: string
+          preferences?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      quest_signups: {
+        Row: {
+          cancellation_reason: string | null
+          id: string
+          notes_private: string | null
+          quest_id: string
+          signed_up_at: string
+          status: Database["public"]["Enums"]["signup_status"] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cancellation_reason?: string | null
+          id?: string
+          notes_private?: string | null
+          quest_id: string
+          signed_up_at?: string
+          status?: Database["public"]["Enums"]["signup_status"] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cancellation_reason?: string | null
+          id?: string
+          notes_private?: string | null
+          quest_id?: string
+          signed_up_at?: string
+          status?: Database["public"]["Enums"]["signup_status"] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_signups_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quests: {
+        Row: {
+          briefing_html: string | null
+          capacity_total: number | null
+          created_at: string
+          icon: string | null
+          id: string
+          meeting_address: string | null
+          meeting_location_name: string | null
+          slug: string
+          start_datetime: string | null
+          status: Database["public"]["Enums"]["quest_status"] | null
+          title: string
+          updated_at: string
+          whatsapp_invite_link: string | null
+        }
+        Insert: {
+          briefing_html?: string | null
+          capacity_total?: number | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          meeting_address?: string | null
+          meeting_location_name?: string | null
+          slug: string
+          start_datetime?: string | null
+          status?: Database["public"]["Enums"]["quest_status"] | null
+          title: string
+          updated_at?: string
+          whatsapp_invite_link?: string | null
+        }
+        Update: {
+          briefing_html?: string | null
+          capacity_total?: number | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          meeting_address?: string | null
+          meeting_location_name?: string | null
+          slug?: string
+          start_datetime?: string | null
+          status?: Database["public"]["Enums"]["quest_status"] | null
+          title?: string
+          updated_at?: string
+          whatsapp_invite_link?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
+      comms_type:
+        | "email_invite"
+        | "email_confirm"
+        | "email_reminder"
+        | "email_followup"
+        | "email_whatsapp"
+      quest_status: "draft" | "open" | "closed" | "completed" | "cancelled"
+      signup_status:
+        | "pending"
+        | "confirmed"
+        | "standby"
+        | "dropped"
+        | "no_show"
+        | "completed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +392,24 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+      comms_type: [
+        "email_invite",
+        "email_confirm",
+        "email_reminder",
+        "email_followup",
+        "email_whatsapp",
+      ],
+      quest_status: ["draft", "open", "closed", "completed", "cancelled"],
+      signup_status: [
+        "pending",
+        "confirmed",
+        "standby",
+        "dropped",
+        "no_show",
+        "completed",
+      ],
+    },
   },
 } as const
