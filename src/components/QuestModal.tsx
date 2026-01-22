@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
   DialogContent,
@@ -6,10 +8,12 @@ import {
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import type { Quest } from '@/constants/quests';
 import { QUEST_STATUS_CONFIG } from '@/constants/quests/types';
 import QuestProgressionSection from './progression/QuestProgressionSection';
-import { FORM_URLS } from '@/constants/content';
 
 interface QuestModalProps {
   quest: Quest | null;
@@ -34,6 +38,11 @@ const ctaColorStyles: Record<string, string> = {
 };
 
 const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const [isJoining, setIsJoining] = useState(false);
+
   if (!quest) return null;
 
   const statusConfig = QUEST_STATUS_CONFIG[quest.status];
@@ -41,9 +50,61 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
   const statusStyles = statusColorStyles[statusConfig.color];
   const ctaStyles = ctaColorStyles[statusConfig.color];
 
-  const handleCTAClick = () => {
-    if (!statusConfig.ctaDisabled) {
-      window.open(FORM_URLS.pilot, '_blank');
+  const handleCTAClick = async () => {
+    if (statusConfig.ctaDisabled) return;
+
+    // If not logged in, redirect to auth
+    if (!user) {
+      onOpenChange(false);
+      navigate('/auth', { state: { from: `/quests`, questId: quest.id } });
+      return;
+    }
+
+    // Join the quest
+    setIsJoining(true);
+    try {
+      // First check if already signed up
+      const { data: existing } = await supabase
+        .from('quest_signups')
+        .select('id, status')
+        .eq('user_id', user.id)
+        .eq('quest_id', quest.id)
+        .maybeSingle();
+
+      if (existing) {
+        toast({
+          title: "Already signed up!",
+          description: `You're ${existing.status} for this quest.`,
+        });
+        onOpenChange(false);
+        navigate('/my-quests');
+        return;
+      }
+
+      // Create signup
+      const { error } = await supabase.from('quest_signups').insert({
+        user_id: user.id,
+        quest_id: quest.id,
+        status: 'pending',
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Quest joined!",
+        description: "You've been added to the waitlist. We'll notify you when you're confirmed.",
+      });
+      onOpenChange(false);
+      navigate('/my-quests');
+    } catch (error: any) {
+      console.error('Error joining quest:', error);
+      toast({
+        variant: "destructive",
+        title: "Failed to join quest",
+        description: error.message || "Please try again.",
+      });
+    } finally {
+      setIsJoining(false);
     }
   };
 
@@ -115,9 +176,9 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
                   size="lg"
                   className={`w-full ${ctaStyles}`}
                   onClick={handleCTAClick}
-                  disabled={statusConfig.ctaDisabled}
+                  disabled={statusConfig.ctaDisabled || isJoining}
                 >
-                  {statusConfig.ctaText}
+                  {isJoining ? 'Joining...' : user ? statusConfig.ctaText : 'Sign in to Join'}
                 </Button>
                 {quest.status === 'open' || quest.status === 'limited' ? (
                   <p className="text-xs text-muted-foreground text-center mt-2">
