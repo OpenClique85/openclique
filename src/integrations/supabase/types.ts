@@ -743,7 +743,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "quest_creator"
       comms_type:
         | "email_invite"
         | "email_confirm"
@@ -758,7 +758,18 @@ export type Database = {
         | "quest_reminder"
         | "general"
         | "feedback_request"
+        | "quest_submitted"
+        | "quest_approved"
+        | "quest_changes_requested"
+        | "quest_rejected"
+        | "creator_invite"
       quest_status: "draft" | "open" | "closed" | "completed" | "cancelled"
+      review_status:
+        | "draft"
+        | "pending_review"
+        | "needs_changes"
+        | "approved"
+        | "rejected"
       signup_status:
         | "pending"
         | "confirmed"
@@ -894,7 +905,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "quest_creator"],
       comms_type: [
         "email_invite",
         "email_confirm",
@@ -910,8 +921,20 @@ export const Constants = {
         "quest_reminder",
         "general",
         "feedback_request",
+        "quest_submitted",
+        "quest_approved",
+        "quest_changes_requested",
+        "quest_rejected",
+        "creator_invite",
       ],
       quest_status: ["draft", "open", "closed", "completed", "cancelled"],
+      review_status: [
+        "draft",
+        "pending_review",
+        "needs_changes",
+        "approved",
+        "rejected",
+      ],
       signup_status: [
         "pending",
         "confirmed",
