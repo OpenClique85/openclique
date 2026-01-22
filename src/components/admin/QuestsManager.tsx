@@ -35,7 +35,9 @@ import {
   FileText,
   Settings,
   Share2,
-  ExternalLink
+  ExternalLink,
+  Bell,
+  Send
 } from 'lucide-react';
 import { format, differenceInDays, differenceInWeeks } from 'date-fns';
 import type { Tables, Enums } from '@/integrations/supabase/types';
@@ -137,6 +139,13 @@ export function QuestsManager() {
   const [editingQuest, setEditingQuest] = useState<Quest | null>(null);
   const [formData, setFormData] = useState<FormData>(defaultFormData);
   const [activeTab, setActiveTab] = useState('basics');
+  
+  // Notify users modal state
+  const [showNotifyModal, setShowNotifyModal] = useState(false);
+  const [notifyQuest, setNotifyQuest] = useState<Quest | null>(null);
+  const [notifyMessage, setNotifyMessage] = useState('');
+  const [isSendingNotifications, setIsSendingNotifications] = useState(false);
+  const [matchingUsersCount, setMatchingUsersCount] = useState<number | null>(null);
 
   const fetchQuests = async () => {
     setIsLoading(true);
@@ -396,6 +405,72 @@ export function QuestsManager() {
     return `${window.location.origin}/quests/${quest.slug}`;
   };
 
+  // Open notify modal and fetch matching users count
+  const handleOpenNotifyModal = async (quest: Quest) => {
+    setNotifyQuest(quest);
+    setNotifyMessage(`We think you'd love "${quest.title}" based on your interests.`);
+    setShowNotifyModal(true);
+    setMatchingUsersCount(null);
+    
+    // Fetch count of users with matching interests
+    try {
+      const { data: profiles, error } = await supabase
+        .from('profiles')
+        .select('id, preferences');
+      
+      if (error) throw error;
+      
+      const tree = quest.progression_tree?.toLowerCase();
+      const matchingCount = (profiles || []).filter((p: any) => {
+        if (!tree) return true;
+        const interests = p.preferences?.interest_tags || [];
+        return interests.some((tag: string) => 
+          tag.toLowerCase().includes(tree) || tree.includes(tag.toLowerCase())
+        );
+      }).length;
+      
+      setMatchingUsersCount(matchingCount);
+    } catch (err) {
+      console.error('Error fetching matching users:', err);
+      setMatchingUsersCount(0);
+    }
+  };
+
+  // Send notifications to matching users
+  const handleSendNotifications = async () => {
+    if (!notifyQuest) return;
+    
+    setIsSendingNotifications(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('notify-users', {
+        body: {
+          type: 'quest_recommendation',
+          quest_id: notifyQuest.id,
+          custom_message: notifyMessage,
+        },
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: 'Notifications sent!',
+        description: `Notified ${data.notified_count} users, sent ${data.emails_sent} emails.`,
+      });
+      
+      setShowNotifyModal(false);
+    } catch (err: any) {
+      console.error('Error sending notifications:', err);
+      toast({
+        variant: 'destructive',
+        title: 'Failed to send notifications',
+        description: err.message || 'Please try again.',
+      });
+    } finally {
+      setIsSendingNotifications(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
@@ -464,6 +539,14 @@ export function QuestsManager() {
                       }}
                     >
                       <ExternalLink className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => handleOpenNotifyModal(quest)}
+                      title="Notify matching users"
+                    >
+                      <Bell className="h-4 w-4" />
                     </Button>
                     <Button variant="ghost" size="icon" onClick={() => handleOpenModal(quest)}>
                       <Pencil className="h-4 w-4" />
@@ -919,6 +1002,81 @@ export function QuestsManager() {
             <Button onClick={handleSubmit} disabled={isSubmitting}>
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {editingQuest ? 'Save Changes' : 'Create Quest'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Notify Users Modal */}
+      <Dialog open={showNotifyModal} onOpenChange={setShowNotifyModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5" />
+              Notify Matching Users
+            </DialogTitle>
+          </DialogHeader>
+          
+          {notifyQuest && (
+            <div className="space-y-4">
+              <div className="p-3 bg-muted rounded-lg">
+                <p className="font-medium">{notifyQuest.icon} {notifyQuest.title}</p>
+                {notifyQuest.progression_tree && (
+                  <p className="text-sm text-muted-foreground">
+                    Tree: {notifyQuest.progression_tree}
+                  </p>
+                )}
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Matching Users</Label>
+                <div className="p-3 bg-primary/5 rounded-lg flex items-center gap-2">
+                  <Users className="h-5 w-5 text-primary" />
+                  {matchingUsersCount === null ? (
+                    <span className="text-muted-foreground">Loading...</span>
+                  ) : (
+                    <span className="font-medium">
+                      {matchingUsersCount} users with matching interests
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Users will receive both an in-app notification and an email.
+                </p>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="notify-message">Custom Message</Label>
+                <Textarea
+                  id="notify-message"
+                  value={notifyMessage}
+                  onChange={(e) => setNotifyMessage(e.target.value)}
+                  placeholder="We think you'd love this quest..."
+                  rows={3}
+                />
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNotifyModal(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSendNotifications} 
+              disabled={isSendingNotifications || matchingUsersCount === 0}
+            >
+              {isSendingNotifications ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Send className="mr-2 h-4 w-4" />
+                  Send Notifications
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -11,9 +11,9 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import type { Quest } from '@/constants/quests';
-import { QUEST_STATUS_CONFIG } from '@/constants/quests/types';
+import type { Quest } from '@/hooks/useQuests';
 import QuestProgressionSection from './progression/QuestProgressionSection';
+import { MapPin, Calendar, DollarSign, Users, Gift } from 'lucide-react';
 
 interface QuestModalProps {
   quest: Quest | null;
@@ -21,10 +21,16 @@ interface QuestModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
+const QUEST_STATUS_CONFIG: Record<Quest['status'], { label: string; color: string; ctaText: string; ctaDisabled?: boolean }> = {
+  'open': { label: 'Open', color: 'green', ctaText: 'Join This Quest' },
+  'closed': { label: 'Full', color: 'yellow', ctaText: 'Join Waitlist' },
+  'coming-soon': { label: 'Coming Soon', color: 'gray', ctaText: 'Get Notified', ctaDisabled: true },
+  'completed': { label: 'Completed', color: 'muted', ctaText: 'Quest Complete', ctaDisabled: true },
+};
+
 const statusColorStyles: Record<string, string> = {
   green: 'bg-emerald-100 text-emerald-700 border-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700',
   yellow: 'bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700',
-  red: 'bg-red-100 text-red-700 border-red-300 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700',
   gray: 'bg-gray-100 text-gray-500 border-gray-300 dark:bg-gray-800/50 dark:text-gray-400 dark:border-gray-600',
   muted: 'bg-muted text-muted-foreground border-border',
 };
@@ -32,9 +38,8 @@ const statusColorStyles: Record<string, string> = {
 const ctaColorStyles: Record<string, string> = {
   green: 'bg-emerald-600 hover:bg-emerald-700 text-white',
   yellow: 'bg-amber-500 hover:bg-amber-600 text-white',
-  red: 'bg-red-400 text-white cursor-not-allowed opacity-60',
   gray: 'bg-gray-400 text-white cursor-not-allowed opacity-60',
-  muted: 'bg-primary hover:bg-primary/90 text-primary-foreground',
+  muted: 'bg-primary hover:bg-primary/90 text-primary-foreground opacity-60 cursor-not-allowed',
 };
 
 const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
@@ -46,7 +51,6 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
   if (!quest) return null;
 
   const statusConfig = QUEST_STATUS_CONFIG[quest.status];
-  const statusLabel = quest.statusLabel || statusConfig.label;
   const statusStyles = statusColorStyles[statusConfig.color];
   const ctaStyles = ctaColorStyles[statusConfig.color];
 
@@ -111,6 +115,18 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] p-0 gap-0">
+        {/* Hero Image */}
+        {quest.image && quest.image !== '/placeholder.svg' && (
+          <div className="relative h-48 w-full overflow-hidden rounded-t-lg">
+            <img 
+              src={quest.image} 
+              alt={quest.imageAlt}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
+          </div>
+        )}
+        
         <DialogHeader className="p-6 pb-4 border-b border-border">
           <div className="flex items-start gap-4">
             <span className="text-5xl" role="img" aria-hidden="true">
@@ -120,16 +136,67 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
               <DialogTitle className="font-display text-2xl font-bold text-foreground mb-2">
                 {quest.title}
               </DialogTitle>
-              <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${statusStyles}`}>
-                {statusLabel}
-              </span>
+              <div className="flex flex-wrap gap-2">
+                <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${statusStyles}`}>
+                  {statusConfig.label}
+                </span>
+                {quest.theme && (
+                  <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-primary/10 text-primary">
+                    {quest.theme}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </DialogHeader>
 
         <ScrollArea className="flex-1 max-h-[60vh]">
           <div className="p-6 space-y-6">
-            {quest.sections.map((section, index) => (
+            {/* Quick Info */}
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Calendar className="w-4 h-4 shrink-0" />
+                <span>{quest.metadata.date}</span>
+              </div>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <DollarSign className="w-4 h-4 shrink-0" />
+                <span>{quest.metadata.cost}</span>
+              </div>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Users className="w-4 h-4 shrink-0" />
+                <span>{quest.metadata.squadSize}</span>
+              </div>
+              {quest.meetingLocation && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <MapPin className="w-4 h-4 shrink-0" />
+                  <span className="truncate">{quest.meetingLocation.name}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Description */}
+            <section className="space-y-2">
+              <h4 className="font-display font-semibold text-foreground">About This Quest</h4>
+              <p className="text-muted-foreground text-sm">
+                {quest.shortDescription}
+              </p>
+            </section>
+
+            {/* Rewards */}
+            {quest.rewards && (
+              <section className="space-y-2">
+                <h4 className="font-display font-semibold text-foreground flex items-center gap-2">
+                  <Gift className="w-4 h-4 text-primary" />
+                  What You'll Earn
+                </h4>
+                <p className="text-muted-foreground text-sm bg-primary/5 rounded-lg p-3">
+                  {quest.rewards}
+                </p>
+              </section>
+            )}
+
+            {/* Sections from database */}
+            {quest.sections?.map((section, index) => (
               <section key={index} className="space-y-2">
                 <h4 className="font-display font-semibold text-foreground">
                   {section.title}
@@ -153,47 +220,56 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
                   </ul>
                 )}
 
-                {section.type === 'text' && typeof section.content === 'string' && (
-                  <p className="text-muted-foreground text-sm">
-                    {section.content}
-                  </p>
-                )}
-
-                {!section.type && typeof section.content === 'string' && (
+                {(section.type === 'text' || !section.type) && typeof section.content === 'string' && (
                   <p className="text-muted-foreground text-sm">
                     {section.content}
                   </p>
                 )}
               </section>
-              ))}
+            ))}
 
-              {/* Progression Section */}
-              <QuestProgressionSection treeId={quest.progressionTree} />
+            {/* Meeting Location Details */}
+            {quest.meetingLocation?.address && (
+              <section className="space-y-2">
+                <h4 className="font-display font-semibold text-foreground flex items-center gap-2">
+                  <MapPin className="w-4 h-4" />
+                  Meeting Location
+                </h4>
+                <div className="bg-muted/50 rounded-lg p-3">
+                  <p className="font-medium text-sm">{quest.meetingLocation.name}</p>
+                  <p className="text-muted-foreground text-sm">{quest.meetingLocation.address}</p>
+                </div>
+              </section>
+            )}
 
-              {/* CTA Section */}
-              <div className="pt-4 border-t border-border">
-                <Button
-                  size="lg"
-                  className={`w-full ${ctaStyles}`}
-                  onClick={handleCTAClick}
-                  disabled={statusConfig.ctaDisabled || isJoining}
-                >
-                  {isJoining ? 'Joining...' : user ? statusConfig.ctaText : 'Sign in to Join'}
-                </Button>
-                {quest.status === 'open' || quest.status === 'limited' ? (
-                  <p className="text-xs text-muted-foreground text-center mt-2">
-                    {quest.status === 'limited' ? 'Only a few spots remaining!' : 'Spots available for the Austin pilot'}
-                  </p>
-                ) : quest.status === 'coming-soon' ? (
-                  <p className="text-xs text-muted-foreground text-center mt-2">
-                    Sign up to be notified when this quest opens
-                  </p>
-                ) : null}
-              </div>
+            {/* Progression Section */}
+            <QuestProgressionSection treeId={quest.progressionTree} />
+
+            {/* CTA Section */}
+            <div className="pt-4 border-t border-border">
+              <Button
+                size="lg"
+                className={`w-full ${ctaStyles}`}
+                onClick={handleCTAClick}
+                disabled={statusConfig.ctaDisabled || isJoining}
+              >
+                {isJoining ? 'Joining...' : user ? statusConfig.ctaText : 'Sign in to Join'}
+              </Button>
+              {quest.status === 'open' && (
+                <p className="text-xs text-muted-foreground text-center mt-2">
+                  Spots available for the Austin pilot
+                </p>
+              )}
+              {quest.status === 'closed' && (
+                <p className="text-xs text-muted-foreground text-center mt-2">
+                  Join the waitlist to be notified of openings
+                </p>
+              )}
             </div>
-          </ScrollArea>
-        </DialogContent>
-      </Dialog>
+          </div>
+        </ScrollArea>
+      </DialogContent>
+    </Dialog>
   );
 };
 

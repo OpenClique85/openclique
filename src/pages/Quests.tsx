@@ -1,96 +1,65 @@
-/**
- * =============================================================================
- * FILE: Quests.tsx
- * PURPOSE: The Quests catalog page - browse and filter all available quests
- * =============================================================================
- * 
- * WHAT THIS FILE CONTROLS:
- * - Quest catalog landing page
- * - Hero section with page title
- * - Quest filtering (by month, day of week, status)
- * - Grid of quest cards
- * - Quest detail modal when a card is clicked
- * - BUGGS helper hint at the bottom
- * 
- * WHERE TO EDIT COPY/TEXT:
- * - Hero title/subtitle: src/constants/quests/page-config.ts → QUESTS_PAGE
- * - Quest data: src/constants/quests/ folder (culture-quests.ts, wellness-quests.ts, etc.)
- * - BUGGS hint text: Line 134 below
- * 
- * HOW FILTERING WORKS:
- * - Month filter: Matches against quest.metadata.date
- * - Day filter: Matches day name (mon, tue, etc.) in quest.metadata.date
- * - Status filter: Matches quest.status (open, closed, coming-soon, etc.)
- * 
- * RELATED FILES:
- * - src/constants/quests/index.ts (QUESTS array, QUESTS_PAGE config)
- * - src/components/QuestCard.tsx (individual quest card)
- * - src/components/QuestModal.tsx (quest detail popup)
- * - src/components/QuestDateFilter.tsx (filter controls)
- * 
- * LAST UPDATED: January 2025
- * =============================================================================
- */
-
 import { useState, useMemo } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import QuestCard from '@/components/QuestCard';
 import QuestModal from '@/components/QuestModal';
-import QuestDateFilter from '@/components/QuestDateFilter';
+import QuestFilterBar, { type QuestFilters } from '@/components/QuestFilterBar';
 import { CTASection } from '@/components/CTASection';
 import { useQuests, type Quest } from '@/hooks/useQuests';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Inbox } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
-// ============ IMAGES ============
 import buggsFace from '@/assets/buggs-face.png';
 import foodTruckScene from '@/assets/austin/food-truck-scene.jpg';
 
-/**
- * Quests Page Component
- * 
- * Displays a filterable catalog of all available quests.
- */
 const Quests = () => {
-  // ============ DATA FETCHING ============
-  const { data: quests = [], isLoading } = useQuests();
+  const { data: quests = [], isLoading, error } = useQuests();
   
-  // ============ STATE MANAGEMENT ============
   const [selectedQuest, setSelectedQuest] = useState<Quest | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   
-  // Active filter state
-  const [filters, setFilters] = useState<{
-    month: string | null;
-    days: number[];
-    statuses: ('open' | 'closed' | 'coming-soon' | 'completed')[];
-  }>({
+  const [filters, setFilters] = useState<QuestFilters>({
+    search: '',
     month: null,
     days: [],
     statuses: [],
+    interests: [],
   });
 
-  /**
-   * Opens the quest detail modal
-   * @param quest - The quest to display in the modal
-   */
   const handleQuestClick = (quest: Quest) => {
     setSelectedQuest(quest);
     setModalOpen(true);
   };
 
-  /**
-   * FILTERED QUESTS
-   * 
-   * Filters the QUESTS array based on active filters.
-   * Uses useMemo for performance (only recalculates when filters change).
-   */
   const filteredQuests = useMemo(() => {
     return quests.filter((quest) => {
+      // Search filter
+      if (filters.search.trim()) {
+        const searchLower = filters.search.toLowerCase();
+        const matchesSearch = 
+          quest.title.toLowerCase().includes(searchLower) ||
+          quest.shortDescription.toLowerCase().includes(searchLower) ||
+          quest.theme?.toLowerCase().includes(searchLower) ||
+          quest.rewards?.toLowerCase().includes(searchLower);
+        
+        if (!matchesSearch) return false;
+      }
+
+      // Interest filter
+      if (filters.interests.length > 0) {
+        const questTree = quest.progressionTree?.toLowerCase();
+        const matchesInterest = filters.interests.some(interest => 
+          questTree?.includes(interest.toLowerCase())
+        );
+        if (!matchesInterest) return false;
+      }
+
+      // Status filter
       if (filters.statuses.length > 0 && !filters.statuses.includes(quest.status)) {
         return false;
       }
 
+      // Month filter
       if (filters.month) {
         const questDateLower = quest.metadata.date.toLowerCase();
         if (!questDateLower.includes(filters.month)) {
@@ -98,6 +67,7 @@ const Quests = () => {
         }
       }
 
+      // Day filter
       if (filters.days.length > 0) {
         const dayNames = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
         const questDateLower = quest.metadata.date.toLowerCase();
@@ -113,15 +83,20 @@ const Quests = () => {
     });
   }, [quests, filters]);
 
+  const hasActiveFilters = 
+    filters.search.length > 0 ||
+    filters.month !== null || 
+    filters.days.length > 0 || 
+    filters.statuses.length > 0 ||
+    filters.interests.length > 0;
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
       
       <main className="flex-1">
-        {/* ============ HERO SECTION ============ */}
-        {/* Text from: src/constants/quests/page-config.ts → QUESTS_PAGE */}
+        {/* Hero Section */}
         <section className="py-16 md:py-24 px-4 relative overflow-hidden">
-          {/* Background image */}
           <div 
             className="absolute inset-0 opacity-15"
             style={{
@@ -145,71 +120,110 @@ const Quests = () => {
           </div>
         </section>
 
-        {/* ============ QUEST CARDS GRID ============ */}
+        {/* Quest Cards Grid */}
         <section className="pb-16 md:pb-24 px-4 relative">
-          {/* Subtle background gradient */}
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-muted/30 to-transparent pointer-events-none" />
           
           <div className="max-w-4xl mx-auto relative z-10">
-            {/* --- Filter Controls --- */}
-            {/* Filter component: src/components/QuestDateFilter.tsx */}
-            <QuestDateFilter 
-              activeFilters={filters}
+            {/* Filter Controls */}
+            <QuestFilterBar 
+              filters={filters}
               onFilterChange={setFilters}
             />
 
-            {/* --- Results Count --- */}
-            {isLoading ? (
-              <div className="flex justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            {/* Loading State */}
+            {isLoading && (
+              <div className="flex flex-col items-center justify-center py-16">
+                <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+                <p className="text-muted-foreground">Loading quests...</p>
               </div>
-            ) : (
+            )}
+
+            {/* Error State */}
+            {error && !isLoading && (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <p className="text-destructive mb-2">Failed to load quests</p>
+                <p className="text-muted-foreground text-sm mb-4">Please try refreshing the page.</p>
+                <Button variant="outline" onClick={() => window.location.reload()}>
+                  Refresh Page
+                </Button>
+              </div>
+            )}
+
+            {/* Content */}
+            {!isLoading && !error && (
               <>
-                {(filters.month || filters.days.length > 0 || filters.statuses.length > 0) && (
+                {/* Results Count */}
+                {hasActiveFilters && (
                   <p className="text-sm text-muted-foreground mb-4">
                     Showing {filteredQuests.length} of {quests.length} quests
                   </p>
                 )}
 
-            {/* --- Quest Cards Grid --- */}
-            {/* Quest cards: src/components/QuestCard.tsx */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-              {filteredQuests.map((quest) => (
-                <QuestCard
-                  key={quest.id}
-                  quest={quest}
-                  onClick={() => handleQuestClick(quest)}
-                />
-              ))}
-            </div>
-
-            {/* --- No Results Message --- */}
-            {filteredQuests.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground mb-2">No quests match your filters.</p>
-                <p className="text-sm text-muted-foreground">Try adjusting your availability or clearing filters.</p>
-              </div>
-            )}
-            
-            {/* --- BUGGS Helper Hint --- */}
-            <div className="mt-12 flex items-center justify-center gap-3 text-muted-foreground">
-              <img src={buggsFace} alt="" className="w-8 h-8 object-contain" />
-              <p className="text-sm">BUGGS guides every quest. You just show up!</p>
-            </div>
+                {/* Quest Cards Grid */}
+                {filteredQuests.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                    {filteredQuests.map((quest) => (
+                      <QuestCard
+                        key={quest.id}
+                        quest={quest}
+                        onClick={() => handleQuestClick(quest)}
+                      />
+                    ))}
+                  </div>
+                ) : quests.length === 0 ? (
+                  // No quests at all
+                  <div className="text-center py-16">
+                    <Inbox className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
+                    <h3 className="font-semibold text-lg mb-2">No quests available yet</h3>
+                    <p className="text-muted-foreground mb-4">
+                      We're working on creating amazing experiences for you.
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Check back soon or join the pilot to be first in line!
+                    </p>
+                  </div>
+                ) : (
+                  // No quests match filters
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground mb-2">No quests match your filters.</p>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Try adjusting your search or clearing some filters.
+                    </p>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setFilters({
+                        search: '',
+                        month: null,
+                        days: [],
+                        statuses: [],
+                        interests: [],
+                      })}
+                    >
+                      Clear All Filters
+                    </Button>
+                  </div>
+                )}
+                
+                {/* BUGGS Helper Hint */}
+                {filteredQuests.length > 0 && (
+                  <div className="mt-12 flex items-center justify-center gap-3 text-muted-foreground">
+                    <img src={buggsFace} alt="" className="w-8 h-8 object-contain" />
+                    <p className="text-sm">BUGGS guides every quest. You just show up!</p>
+                  </div>
+                )}
               </>
             )}
           </div>
         </section>
 
-        {/* ============ CTA SECTION ============ */}
         <CTASection />
       </main>
 
       <Footer />
 
-      {/* ============ QUEST DETAIL MODAL ============ */}
-      {/* Opens when a quest card is clicked */}
-      {/* Modal component: src/components/QuestModal.tsx */}
+      {/* Quest Detail Modal */}
       <QuestModal
         quest={selectedQuest}
         open={modalOpen}
