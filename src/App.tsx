@@ -69,6 +69,9 @@ import CreatorsDirectory from "./pages/CreatorsDirectory";
 import QuestBuilder from "./pages/QuestBuilder";
 import SponsorOnboarding from "./pages/SponsorOnboarding";
 import SponsorDashboard from "./pages/SponsorDashboard";
+import SponsorRewards from "./pages/SponsorRewards";
+import SponsorVenues from "./pages/SponsorVenues";
+import SponsorDiscover from "./pages/SponsorDiscover";
 import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
@@ -126,6 +129,10 @@ const App = () => (
             
             {/* SPONSOR PAGES */}
             <Route path="/sponsors/onboard" element={<SponsorOnboarding />} />
+            <Route path="/sponsor" element={<ProtectedRoute><SponsorDashboard /></ProtectedRoute>} />
+            <Route path="/sponsor/rewards" element={<ProtectedRoute><SponsorRewards /></ProtectedRoute>} />
+            <Route path="/sponsor/venues" element={<ProtectedRoute><SponsorVenues /></ProtectedRoute>} />
+            <Route path="/sponsor/discover" element={<ProtectedRoute><SponsorDiscover /></ProtectedRoute>} />
             <Route path="/sponsor" element={<ProtectedRoute><SponsorDashboard /></ProtectedRoute>} />
             
             {/* LEGAL PAGES */}
