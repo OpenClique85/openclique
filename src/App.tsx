@@ -38,19 +38,25 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";           // UR
 // IMPORTS: Page Components
 // Each page is its own file in src/pages/
 // -----------------------------------------------------------------------------
-import Index from "./pages/Index";                         // Homepage (/)
-import HowItWorks from "./pages/HowItWorks";               // How It Works page
-import About from "./pages/About";                         // About page
-import Pilot from "./pages/Pilot";                         // Join the Pilot signup
-import Partners from "./pages/Partners";                   // Partner signup page
-import WorkWithUs from "./pages/WorkWithUs";               // Job/volunteer page
-import CreatorsHub from "./pages/CreatorsHub";             // Creator landing page (/creators)
-import ContentCreatorsPage from "./pages/ContentCreatorsPage"; // For influencers
-import QuestCreatorsPage from "./pages/QuestCreatorsPage"; // For quest designers
-import Privacy from "./pages/Privacy";                     // Privacy policy
-import Terms from "./pages/Terms";                         // Terms of service
-import Quests from "./pages/Quests";                       // Quest catalog
-import NotFound from "./pages/NotFound";                   // 404 error page
+import Index from "./pages/Index";
+import HowItWorks from "./pages/HowItWorks";
+import About from "./pages/About";
+import Pilot from "./pages/Pilot";
+import Partners from "./pages/Partners";
+import WorkWithUs from "./pages/WorkWithUs";
+import CreatorsHub from "./pages/CreatorsHub";
+import ContentCreatorsPage from "./pages/ContentCreatorsPage";
+import QuestCreatorsPage from "./pages/QuestCreatorsPage";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import Quests from "./pages/Quests";
+import NotFound from "./pages/NotFound";
+import Auth from "./pages/Auth";
+import MyQuests from "./pages/MyQuests";
+import Admin from "./pages/Admin";
+import Feedback from "./pages/Feedback";
+import { AuthProvider } from "./hooks/useAuth";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 // -----------------------------------------------------------------------------
 // SETUP: Initialize data fetching client
@@ -62,49 +68,45 @@ const queryClient = new QueryClient();
 // -----------------------------------------------------------------------------
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      {/* Toast notifications (appear in corner when triggered) */}
-      <Toaster />
-      <Sonner />
-      
-      {/* Router: Handles URL changes and displays correct page */}
-      <BrowserRouter>
-        <Routes>
-          {/* ============================================= */}
-          {/* MAIN PAGES */}
-          {/* ============================================= */}
-          <Route path="/" element={<Index />} />
-          <Route path="/how-it-works" element={<HowItWorks />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/quests" element={<Quests />} />
-          
-          {/* ============================================= */}
-          {/* SIGNUP/FUNNEL PAGES */}
-          {/* ============================================= */}
-          <Route path="/pilot" element={<Pilot />} />
-          <Route path="/partners" element={<Partners />} />
-          <Route path="/work-with-us" element={<WorkWithUs />} />
-          
-          {/* ============================================= */}
-          {/* CREATOR PAGES (nested under /creators) */}
-          {/* ============================================= */}
-          <Route path="/creators" element={<CreatorsHub />} />
-          <Route path="/creators/content-creators" element={<ContentCreatorsPage />} />
-          <Route path="/creators/quest-creators" element={<QuestCreatorsPage />} />
-          
-          {/* ============================================= */}
-          {/* LEGAL PAGES */}
-          {/* ============================================= */}
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/terms" element={<Terms />} />
-          
-          {/* ============================================= */}
-          {/* 404 CATCH-ALL (must be last) */}
-          {/* ============================================= */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        
+        <BrowserRouter>
+          <Routes>
+            {/* MAIN PAGES */}
+            <Route path="/" element={<Index />} />
+            <Route path="/how-it-works" element={<HowItWorks />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/quests" element={<Quests />} />
+            
+            {/* AUTH */}
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/my-quests" element={<ProtectedRoute><MyQuests /></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute requireAdmin><Admin /></ProtectedRoute>} />
+            <Route path="/feedback/:questId" element={<ProtectedRoute><Feedback /></ProtectedRoute>} />
+            
+            {/* SIGNUP/FUNNEL PAGES */}
+            <Route path="/pilot" element={<Pilot />} />
+            <Route path="/partners" element={<Partners />} />
+            <Route path="/work-with-us" element={<WorkWithUs />} />
+            
+            {/* CREATOR PAGES */}
+            <Route path="/creators" element={<CreatorsHub />} />
+            <Route path="/creators/content-creators" element={<ContentCreatorsPage />} />
+            <Route path="/creators/quest-creators" element={<QuestCreatorsPage />} />
+            
+            {/* LEGAL PAGES */}
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            
+            {/* 404 */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
