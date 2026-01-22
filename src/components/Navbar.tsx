@@ -43,7 +43,7 @@
 
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
-import { Menu, X, ChevronDown, LogIn, LogOut, User } from "lucide-react";
+import { Menu, X, ChevronDown, LogIn, LogOut, User, ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -98,6 +98,17 @@ export function Navbar() {
                 {link.label}
               </Link>
             ))}
+            {/* My Quests - visible when logged in */}
+            {user && (
+              <Link
+                to="/my-quests"
+                className={`text-sm font-medium transition-colors hover:text-primary whitespace-nowrap ${
+                  isActive('/my-quests') ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                My Quests
+              </Link>
+            )}
           </div>
 
           {/* ---------------------------------------------------------------- */}
@@ -178,9 +189,9 @@ export function Navbar() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
                   <DropdownMenuItem asChild>
-                    <Link to="/my-quests" className="flex items-center gap-2 cursor-pointer">
+                    <Link to="/profile" className="flex items-center gap-2 cursor-pointer">
                       <User className="h-4 w-4" />
-                      My Quests
+                      My Profile
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
@@ -319,8 +330,19 @@ export function Navbar() {
                       className="justify-start gap-2"
                     >
                       <Link to="/my-quests" onClick={() => setIsOpen(false)}>
-                        <User className="h-4 w-4" />
+                        <ClipboardList className="h-4 w-4" />
                         My Quests
+                      </Link>
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      asChild
+                      className="justify-start gap-2"
+                    >
+                      <Link to="/profile" onClick={() => setIsOpen(false)}>
+                        <User className="h-4 w-4" />
+                        My Profile
                       </Link>
                     </Button>
                     {isAdmin && (

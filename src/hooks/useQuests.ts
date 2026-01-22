@@ -19,6 +19,9 @@ export interface Quest {
   shortDescription: string;
   rewards: string;
   progressionTree?: string;
+  creatorType?: 'openclique' | 'community' | 'partner';
+  creatorName?: string;
+  creatorSocialUrl?: string;
   metadata: {
     date: string;
     cost: string;
@@ -114,6 +117,9 @@ const transformQuest = (dbQuest: DbQuest): Quest => {
     shortDescription: dbQuest.short_description || 'An exciting quest awaits!',
     rewards: dbQuest.rewards || 'Memories & new friends',
     progressionTree: dbQuest.progression_tree || undefined,
+    creatorType: (dbQuest as DbQuest & { creator_type?: string }).creator_type as Quest['creatorType'] || 'openclique',
+    creatorName: (dbQuest as DbQuest & { creator_name?: string }).creator_name || undefined,
+    creatorSocialUrl: (dbQuest as DbQuest & { creator_social_url?: string }).creator_social_url || undefined,
     metadata: {
       date: formatDateRange(dbQuest.start_datetime, dbQuest.end_datetime),
       cost: dbQuest.cost_description || 'Free',

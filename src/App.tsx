@@ -55,6 +55,7 @@ import SquadDetail from "./pages/SquadDetail";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import MyQuests from "./pages/MyQuests";
+import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
 import Feedback from "./pages/Feedback";
 import Notifications from "./pages/Notifications";
@@ -88,6 +89,7 @@ const App = () => (
             {/* AUTH */}
             <Route path="/auth" element={<Auth />} />
             <Route path="/my-quests" element={<ProtectedRoute><MyQuests /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/squads/:squadId" element={<ProtectedRoute><SquadDetail /></ProtectedRoute>} />
             <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute requireAdmin><Admin /></ProtectedRoute>} />
