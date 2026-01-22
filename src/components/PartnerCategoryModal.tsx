@@ -6,7 +6,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Check } from "lucide-react";
-import { FORM_URLS } from "@/constants/content";
 
 interface ExampleQuest {
   name: string;
@@ -29,17 +28,21 @@ interface PartnerCategoryModalProps {
   category: PartnerCategory | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onApply?: (categoryId: string) => void;
 }
 
 export function PartnerCategoryModal({
   category,
   open,
   onOpenChange,
+  onApply,
 }: PartnerCategoryModalProps) {
   if (!category) return null;
 
   const handleCTAClick = () => {
-    window.open(FORM_URLS.partners, "_blank");
+    if (onApply) {
+      onApply(category.id);
+    }
   };
 
   return (

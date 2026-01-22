@@ -1,26 +1,15 @@
 /**
  * =============================================================================
  * FILE: Pilot.tsx
- * PURPOSE: The Pilot signup page - for users joining the Austin pilot program
+ * PURPOSE: The Pilot page - now redirects to Quests or serves as overview
  * =============================================================================
  * 
  * WHAT THIS FILE CONTROLS:
- * - Pilot program landing page
- * - BUGGS mascot header with animated "accepting applications" badge
- * - "What to expect" list
- * - CTA button that opens Google Form
+ * - Pilot program overview page
+ * - Redirects user to browse quests
  * 
  * WHERE TO EDIT COPY/TEXT:
- * - Title and subtitle: src/constants/content.ts → PILOT_PAGE.title/subtitle
- * - What to expect list: src/constants/content.ts → PILOT_PAGE.whatToExpect
- * - CTA button text: src/constants/content.ts → PILOT_PAGE.ctaText
- * - Note below button: src/constants/content.ts → PILOT_PAGE.note
- * - Application form URL: src/constants/content.ts → FORM_URLS.pilot
- * 
- * RELATED FILES:
- * - src/constants/content.ts (PILOT_PAGE and FORM_URLS)
- * - src/assets/buggs-face.png (BUGGS mascot image)
- * - src/assets/austin/zilker-park.jpg (background image)
+ * - Title and subtitle: src/constants/content.ts → PILOT_PAGE
  * 
  * LAST UPDATED: January 2025
  * =============================================================================
@@ -29,27 +18,20 @@
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { PILOT_PAGE, FORM_URLS } from "@/constants/content";
+import { PILOT_PAGE } from "@/constants/content";
 import { ArrowRight, Check } from "lucide-react";
+import { Link } from "react-router-dom";
 
 // ============ IMAGES ============
-import buggsFace from "@/assets/buggs-face.png";       // BUGGS mascot icon
-import zilkerPark from "@/assets/austin/zilker-park.jpg"; // Background image
+import buggsFace from "@/assets/buggs-face.png";
+import zilkerPark from "@/assets/austin/zilker-park.jpg";
 
 /**
  * Pilot Page Component
  * 
- * Simple signup page for the Austin pilot program.
+ * Overview page that directs users to the Quests catalog.
  */
 export default function Pilot() {
-  /**
-   * Opens the pilot application Google Form
-   * URL defined in: src/constants/content.ts → FORM_URLS.pilot
-   */
-  const handleCTAClick = () => {
-    window.open(FORM_URLS.pilot, "_blank");
-  };
-
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -81,17 +63,16 @@ export default function Pilot() {
                   />
                 </div>
                 
-                {/* Animated "accepting applications" badge */}
+                {/* Active badge */}
                 <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
                   </span>
-                  Now accepting applications {/* ← EDIT BADGE TEXT HERE */}
+                  Austin Pilot Now Live
                 </div>
                 
                 {/* Page title and subtitle */}
-                {/* Text from: src/constants/content.ts → PILOT_PAGE.title/subtitle */}
                 <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">
                   {PILOT_PAGE.title}
                 </h1>
@@ -101,10 +82,9 @@ export default function Pilot() {
               </div>
 
               {/* ============ WHAT TO EXPECT LIST ============ */}
-              {/* Items from: src/constants/content.ts → PILOT_PAGE.whatToExpect */}
               <div className="bg-card rounded-xl p-8 border border-border mb-8">
                 <h2 className="font-display text-xl font-semibold text-foreground mb-6">
-                  What to expect {/* ← EDIT SECTION HEADLINE HERE */}
+                  What to expect
                 </h2>
                 <ul className="space-y-4">
                   {PILOT_PAGE.whatToExpect.map((item, index) => (
@@ -119,16 +99,16 @@ export default function Pilot() {
               </div>
 
               {/* ============ CTA BUTTON ============ */}
-              {/* Button text from: src/constants/content.ts → PILOT_PAGE.ctaText */}
-              {/* Opens: src/constants/content.ts → FORM_URLS.pilot */}
               <div className="text-center">
                 <Button
                   size="lg"
-                  onClick={handleCTAClick}
+                  asChild
                   className="text-base px-8 gap-2"
                 >
-                  {PILOT_PAGE.ctaText}
-                  <ArrowRight className="w-4 h-4" />
+                  <Link to="/quests">
+                    {PILOT_PAGE.ctaText}
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
                 </Button>
                 <p className="text-xs text-muted-foreground mt-4">
                   {PILOT_PAGE.note}

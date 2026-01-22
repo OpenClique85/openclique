@@ -52,6 +52,39 @@ export type Database = {
           },
         ]
       }
+      creator_applications: {
+        Row: {
+          created_at: string | null
+          creator_type: string | null
+          email: string
+          id: string
+          message: string | null
+          name: string
+          social_links: Json | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          creator_type?: string | null
+          email: string
+          id?: string
+          message?: string | null
+          name: string
+          social_links?: Json | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          creator_type?: string | null
+          email?: string
+          id?: string
+          message?: string | null
+          name?: string
+          social_links?: Json | null
+          status?: string | null
+        }
+        Relationships: []
+      }
       feedback: {
         Row: {
           belonging_delta: number | null
@@ -139,6 +172,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      partner_applications: {
+        Row: {
+          business_name: string
+          category: string | null
+          contact_email: string
+          contact_name: string
+          created_at: string | null
+          id: string
+          message: string | null
+          status: string | null
+        }
+        Insert: {
+          business_name: string
+          category?: string | null
+          contact_email: string
+          contact_name: string
+          created_at?: string | null
+          id?: string
+          message?: string | null
+          status?: string | null
+        }
+        Update: {
+          business_name?: string
+          category?: string | null
+          contact_email?: string
+          contact_name?: string
+          created_at?: string | null
+          id?: string
+          message?: string | null
+          status?: string | null
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -351,6 +417,39 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      volunteer_applications: {
+        Row: {
+          created_at: string | null
+          email: string
+          experience: string | null
+          id: string
+          message: string | null
+          name: string
+          role_interest: string | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          experience?: string | null
+          id?: string
+          message?: string | null
+          name: string
+          role_interest?: string | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          experience?: string | null
+          id?: string
+          message?: string | null
+          name?: string
+          role_interest?: string | null
+          status?: string | null
         }
         Relationships: []
       }

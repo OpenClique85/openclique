@@ -9,31 +9,20 @@
  * - Available roles grid with icons
  * - "Who We Look For" trait tags
  * - FAQ accordion
- * - CTA button that opens Google Form
+ * - In-app application form modal
  * 
  * WHERE TO EDIT COPY/TEXT:
- * - Title and subtitle: src/constants/content.ts → WORK_WITH_US_PAGE.title/subtitle
- * - Role cards: src/constants/content.ts → WORK_WITH_US_PAGE.roles
- * - Trait tags: src/constants/content.ts → WORK_WITH_US_PAGE.whoWeLookFor
- * - FAQ items: src/constants/content.ts → WORK_WITH_US_PAGE.faq
- * - CTA button text: src/constants/content.ts → WORK_WITH_US_PAGE.ctaText
- * - Application form URL: src/constants/content.ts → FORM_URLS.workWithUs
- * 
- * ICON/IMAGE MAPPINGS:
- * - iconMap: Maps role index to Lucide icons
- * - roleImages: Maps role index to background images for hover effect
- * 
- * RELATED FILES:
- * - src/constants/content.ts (WORK_WITH_US_PAGE and FORM_URLS)
+ * - All text: src/constants/content.ts → WORK_WITH_US_PAGE
  * 
  * LAST UPDATED: January 2025
  * =============================================================================
  */
 
+import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { WORK_WITH_US_PAGE, FORM_URLS } from "@/constants/content";
+import { WORK_WITH_US_PAGE } from "@/constants/content";
 import { ArrowRight, Compass, Users, Sparkles } from "lucide-react";
 import {
   Accordion,
@@ -41,45 +30,23 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { VolunteerApplicationForm } from "@/components/forms";
 
 // ============ IMAGES ============
 import runningGroup from "@/assets/austin/running-group.jpg";
 import coffeeShopFriends from "@/assets/austin/coffee-shop-friends.jpg";
 import rooftopGathering from "@/assets/austin/rooftop-gathering.jpg";
 
-/**
- * ROLE ICON MAPPING
- * 
- * Maps role index (0, 1, 2) to Lucide icons.
- * Add more icons if you add more roles in content.ts.
- */
 const iconMap = {
-  0: Compass,    // First role icon
-  1: Users,      // Second role icon
-  2: Sparkles,   // Third role icon
+  0: Compass,
+  1: Users,
+  2: Sparkles,
 };
 
-/**
- * ROLE BACKGROUND IMAGES
- * 
- * Maps role index to images that appear on hover.
- * Add more images if you add more roles.
- */
 const roleImages = [runningGroup, coffeeShopFriends, rooftopGathering];
 
-/**
- * Work With Us Page Component
- * 
- * Displays job/volunteer opportunities and application CTA.
- */
 export default function WorkWithUs() {
-  /**
-   * Opens the work application Google Form
-   * URL defined in: src/constants/content.ts → FORM_URLS.workWithUs
-   */
-  const handleCTAClick = () => {
-    window.open(FORM_URLS.workWithUs, "_blank");
-  };
+  const [formOpen, setFormOpen] = useState(false);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -102,7 +69,6 @@ export default function WorkWithUs() {
             <div className="max-w-3xl mx-auto">
               
               {/* ============ HEADER ============ */}
-              {/* Text from: src/constants/content.ts → WORK_WITH_US_PAGE.title/subtitle */}
               <div className="text-center mb-12">
                 <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">
                   {WORK_WITH_US_PAGE.title}
@@ -113,7 +79,6 @@ export default function WorkWithUs() {
               </div>
 
               {/* ============ ROLES GRID ============ */}
-              {/* Roles from: src/constants/content.ts → WORK_WITH_US_PAGE.roles */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                 {WORK_WITH_US_PAGE.roles.map((role, index) => {
                   const Icon = iconMap[index as keyof typeof iconMap] || Sparkles;
@@ -123,7 +88,6 @@ export default function WorkWithUs() {
                       key={role.title}
                       className="group bg-card rounded-xl p-6 border border-border text-center relative overflow-hidden hover:border-navy/50 hover:shadow-lg transition-all duration-300"
                     >
-                      {/* Hover background image */}
                       <div 
                         className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500"
                         style={{
@@ -149,10 +113,9 @@ export default function WorkWithUs() {
               </div>
 
               {/* ============ WHO WE LOOK FOR ============ */}
-              {/* Traits from: src/constants/content.ts → WORK_WITH_US_PAGE.whoWeLookFor */}
               <div className="text-center mb-12">
                 <h2 className="font-display text-xl font-semibold text-foreground mb-4">
-                  Who We Look For {/* ← EDIT SECTION HEADLINE HERE */}
+                  Who We Look For
                 </h2>
                 <div className="flex flex-wrap justify-center gap-2">
                   {WORK_WITH_US_PAGE.whoWeLookFor.map((trait) => (
@@ -167,10 +130,9 @@ export default function WorkWithUs() {
               </div>
 
               {/* ============ FAQ ============ */}
-              {/* Questions from: src/constants/content.ts → WORK_WITH_US_PAGE.faq */}
               <div className="mb-12">
                 <h2 className="font-display text-xl font-semibold text-foreground mb-6 text-center">
-                  Questions? {/* ← EDIT SECTION HEADLINE HERE */}
+                  Questions?
                 </h2>
                 <Accordion type="single" collapsible className="w-full">
                   {WORK_WITH_US_PAGE.faq.map((item, index) => (
@@ -187,12 +149,10 @@ export default function WorkWithUs() {
               </div>
 
               {/* ============ CTA BUTTON ============ */}
-              {/* Button text from: src/constants/content.ts → WORK_WITH_US_PAGE.ctaText */}
-              {/* Opens: src/constants/content.ts → FORM_URLS.workWithUs */}
               <div className="text-center">
                 <Button
                   size="lg"
-                  onClick={handleCTAClick}
+                  onClick={() => setFormOpen(true)}
                   className="bg-navy text-navy-foreground hover:bg-navy/90 text-base px-8 gap-2"
                 >
                   {WORK_WITH_US_PAGE.ctaText}
@@ -207,6 +167,12 @@ export default function WorkWithUs() {
         </section>
       </main>
       <Footer />
+
+      {/* ============ APPLICATION FORM MODAL ============ */}
+      <VolunteerApplicationForm
+        open={formOpen}
+        onOpenChange={setFormOpen}
+      />
     </div>
   );
 }

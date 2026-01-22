@@ -71,26 +71,10 @@ export const CTA_NAV_LINKS = [
   { label: "Work With Us", href: "/work-with-us", variant: "link" as const },
 ];
 
-
 // =============================================================================
-// SECTION 3: GOOGLE FORM URLS
+// SECTION 3: INTERNAL ROUTES (Replaced Google Forms)
 // =============================================================================
-// These are the links to Google Forms for collecting signups.
-// To update a form: replace the URL inside the quotes.
-// 
-// HOW TO GET YOUR FORM URL:
-// 1. Open your Google Form
-// 2. Click "Send" button
-// 3. Click the link icon
-// 4. Copy the URL and paste here
-
-export const FORM_URLS = {
-  pilot: "https://docs.google.com/forms/d/e/1FAIpQLSd9skqXpY1BsmLy4SGro8cItzQd5O486j0MySJzUxeoNd5l0w/viewform",
-  partners: "https://docs.google.com/forms/d/e/1FAIpQLSdz0Y2tYSrFsSuiJEtbXFLcAsfsxa5-9KAOSgtYDU8UwRolzA/viewform",
-  workWithUs: "https://docs.google.com/forms/d/e/1FAIpQLScSbXEuiYfLBc5p9p-1SJ-rwBE_duj85rW8kDAt8z-KSJqdjw/viewform",
-  creators: "https://docs.google.com/forms/d/e/1FAIpQLSd9skqXpY1BsmLy4SGro8cItzQd5O486j0MySJzUxeoNd5l0w/viewform",
-};
-
+// All CTAs now route to in-app pages or modals instead of external forms.
 
 // =============================================================================
 // SECTION 4: SOCIAL MEDIA LINKS
@@ -234,7 +218,7 @@ export const HERO = {
   headline: "Build the village you've been missing",
   headlineAccent: "One Quest at a time.",
   subheadline: "Join a small squad. Complete a curated adventure. Make real friends.",
-  primaryCta: "Join the Pilot",
+  primaryCta: "Find Your Quest",
   secondaryCta: "Partner With Us",
   tertiaryCta: "Work With Us",
 };
@@ -266,7 +250,7 @@ export const BENEFITS = [
 
 export const SOCIAL_PROOF = {
   badge: "Now launching in Austin",
-  message: "Now accepting applications for the Austin pilot.",
+  message: "Browse open quests and join your first adventure.",
 };
 
 // =============================================================================
@@ -412,16 +396,16 @@ export const FAQ = [
 // =============================================================================
 
 export const PILOT_PAGE = {
-  title: "Join the Austin Pilot",
-  subtitle: "Be among the first to experience OpenClique. We're looking for adventurous souls ready to try something new.",
+  title: "Find Your First Quest",
+  subtitle: "Browse open quests, join a squad, and start your adventure. It's that simple.",
   whatToExpect: [
-    "Match with a small squad based on your interests",
-    "Receive your first quest within 2 weeks of signing up",
-    "Complete 1-2 quests per month during the pilot",
-    "Help shape the future of OpenClique with your feedback",
+    "Browse quests that match your interests",
+    "Join a small squad of 3-6 people",
+    "Complete adventures and earn rewards",
+    "Make real friends along the way",
   ],
-  ctaText: "Start Your Adventure",
-  note: "By signing up, you'll be redirected to our signup form. We'll never share your information with third parties.",
+  ctaText: "Browse Quests",
+  note: "Sign up to join quests and track your progress.",
 };
 
 export const PARTNERS_PAGE = {
@@ -579,8 +563,8 @@ export const PARTNERS_PAGE = {
     },
   ],
   
-  ctaText: "Let's Talk",
-  note: "You'll be redirected to our partnership inquiry form.",
+  ctaText: "Partner With Us",
+  note: "Fill out our quick form and we'll reach out within 48 hours.",
 };
 
 export const WORK_WITH_US_PAGE = {
