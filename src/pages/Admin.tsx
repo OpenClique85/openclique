@@ -51,11 +51,12 @@ export default function Admin() {
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-9 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-10 lg:w-auto lg:inline-grid">
             <TabsTrigger value="quests">Quests</TabsTrigger>
             <TabsTrigger value="signups">Signups</TabsTrigger>
             <TabsTrigger value="squads">Squads</TabsTrigger>
             <TabsTrigger value="creators">Creators</TabsTrigger>
+            <TabsTrigger value="sponsors">Sponsors</TabsTrigger>
             <TabsTrigger value="preview">Preview</TabsTrigger>
             <TabsTrigger value="messaging">Messaging</TabsTrigger>
             <TabsTrigger value="whatsapp">WhatsApp</TabsTrigger>
@@ -77,6 +78,10 @@ export default function Admin() {
           
           <TabsContent value="creators">
             <CreatorsManager />
+          </TabsContent>
+          
+          <TabsContent value="sponsors">
+            <SponsorsManager />
           </TabsContent>
           
           <TabsContent value="preview">

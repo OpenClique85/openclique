@@ -23,3 +23,9 @@ verify_jwt = false
 
 [functions.create-test-users]
 verify_jwt = false
+
+[functions.send-sponsor-invite]
+verify_jwt = false
+
+[functions.redeem-sponsor-invite]
+verify_jwt = false

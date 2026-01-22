@@ -67,6 +67,8 @@ import CreatorAnalyticsPage from "./pages/CreatorAnalyticsPage";
 import CreatorPublicProfile from "./pages/CreatorPublicProfile";
 import CreatorsDirectory from "./pages/CreatorsDirectory";
 import QuestBuilder from "./pages/QuestBuilder";
+import SponsorOnboarding from "./pages/SponsorOnboarding";
+import SponsorDashboard from "./pages/SponsorDashboard";
 import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
@@ -121,6 +123,10 @@ const App = () => (
             <Route path="/creator/profile" element={<ProtectedRoute><CreatorProfile /></ProtectedRoute>} />
             <Route path="/creator/quests/new" element={<ProtectedRoute><QuestBuilder /></ProtectedRoute>} />
             <Route path="/creator/quests/:questId/edit" element={<ProtectedRoute><QuestBuilder /></ProtectedRoute>} />
+            
+            {/* SPONSOR PAGES */}
+            <Route path="/sponsors/onboard" element={<SponsorOnboarding />} />
+            <Route path="/sponsor" element={<ProtectedRoute><SponsorDashboard /></ProtectedRoute>} />
             
             {/* LEGAL PAGES */}
             <Route path="/privacy" element={<Privacy />} />
