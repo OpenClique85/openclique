@@ -1,5 +1,6 @@
-import { Calendar, DollarSign, Clock, Users, Gift, ExternalLink } from 'lucide-react';
+import { Calendar, DollarSign, Clock, Users, Gift, ExternalLink, Star } from 'lucide-react';
 import type { Quest } from '@/hooks/useQuests';
+import { useQuestRating } from '@/hooks/useQuestRatings';
 import logo from '@/assets/oc-icon.png';
 
 const QUEST_STATUS_CONFIG: Record<Quest['status'], { label: string; color: string; ctaDisabled?: boolean }> = {
@@ -33,6 +34,9 @@ const QuestCard = ({ quest, onClick }: QuestCardProps) => {
   const statusLabel = statusConfig.label;
   const statusStyles = statusColorStyles[statusConfig.color];
   const themeStyles = themeColorStyles[quest.themeColor];
+  
+  // Fetch rating for this quest
+  const { rating, reviewCount } = useQuestRating(quest.id);
 
   return (
     <button
@@ -99,28 +103,40 @@ const QuestCard = ({ quest, onClick }: QuestCardProps) => {
           <span>{quest.rewards}</span>
         </div>
 
-        {/* Creator Attribution */}
+        {/* Rating + Creator Attribution Row */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            {quest.creatorType === 'openclique' || !quest.creatorType ? (
-              <>
-                <img src={logo} alt="OpenClique" className="w-4 h-4 rounded-full" />
-                <span>OpenClique Created</span>
-              </>
-            ) : quest.creatorType === 'community' ? (
-              <>
-                <span className="w-4 h-4 rounded-full bg-creator/20 flex items-center justify-center text-[10px]">👤</span>
-                <span>by {quest.creatorName || 'Community'}</span>
-                {quest.creatorSocialUrl && (
-                  <ExternalLink className="w-3 h-3 text-primary" />
-                )}
-              </>
-            ) : (
-              <>
-                <span className="w-4 h-4 rounded-full bg-sunset/20 flex items-center justify-center text-[10px]">🤝</span>
-                <span>Partner: {quest.creatorName || 'Local Partner'}</span>
-              </>
+          <div className="flex items-center gap-3">
+            {/* Star Rating - only show if there are reviews */}
+            {reviewCount > 0 && rating !== null && (
+              <div className="flex items-center gap-1 text-sm">
+                <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                <span className="font-medium text-foreground">{rating.toFixed(1)}</span>
+                <span className="text-muted-foreground">({reviewCount})</span>
+              </div>
             )}
+            
+            {/* Creator Attribution */}
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              {quest.creatorType === 'openclique' || !quest.creatorType ? (
+                <>
+                  <img src={logo} alt="OpenClique" className="w-4 h-4 rounded-full" />
+                  <span>OpenClique</span>
+                </>
+              ) : quest.creatorType === 'community' ? (
+                <>
+                  <span className="w-4 h-4 rounded-full bg-creator/20 flex items-center justify-center text-[10px]">👤</span>
+                  <span>{quest.creatorName || 'Community'}</span>
+                  {quest.creatorSocialUrl && (
+                    <ExternalLink className="w-3 h-3 text-primary" />
+                  )}
+                </>
+              ) : (
+                <>
+                  <span className="w-4 h-4 rounded-full bg-sunset/20 flex items-center justify-center text-[10px]">🤝</span>
+                  <span>{quest.creatorName || 'Partner'}</span>
+                </>
+              )}
+            </div>
           </div>
           
           {/* View Details Link */}

@@ -73,26 +73,22 @@ export function Navbar() {
   return (
     <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16 md:h-20">
+        <div className="flex items-center justify-between h-16">
           
-          {/* ---------------------------------------------------------------- */}
-          {/* LOGO - Links to homepage */}
-          {/* ---------------------------------------------------------------- */}
+          {/* LOGO */}
           <Link to="/" className="flex items-center gap-2 shrink-0">
-            <img src={logo} alt={BRAND.name} className="h-10 md:h-12 w-auto" />
+            <img src={logo} alt={BRAND.name} className="h-9 w-auto" />
           </Link>
 
-          {/* ---------------------------------------------------------------- */}
-          {/* DESKTOP NAVIGATION - Main links */}
-          {/* Hidden on mobile (md:flex means only show on medium+ screens) */}
-          {/* ---------------------------------------------------------------- */}
-          <div className="hidden md:flex items-center gap-6">
+          {/* DESKTOP NAVIGATION */}
+          <div className="hidden md:flex items-center gap-1">
+            {/* Core nav links */}
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 to={link.href}
-                className={`text-sm font-medium transition-colors hover:text-primary whitespace-nowrap ${
-                  isActive(link.href) ? "text-primary" : "text-muted-foreground"
+                className={`text-sm font-medium px-3 py-2 rounded-md transition-colors hover:bg-muted ${
+                  isActive(link.href) ? "text-primary bg-primary/5" : "text-muted-foreground"
                 }`}
               >
                 {link.label}
@@ -102,8 +98,8 @@ export function Navbar() {
             {user && (
               <Link
                 to="/my-quests"
-                className={`text-sm font-medium transition-colors hover:text-primary whitespace-nowrap ${
-                  isActive('/my-quests') ? "text-primary" : "text-muted-foreground"
+                className={`text-sm font-medium px-3 py-2 rounded-md transition-colors hover:bg-muted ${
+                  isActive('/my-quests') ? "text-primary bg-primary/5" : "text-muted-foreground"
                 }`}
               >
                 My Quests
@@ -111,60 +107,31 @@ export function Navbar() {
             )}
           </div>
 
-          {/* ---------------------------------------------------------------- */}
-          {/* DESKTOP CTA BUTTONS */}
-          {/* Primary: Join the Pilot (solid teal button) */}
-          {/* Secondary: Get Involved dropdown (outline button) */}
-          {/* ---------------------------------------------------------------- */}
-          <div className="hidden md:flex items-center gap-3">
-            {/* Primary CTA */}
-            <Button
-              size="sm"
-              asChild
-              className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all px-4"
-            >
-              <Link to="/quests">Find Your Quest</Link>
-            </Button>
-            
-            {/* Secondary CTA - Dropdown */}
+          {/* DESKTOP RIGHT SECTION */}
+          <div className="hidden md:flex items-center gap-2">
+            {/* Get Involved Dropdown - consolidates CTAs */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="gap-1 px-4"
-                >
+                <Button size="sm" variant="ghost" className="gap-1 text-muted-foreground">
                   Get Involved
-                  <ChevronDown className="h-4 w-4" />
+                  <ChevronDown className="h-3.5 w-3.5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                {/* Creators - Purple accent */}
+              <DropdownMenuContent align="end" className="w-44">
                 <DropdownMenuItem asChild>
-                  <Link 
-                    to="/creators" 
-                    className="flex items-center gap-2 cursor-pointer"
-                  >
+                  <Link to="/creators" className="flex items-center gap-2 cursor-pointer">
                     <span className="w-2 h-2 rounded-full bg-creator" />
                     For Creators
                   </Link>
                 </DropdownMenuItem>
-                {/* Partners - Orange/Sunset accent */}
                 <DropdownMenuItem asChild>
-                  <Link 
-                    to="/partners" 
-                    className="flex items-center gap-2 cursor-pointer"
-                  >
+                  <Link to="/partners" className="flex items-center gap-2 cursor-pointer">
                     <span className="w-2 h-2 rounded-full bg-sunset" />
                     Partner With Us
                   </Link>
                 </DropdownMenuItem>
-                {/* Work With Us - Navy accent */}
                 <DropdownMenuItem asChild>
-                  <Link 
-                    to="/work-with-us" 
-                    className="flex items-center gap-2 cursor-pointer"
-                  >
+                  <Link to="/work-with-us" className="flex items-center gap-2 cursor-pointer">
                     <span className="w-2 h-2 rounded-full bg-navy" />
                     Work With Us
                   </Link>
@@ -172,41 +139,46 @@ export function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Notification Bell (only for logged in users) */}
+            {/* Notification Bell */}
             {user && <NotificationBell />}
 
             {/* Auth Section */}
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button size="sm" variant="ghost" className="gap-2 px-3">
-                    <User className="h-4 w-4" />
-                    <span className="max-w-[100px] truncate text-sm">
-                      {user.email?.split('@')[0]}
-                    </span>
-                    <ChevronDown className="h-3 w-3" />
+                  <Button size="sm" variant="ghost" className="gap-1.5 px-2.5">
+                    <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
+                      <User className="h-4 w-4 text-primary" />
+                    </div>
+                    <ChevronDown className="h-3 w-3 text-muted-foreground" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuContent align="end" className="w-44">
+                  <div className="px-2 py-1.5 text-xs text-muted-foreground border-b border-border mb-1">
+                    {user.email}
+                  </div>
                   <DropdownMenuItem asChild>
                     <Link to="/profile" className="flex items-center gap-2 cursor-pointer">
                       <User className="h-4 w-4" />
-                      My Profile
+                      Profile
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/notifications" className="flex items-center gap-2 cursor-pointer">
-                      <span className="w-2 h-2 rounded-full bg-amber-500" />
-                      Notifications
+                    <Link to="/my-quests" className="flex items-center gap-2 cursor-pointer">
+                      <ClipboardList className="h-4 w-4" />
+                      My Quests
                     </Link>
                   </DropdownMenuItem>
                   {isAdmin && (
-                    <DropdownMenuItem asChild>
-                      <Link to="/admin" className="flex items-center gap-2 cursor-pointer">
-                        <span className="w-2 h-2 rounded-full bg-primary" />
-                        Admin Dashboard
-                      </Link>
-                    </DropdownMenuItem>
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin" className="flex items-center gap-2 cursor-pointer">
+                          <span className="w-2 h-2 rounded-full bg-primary" />
+                          Admin
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
                   )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem 
@@ -219,11 +191,8 @@ export function Navbar() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button size="sm" variant="ghost" asChild className="gap-2">
-                <Link to="/auth">
-                  <LogIn className="h-4 w-4" />
-                  Sign In
-                </Link>
+              <Button size="sm" asChild>
+                <Link to="/auth">Sign In</Link>
               </Button>
             )}
           </div>
@@ -247,141 +216,102 @@ export function Navbar() {
         {/* ------------------------------------------------------------------ */}
         {isOpen && (
           <div className="md:hidden py-4 border-t border-border animate-fade-in">
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1">
               {/* Main navigation links */}
               {NAV_LINKS.map((link) => (
                 <Link
                   key={link.href}
                   to={link.href}
-                  className={`text-sm font-medium transition-colors hover:text-primary ${
-                    isActive(link.href) ? "text-primary" : "text-muted-foreground"
+                  className={`text-sm font-medium px-3 py-2 rounded-md transition-colors ${
+                    isActive(link.href) ? "text-primary bg-primary/5" : "text-muted-foreground hover:bg-muted"
                   }`}
-                  onClick={() => setIsOpen(false)} // Close menu after clicking
+                  onClick={() => setIsOpen(false)}
                 >
                   {link.label}
                 </Link>
               ))}
               
-              {/* CTA section (separated by border) */}
-              <div className="flex flex-col gap-2 pt-4 border-t border-border">
-                {/* Primary CTA */}
-                <Button
-                  size="sm"
-                  asChild
-                  className="justify-start bg-primary text-primary-foreground"
+              {/* My Quests for logged in users */}
+              {user && (
+                <Link
+                  to="/my-quests"
+                  className={`text-sm font-medium px-3 py-2 rounded-md transition-colors ${
+                    isActive('/my-quests') ? "text-primary bg-primary/5" : "text-muted-foreground hover:bg-muted"
+                  }`}
+                  onClick={() => setIsOpen(false)}
                 >
-                  <Link to="/quests" onClick={() => setIsOpen(false)}>Find Your Quest</Link>
-                </Button>
-                
-                {/* Secondary options label */}
-                <p className="text-xs text-muted-foreground pt-2 pb-1">Get Involved</p>
-                
-                {/* Creators link */}
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  asChild
-                  className="justify-start gap-2"
+                  My Quests
+                </Link>
+              )}
+              
+              {/* Get Involved section */}
+              <div className="mt-3 pt-3 border-t border-border">
+                <p className="text-xs text-muted-foreground px-3 pb-2">Get Involved</p>
+                <Link
+                  to="/creators"
+                  className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md text-muted-foreground hover:bg-muted"
+                  onClick={() => setIsOpen(false)}
                 >
-                  <Link to="/creators" onClick={() => setIsOpen(false)}>
-                    <span className="w-2 h-2 rounded-full bg-creator" />
-                    For Creators
-                  </Link>
-                </Button>
-                
-                {/* Partners link */}
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  asChild
-                  className="justify-start gap-2"
+                  <span className="w-2 h-2 rounded-full bg-creator" />
+                  For Creators
+                </Link>
+                <Link
+                  to="/partners"
+                  className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md text-muted-foreground hover:bg-muted"
+                  onClick={() => setIsOpen(false)}
                 >
-                  <Link to="/partners" onClick={() => setIsOpen(false)}>
-                    <span className="w-2 h-2 rounded-full bg-sunset" />
-                    Partner With Us
-                  </Link>
-                </Button>
-                
-                {/* Work With Us link */}
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  asChild
-                  className="justify-start gap-2"
+                  <span className="w-2 h-2 rounded-full bg-sunset" />
+                  Partner With Us
+                </Link>
+                <Link
+                  to="/work-with-us"
+                  className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md text-muted-foreground hover:bg-muted"
+                  onClick={() => setIsOpen(false)}
                 >
-                  <Link to="/work-with-us" onClick={() => setIsOpen(false)}>
-                    <span className="w-2 h-2 rounded-full bg-navy" />
-                    Work With Us
-                  </Link>
-                </Button>
+                  <span className="w-2 h-2 rounded-full bg-navy" />
+                  Work With Us
+                </Link>
               </div>
 
-              {/* Auth section for mobile */}
-              <div className="flex flex-col gap-2 pt-4 border-t border-border">
+              {/* Auth section */}
+              <div className="mt-3 pt-3 border-t border-border">
                 {user ? (
                   <>
-                    <p className="text-xs text-muted-foreground pb-1">
-                      Signed in as {user.email?.split('@')[0]}
+                    <p className="text-xs text-muted-foreground px-3 pb-2 truncate">
+                      {user.email}
                     </p>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      asChild
-                      className="justify-start gap-2"
+                    <Link
+                      to="/profile"
+                      className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md text-muted-foreground hover:bg-muted"
+                      onClick={() => setIsOpen(false)}
                     >
-                      <Link to="/my-quests" onClick={() => setIsOpen(false)}>
-                        <ClipboardList className="h-4 w-4" />
-                        My Quests
-                      </Link>
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      asChild
-                      className="justify-start gap-2"
-                    >
-                      <Link to="/profile" onClick={() => setIsOpen(false)}>
-                        <User className="h-4 w-4" />
-                        My Profile
-                      </Link>
-                    </Button>
+                      <User className="h-4 w-4" />
+                      Profile
+                    </Link>
                     {isAdmin && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        asChild
-                        className="justify-start gap-2"
+                      <Link
+                        to="/admin"
+                        className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md text-muted-foreground hover:bg-muted"
+                        onClick={() => setIsOpen(false)}
                       >
-                        <Link to="/admin" onClick={() => setIsOpen(false)}>
-                          <span className="w-2 h-2 rounded-full bg-primary" />
-                          Admin Dashboard
-                        </Link>
-                      </Button>
+                        <span className="w-2 h-2 rounded-full bg-primary" />
+                        Admin
+                      </Link>
                     )}
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="justify-start gap-2 text-destructive"
+                    <button
                       onClick={() => {
                         signOut();
                         setIsOpen(false);
                       }}
+                      className="flex items-center gap-2 w-full text-sm font-medium px-3 py-2 rounded-md text-destructive hover:bg-muted"
                     >
                       <LogOut className="h-4 w-4" />
                       Sign Out
-                    </Button>
+                    </button>
                   </>
                 ) : (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    asChild
-                    className="justify-start gap-2"
-                  >
-                    <Link to="/auth" onClick={() => setIsOpen(false)}>
-                      <LogIn className="h-4 w-4" />
-                      Sign In
-                    </Link>
+                  <Button size="sm" asChild className="mx-3">
+                    <Link to="/auth" onClick={() => setIsOpen(false)}>Sign In</Link>
                   </Button>
                 )}
               </div>
