@@ -14,6 +14,7 @@ import { PersistentSquadsManager } from '@/components/admin/PersistentSquadsMana
 import { CreatorsManager } from '@/components/admin/CreatorsManager';
 import { SponsorsManager } from '@/components/admin/SponsorsManager';
 import { CreatorPreviewTab } from '@/components/admin/CreatorPreviewTab';
+import { SponsorPreviewTab } from '@/components/admin/SponsorPreviewTab';
 import { DevToolsSection } from '@/components/admin/DevToolsSection';
 
 export default function Admin() {
@@ -52,13 +53,14 @@ export default function Admin() {
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-10 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-11 lg:w-auto lg:inline-grid">
             <TabsTrigger value="quests">Quests</TabsTrigger>
             <TabsTrigger value="signups">Signups</TabsTrigger>
             <TabsTrigger value="squads">Squads</TabsTrigger>
             <TabsTrigger value="creators">Creators</TabsTrigger>
             <TabsTrigger value="sponsors">Sponsors</TabsTrigger>
-            <TabsTrigger value="preview">Preview</TabsTrigger>
+            <TabsTrigger value="creator-preview">Creator View</TabsTrigger>
+            <TabsTrigger value="sponsor-preview">Sponsor View</TabsTrigger>
             <TabsTrigger value="messaging">Messaging</TabsTrigger>
             <TabsTrigger value="whatsapp">WhatsApp</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
@@ -85,8 +87,12 @@ export default function Admin() {
             <SponsorsManager />
           </TabsContent>
           
-          <TabsContent value="preview">
+          <TabsContent value="creator-preview">
             <CreatorPreviewTab />
+          </TabsContent>
+          
+          <TabsContent value="sponsor-preview">
+            <SponsorPreviewTab />
           </TabsContent>
           
           <TabsContent value="messaging">

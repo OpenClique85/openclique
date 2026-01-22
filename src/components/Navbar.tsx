@@ -43,7 +43,7 @@
 
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
-import { Menu, X, ChevronDown, LogIn, LogOut, User, ClipboardList, Sparkles } from "lucide-react";
+import { Menu, X, ChevronDown, LogIn, LogOut, User, ClipboardList, Sparkles, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -65,7 +65,7 @@ export function Navbar() {
   const location = useLocation();
   
   // Auth state
-  const { user, signOut, isAdmin, isCreator } = useAuth();
+  const { user, signOut, isAdmin, isCreator, isSponsor } = useAuth();
 
   // Helper: Check if a nav link matches current page
   const isActive = (href: string) => location.pathname === href;
@@ -174,6 +174,14 @@ export function Navbar() {
                       <Link to="/creator" className="flex items-center gap-2 cursor-pointer">
                         <Sparkles className="h-4 w-4 text-creator" />
                         Creator Portal
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  {isSponsor && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/sponsor" className="flex items-center gap-2 cursor-pointer">
+                        <Building2 className="h-4 w-4 text-sunset" />
+                        Sponsor Portal
                       </Link>
                     </DropdownMenuItem>
                   )}
@@ -304,6 +312,16 @@ export function Navbar() {
                       >
                         <Sparkles className="h-4 w-4 text-creator" />
                         Creator Portal
+                      </Link>
+                    )}
+                    {isSponsor && (
+                      <Link
+                        to="/sponsor"
+                        className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md text-muted-foreground hover:bg-muted"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <Building2 className="h-4 w-4 text-sunset" />
+                        Sponsor Portal
                       </Link>
                     )}
                     {isAdmin && (
