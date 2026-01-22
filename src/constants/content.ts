@@ -1,48 +1,89 @@
 /**
- * OpenClique Content Configuration
+ * =============================================================================
+ * CONTENT.TS - MASTER CONTENT CONFIGURATION FILE
+ * =============================================================================
  * 
- * This file contains all editable content for the OpenClique website.
- * Update values here to change text, links, images, and more without touching component code.
+ * This is the MOST IMPORTANT file for non-developers to edit.
+ * It contains ALL the text, links, and content for the OpenClique website.
  * 
- * HOW TO UPDATE:
- * 1. Find the section you want to edit
- * 2. Change the value in quotes
+ * WHAT'S IN THIS FILE:
+ * - Brand name and tagline
+ * - Navigation menu links
+ * - Google Form URLs (for signups)
+ * - Social media links
+ * - Page-by-page content (headlines, descriptions, etc.)
+ * - FAQ questions and answers
+ * - SEO metadata
+ * 
+ * HOW TO EDIT:
+ * 1. Use Ctrl+F (or Cmd+F on Mac) to search for the text you want to change
+ * 2. Edit the text inside the quotes "like this"
  * 3. Save the file
- * 4. Your changes will appear on the site
+ * 4. Your changes appear on the site immediately
+ * 
+ * IMPORTANT RULES:
+ * - Don't delete the quotes around text
+ * - Don't delete commas at the end of lines
+ * - Don't change variable names (the words before the colon)
+ * - If you break something, use Ctrl+Z to undo
+ * 
+ * EXAMPLE:
+ * To change the tagline from "Build the village..." to "Find your people...":
+ *   BEFORE: tagline: "Build the village you've been missing.",
+ *   AFTER:  tagline: "Find your people. One Quest at a time.",
+ * 
+ * =============================================================================
  */
 
+
 // =============================================================================
-// BRAND & GENERAL
+// SECTION 1: BRAND INFORMATION
 // =============================================================================
+// The core brand name, tagline, and description used across the site.
+// These appear in the footer, meta tags, and various pages.
 
 export const BRAND = {
-  name: "OpenClique",
-  tagline: "Build the village you've been missing. One Quest at a time.",
+  name: "OpenClique",                                    // Company/product name
+  tagline: "Build the village you've been missing. One Quest at a time.", // Main slogan
   description: "OpenClique brings people together in small, guided groups through real-world quests: curated activities that help turn shared interests into real friendships.",
-  launchCity: "Austin",
+  launchCity: "Austin",                                  // Current pilot city
 };
 
+
 // =============================================================================
-// NAVIGATION LINKS
+// SECTION 2: NAVIGATION LINKS
 // =============================================================================
+// These define what appears in the top navigation bar.
+// To add a new page: add a new { label: "Page Name", href: "/page-url" }
 
 export const NAV_LINKS = [
-  { label: "Home", href: "/" },
-  { label: "Quests", href: "/quests" },
-  { label: "How It Works", href: "/how-it-works" },
-  { label: "For Creators", href: "/creators" },
-  { label: "About", href: "/about" },
+  { label: "Home", href: "/" },                          // Homepage
+  { label: "Quests", href: "/quests" },                  // Quest catalog
+  { label: "How It Works", href: "/how-it-works" },      // Process explanation
+  { label: "For Creators", href: "/creators" },          // Creator landing page
+  { label: "About", href: "/about" },                    // About us
 ];
 
+// CTA (Call-to-Action) links - the buttons in the nav header
+// variant: "primary" = solid button, "secondary" = outline, "link" = text only
 export const CTA_NAV_LINKS = [
   { label: "Join the Pilot", href: "/pilot", variant: "primary" as const },
   { label: "Partner With Us", href: "/partners", variant: "secondary" as const },
   { label: "Work With Us", href: "/work-with-us", variant: "link" as const },
 ];
 
+
 // =============================================================================
-// GOOGLE FORM URLS
+// SECTION 3: GOOGLE FORM URLS
 // =============================================================================
+// These are the links to Google Forms for collecting signups.
+// To update a form: replace the URL inside the quotes.
+// 
+// HOW TO GET YOUR FORM URL:
+// 1. Open your Google Form
+// 2. Click "Send" button
+// 3. Click the link icon
+// 4. Copy the URL and paste here
 
 export const FORM_URLS = {
   pilot: "https://docs.google.com/forms/d/e/1FAIpQLSd9skqXpY1BsmLy4SGro8cItzQd5O486j0MySJzUxeoNd5l0w/viewform",
@@ -51,9 +92,12 @@ export const FORM_URLS = {
   creators: "https://docs.google.com/forms/d/e/1FAIpQLSd9skqXpY1BsmLy4SGro8cItzQd5O486j0MySJzUxeoNd5l0w/viewform",
 };
 
+
 // =============================================================================
-// SOCIAL MEDIA LINKS
+// SECTION 4: SOCIAL MEDIA LINKS
 // =============================================================================
+// Links to official OpenClique social media profiles.
+// These appear in the footer and can be referenced elsewhere.
 
 export const SOCIAL_LINKS = {
   instagram: "https://www.instagram.com/openclique/",
