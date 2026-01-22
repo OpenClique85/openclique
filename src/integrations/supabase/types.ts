@@ -171,14 +171,25 @@ export type Database = {
         Row: {
           briefing_html: string | null
           capacity_total: number | null
+          cost_description: string | null
           created_at: string
+          end_datetime: string | null
           icon: string | null
           id: string
+          image_url: string | null
           meeting_address: string | null
           meeting_location_name: string | null
+          objectives: string | null
+          progression_tree: string | null
+          rewards: string | null
+          short_description: string | null
           slug: string
           start_datetime: string | null
           status: Database["public"]["Enums"]["quest_status"] | null
+          success_criteria: string | null
+          tags: string[] | null
+          theme: string | null
+          theme_color: string | null
           title: string
           updated_at: string
           whatsapp_invite_link: string | null
@@ -186,14 +197,25 @@ export type Database = {
         Insert: {
           briefing_html?: string | null
           capacity_total?: number | null
+          cost_description?: string | null
           created_at?: string
+          end_datetime?: string | null
           icon?: string | null
           id?: string
+          image_url?: string | null
           meeting_address?: string | null
           meeting_location_name?: string | null
+          objectives?: string | null
+          progression_tree?: string | null
+          rewards?: string | null
+          short_description?: string | null
           slug: string
           start_datetime?: string | null
           status?: Database["public"]["Enums"]["quest_status"] | null
+          success_criteria?: string | null
+          tags?: string[] | null
+          theme?: string | null
+          theme_color?: string | null
           title: string
           updated_at?: string
           whatsapp_invite_link?: string | null
@@ -201,19 +223,71 @@ export type Database = {
         Update: {
           briefing_html?: string | null
           capacity_total?: number | null
+          cost_description?: string | null
           created_at?: string
+          end_datetime?: string | null
           icon?: string | null
           id?: string
+          image_url?: string | null
           meeting_address?: string | null
           meeting_location_name?: string | null
+          objectives?: string | null
+          progression_tree?: string | null
+          rewards?: string | null
+          short_description?: string | null
           slug?: string
           start_datetime?: string | null
           status?: Database["public"]["Enums"]["quest_status"] | null
+          success_criteria?: string | null
+          tags?: string[] | null
+          theme?: string | null
+          theme_color?: string | null
           title?: string
           updated_at?: string
           whatsapp_invite_link?: string | null
         }
         Relationships: []
+      }
+      referrals: {
+        Row: {
+          clicked_at: string | null
+          created_at: string | null
+          id: string
+          quest_id: string
+          referral_code: string
+          referred_user_id: string | null
+          referrer_user_id: string
+          signed_up_at: string | null
+        }
+        Insert: {
+          clicked_at?: string | null
+          created_at?: string | null
+          id?: string
+          quest_id: string
+          referral_code: string
+          referred_user_id?: string | null
+          referrer_user_id: string
+          signed_up_at?: string | null
+        }
+        Update: {
+          clicked_at?: string | null
+          created_at?: string | null
+          id?: string
+          quest_id?: string
+          referral_code?: string
+          referred_user_id?: string | null
+          referrer_user_id?: string
+          signed_up_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
