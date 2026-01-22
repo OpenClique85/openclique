@@ -59,6 +59,8 @@ import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
 import Feedback from "./pages/Feedback";
 import Notifications from "./pages/Notifications";
+import CreatorOnboarding from "./pages/CreatorOnboarding";
+import CreatorDashboard from "./pages/CreatorDashboard";
 import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
@@ -104,6 +106,9 @@ const App = () => (
             <Route path="/creators" element={<CreatorsHub />} />
             <Route path="/creators/content-creators" element={<ContentCreatorsPage />} />
             <Route path="/creators/quest-creators" element={<QuestCreatorsPage />} />
+            <Route path="/creators/onboard" element={<CreatorOnboarding />} />
+            <Route path="/creator" element={<ProtectedRoute><CreatorDashboard /></ProtectedRoute>} />
+            <Route path="/creator/*" element={<ProtectedRoute><CreatorDashboard /></ProtectedRoute>} />
             
             {/* LEGAL PAGES */}
             <Route path="/privacy" element={<Privacy />} />

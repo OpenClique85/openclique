@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,9 +23,14 @@ export default function Auth() {
   const { user, signIn, signUp, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/my-quests';
+  // Support both location.state.from and ?redirect= query param
+  const redirectParam = searchParams.get('redirect');
+  const from = redirectParam 
+    || (location.state as { from?: { pathname: string } })?.from?.pathname 
+    || '/my-quests';
 
   useEffect(() => {
     if (user) {

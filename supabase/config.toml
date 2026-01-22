@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.recommend-squads]
 verify_jwt = false
+
+[functions.redeem-creator-invite]
+verify_jwt = false
