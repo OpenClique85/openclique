@@ -54,6 +54,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { NAV_LINKS, BRAND } from "@/constants/content";
 import { useAuth } from "@/hooks/useAuth";
+import { NotificationBell } from "@/components/NotificationBell";
 import logo from "@/assets/logo.png";
 
 export function Navbar() {
@@ -160,6 +161,9 @@ export function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
 
+            {/* Notification Bell (only for logged in users) */}
+            {user && <NotificationBell />}
+
             {/* Auth Section */}
             {user ? (
               <DropdownMenu>
@@ -177,6 +181,12 @@ export function Navbar() {
                     <Link to="/my-quests" className="flex items-center gap-2 cursor-pointer">
                       <User className="h-4 w-4" />
                       My Quests
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/notifications" className="flex items-center gap-2 cursor-pointer">
+                      <span className="w-2 h-2 rounded-full bg-amber-500" />
+                      Notifications
                     </Link>
                   </DropdownMenuItem>
                   {isAdmin && (

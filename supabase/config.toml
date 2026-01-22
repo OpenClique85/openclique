@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.generate-quest-image]
 verify_jwt = false
+
+[functions.notify-users]
+verify_jwt = false

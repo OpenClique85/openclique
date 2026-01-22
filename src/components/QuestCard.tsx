@@ -1,6 +1,12 @@
 import { Calendar, DollarSign, Clock, Users, Gift } from 'lucide-react';
-import type { Quest } from '@/constants/quests';
-import { QUEST_STATUS_CONFIG } from '@/constants/quests/types';
+import type { Quest } from '@/hooks/useQuests';
+
+const QUEST_STATUS_CONFIG: Record<Quest['status'], { label: string; color: string; ctaDisabled?: boolean }> = {
+  'open': { label: 'Open', color: 'green' },
+  'closed': { label: 'Full', color: 'yellow' },
+  'coming-soon': { label: 'Coming Soon', color: 'gray', ctaDisabled: true },
+  'completed': { label: 'Completed', color: 'muted', ctaDisabled: true },
+};
 
 interface QuestCardProps {
   quest: Quest;
@@ -17,14 +23,13 @@ const themeColorStyles: Record<Quest['themeColor'], string> = {
 const statusColorStyles: Record<string, string> = {
   green: 'bg-emerald-100 text-emerald-700 border-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700',
   yellow: 'bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700',
-  red: 'bg-red-100 text-red-700 border-red-300 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700',
   gray: 'bg-gray-100 text-gray-500 border-gray-300 dark:bg-gray-800/50 dark:text-gray-400 dark:border-gray-600',
   muted: 'bg-muted text-muted-foreground border-border',
 };
 
 const QuestCard = ({ quest, onClick }: QuestCardProps) => {
   const statusConfig = QUEST_STATUS_CONFIG[quest.status];
-  const statusLabel = quest.statusLabel || statusConfig.label;
+  const statusLabel = statusConfig.label;
   const statusStyles = statusColorStyles[statusConfig.color];
   const themeStyles = themeColorStyles[quest.themeColor];
 
