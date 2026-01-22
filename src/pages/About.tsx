@@ -1,42 +1,120 @@
+/**
+ * =============================================================================
+ * FILE: About.tsx
+ * PURPOSE: The About page - tells the OpenClique story, team, traction, and values
+ * =============================================================================
+ * 
+ * WHAT THIS FILE CONTROLS:
+ * - Mission statement and company story
+ * - Team member profiles with photos
+ * - Traction/achievements section with images
+ * - Core values section with icons
+ * - FAQ and CTA sections at the bottom
+ * 
+ * WHERE TO EDIT COPY/TEXT:
+ * - Mission, story, team, traction, values: src/constants/content.ts → ABOUT
+ * - Section headlines are hardcoded below (search for text in quotes)
+ * - BUGGS team card text: Lines 96-104 below
+ * 
+ * WHERE TO EDIT IMAGES:
+ * - Team photos: src/assets/team/ folder, then update imports at top
+ * - Traction images: src/assets/traction/ folder, then update imports
+ * - Background image: src/assets/austin/zilker-park.jpg
+ * 
+ * IMAGE MAPPINGS:
+ * - teamPhotos: Maps member.photo field to actual image files
+ * - tractionPhotos: Maps item.image field to actual image files
+ * 
+ * RELATED FILES:
+ * - src/constants/content.ts (ABOUT section for all text)
+ * - src/components/FAQ.tsx (FAQ section)
+ * - src/components/CTASection.tsx (final CTA)
+ * 
+ * LAST UPDATED: January 2025
+ * =============================================================================
+ */
+
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { FAQ } from "@/components/FAQ";
 import { CTASection } from "@/components/CTASection";
 import { ABOUT } from "@/constants/content";
 import { Shield, Heart, Target } from "lucide-react";
+
+// ============ TEAM PHOTOS ============
+// Import team member photos here and add to the mapping below
 import anthonyCami from "@/assets/team/anthony-cami.jpeg";
 import andrewPoss from "@/assets/team/andrew-poss.jpeg";
+import buggsReal from "@/assets/team/buggs-real.jpeg";
+
+// ============ TRACTION PHOTOS ============
+// Import achievement/traction photos here and add to the mapping below
 import tvlSemifinalists from "@/assets/traction/tvl-semifinalists.jpeg";
 import aclWinners from "@/assets/traction/acl-winners.jpeg";
 import kendraScottAccelerator from "@/assets/traction/kendra-scott-accelerator.jpeg";
-import buggsReal from "@/assets/team/buggs-real.jpeg";
+
+// ============ BACKGROUND IMAGE ============
 import zilkerPark from "@/assets/austin/zilker-park.jpg";
 
+/**
+ * TEAM PHOTOS MAPPING
+ * 
+ * Maps the "photo" field from ABOUT.team in content.ts to actual image files.
+ * To add a new team member:
+ * 1. Add their photo to src/assets/team/
+ * 2. Import it above (e.g., import newPerson from "@/assets/team/new-person.jpeg")
+ * 3. Add the mapping here (e.g., newperson: newPerson)
+ * 4. Add their info in src/constants/content.ts → ABOUT.team
+ */
 const teamPhotos: Record<string, string> = {
-  anthony: anthonyCami,
-  andrew: andrewPoss,
+  anthony: anthonyCami,    // Anthony's photo
+  andrew: andrewPoss,      // Andrew's photo
 };
 
+/**
+ * TRACTION PHOTOS MAPPING
+ * 
+ * Maps the "image" field from ABOUT.traction in content.ts to actual image files.
+ * Same process as team photos to add new achievements.
+ */
 const tractionPhotos: Record<string, string> = {
-  "tvl-semifinalists": tvlSemifinalists,
-  "acl-winners": aclWinners,
-  "kendra-scott-accelerator": kendraScottAccelerator,
+  "tvl-semifinalists": tvlSemifinalists,          // Texas Venture Labs achievement
+  "acl-winners": aclWinners,                       // ACL competition win
+  "kendra-scott-accelerator": kendraScottAccelerator, // Accelerator program
 };
 
+/**
+ * VALUE ICONS MAPPING
+ * 
+ * Maps the "icon" field from ABOUT.values to Lucide icon components.
+ * To add a new icon:
+ * 1. Import it from lucide-react at the top
+ * 2. Add the mapping here (e.g., newicon: NewIcon)
+ */
 const valueIcons: Record<string, React.ElementType> = {
-  shield: Shield,
-  heart: Heart,
-  target: Target,
+  shield: Shield,   // Represents trust/safety
+  heart: Heart,     // Represents care/community
+  target: Target,   // Represents purpose/goals
 };
 
+/**
+ * About Page Component
+ * 
+ * Renders the full About page with mission, story, team, traction, and values.
+ */
 export default function About() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1">
-        {/* Mission + Story + Team (combined for flow) */}
+        
+        {/* ============ SECTION 1: Mission + Story + Team ============ */}
+        {/* Combined section with gradient background for visual flow */}
         <section className="py-12 md:py-16 bg-gradient-to-br from-primary/5 via-background to-accent/5">
           <div className="container mx-auto px-4">
+            
+            {/* --- Mission Statement --- */}
+            {/* Text from: src/constants/content.ts → ABOUT.mission */}
             <div className="max-w-3xl mx-auto text-center mb-12">
               <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">
                 {ABOUT.mission.title}
@@ -44,6 +122,9 @@ export default function About() {
               <p className="text-lg text-muted-foreground leading-relaxed mb-8">
                 {ABOUT.mission.description}
               </p>
+              
+              {/* --- Our Story Card --- */}
+              {/* Text from: src/constants/content.ts → ABOUT.story */}
               <div className="bg-card/60 backdrop-blur-sm rounded-xl p-6 border border-border/50 text-left">
                 <h2 className="font-display text-xl font-semibold text-foreground mb-3">
                   {ABOUT.story.title}
@@ -54,12 +135,14 @@ export default function About() {
               </div>
             </div>
 
-            {/* Team - immediately after story */}
+            {/* --- Team Grid --- */}
+            {/* Team data from: src/constants/content.ts → ABOUT.team */}
             <div className="max-w-2xl mx-auto">
               <h2 className="font-display text-2xl font-bold text-foreground mb-8 text-center">
                 Meet the Team
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Dynamic team member cards from content.ts */}
                 {ABOUT.team.map((member) => (
                   <div
                     key={member.name}
@@ -84,7 +167,9 @@ export default function About() {
                   </div>
                 ))}
                 
-                {/* BUGGS as team member with real photo */}
+                {/* --- BUGGS Team Card (Hardcoded) --- */}
+                {/* BUGGS is our AI mascot, always shown as a team member */}
+                {/* To edit BUGGS info, change the text below directly */}
                 <div className="bg-card rounded-xl p-6 border border-border text-center hover:shadow-lg transition-shadow">
                   <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-4 border-primary/20">
                     <img
@@ -97,10 +182,10 @@ export default function About() {
                     BUGGS
                   </h3>
                   <p className="text-primary text-sm font-medium mb-2">
-                    Chief Vibes Officer
+                    Chief Vibes Officer {/* ← EDIT BUGGS ROLE HERE */}
                   </p>
                   <p className="text-muted-foreground text-sm">
-                    Your AI squad guide. Keeps the conversation flowing and the logistics sorted.
+                    Your AI squad guide. Keeps the conversation flowing and the logistics sorted. {/* ← EDIT BUGGS BIO HERE */}
                   </p>
                 </div>
               </div>
@@ -108,7 +193,9 @@ export default function About() {
           </div>
         </section>
 
-        {/* Traction with Zilker Park background */}
+        {/* ============ SECTION 2: Traction/Achievements ============ */}
+        {/* Shows company milestones with Zilker Park background */}
+        {/* Traction data from: src/constants/content.ts → ABOUT.traction */}
         <section className="py-12 md:py-16 relative overflow-hidden">
           {/* Background image with overlay */}
           <div 
@@ -124,11 +211,13 @@ export default function About() {
           <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-5xl mx-auto">
               <h2 className="font-display text-3xl font-bold text-foreground mb-4 text-center">
-                Building Momentum
+                Building Momentum {/* ← EDIT SECTION HEADLINE HERE */}
               </h2>
               <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
-                Our journey from idea to impact, validated by Austin's entrepreneurial community.
+                Our journey from idea to impact, validated by Austin's entrepreneurial community. {/* ← EDIT SECTION SUBHEADLINE HERE */}
               </p>
+              
+              {/* Traction cards grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {ABOUT.traction.map((item) => (
                   <div
@@ -157,12 +246,14 @@ export default function About() {
           </div>
         </section>
 
-        {/* Values */}
+        {/* ============ SECTION 3: Values ============ */}
+        {/* Company core values with icons */}
+        {/* Values data from: src/constants/content.ts → ABOUT.values */}
         <section className="py-12 md:py-16 bg-muted/50">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
               <h2 className="font-display text-3xl font-bold text-foreground mb-12 text-center">
-                Our Values
+                Our Values {/* ← EDIT SECTION HEADLINE HERE */}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {ABOUT.values.map((value) => {
@@ -191,6 +282,7 @@ export default function About() {
           </div>
         </section>
 
+        {/* ============ SECTION 4 & 5: FAQ and CTA ============ */}
         <FAQ />
         <CTASection />
       </main>
