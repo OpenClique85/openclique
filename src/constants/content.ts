@@ -60,7 +60,6 @@ export const NAV_LINKS = [
   { label: "Home", href: "/" },                          // Homepage
   { label: "Quests", href: "/quests" },                  // Quest catalog
   { label: "How It Works", href: "/how-it-works" },      // Process explanation
-  { label: "For Creators", href: "/creators" },          // Creator landing page
   { label: "About", href: "/about" },                    // About us
 ];
 
