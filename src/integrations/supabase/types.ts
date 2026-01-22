@@ -757,6 +757,7 @@ export type Database = {
         | "signup_confirmed"
         | "quest_reminder"
         | "general"
+        | "feedback_request"
       quest_status: "draft" | "open" | "closed" | "completed" | "cancelled"
       signup_status:
         | "pending"
@@ -908,6 +909,7 @@ export const Constants = {
         "signup_confirmed",
         "quest_reminder",
         "general",
+        "feedback_request",
       ],
       quest_status: ["draft", "open", "closed", "completed", "cancelled"],
       signup_status: [

@@ -144,9 +144,10 @@ export function SignupsManager() {
     }
     
     // Create notifications for each user
+    // Using 'general' type since feedback_request was just added to enum
     const notifications = usersNeedingReminder.map(userId => ({
       user_id: userId,
-      type: 'feedback_request' as const,
+      type: 'general' as const,
       title: `How was ${selectedQuest.title}?`,
       body: `We'd love your feedback! Takes just 60 seconds.`,
       quest_id: selectedQuestId,
