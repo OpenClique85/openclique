@@ -13,6 +13,7 @@ import { Analytics } from '@/components/admin/Analytics';
 import { PersistentSquadsManager } from '@/components/admin/PersistentSquadsManager';
 import { CreatorsManager } from '@/components/admin/CreatorsManager';
 import { CreatorPreviewTab } from '@/components/admin/CreatorPreviewTab';
+import { DevToolsSection } from '@/components/admin/DevToolsSection';
 
 export default function Admin() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
@@ -50,7 +51,7 @@ export default function Admin() {
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-9 lg:w-auto lg:inline-grid">
             <TabsTrigger value="quests">Quests</TabsTrigger>
             <TabsTrigger value="signups">Signups</TabsTrigger>
             <TabsTrigger value="squads">Squads</TabsTrigger>
@@ -59,6 +60,7 @@ export default function Admin() {
             <TabsTrigger value="messaging">Messaging</TabsTrigger>
             <TabsTrigger value="whatsapp">WhatsApp</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="devtools">Dev Tools</TabsTrigger>
           </TabsList>
           
           <TabsContent value="quests">
@@ -91,6 +93,10 @@ export default function Admin() {
           
           <TabsContent value="analytics">
             <Analytics />
+          </TabsContent>
+          
+          <TabsContent value="devtools">
+            <DevToolsSection />
           </TabsContent>
         </Tabs>
       </main>

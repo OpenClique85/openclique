@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.send-creator-invite]
 verify_jwt = false
+
+[functions.create-test-users]
+verify_jwt = false
