@@ -35,6 +35,9 @@ export function Hero() {
           {/* Headline */}
           <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 animate-fade-in [animation-delay:100ms]">
             {HERO.headline}
+            <span className="block text-3xl md:text-4xl lg:text-5xl mt-3 text-primary font-semibold">
+              {HERO.headlineAccent}
+            </span>
           </h1>
 
           {/* Subheadline */}
