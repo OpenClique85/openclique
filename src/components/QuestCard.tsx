@@ -1,10 +1,9 @@
 import { Link } from 'react-router-dom';
-import { Calendar, DollarSign, Clock, Users, Gift, ExternalLink, Star } from 'lucide-react';
+import { Calendar, DollarSign, Clock, Users, Gift, ExternalLink, Star, Sparkles } from 'lucide-react';
 import type { Quest } from '@/hooks/useQuests';
 import { useQuestRating } from '@/hooks/useQuestRatings';
 import { useCreatorSlug } from '@/hooks/useCreatorSlugs';
 import logo from '@/assets/oc-icon.png';
-
 const QUEST_STATUS_CONFIG: Record<Quest['status'], { label: string; color: string; ctaDisabled?: boolean }> = {
   'open': { label: 'Open', color: 'green' },
   'closed': { label: 'Full', color: 'yellow' },
@@ -66,6 +65,13 @@ const QuestCard = ({ quest, onClick }: QuestCardProps) => {
         <span className={`absolute top-3 right-3 text-xs font-medium px-2.5 py-1 rounded-full border backdrop-blur-sm ${statusStyles}`}>
           {statusLabel}
         </span>
+        {/* Sponsored Badge */}
+        {'isSponsored' in quest && quest.isSponsored && (
+          <span className="absolute top-3 left-3 text-xs font-medium px-2.5 py-1 rounded-full backdrop-blur-sm bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 flex items-center gap-1">
+            <Sparkles className="h-3 w-3" />
+            Sponsored
+          </span>
+        )}
         {/* Theme Tag Overlay */}
         <span className={`absolute bottom-3 left-3 text-xs font-medium px-2.5 py-1 rounded-full backdrop-blur-sm ${themeStyles}`}>
           {quest.theme}
