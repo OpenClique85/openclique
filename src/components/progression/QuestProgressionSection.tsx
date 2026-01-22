@@ -3,11 +3,16 @@ import TreeNode from './TreeNode';
 import { PROGRESSION_TREES, getChildNodes, getRootNode } from '@/constants/progressionTrees';
 
 interface QuestProgressionSectionProps {
-  treeId: 'culture' | 'wellness' | 'connector';
+  treeId?: string;
 }
 
 const QuestProgressionSection = ({ treeId }: QuestProgressionSectionProps) => {
-  const tree = PROGRESSION_TREES[treeId];
+  // Only render if we have a valid tree ID
+  if (!treeId || !['culture', 'wellness', 'connector'].includes(treeId)) {
+    return null;
+  }
+
+  const tree = PROGRESSION_TREES[treeId as 'culture' | 'wellness' | 'connector'];
   const rootNode = getRootNode(tree);
   const tier1Nodes = rootNode ? getChildNodes(tree, rootNode.id) : [];
 
