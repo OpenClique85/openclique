@@ -277,6 +277,47 @@ export type Database = {
           },
         ]
       }
+      quest_squads: {
+        Row: {
+          compatibility_score: number | null
+          confirmed_at: string | null
+          created_at: string
+          id: string
+          quest_id: string
+          squad_name: string
+          status: Database["public"]["Enums"]["squad_status"]
+          whatsapp_link: string | null
+        }
+        Insert: {
+          compatibility_score?: number | null
+          confirmed_at?: string | null
+          created_at?: string
+          id?: string
+          quest_id: string
+          squad_name?: string
+          status?: Database["public"]["Enums"]["squad_status"]
+          whatsapp_link?: string | null
+        }
+        Update: {
+          compatibility_score?: number | null
+          confirmed_at?: string | null
+          created_at?: string
+          id?: string
+          quest_id?: string
+          squad_name?: string
+          status?: Database["public"]["Enums"]["squad_status"]
+          whatsapp_link?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_squads_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quests: {
         Row: {
           briefing_html: string | null
@@ -399,6 +440,45 @@ export type Database = {
           },
         ]
       }
+      squad_members: {
+        Row: {
+          added_at: string
+          id: string
+          signup_id: string | null
+          squad_id: string
+          user_id: string
+        }
+        Insert: {
+          added_at?: string
+          id?: string
+          signup_id?: string | null
+          squad_id: string
+          user_id: string
+        }
+        Update: {
+          added_at?: string
+          id?: string
+          signup_id?: string | null
+          squad_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "squad_members_signup_id_fkey"
+            columns: ["signup_id"]
+            isOneToOne: false
+            referencedRelation: "quest_signups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "squad_members_squad_id_fkey"
+            columns: ["squad_id"]
+            isOneToOne: false
+            referencedRelation: "quest_squads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -498,6 +578,7 @@ export type Database = {
         | "dropped"
         | "no_show"
         | "completed"
+      squad_status: "draft" | "confirmed" | "active" | "completed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -650,6 +731,7 @@ export const Constants = {
         "no_show",
         "completed",
       ],
+      squad_status: ["draft", "confirmed", "active", "completed"],
     },
   },
 } as const

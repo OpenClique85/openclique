@@ -25,9 +25,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, MoreHorizontal, Eye, EyeOff } from 'lucide-react';
+import { Loader2, MoreHorizontal, Eye, EyeOff, Users } from 'lucide-react';
 import { format } from 'date-fns';
 import type { Tables, Enums } from '@/integrations/supabase/types';
+import { SquadRecommendationModal } from './SquadRecommendationModal';
 
 type Quest = Tables<'quests'>;
 type QuestSignup = Tables<'quest_signups'>;
@@ -55,6 +56,9 @@ export function SignupsManager() {
   const [isLoading, setIsLoading] = useState(true);
   const [showEmails, setShowEmails] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [showSquadModal, setShowSquadModal] = useState(false);
+
+  const selectedQuest = quests.find(q => q.id === selectedQuestId);
 
   useEffect(() => {
     const fetchQuests = async () => {
@@ -176,6 +180,17 @@ export function SignupsManager() {
           {showEmails ? <EyeOff className="mr-2 h-4 w-4" /> : <Eye className="mr-2 h-4 w-4" />}
           {showEmails ? 'Hide Emails' : 'Show Emails'}
         </Button>
+        
+        {/* Generate Squads button - show when there are pending signups */}
+        {counts.pending >= 3 && (
+          <Button
+            onClick={() => setShowSquadModal(true)}
+            className="ml-auto"
+          >
+            <Users className="mr-2 h-4 w-4" />
+            Generate Squads ({counts.pending} pending)
+          </Button>
+        )}
       </div>
       
       {/* Status Filters */}
@@ -271,6 +286,15 @@ export function SignupsManager() {
           )}
         </CardContent>
       </Card>
+      
+      {/* Squad Recommendation Modal */}
+      <SquadRecommendationModal
+        open={showSquadModal}
+        onOpenChange={setShowSquadModal}
+        questId={selectedQuestId}
+        questTitle={selectedQuest?.title || ''}
+        onSquadsConfirmed={fetchSignups}
+      />
     </div>
   );
 }

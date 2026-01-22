@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 interface NotifyUsersRequest {
-  type: 'quest_recommendation' | 'quest_shared' | 'referral_accepted';
+  type: 'quest_recommendation' | 'quest_shared' | 'referral_accepted' | 'signup_confirmed';
   quest_id: string;
   user_ids?: string[]; // If empty, find matching users
   custom_message?: string;
@@ -223,6 +223,20 @@ const handler = async (req: Request): Promise<Response> => {
           <h2>${quest.icon} ${quest.title}</h2>
           <p>Thanks for spreading the word! The more the merrier.</p>
           <p><a href="${questUrl}" style="color: #7c3aed; font-weight: bold;">View Quest →</a></p>
+        `;
+        break;
+      
+      case 'signup_confirmed':
+        notificationTitle = `✅ You're confirmed for ${quest.title}!`;
+        notificationBody = custom_message || `Great news! Your spot is confirmed. Check your email for details.`;
+        emailSubject = `✅ You're in! ${quest.title}`;
+        emailHtml = `
+          <h1>You're confirmed!</h1>
+          <p>Great news - your spot for this quest is officially confirmed:</p>
+          <h2>${quest.icon} ${quest.title}</h2>
+          ${custom_message ? `<p>${custom_message}</p>` : ''}
+          <p><a href="${questUrl}" style="color: #7c3aed; font-weight: bold;">View Quest Details →</a></p>
+          <p style="color: #6b7280; font-size: 12px;">We'll send you more details as the event approaches. Get ready for an adventure!</p>
         `;
         break;
       
