@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.redeem-creator-invite]
 verify_jwt = false
+
+[functions.send-creator-invite]
+verify_jwt = false
