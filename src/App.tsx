@@ -62,6 +62,9 @@ import Notifications from "./pages/Notifications";
 import CreatorOnboarding from "./pages/CreatorOnboarding";
 import CreatorDashboard from "./pages/CreatorDashboard";
 import CreatorQuests from "./pages/CreatorQuests";
+import CreatorProfile from "./pages/CreatorProfile";
+import CreatorAnalyticsPage from "./pages/CreatorAnalyticsPage";
+import CreatorPublicProfile from "./pages/CreatorPublicProfile";
 import QuestBuilder from "./pages/QuestBuilder";
 import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -109,8 +112,11 @@ const App = () => (
             <Route path="/creators/content-creators" element={<ContentCreatorsPage />} />
             <Route path="/creators/quest-creators" element={<QuestCreatorsPage />} />
             <Route path="/creators/onboard" element={<CreatorOnboarding />} />
+            <Route path="/creators/:slug" element={<CreatorPublicProfile />} />
             <Route path="/creator" element={<ProtectedRoute><CreatorDashboard /></ProtectedRoute>} />
             <Route path="/creator/quests" element={<ProtectedRoute><CreatorQuests /></ProtectedRoute>} />
+            <Route path="/creator/analytics" element={<ProtectedRoute><CreatorAnalyticsPage /></ProtectedRoute>} />
+            <Route path="/creator/profile" element={<ProtectedRoute><CreatorProfile /></ProtectedRoute>} />
             <Route path="/creator/quests/new" element={<ProtectedRoute><QuestBuilder /></ProtectedRoute>} />
             <Route path="/creator/quests/:questId/edit" element={<ProtectedRoute><QuestBuilder /></ProtectedRoute>} />
             

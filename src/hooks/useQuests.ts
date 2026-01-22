@@ -103,7 +103,7 @@ const calculateDuration = (start: string | null, end: string | null): string => 
 };
 
 // Transform database quest to UI quest format
-const transformQuest = (dbQuest: DbQuest): Quest => {
+export const transformQuest = (dbQuest: DbQuest): Quest => {
   return {
     id: dbQuest.id,
     slug: dbQuest.slug,

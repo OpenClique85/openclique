@@ -43,7 +43,7 @@
 
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
-import { Menu, X, ChevronDown, LogIn, LogOut, User, ClipboardList } from "lucide-react";
+import { Menu, X, ChevronDown, LogIn, LogOut, User, ClipboardList, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -65,7 +65,7 @@ export function Navbar() {
   const location = useLocation();
   
   // Auth state
-  const { user, signOut, isAdmin } = useAuth();
+  const { user, signOut, isAdmin, isCreator } = useAuth();
 
   // Helper: Check if a nav link matches current page
   const isActive = (href: string) => location.pathname === href;
@@ -169,6 +169,14 @@ export function Navbar() {
                       My Quests
                     </Link>
                   </DropdownMenuItem>
+                  {isCreator && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/creator" className="flex items-center gap-2 cursor-pointer">
+                        <Sparkles className="h-4 w-4 text-creator" />
+                        Creator Portal
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   {isAdmin && (
                     <>
                       <DropdownMenuSeparator />
@@ -288,6 +296,16 @@ export function Navbar() {
                       <User className="h-4 w-4" />
                       Profile
                     </Link>
+                    {isCreator && (
+                      <Link
+                        to="/creator"
+                        className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md text-muted-foreground hover:bg-muted"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <Sparkles className="h-4 w-4 text-creator" />
+                        Creator Portal
+                      </Link>
+                    )}
                     {isAdmin && (
                       <Link
                         to="/admin"

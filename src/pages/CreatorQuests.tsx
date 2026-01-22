@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { CreatorPortalNav } from '@/components/creators/CreatorPortalNav';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -263,6 +264,7 @@ export default function CreatorQuests() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
+      <CreatorPortalNav />
       
       <main className="flex-1 container mx-auto px-4 py-8">
         {/* Header */}
