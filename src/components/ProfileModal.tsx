@@ -14,7 +14,6 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, ChevronDown, ChevronUp } from 'lucide-react';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   MultiSelect,
   SingleSelect,
@@ -37,6 +36,8 @@ import {
   ComfortWith,
   OpenTo,
   ContextTag,
+  AgeRange,
+  AustinArea,
   GROUP_SIZE_OPTIONS,
   GROUP_TENDENCY_OPTIONS,
   POST_EVENT_ENERGY_OPTIONS,
@@ -50,6 +51,8 @@ import {
   COMFORT_WITH_OPTIONS,
   OPEN_TO_OPTIONS,
   CONTEXT_TAG_OPTIONS,
+  AGE_RANGE_OPTIONS,
+  AUSTIN_AREA_OPTIONS,
 } from '@/types/profile';
 
 interface ProfileModalProps {
@@ -74,6 +77,10 @@ export function ProfileModal({ open, onComplete }: ProfileModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [showMoreOptions, setShowMoreOptions] = useState(false);
+
+  // Demographics (optional)
+  const [ageRange, setAgeRange] = useState<AgeRange | undefined>();
+  const [area, setArea] = useState<AustinArea | undefined>();
 
   // Extended preferences
   const [groupSize, setGroupSize] = useState<GroupSize[]>([]);
@@ -109,6 +116,14 @@ export function ProfileModal({ open, onComplete }: ProfileModalProps) {
     const prefs: UserPreferences = {
       interest_tags: interests,
     };
+
+    // Demographics
+    if (ageRange || area) {
+      prefs.demographics = {
+        ...(ageRange && { age_range: ageRange }),
+        ...(area && { area }),
+      };
+    }
 
     // Only include fields that have values
     if (groupSize.length || groupTendency.length || postEventEnergy || vibePreference !== 3) {
@@ -225,17 +240,17 @@ export function ProfileModal({ open, onComplete }: ProfileModalProps) {
   return (
     <Dialog open={open} onOpenChange={() => {}}>
       <DialogContent 
-        className="sm:max-w-lg max-h-[90vh] flex flex-col p-0" 
+        className="sm:max-w-lg max-h-[90vh] flex flex-col p-0 overflow-hidden" 
         onPointerDownOutside={(e) => e.preventDefault()}
       >
-        <DialogHeader className="px-6 pt-6 pb-2">
+        <DialogHeader className="px-6 pt-6 pb-2 shrink-0">
           <DialogTitle className="font-display text-xl">Complete Your Profile</DialogTitle>
           <DialogDescription>
             Help us match you with the right quests and squads. Takes about a minute!
           </DialogDescription>
         </DialogHeader>
         
-        <ScrollArea className="flex-1 px-6">
+        <div className="flex-1 overflow-y-auto px-6">
           <form onSubmit={handleSubmit} className="space-y-6 pb-6">
             {/* Display Name - Required */}
             <div className="space-y-2">
@@ -285,6 +300,26 @@ export function ProfileModal({ open, onComplete }: ProfileModalProps) {
 
             {showMoreOptions && (
               <div className="space-y-6 animate-fade-in">
+                {/* Demographics Section */}
+                <SectionHeader title="A Little About You" icon="👤" />
+                <p className="text-xs text-muted-foreground -mt-4">
+                  Helps us match you with similar folks. Totally optional!
+                </p>
+                
+                <SingleSelect<AgeRange>
+                  label="Age range"
+                  options={AGE_RANGE_OPTIONS}
+                  selected={ageRange}
+                  onChange={(v) => setAgeRange(v)}
+                />
+                
+                <SingleSelect<AustinArea>
+                  label="Where in Austin are you based?"
+                  options={AUSTIN_AREA_OPTIONS}
+                  selected={area}
+                  onChange={(v) => setArea(v)}
+                />
+
                 {/* Social Style Section */}
                 <SectionHeader title="Social Style" icon="💬" />
                 
@@ -395,7 +430,7 @@ export function ProfileModal({ open, onComplete }: ProfileModalProps) {
                 />
 
                 {/* Context Section */}
-                <SectionHeader title="About You" icon="🙋" />
+                <SectionHeader title="Life Stage" icon="🙋" />
                 
                 <MultiSelect
                   label="Which describe you right now? (optional)"
@@ -447,7 +482,7 @@ export function ProfileModal({ open, onComplete }: ProfileModalProps) {
               You can update these preferences anytime in your profile settings
             </p>
           </form>
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );

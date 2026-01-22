@@ -35,10 +35,20 @@ export type OpenTo = 'mixed_ages' | 'mixed_backgrounds' | 'first_timers' | 'retu
 // Context tags
 export type ContextTag = 'new_to_city' | 'remote_wfh' | 'student' | 'career_transition' | 'busy_season' | 'building_routine';
 
+// Demographics (ranges to minimize PII)
+export type AgeRange = '18_24' | '25_34' | '35_44' | '45_54' | '55_plus';
+export type AustinArea = 'downtown' | 'east_austin' | 'south_austin' | 'north_austin' | 'central' | 'round_rock_pflugerville' | 'cedar_park_leander' | 'other';
+
 // Full preferences interface
 export interface UserPreferences {
   // Existing field
   interest_tags?: string[];
+  
+  // Demographics (optional, for matching)
+  demographics?: {
+    age_range?: AgeRange;
+    area?: AustinArea;
+  };
   
   // Social Energy & Style
   social_style?: {
@@ -189,4 +199,24 @@ export const CONTEXT_TAG_OPTIONS: QuestionOption<ContextTag>[] = [
   { id: 'career_transition', label: 'Career transition', emoji: '🔄' },
   { id: 'busy_season', label: 'Busy season of life', emoji: '⏰' },
   { id: 'building_routine', label: 'Looking to build routine', emoji: '📅' },
+];
+
+// Demographics options (using ranges to minimize PII)
+export const AGE_RANGE_OPTIONS: QuestionOption<AgeRange>[] = [
+  { id: '18_24', label: '18-24' },
+  { id: '25_34', label: '25-34' },
+  { id: '35_44', label: '35-44' },
+  { id: '45_54', label: '45-54' },
+  { id: '55_plus', label: '55+' },
+];
+
+export const AUSTIN_AREA_OPTIONS: QuestionOption<AustinArea>[] = [
+  { id: 'downtown', label: 'Downtown', emoji: '🏙️' },
+  { id: 'east_austin', label: 'East Austin', emoji: '🌅' },
+  { id: 'south_austin', label: 'South Austin', emoji: '🌳' },
+  { id: 'north_austin', label: 'North Austin', emoji: '🏘️' },
+  { id: 'central', label: 'Central/UT Area', emoji: '🎓' },
+  { id: 'round_rock_pflugerville', label: 'Round Rock/Pflugerville', emoji: '🏡' },
+  { id: 'cedar_park_leander', label: 'Cedar Park/Leander', emoji: '🌲' },
+  { id: 'other', label: 'Other/Flexible', emoji: '📍' },
 ];
