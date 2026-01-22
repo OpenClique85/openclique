@@ -12,6 +12,7 @@ import { WhatsAppManager } from '@/components/admin/WhatsAppManager';
 import { Analytics } from '@/components/admin/Analytics';
 import { PersistentSquadsManager } from '@/components/admin/PersistentSquadsManager';
 import { CreatorsManager } from '@/components/admin/CreatorsManager';
+import { SponsorsManager } from '@/components/admin/SponsorsManager';
 import { CreatorPreviewTab } from '@/components/admin/CreatorPreviewTab';
 import { DevToolsSection } from '@/components/admin/DevToolsSection';
 
