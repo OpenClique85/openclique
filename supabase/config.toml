@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.notify-users]
 verify_jwt = false
+
+[functions.recommend-squads]
+verify_jwt = false
