@@ -1,6 +1,8 @@
+import { Link } from 'react-router-dom';
 import { Calendar, DollarSign, Clock, Users, Gift, ExternalLink, Star } from 'lucide-react';
 import type { Quest } from '@/hooks/useQuests';
 import { useQuestRating } from '@/hooks/useQuestRatings';
+import { useCreatorSlug } from '@/hooks/useCreatorSlugs';
 import logo from '@/assets/oc-icon.png';
 
 const QUEST_STATUS_CONFIG: Record<Quest['status'], { label: string; color: string; ctaDisabled?: boolean }> = {
@@ -37,6 +39,15 @@ const QuestCard = ({ quest, onClick }: QuestCardProps) => {
   
   // Fetch rating for this quest
   const { rating, reviewCount } = useQuestRating(quest.id);
+  
+  // Fetch creator slug for linking
+  const { data: creatorInfo } = useCreatorSlug(
+    quest.creatorType === 'community' ? quest.creatorId : undefined
+  );
+
+  const handleCreatorClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
 
   return (
     <button
@@ -125,7 +136,17 @@ const QuestCard = ({ quest, onClick }: QuestCardProps) => {
               ) : quest.creatorType === 'community' ? (
                 <>
                   <span className="w-4 h-4 rounded-full bg-creator/20 flex items-center justify-center text-[10px]">👤</span>
-                  <span>{quest.creatorName || 'Community'}</span>
+                  {creatorInfo?.slug ? (
+                    <Link
+                      to={`/creators/${creatorInfo.slug}`}
+                      onClick={handleCreatorClick}
+                      className="hover:text-primary hover:underline transition-colors"
+                    >
+                      {quest.creatorName || 'Community'}
+                    </Link>
+                  ) : (
+                    <span>{quest.creatorName || 'Community'}</span>
+                  )}
                   {quest.creatorSocialUrl && (
                     <ExternalLink className="w-3 h-3 text-primary" />
                   )}
