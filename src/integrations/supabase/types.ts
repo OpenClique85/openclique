@@ -330,6 +330,9 @@ export type Database = {
           capacity_total: number | null
           cost_description: string | null
           created_at: string
+          creator_name: string | null
+          creator_social_url: string | null
+          creator_type: string | null
           end_datetime: string | null
           icon: string | null
           id: string
@@ -356,6 +359,9 @@ export type Database = {
           capacity_total?: number | null
           cost_description?: string | null
           created_at?: string
+          creator_name?: string | null
+          creator_social_url?: string | null
+          creator_type?: string | null
           end_datetime?: string | null
           icon?: string | null
           id?: string
@@ -382,6 +388,9 @@ export type Database = {
           capacity_total?: number | null
           cost_description?: string | null
           created_at?: string
+          creator_name?: string | null
+          creator_social_url?: string | null
+          creator_type?: string | null
           end_datetime?: string | null
           icon?: string | null
           id?: string
@@ -698,7 +707,22 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      quest_ratings: {
+        Row: {
+          avg_rating: number | null
+          quest_id: string | null
+          review_count: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       has_role: {
