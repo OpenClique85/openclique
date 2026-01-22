@@ -11,6 +11,7 @@ interface AuthContextType {
   profile: Profile | null;
   isLoading: boolean;
   isAdmin: boolean;
+  isCreator: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string) => Promise<{ error: Error | null }>;
   signInWithGoogle: () => Promise<{ error: Error | null }>;
@@ -26,6 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isCreator, setIsCreator] = useState(false);
 
   const fetchProfile = async (userId: string) => {
     const { data } = await supabase
@@ -46,6 +48,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsAdmin(data === true);
   };
 
+  const checkCreatorStatus = async (userId: string) => {
+    const { data } = await supabase.rpc('has_role', {
+      _user_id: userId,
+      _role: 'quest_creator'
+    });
+    setIsCreator(data === true);
+  };
+
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -58,10 +68,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setTimeout(() => {
             fetchProfile(session.user.id);
             checkAdminStatus(session.user.id);
+            checkCreatorStatus(session.user.id);
           }, 0);
         } else {
           setProfile(null);
           setIsAdmin(false);
+          setIsCreator(false);
         }
       }
     );
@@ -74,6 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (session?.user) {
         fetchProfile(session.user.id);
         checkAdminStatus(session.user.id);
+        checkCreatorStatus(session.user.id);
       }
       setIsLoading(false);
     });
@@ -112,6 +125,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
     setProfile(null);
     setIsAdmin(false);
+    setIsCreator(false);
   };
 
   const refreshProfile = async () => {
@@ -127,6 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       profile,
       isLoading,
       isAdmin,
+      isCreator,
       signIn,
       signUp,
       signInWithGoogle,

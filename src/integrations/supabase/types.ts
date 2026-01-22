@@ -137,6 +137,7 @@ export type Database = {
           onboarded_at: string | null
           payout_placeholder: Json | null
           photo_url: string | null
+          slug: string | null
           socials: Json | null
           status: string
           updated_at: string
@@ -152,6 +153,7 @@ export type Database = {
           onboarded_at?: string | null
           payout_placeholder?: Json | null
           photo_url?: string | null
+          slug?: string | null
           socials?: Json | null
           status?: string
           updated_at?: string
@@ -167,6 +169,7 @@ export type Database = {
           onboarded_at?: string | null
           payout_placeholder?: Json | null
           photo_url?: string | null
+          slug?: string | null
           socials?: Json | null
           status?: string
           updated_at?: string

@@ -13,7 +13,7 @@ const corsHeaders = {
 interface SendEmailRequest {
   to: string | string[];
   subject: string;
-  template: "quest_confirmation" | "quest_reminder" | "quest_cancelled" | "custom";
+  template: "quest_confirmation" | "quest_reminder" | "quest_cancelled" | "quest_approved" | "quest_needs_changes" | "quest_rejected" | "custom";
   variables?: Record<string, string>;
   customHtml?: string;
 }
@@ -76,6 +76,81 @@ const templates: Record<string, (vars: Record<string, string>) => string> = {
       ${vars.reason ? `<p style="font-size: 14px; color: #666;"><strong>Reason:</strong> ${vars.reason}</p>` : ""}
       
       <p style="font-size: 14px; color: #666;">We know this is disappointing. Keep an eye out for new quests — there's always another adventure around the corner!</p>
+      <p style="font-size: 14px; color: #666;">— The OpenClique Team</p>
+    </div>
+  `,
+  
+  quest_approved: (vars) => `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #10b981; margin: 0;">🎉 Your Quest is Approved!</h1>
+      </div>
+      <p style="font-size: 16px; color: #333;">Hey ${vars.creator_name || "Creator"}!</p>
+      <p style="font-size: 16px; color: #333;">Great news — your quest <strong>"${vars.quest_title || "your quest"}"</strong> has been approved!</p>
+      
+      <div style="background: #ecfdf5; border-left: 4px solid #10b981; padding: 15px; margin: 20px 0;">
+        <p style="margin: 0; font-size: 16px;">
+          ${vars.is_published === 'true' 
+            ? '✅ Your quest is now <strong>live</strong> and accepting signups!' 
+            : '✅ Your quest is approved and ready to be published when you\'re ready.'}
+        </p>
+      </div>
+      
+      ${vars.quest_url ? `
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${vars.quest_url}" style="background: #14b8a6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">
+            View Your Quest
+          </a>
+        </div>
+      ` : ""}
+      
+      <p style="font-size: 14px; color: #666;">Congratulations on creating something awesome!</p>
+      <p style="font-size: 14px; color: #666;">— The OpenClique Team</p>
+    </div>
+  `,
+  
+  quest_needs_changes: (vars) => `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #f59e0b; margin: 0;">📝 Quest Feedback</h1>
+      </div>
+      <p style="font-size: 16px; color: #333;">Hey ${vars.creator_name || "Creator"},</p>
+      <p style="font-size: 16px; color: #333;">We've reviewed your quest <strong>"${vars.quest_title || "your quest"}"</strong> and have some feedback to help make it even better.</p>
+      
+      <div style="background: #fffbeb; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
+        <p style="margin: 0 0 10px 0; font-weight: bold;">Reviewer Feedback:</p>
+        <p style="margin: 0; font-size: 14px;">${vars.admin_notes || "Please check the Creator Portal for details."}</p>
+      </div>
+      
+      ${vars.edit_url ? `
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${vars.edit_url}" style="background: #f59e0b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">
+            Edit Your Quest
+          </a>
+        </div>
+      ` : ""}
+      
+      <p style="font-size: 14px; color: #666;">Once you've made the updates, you can resubmit for review.</p>
+      <p style="font-size: 14px; color: #666;">— The OpenClique Team</p>
+    </div>
+  `,
+  
+  quest_rejected: (vars) => `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #6b7280; margin: 0;">Quest Update</h1>
+      </div>
+      <p style="font-size: 16px; color: #333;">Hey ${vars.creator_name || "Creator"},</p>
+      <p style="font-size: 16px; color: #333;">We've reviewed your quest <strong>"${vars.quest_title || "your quest"}"</strong> and unfortunately, it wasn't approved at this time.</p>
+      
+      ${vars.admin_notes ? `
+        <div style="background: #f3f4f6; border-left: 4px solid #6b7280; padding: 15px; margin: 20px 0;">
+          <p style="margin: 0 0 10px 0; font-weight: bold;">Feedback:</p>
+          <p style="margin: 0; font-size: 14px;">${vars.admin_notes}</p>
+        </div>
+      ` : ""}
+      
+      <p style="font-size: 14px; color: #666;">Don't be discouraged! We encourage you to create new quests that align with our community guidelines. We're here to help if you have questions.</p>
       <p style="font-size: 14px; color: #666;">— The OpenClique Team</p>
     </div>
   `,

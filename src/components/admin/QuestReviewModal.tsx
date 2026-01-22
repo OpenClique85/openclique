@@ -106,6 +106,50 @@ export function QuestReviewModal({ quest, open, onOpenChange, onActionComplete }
             quest_id: quest.id
           });
         }
+
+        // Send email notification
+        try {
+          // Get creator's email from profiles
+          const { data: creatorProfile } = await supabase
+            .from('profiles')
+            .select('email, display_name')
+            .eq('id', quest.creator_id)
+            .single();
+
+          if (creatorProfile?.email) {
+            const templateMap: Record<string, string> = {
+              'approved': 'quest_approved',
+              'needs_changes': 'quest_needs_changes',
+              'rejected': 'quest_rejected'
+            };
+
+            const template = templateMap[newStatus];
+            if (template) {
+              await supabase.functions.invoke('send-email', {
+                body: {
+                  to: creatorProfile.email,
+                  subject: newStatus === 'approved' 
+                    ? `🎉 Your quest "${quest.title}" is approved!`
+                    : newStatus === 'needs_changes'
+                      ? `📝 Feedback on "${quest.title}"`
+                      : `Update on "${quest.title}"`,
+                  template,
+                  variables: {
+                    creator_name: creatorProfile.display_name || quest.creator_profile?.display_name || 'Creator',
+                    quest_title: quest.title,
+                    admin_notes: adminNotes || '',
+                    is_published: shouldPublish ? 'true' : 'false',
+                    quest_url: shouldPublish ? `${window.location.origin}/quests/${quest.slug}` : '',
+                    edit_url: `${window.location.origin}/creator/quests/${quest.id}/edit`
+                  }
+                }
+              });
+            }
+          }
+        } catch (emailError) {
+          console.error('Failed to send email notification:', emailError);
+          // Don't block the action if email fails
+        }
       }
 
       const successMessage = 

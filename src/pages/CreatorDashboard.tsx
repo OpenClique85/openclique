@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { CreatorPortalNav } from '@/components/creators/CreatorPortalNav';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -92,6 +93,7 @@ export default function CreatorDashboard() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
+      <CreatorPortalNav />
       
       <main className="flex-1 container mx-auto px-4 py-8">
         {/* Header */}
@@ -189,17 +191,6 @@ export default function CreatorDashboard() {
             </CardContent>
           </Card>
         </div>
-
-        {/* Coming Soon */}
-        <Card className="mt-8 border-dashed">
-          <CardHeader className="text-center">
-            <Sparkles className="h-8 w-8 text-creator mx-auto mb-2" />
-            <CardTitle>Analytics Coming Soon</CardTitle>
-            <CardDescription>
-              Track signups, ratings, and feedback for your quests.
-            </CardDescription>
-          </CardHeader>
-        </Card>
       </main>
       
       <Footer />
