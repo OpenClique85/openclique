@@ -61,6 +61,7 @@ import Feedback from "./pages/Feedback";
 import Notifications from "./pages/Notifications";
 import CreatorOnboarding from "./pages/CreatorOnboarding";
 import CreatorDashboard from "./pages/CreatorDashboard";
+import CreatorQuests from "./pages/CreatorQuests";
 import QuestBuilder from "./pages/QuestBuilder";
 import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -109,6 +110,7 @@ const App = () => (
             <Route path="/creators/quest-creators" element={<QuestCreatorsPage />} />
             <Route path="/creators/onboard" element={<CreatorOnboarding />} />
             <Route path="/creator" element={<ProtectedRoute><CreatorDashboard /></ProtectedRoute>} />
+            <Route path="/creator/quests" element={<ProtectedRoute><CreatorQuests /></ProtectedRoute>} />
             <Route path="/creator/quests/new" element={<ProtectedRoute><QuestBuilder /></ProtectedRoute>} />
             <Route path="/creator/quests/:questId/edit" element={<ProtectedRoute><QuestBuilder /></ProtectedRoute>} />
             
