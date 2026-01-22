@@ -1,3 +1,35 @@
+/**
+ * =============================================================================
+ * FILE: WorkWithUs.tsx
+ * PURPOSE: The Work With Us page - for job seekers and volunteers
+ * =============================================================================
+ * 
+ * WHAT THIS FILE CONTROLS:
+ * - Job/volunteer opportunities landing page
+ * - Available roles grid with icons
+ * - "Who We Look For" trait tags
+ * - FAQ accordion
+ * - CTA button that opens Google Form
+ * 
+ * WHERE TO EDIT COPY/TEXT:
+ * - Title and subtitle: src/constants/content.ts → WORK_WITH_US_PAGE.title/subtitle
+ * - Role cards: src/constants/content.ts → WORK_WITH_US_PAGE.roles
+ * - Trait tags: src/constants/content.ts → WORK_WITH_US_PAGE.whoWeLookFor
+ * - FAQ items: src/constants/content.ts → WORK_WITH_US_PAGE.faq
+ * - CTA button text: src/constants/content.ts → WORK_WITH_US_PAGE.ctaText
+ * - Application form URL: src/constants/content.ts → FORM_URLS.workWithUs
+ * 
+ * ICON/IMAGE MAPPINGS:
+ * - iconMap: Maps role index to Lucide icons
+ * - roleImages: Maps role index to background images for hover effect
+ * 
+ * RELATED FILES:
+ * - src/constants/content.ts (WORK_WITH_US_PAGE and FORM_URLS)
+ * 
+ * LAST UPDATED: January 2025
+ * =============================================================================
+ */
+
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -9,19 +41,42 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+
+// ============ IMAGES ============
 import runningGroup from "@/assets/austin/running-group.jpg";
 import coffeeShopFriends from "@/assets/austin/coffee-shop-friends.jpg";
 import rooftopGathering from "@/assets/austin/rooftop-gathering.jpg";
 
+/**
+ * ROLE ICON MAPPING
+ * 
+ * Maps role index (0, 1, 2) to Lucide icons.
+ * Add more icons if you add more roles in content.ts.
+ */
 const iconMap = {
-  0: Compass,
-  1: Users,
-  2: Sparkles,
+  0: Compass,    // First role icon
+  1: Users,      // Second role icon
+  2: Sparkles,   // Third role icon
 };
 
+/**
+ * ROLE BACKGROUND IMAGES
+ * 
+ * Maps role index to images that appear on hover.
+ * Add more images if you add more roles.
+ */
 const roleImages = [runningGroup, coffeeShopFriends, rooftopGathering];
 
+/**
+ * Work With Us Page Component
+ * 
+ * Displays job/volunteer opportunities and application CTA.
+ */
 export default function WorkWithUs() {
+  /**
+   * Opens the work application Google Form
+   * URL defined in: src/constants/content.ts → FORM_URLS.workWithUs
+   */
   const handleCTAClick = () => {
     window.open(FORM_URLS.workWithUs, "_blank");
   };
@@ -31,7 +86,8 @@ export default function WorkWithUs() {
       <Navbar />
       <main className="flex-1">
         <section className="py-16 md:py-24 relative overflow-hidden">
-          {/* Background image */}
+          
+          {/* ============ BACKGROUND IMAGE ============ */}
           <div 
             className="absolute inset-0 opacity-10"
             style={{
@@ -44,7 +100,9 @@ export default function WorkWithUs() {
           
           <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-3xl mx-auto">
-              {/* Header */}
+              
+              {/* ============ HEADER ============ */}
+              {/* Text from: src/constants/content.ts → WORK_WITH_US_PAGE.title/subtitle */}
               <div className="text-center mb-12">
                 <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">
                   {WORK_WITH_US_PAGE.title}
@@ -54,7 +112,8 @@ export default function WorkWithUs() {
                 </p>
               </div>
 
-              {/* Roles */}
+              {/* ============ ROLES GRID ============ */}
+              {/* Roles from: src/constants/content.ts → WORK_WITH_US_PAGE.roles */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                 {WORK_WITH_US_PAGE.roles.map((role, index) => {
                   const Icon = iconMap[index as keyof typeof iconMap] || Sparkles;
@@ -89,10 +148,11 @@ export default function WorkWithUs() {
                 })}
               </div>
 
-              {/* Who We Look For */}
+              {/* ============ WHO WE LOOK FOR ============ */}
+              {/* Traits from: src/constants/content.ts → WORK_WITH_US_PAGE.whoWeLookFor */}
               <div className="text-center mb-12">
                 <h2 className="font-display text-xl font-semibold text-foreground mb-4">
-                  Who We Look For
+                  Who We Look For {/* ← EDIT SECTION HEADLINE HERE */}
                 </h2>
                 <div className="flex flex-wrap justify-center gap-2">
                   {WORK_WITH_US_PAGE.whoWeLookFor.map((trait) => (
@@ -106,10 +166,11 @@ export default function WorkWithUs() {
                 </div>
               </div>
 
-              {/* FAQ */}
+              {/* ============ FAQ ============ */}
+              {/* Questions from: src/constants/content.ts → WORK_WITH_US_PAGE.faq */}
               <div className="mb-12">
                 <h2 className="font-display text-xl font-semibold text-foreground mb-6 text-center">
-                  Questions?
+                  Questions? {/* ← EDIT SECTION HEADLINE HERE */}
                 </h2>
                 <Accordion type="single" collapsible className="w-full">
                   {WORK_WITH_US_PAGE.faq.map((item, index) => (
@@ -125,7 +186,9 @@ export default function WorkWithUs() {
                 </Accordion>
               </div>
 
-              {/* CTA */}
+              {/* ============ CTA BUTTON ============ */}
+              {/* Button text from: src/constants/content.ts → WORK_WITH_US_PAGE.ctaText */}
+              {/* Opens: src/constants/content.ts → FORM_URLS.workWithUs */}
               <div className="text-center">
                 <Button
                   size="lg"

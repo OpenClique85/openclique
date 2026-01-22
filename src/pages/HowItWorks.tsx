@@ -1,3 +1,31 @@
+/**
+ * =============================================================================
+ * FILE: HowItWorks.tsx
+ * PURPOSE: The How It Works page - explains the OpenClique process and journey
+ * =============================================================================
+ * 
+ * WHAT THIS FILE CONTROLS:
+ * - "The Journey" numbered steps section
+ * - Interactive quest path carousel (culture/wellness/connector trees)
+ * - User progression timeline
+ * - "Meet BUGGS" feature section
+ * - CTA section at the bottom
+ * 
+ * WHERE TO EDIT COPY/TEXT:
+ * - Hero title/subtitle: src/constants/content.ts → HOW_IT_WORKS.heroTitle/heroSubtitle
+ * - Journey steps: src/constants/content.ts → HOW_IT_WORKS.steps
+ * - BUGGS section: src/constants/content.ts → HOW_IT_WORKS.buggs
+ * 
+ * RELATED FILES:
+ * - src/constants/content.ts (HOW_IT_WORKS for all text)
+ * - src/components/progression/PathCarousel.tsx (interactive path selector)
+ * - src/components/UserJourneySection.tsx (progression timeline)
+ * - src/components/CTASection.tsx (final CTA)
+ * 
+ * LAST UPDATED: January 2025
+ * =============================================================================
+ */
+
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { CTASection } from "@/components/CTASection";
@@ -5,15 +33,24 @@ import { HOW_IT_WORKS } from "@/constants/content";
 import { Check } from "lucide-react";
 import PathCarousel from "@/components/progression/PathCarousel";
 import { UserJourneySection } from "@/components/UserJourneySection";
-import buggsFace from "@/assets/buggs-face.png";
-import runningGroup from "@/assets/austin/running-group.jpg";
 
+// ============ IMAGES ============
+import buggsFace from "@/assets/buggs-face.png";       // BUGGS mascot for Meet BUGGS section
+import runningGroup from "@/assets/austin/running-group.jpg"; // Hero background
+
+/**
+ * How It Works Page Component
+ * 
+ * Explains the OpenClique process from signup to ongoing engagement.
+ */
 export default function HowItWorks() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1">
-        {/* Hero with running background */}
+        
+        {/* ============ SECTION 1: HERO ============ */}
+        {/* Text from: src/constants/content.ts → HOW_IT_WORKS.heroTitle/heroSubtitle */}
         <section className="py-16 md:py-24 relative overflow-hidden">
           {/* Background image */}
           <div 
@@ -38,16 +75,17 @@ export default function HowItWorks() {
           </div>
         </section>
 
-        {/* Steps - The Journey */}
+        {/* ============ SECTION 2: THE JOURNEY (Steps) ============ */}
+        {/* Steps from: src/constants/content.ts → HOW_IT_WORKS.steps */}
         <section className="py-16 md:py-24 bg-muted/50">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
               <h2 className="font-display text-3xl font-bold text-foreground mb-12 text-center">
-                The Journey
+                The Journey {/* ← EDIT SECTION HEADLINE HERE */}
               </h2>
               
               <div className="relative">
-                {/* Vertical line */}
+                {/* Vertical connector line (desktop only) */}
                 <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-border hidden md:block" />
                 
                 <div className="space-y-8">
@@ -56,12 +94,12 @@ export default function HowItWorks() {
                       key={step.number}
                       className="relative flex gap-6 items-start"
                     >
-                      {/* Step number */}
+                      {/* Step number circle */}
                       <div className="flex-shrink-0 w-16 h-16 rounded-full bg-primary text-primary-foreground font-display font-bold text-xl flex items-center justify-center z-10">
                         {step.number}
                       </div>
                       
-                      {/* Content */}
+                      {/* Step content card */}
                       <div className="flex-1 bg-card rounded-xl p-6 border border-border">
                         <h3 className="font-display text-xl font-semibold text-foreground mb-2">
                           {step.title}
@@ -78,20 +116,22 @@ export default function HowItWorks() {
           </div>
         </section>
 
-        {/* Your Quest Journey - RPG Branching Trees */}
+        {/* ============ SECTION 3: YOUR QUEST JOURNEY ============ */}
+        {/* Interactive path selector showing branching progression trees */}
         <section className="py-16 md:py-24">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-12">
                 <h2 className="font-display text-3xl font-bold text-foreground mb-4">
-                  Your Quest Journey
+                  Your Quest Journey {/* ← EDIT SECTION HEADLINE HERE */}
                 </h2>
                 <p className="text-lg text-muted-foreground">
-                  Complete experiences with your squad. Choices you make together shape what opens next.
+                  Complete experiences with your squad. Choices you make together shape what opens next. {/* ← EDIT SECTION SUBHEADLINE HERE */}
                 </p>
               </div>
 
-              {/* Interactive Path Carousel with Branching Trees */}
+              {/* Interactive Path Carousel */}
+              {/* Component: src/components/progression/PathCarousel.tsx */}
               <PathCarousel />
 
               {/* Explanation footer */}
@@ -105,17 +145,21 @@ export default function HowItWorks() {
           </div>
         </section>
 
-        {/* Your Progression - User Journey */}
+        {/* ============ SECTION 4: YOUR PROGRESSION ============ */}
+        {/* Timeline showing user journey from first quest to alumni */}
+        {/* Component: src/components/UserJourneySection.tsx */}
         <UserJourneySection />
 
-        {/* Meet BUGGS - Centered layout */}
+        {/* ============ SECTION 5: MEET BUGGS ============ */}
+        {/* Text from: src/constants/content.ts → HOW_IT_WORKS.buggs */}
         <section className="py-16 md:py-24 bg-muted/50">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto">
               <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-2xl p-8 md:p-12 border border-primary/10">
-                {/* Centered BUGGS illustration */}
+                {/* Centered layout */}
                 <div className="flex flex-col items-center text-center">
-                  {/* BUGGS Mascot - centered in rounded white container */}
+                  
+                  {/* BUGGS Mascot Image */}
                   <div className="mb-8 flex justify-center">
                     <div className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-white shadow-lg border border-border/50 flex items-center justify-center p-2">
                       <img 
@@ -137,6 +181,8 @@ export default function HowItWorks() {
                     <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
                       {HOW_IT_WORKS.buggs.description}
                     </p>
+                    
+                    {/* BUGGS Features List */}
                     <ul className="space-y-3 inline-block text-left">
                       {HOW_IT_WORKS.buggs.features.map((feature, index) => (
                         <li key={index} className="flex items-center gap-3">
@@ -154,6 +200,7 @@ export default function HowItWorks() {
           </div>
         </section>
 
+        {/* ============ SECTION 6: CTA ============ */}
         <CTASection />
       </main>
       <Footer />

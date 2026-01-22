@@ -1,12 +1,51 @@
+/**
+ * =============================================================================
+ * FILE: Pilot.tsx
+ * PURPOSE: The Pilot signup page - for users joining the Austin pilot program
+ * =============================================================================
+ * 
+ * WHAT THIS FILE CONTROLS:
+ * - Pilot program landing page
+ * - BUGGS mascot header with animated "accepting applications" badge
+ * - "What to expect" list
+ * - CTA button that opens Google Form
+ * 
+ * WHERE TO EDIT COPY/TEXT:
+ * - Title and subtitle: src/constants/content.ts → PILOT_PAGE.title/subtitle
+ * - What to expect list: src/constants/content.ts → PILOT_PAGE.whatToExpect
+ * - CTA button text: src/constants/content.ts → PILOT_PAGE.ctaText
+ * - Note below button: src/constants/content.ts → PILOT_PAGE.note
+ * - Application form URL: src/constants/content.ts → FORM_URLS.pilot
+ * 
+ * RELATED FILES:
+ * - src/constants/content.ts (PILOT_PAGE and FORM_URLS)
+ * - src/assets/buggs-face.png (BUGGS mascot image)
+ * - src/assets/austin/zilker-park.jpg (background image)
+ * 
+ * LAST UPDATED: January 2025
+ * =============================================================================
+ */
+
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { PILOT_PAGE, FORM_URLS } from "@/constants/content";
 import { ArrowRight, Check } from "lucide-react";
-import buggsFace from "@/assets/buggs-face.png";
-import zilkerPark from "@/assets/austin/zilker-park.jpg";
 
+// ============ IMAGES ============
+import buggsFace from "@/assets/buggs-face.png";       // BUGGS mascot icon
+import zilkerPark from "@/assets/austin/zilker-park.jpg"; // Background image
+
+/**
+ * Pilot Page Component
+ * 
+ * Simple signup page for the Austin pilot program.
+ */
 export default function Pilot() {
+  /**
+   * Opens the pilot application Google Form
+   * URL defined in: src/constants/content.ts → FORM_URLS.pilot
+   */
   const handleCTAClick = () => {
     window.open(FORM_URLS.pilot, "_blank");
   };
@@ -16,7 +55,8 @@ export default function Pilot() {
       <Navbar />
       <main className="flex-1">
         <section className="py-16 md:py-24 relative overflow-hidden">
-          {/* Background image */}
+          
+          {/* ============ BACKGROUND IMAGE ============ */}
           <div 
             className="absolute inset-0 opacity-10"
             style={{
@@ -29,8 +69,10 @@ export default function Pilot() {
           
           <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-2xl mx-auto">
-              {/* Header with BUGGS */}
+              
+              {/* ============ HEADER WITH BUGGS ============ */}
               <div className="text-center mb-12">
+                {/* BUGGS mascot image */}
                 <div className="flex justify-center mb-6">
                   <img 
                     src={buggsFace} 
@@ -38,13 +80,18 @@ export default function Pilot() {
                     className="w-16 h-16 object-contain"
                   />
                 </div>
+                
+                {/* Animated "accepting applications" badge */}
                 <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
                   </span>
-                  Now accepting applications
+                  Now accepting applications {/* ← EDIT BADGE TEXT HERE */}
                 </div>
+                
+                {/* Page title and subtitle */}
+                {/* Text from: src/constants/content.ts → PILOT_PAGE.title/subtitle */}
                 <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">
                   {PILOT_PAGE.title}
                 </h1>
@@ -53,10 +100,11 @@ export default function Pilot() {
                 </p>
               </div>
 
-              {/* What to expect */}
+              {/* ============ WHAT TO EXPECT LIST ============ */}
+              {/* Items from: src/constants/content.ts → PILOT_PAGE.whatToExpect */}
               <div className="bg-card rounded-xl p-8 border border-border mb-8">
                 <h2 className="font-display text-xl font-semibold text-foreground mb-6">
-                  What to expect
+                  What to expect {/* ← EDIT SECTION HEADLINE HERE */}
                 </h2>
                 <ul className="space-y-4">
                   {PILOT_PAGE.whatToExpect.map((item, index) => (
@@ -70,7 +118,9 @@ export default function Pilot() {
                 </ul>
               </div>
 
-              {/* CTA */}
+              {/* ============ CTA BUTTON ============ */}
+              {/* Button text from: src/constants/content.ts → PILOT_PAGE.ctaText */}
+              {/* Opens: src/constants/content.ts → FORM_URLS.pilot */}
               <div className="text-center">
                 <Button
                   size="lg"

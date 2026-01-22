@@ -1,7 +1,44 @@
+/**
+ * =============================================================================
+ * FILE: Terms.tsx
+ * PURPOSE: The Terms of Service page - legal terms and conditions
+ * =============================================================================
+ * 
+ * WHAT THIS FILE CONTROLS:
+ * - Terms of service content and formatting
+ * - All legal terms including pilot program, user conduct, safety guidelines
+ * - Community guidelines section (has anchor #community-guidelines)
+ * - Safety section (has anchor #safety)
+ * 
+ * WHERE TO EDIT COPY/TEXT:
+ * - Brand name is pulled from: src/constants/content.ts → BRAND.name
+ * - All other text is hardcoded in this file (see sections below)
+ * - Contact email: hello@openclique.com (appears in multiple places)
+ * 
+ * IMPORTANT ANCHORS:
+ * - #community-guidelines - Links directly to community guidelines section
+ * - #safety - Links directly to safety section
+ * 
+ * NOTE: This is a legal document. Changes should be reviewed for compliance.
+ * 
+ * RELATED FILES:
+ * - src/constants/content.ts (BRAND.name only)
+ * - src/pages/Privacy.tsx (companion legal page)
+ * 
+ * LAST UPDATED: January 2025
+ * =============================================================================
+ */
+
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { BRAND } from "@/constants/content";
 
+/**
+ * Terms of Service Page Component
+ * 
+ * Displays the full terms of service with multiple sections.
+ * Uses semantic HTML and prose styling for readability.
+ */
 export default function Terms() {
   return (
     <div className="min-h-screen flex flex-col">
@@ -10,15 +47,20 @@ export default function Terms() {
         <section className="py-16 md:py-24">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto prose prose-slate">
+              
+              {/* ============ PAGE TITLE ============ */}
               <h1 className="font-display text-4xl font-bold text-foreground mb-8">
                 Terms of Service
               </h1>
               
+              {/* Auto-generated "Last updated" date */}
               <p className="text-muted-foreground text-lg mb-8">
                 Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
               </p>
 
               <div className="space-y-8 text-muted-foreground">
+                
+                {/* ============ SECTION: Welcome ============ */}
                 <section>
                   <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
                     Welcome to {BRAND.name}
@@ -30,6 +72,7 @@ export default function Terms() {
                   </p>
                 </section>
 
+                {/* ============ SECTION: Pilot Program ============ */}
                 <section>
                   <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
                     Pilot Program
@@ -45,6 +88,7 @@ export default function Terms() {
                   </ul>
                 </section>
 
+                {/* ============ SECTION: User Conduct ============ */}
                 <section>
                   <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
                     User Conduct
@@ -59,6 +103,8 @@ export default function Terms() {
                   </ul>
                 </section>
 
+                {/* ============ SECTION: Community Guidelines ============ */}
+                {/* This section has an anchor: #community-guidelines */}
                 <section id="community-guidelines">
                   <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
                     Community Guidelines
@@ -94,6 +140,8 @@ export default function Terms() {
                   </p>
                 </section>
 
+                {/* ============ SECTION: Safety & Trust ============ */}
+                {/* This section has an anchor: #safety */}
                 <section id="safety">
                   <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
                     Safety & Trust
@@ -102,6 +150,8 @@ export default function Terms() {
                     Safety is our top priority. While we design quests with safety in mind, {BRAND.name} facilitates 
                     real-world meetups, and you are responsible for your own safety.
                   </p>
+                  
+                  {/* What We Do */}
                   <h3 className="font-display text-lg font-semibold text-foreground mt-6 mb-3">
                     What We Do
                   </h3>
@@ -113,6 +163,8 @@ export default function Terms() {
                     <li>Rating and feedback system after each quest</li>
                     <li>Dedicated reporting channel for concerns</li>
                   </ul>
+                  
+                  {/* What You Should Do */}
                   <h3 className="font-display text-lg font-semibold text-foreground mt-6 mb-3">
                     What You Should Do
                   </h3>
@@ -132,6 +184,7 @@ export default function Terms() {
                   </p>
                 </section>
 
+                {/* ============ SECTION: Intellectual Property ============ */}
                 <section>
                   <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
                     Intellectual Property
@@ -142,6 +195,7 @@ export default function Terms() {
                   </p>
                 </section>
 
+                {/* ============ SECTION: Limitation of Liability ============ */}
                 <section>
                   <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
                     Limitation of Liability
@@ -153,6 +207,7 @@ export default function Terms() {
                   </p>
                 </section>
 
+                {/* ============ SECTION: Changes to Terms ============ */}
                 <section>
                   <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
                     Changes to Terms
@@ -163,6 +218,7 @@ export default function Terms() {
                   </p>
                 </section>
 
+                {/* ============ SECTION: Contact ============ */}
                 <section>
                   <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
                     Contact

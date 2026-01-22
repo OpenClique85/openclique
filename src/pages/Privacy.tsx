@@ -1,7 +1,38 @@
+/**
+ * =============================================================================
+ * FILE: Privacy.tsx
+ * PURPOSE: The Privacy Policy page - legal privacy information
+ * =============================================================================
+ * 
+ * WHAT THIS FILE CONTROLS:
+ * - Privacy policy content and formatting
+ * - All privacy-related legal text
+ * 
+ * WHERE TO EDIT COPY/TEXT:
+ * - Brand name is pulled from: src/constants/content.ts → BRAND.name
+ * - All other text is hardcoded in this file (see sections below)
+ * - Contact email: hello@openclique.com (appears in multiple places)
+ * 
+ * NOTE: This is a legal document. Changes should be reviewed for compliance.
+ * 
+ * RELATED FILES:
+ * - src/constants/content.ts (BRAND.name only)
+ * - src/pages/Terms.tsx (companion legal page)
+ * 
+ * LAST UPDATED: January 2025
+ * =============================================================================
+ */
+
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { BRAND } from "@/constants/content";
 
+/**
+ * Privacy Policy Page Component
+ * 
+ * Displays the full privacy policy with multiple sections.
+ * Uses semantic HTML and prose styling for readability.
+ */
 export default function Privacy() {
   return (
     <div className="min-h-screen flex flex-col">
@@ -10,15 +41,20 @@ export default function Privacy() {
         <section className="py-16 md:py-24">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto prose prose-slate">
+              
+              {/* ============ PAGE TITLE ============ */}
               <h1 className="font-display text-4xl font-bold text-foreground mb-8">
                 Privacy Policy
               </h1>
               
+              {/* Auto-generated "Last updated" date */}
               <p className="text-muted-foreground text-lg mb-8">
                 Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
               </p>
 
               <div className="space-y-8 text-muted-foreground">
+                
+                {/* ============ SECTION: Commitment ============ */}
                 <section>
                   <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
                     Our Commitment to Privacy
@@ -29,6 +65,7 @@ export default function Privacy() {
                   </p>
                 </section>
 
+                {/* ============ SECTION: What We Collect ============ */}
                 <section>
                   <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
                     What We Collect on This Website
@@ -48,6 +85,7 @@ export default function Privacy() {
                   </ul>
                 </section>
 
+                {/* ============ SECTION: Google Forms ============ */}
                 <section>
                   <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
                     When You Sign Up (via Google Forms)
@@ -64,6 +102,7 @@ export default function Privacy() {
                   </ul>
                 </section>
 
+                {/* ============ SECTION: Email ============ */}
                 <section>
                   <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
                     Email Subscriptions
@@ -74,6 +113,7 @@ export default function Privacy() {
                   </p>
                 </section>
 
+                {/* ============ SECTION: Your Rights ============ */}
                 <section>
                   <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
                     Your Rights
@@ -87,6 +127,7 @@ export default function Privacy() {
                   </ul>
                 </section>
 
+                {/* ============ SECTION: Data Deletion ============ */}
                 <section>
                   <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
                     Data Deletion Requests
@@ -105,6 +146,7 @@ export default function Privacy() {
                   </ul>
                 </section>
 
+                {/* ============ SECTION: Data Retention ============ */}
                 <section>
                   <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
                     Data Retention
@@ -126,6 +168,7 @@ export default function Privacy() {
                   </p>
                 </section>
 
+                {/* ============ SECTION: Third-Party Services ============ */}
                 <section>
                   <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
                     Third-Party Services
@@ -147,6 +190,7 @@ export default function Privacy() {
                   </p>
                 </section>
 
+                {/* ============ SECTION: Contact ============ */}
                 <section>
                   <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
                     Contact Us
