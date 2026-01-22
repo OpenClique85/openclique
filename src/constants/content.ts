@@ -232,7 +232,7 @@ export const WHO_ITS_FOR = {
 // =============================================================================
 
 export const HERO = {
-  headline: "Build the village you've been missing.",
+  headline: "Build the village you've been missing",
   headlineAccent: "One Quest at a time.",
   subheadline: "Join a small squad. Complete a curated adventure. Make real friends.",
   primaryCta: "Join the Pilot",
