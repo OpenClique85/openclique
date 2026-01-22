@@ -10,12 +10,13 @@ import { MySquadsSection } from '@/components/squads/MySquadsSection';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, MapPin, Calendar, MessageCircle, ExternalLink, Search } from 'lucide-react';
+import { Loader2, MapPin, Calendar, MessageCircle, ExternalLink, Search, Star, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import type { Tables } from '@/integrations/supabase/types';
 
 type QuestSignup = Tables<'quest_signups'>;
 type Quest = Tables<'quests'>;
+type Feedback = Tables<'feedback'>;
 
 type SignupWithQuest = QuestSignup & {
   quest: Quest;
@@ -33,6 +34,7 @@ const STATUS_BADGES: Record<string, { label: string; variant: 'default' | 'secon
 export default function MyQuests() {
   const { user, profile, isLoading: authLoading } = useAuth();
   const [signups, setSignups] = useState<SignupWithQuest[]>([]);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [cancelModal, setCancelModal] = useState<{
@@ -62,6 +64,18 @@ export default function MyQuests() {
     
     if (!error && data) {
       setSignups(data as SignupWithQuest[]);
+      
+      // Check which quests already have feedback
+      const questIds = data.map(s => s.quest_id);
+      const { data: feedbackData } = await supabase
+        .from('feedback')
+        .select('quest_id')
+        .eq('user_id', user.id)
+        .in('quest_id', questIds);
+      
+      if (feedbackData) {
+        setFeedbackSubmitted(new Set(feedbackData.map(f => f.quest_id)));
+      }
     }
     setIsLoading(false);
   };
@@ -240,39 +254,54 @@ export default function MyQuests() {
             </h2>
             
             <div className="space-y-3">
-              {pastSignups.map((signup) => (
-                <Card key={signup.id} className="bg-muted/30">
-                  <CardContent className="py-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl opacity-60">{signup.quest.icon || '🎯'}</span>
-                        <div>
-                          <p className="font-medium">{signup.quest.title}</p>
-                          {signup.quest.start_datetime && (
-                            <p className="text-sm text-muted-foreground">
-                              {format(new Date(signup.quest.start_datetime), 'MMMM d, yyyy')}
-                            </p>
+              {pastSignups.map((signup) => {
+                const isPast = signup.quest.start_datetime && new Date(signup.quest.start_datetime) < now;
+                const wasAttending = ['confirmed', 'completed'].includes(signup.status || '');
+                const canLeaveFeedback = isPast && wasAttending;
+                const hasFeedback = feedbackSubmitted.has(signup.quest_id);
+                
+                return (
+                  <Card key={signup.id} className="bg-muted/30">
+                    <CardContent className="py-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl opacity-60">{signup.quest.icon || '🎯'}</span>
+                          <div>
+                            <p className="font-medium">{signup.quest.title}</p>
+                            {signup.quest.start_datetime && (
+                              <p className="text-sm text-muted-foreground">
+                                {format(new Date(signup.quest.start_datetime), 'MMMM d, yyyy')}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-3">
+                          <Badge variant={STATUS_BADGES[signup.status || 'pending'].variant}>
+                            {STATUS_BADGES[signup.status || 'pending'].label}
+                          </Badge>
+                          
+                          {canLeaveFeedback && (
+                            hasFeedback ? (
+                              <Button variant="ghost" size="sm" disabled className="text-muted-foreground">
+                                <CheckCircle className="h-4 w-4 mr-1" />
+                                Feedback Sent
+                              </Button>
+                            ) : (
+                              <Button variant="outline" size="sm" asChild>
+                                <Link to={`/feedback/${signup.quest.id}`}>
+                                  <Star className="h-4 w-4 mr-1" />
+                                  Leave Feedback
+                                </Link>
+                              </Button>
+                            )
                           )}
                         </div>
                       </div>
-                      
-                      <div className="flex items-center gap-3">
-                        <Badge variant={STATUS_BADGES[signup.status || 'pending'].variant}>
-                          {STATUS_BADGES[signup.status || 'pending'].label}
-                        </Badge>
-                        
-                        {signup.status === 'completed' && (
-                          <Button variant="outline" size="sm" asChild>
-                            <Link to={`/feedback/${signup.quest.id}`}>
-                              Leave Feedback
-                            </Link>
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           </section>
         )}

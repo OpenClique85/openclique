@@ -25,7 +25,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, MoreHorizontal, Eye, EyeOff, Users } from 'lucide-react';
+import { Loader2, MoreHorizontal, Eye, EyeOff, Users, Mail } from 'lucide-react';
 import { format } from 'date-fns';
 import type { Tables, Enums } from '@/integrations/supabase/types';
 import { SquadRecommendationModal } from './SquadRecommendationModal';
@@ -53,7 +53,9 @@ export function SignupsManager() {
   const [quests, setQuests] = useState<Quest[]>([]);
   const [selectedQuestId, setSelectedQuestId] = useState<string>('');
   const [signups, setSignups] = useState<SignupWithProfile[]>([]);
+  const [feedbackCounts, setFeedbackCounts] = useState<Record<string, number>>({});
   const [isLoading, setIsLoading] = useState(true);
+  const [isSendingReminder, setIsSendingReminder] = useState(false);
   const [showEmails, setShowEmails] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showSquadModal, setShowSquadModal] = useState(false);
@@ -105,7 +107,60 @@ export function SignupsManager() {
         profile: profilesMap.get(s.user_id) || null
       }));
       setSignups(merged);
+      
+      // Fetch feedback count for this quest
+      const { count } = await supabase
+        .from('feedback')
+        .select('*', { count: 'exact', head: true })
+        .eq('quest_id', selectedQuestId);
+      
+      setFeedbackCounts(prev => ({ ...prev, [selectedQuestId]: count || 0 }));
     }
+  };
+
+  const sendFeedbackReminder = async () => {
+    if (!selectedQuest) return;
+    
+    setIsSendingReminder(true);
+    
+    // Get users who completed/confirmed but haven't given feedback
+    const confirmedUserIds = signups
+      .filter(s => ['confirmed', 'completed'].includes(s.status || ''))
+      .map(s => s.user_id);
+    
+    // Get users who already submitted feedback
+    const { data: feedbackData } = await supabase
+      .from('feedback')
+      .select('user_id')
+      .eq('quest_id', selectedQuestId);
+    
+    const usersWithFeedback = new Set(feedbackData?.map(f => f.user_id) || []);
+    const usersNeedingReminder = confirmedUserIds.filter(id => !usersWithFeedback.has(id));
+    
+    if (usersNeedingReminder.length === 0) {
+      toast({ title: 'All attendees have already submitted feedback!' });
+      setIsSendingReminder(false);
+      return;
+    }
+    
+    // Create notifications for each user
+    const notifications = usersNeedingReminder.map(userId => ({
+      user_id: userId,
+      type: 'feedback_request' as const,
+      title: `How was ${selectedQuest.title}?`,
+      body: `We'd love your feedback! Takes just 60 seconds.`,
+      quest_id: selectedQuestId,
+    }));
+    
+    const { error } = await supabase.from('notifications').insert(notifications);
+    
+    if (error) {
+      toast({ variant: 'destructive', title: 'Failed to send reminders' });
+    } else {
+      toast({ title: `Sent ${usersNeedingReminder.length} feedback reminder(s)` });
+    }
+    
+    setIsSendingReminder(false);
   };
 
   const updateStatus = async (signupId: string, newStatus: SignupStatus) => {
@@ -185,10 +240,25 @@ export function SignupsManager() {
         {counts.pending >= 3 && (
           <Button
             onClick={() => setShowSquadModal(true)}
-            className="ml-auto"
           >
             <Users className="mr-2 h-4 w-4" />
             Generate Squads ({counts.pending} pending)
+          </Button>
+        )}
+        
+        {/* Feedback Reminder button - show for past quests */}
+        {selectedQuest?.start_datetime && new Date(selectedQuest.start_datetime) < new Date() && (
+          <Button
+            variant="outline"
+            onClick={sendFeedbackReminder}
+            disabled={isSendingReminder}
+          >
+            {isSendingReminder ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Mail className="mr-2 h-4 w-4" />
+            )}
+            Send Feedback Reminder
           </Button>
         )}
       </div>
