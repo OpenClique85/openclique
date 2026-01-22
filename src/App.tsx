@@ -50,6 +50,7 @@ import QuestCreatorsPage from "./pages/QuestCreatorsPage";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Quests from "./pages/Quests";
+import QuestDetail from "./pages/QuestDetail";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import MyQuests from "./pages/MyQuests";
@@ -80,6 +81,7 @@ const App = () => (
             <Route path="/how-it-works" element={<HowItWorks />} />
             <Route path="/about" element={<About />} />
             <Route path="/quests" element={<Quests />} />
+            <Route path="/quests/:slug" element={<QuestDetail />} />
             
             {/* AUTH */}
             <Route path="/auth" element={<Auth />} />
