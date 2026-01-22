@@ -96,6 +96,50 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          quest_id: string | null
+          read_at: string | null
+          referrer_user_id: string | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          quest_id?: string | null
+          read_at?: string | null
+          referrer_user_id?: string | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          quest_id?: string | null
+          read_at?: string | null
+          referrer_user_id?: string | null
+          title?: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           consent_given_at: string | null
@@ -340,6 +384,13 @@ export type Database = {
         | "email_reminder"
         | "email_followup"
         | "email_whatsapp"
+      notification_type:
+        | "quest_recommendation"
+        | "quest_shared"
+        | "referral_accepted"
+        | "signup_confirmed"
+        | "quest_reminder"
+        | "general"
       quest_status: "draft" | "open" | "closed" | "completed" | "cancelled"
       signup_status:
         | "pending"
@@ -482,6 +533,14 @@ export const Constants = {
         "email_reminder",
         "email_followup",
         "email_whatsapp",
+      ],
+      notification_type: [
+        "quest_recommendation",
+        "quest_shared",
+        "referral_accepted",
+        "signup_confirmed",
+        "quest_reminder",
+        "general",
       ],
       quest_status: ["draft", "open", "closed", "completed", "cancelled"],
       signup_status: [

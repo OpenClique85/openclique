@@ -56,6 +56,7 @@ import Auth from "./pages/Auth";
 import MyQuests from "./pages/MyQuests";
 import Admin from "./pages/Admin";
 import Feedback from "./pages/Feedback";
+import Notifications from "./pages/Notifications";
 import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
@@ -86,6 +87,7 @@ const App = () => (
             {/* AUTH */}
             <Route path="/auth" element={<Auth />} />
             <Route path="/my-quests" element={<ProtectedRoute><MyQuests /></ProtectedRoute>} />
+            <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute requireAdmin><Admin /></ProtectedRoute>} />
             <Route path="/feedback/:questId" element={<ProtectedRoute><Feedback /></ProtectedRoute>} />
             

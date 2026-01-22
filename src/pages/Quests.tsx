@@ -39,7 +39,8 @@ import QuestCard from '@/components/QuestCard';
 import QuestModal from '@/components/QuestModal';
 import QuestDateFilter from '@/components/QuestDateFilter';
 import { CTASection } from '@/components/CTASection';
-import { QUESTS, QUESTS_PAGE, type Quest, type QuestStatus } from '@/constants/quests';
+import { useQuests, type Quest } from '@/hooks/useQuests';
+import { Loader2 } from 'lucide-react';
 
 // ============ IMAGES ============
 import buggsFace from '@/assets/buggs-face.png';
@@ -51,16 +52,18 @@ import foodTruckScene from '@/assets/austin/food-truck-scene.jpg';
  * Displays a filterable catalog of all available quests.
  */
 const Quests = () => {
+  // ============ DATA FETCHING ============
+  const { data: quests = [], isLoading } = useQuests();
+  
   // ============ STATE MANAGEMENT ============
-  // Currently selected quest for the detail modal
   const [selectedQuest, setSelectedQuest] = useState<Quest | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   
   // Active filter state
   const [filters, setFilters] = useState<{
-    month: string | null;    // Selected month (lowercase) or null for all
-    days: number[];          // Array of day indices (0=Sun, 1=Mon, etc.)
-    statuses: QuestStatus[]; // Array of selected statuses
+    month: string | null;
+    days: number[];
+    statuses: ('open' | 'closed' | 'coming-soon' | 'completed')[];
   }>({
     month: null,
     days: [],
@@ -83,15 +86,11 @@ const Quests = () => {
    * Uses useMemo for performance (only recalculates when filters change).
    */
   const filteredQuests = useMemo(() => {
-    return QUESTS.filter((quest) => {
-      // --- Status Filter ---
-      // If statuses are selected, quest must match one of them
+    return quests.filter((quest) => {
       if (filters.statuses.length > 0 && !filters.statuses.includes(quest.status)) {
         return false;
       }
 
-      // --- Month Filter ---
-      // Check if quest date contains the selected month
       if (filters.month) {
         const questDateLower = quest.metadata.date.toLowerCase();
         if (!questDateLower.includes(filters.month)) {
@@ -99,8 +98,6 @@ const Quests = () => {
         }
       }
 
-      // --- Day of Week Filter ---
-      // Check if quest date contains one of the selected day names
       if (filters.days.length > 0) {
         const dayNames = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
         const questDateLower = quest.metadata.date.toLowerCase();
@@ -114,7 +111,7 @@ const Quests = () => {
 
       return true;
     });
-  }, [filters]);
+  }, [quests, filters]);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -137,13 +134,13 @@ const Quests = () => {
           
           <div className="max-w-4xl mx-auto text-center relative z-10">
             <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">
-              {QUESTS_PAGE.heroTitle}
+              Discover Your Next Quest
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-4">
-              {QUESTS_PAGE.heroSubtitle}
+              Browse curated experiences designed to help you meet new people and explore Austin.
             </p>
             <p className="text-sm text-muted-foreground/80 max-w-xl mx-auto">
-              {QUESTS_PAGE.heroExplainer}
+              Each quest is a shared adventure with a small group. No awkward networking—just real connections.
             </p>
           </div>
         </section>
@@ -162,12 +159,17 @@ const Quests = () => {
             />
 
             {/* --- Results Count --- */}
-            {/* Only shows when filters are active */}
-            {(filters.month || filters.days.length > 0 || filters.statuses.length > 0) && (
-              <p className="text-sm text-muted-foreground mb-4">
-                Showing {filteredQuests.length} of {QUESTS.length} quests
-              </p>
-            )}
+            {isLoading ? (
+              <div className="flex justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : (
+              <>
+                {(filters.month || filters.days.length > 0 || filters.statuses.length > 0) && (
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Showing {filteredQuests.length} of {quests.length} quests
+                  </p>
+                )}
 
             {/* --- Quest Cards Grid --- */}
             {/* Quest cards: src/components/QuestCard.tsx */}
@@ -190,11 +192,12 @@ const Quests = () => {
             )}
             
             {/* --- BUGGS Helper Hint --- */}
-            {/* To edit the hint text, change the text below */}
             <div className="mt-12 flex items-center justify-center gap-3 text-muted-foreground">
               <img src={buggsFace} alt="" className="w-8 h-8 object-contain" />
-              <p className="text-sm">BUGGS guides every quest. You just show up!</p> {/* ← EDIT HINT TEXT HERE */}
+              <p className="text-sm">BUGGS guides every quest. You just show up!</p>
             </div>
+              </>
+            )}
           </div>
         </section>
 
