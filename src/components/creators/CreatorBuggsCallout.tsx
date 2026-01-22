@@ -1,5 +1,5 @@
 import { CREATORS_PAGE } from "@/constants/content";
-import buggsFront from "@/assets/buggs-front.png";
+import buggsFace from "@/assets/buggs-face.png";
 
 export function CreatorBuggsCallout() {
   return (
@@ -7,9 +7,9 @@ export function CreatorBuggsCallout() {
       <div className="container mx-auto px-4">
         <div className="max-w-2xl mx-auto">
           <div className="bg-card rounded-2xl p-8 border border-border shadow-lg text-center">
-            <div className="w-24 h-24 mx-auto mb-6 bg-white rounded-2xl p-3 shadow-sm">
+            <div className="w-20 h-20 mx-auto mb-6 bg-white rounded-full p-2 shadow-sm border border-border/50">
               <img 
-                src={buggsFront} 
+                src={buggsFace} 
                 alt="BUGGS mascot" 
                 className="w-full h-full object-contain"
               />

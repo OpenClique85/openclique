@@ -16,7 +16,9 @@ import foodTruckScene from "@/assets/austin/food-truck-scene.jpg";
 import coffeeShopFriends from "@/assets/austin/coffee-shop-friends.jpg";
 import concertCrowd from "@/assets/austin/concert-crowd.jpg";
 import muralWall from "@/assets/austin/mural-wall.jpg";
-import buggsFront from "@/assets/buggs-front.png";
+import buggsFace from "@/assets/buggs-face.png";
+import { Link } from "react-router-dom";
+import { ChevronLeft } from "lucide-react";
 
 const valuePropIcons = {
   palette: Palette,
@@ -62,10 +64,18 @@ export default function ContentCreatorsPage() {
           
           <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-3xl mx-auto text-center">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-creator/10 rounded-full mb-6">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-creator/10 rounded-full mb-4">
                 <Sparkles className="w-4 h-4 text-creator" />
                 <span className="text-sm font-medium text-creator">Content Creators</span>
               </div>
+              
+              <Link 
+                to="/creators" 
+                className="flex items-center justify-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                Back to Creator Hub
+              </Link>
               
               <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6">
                 Turn Followers Into Friends
@@ -138,7 +148,7 @@ export default function ContentCreatorsPage() {
               </h2>
               <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
                 Whether you're building a fitness empire or teaching a craft, your audience wants to connect.
-                <span className="block text-sm mt-1 text-creator">Tap any card to learn more.</span>
+                <span className="block text-sm mt-1 text-creator">Click any card to learn more.</span>
               </p>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -221,9 +231,9 @@ export default function ContentCreatorsPage() {
           <div className="container mx-auto px-4">
             <div className="max-w-2xl mx-auto">
               <div className="bg-card rounded-2xl p-8 border border-border shadow-lg text-center">
-                <div className="w-24 h-24 mx-auto mb-6 bg-white rounded-2xl p-3 shadow-sm">
+              <div className="w-20 h-20 mx-auto mb-6 bg-white rounded-full p-2 shadow-sm border border-border/50">
                   <img 
-                    src={buggsFront} 
+                    src={buggsFace} 
                     alt="BUGGS mascot" 
                     className="w-full h-full object-contain"
                   />

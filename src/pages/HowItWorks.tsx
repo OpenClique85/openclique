@@ -5,7 +5,7 @@ import { HOW_IT_WORKS } from "@/constants/content";
 import { Check } from "lucide-react";
 import PathCarousel from "@/components/progression/PathCarousel";
 import { UserJourneySection } from "@/components/UserJourneySection";
-import buggsFront from "@/assets/buggs-front.png";
+import buggsFace from "@/assets/buggs-face.png";
 import runningGroup from "@/assets/austin/running-group.jpg";
 
 export default function HowItWorks() {
@@ -117,11 +117,11 @@ export default function HowItWorks() {
                 <div className="flex flex-col items-center text-center">
                   {/* BUGGS Mascot - centered in rounded white container */}
                   <div className="mb-8 flex justify-center">
-                    <div className="w-36 h-36 md:w-44 md:h-44 rounded-3xl bg-white shadow-lg border border-border/50 flex items-center justify-center">
+                    <div className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-white shadow-lg border border-border/50 flex items-center justify-center p-2">
                       <img 
-                        src={buggsFront} 
+                        src={buggsFace} 
                         alt="BUGGS - Behavioral Utility for Group Guidance & Structure"
-                        className="w-28 h-28 md:w-36 md:h-36 object-contain"
+                        className="w-full h-full object-contain"
                       />
                     </div>
                   </div>
