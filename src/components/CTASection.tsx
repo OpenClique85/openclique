@@ -27,10 +27,10 @@ export function CTASection() {
         <div className="max-w-3xl mx-auto text-center">
           
           <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
-            Ready for your first quest?
+            Ready to find your quest?
           </h2>
           <p className="text-background/70 text-lg mb-8 max-w-2xl mx-auto">
-            Join the Austin pilot. Your first quest is waiting.
+            Browse open quests and join your first adventure.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button
@@ -38,7 +38,7 @@ export function CTASection() {
               asChild
               className="w-full sm:w-auto text-base px-8 bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              <Link to="/pilot">Join the Pilot</Link>
+              <Link to="/quests">Find Your Quest</Link>
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

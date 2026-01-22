@@ -112,7 +112,7 @@ export function Navbar() {
               asChild
               className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all px-4"
             >
-              <Link to="/pilot">Join the Pilot</Link>
+              <Link to="/quests">Find Your Quest</Link>
             </Button>
             
             {/* Secondary CTA - Dropdown */}
@@ -259,7 +259,7 @@ export function Navbar() {
                   asChild
                   className="justify-start bg-primary text-primary-foreground"
                 >
-                  <Link to="/pilot" onClick={() => setIsOpen(false)}>Join the Pilot</Link>
+                  <Link to="/quests" onClick={() => setIsOpen(false)}>Find Your Quest</Link>
                 </Button>
                 
                 {/* Secondary options label */}
