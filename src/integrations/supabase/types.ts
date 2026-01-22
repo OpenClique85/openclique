@@ -323,6 +323,14 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
+      record_referral_signup: {
+        Args: { p_referral_code: string; p_user_id: string }
+        Returns: undefined
+      }
+      track_referral_click: {
+        Args: { p_referral_code: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "user"
