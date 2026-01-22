@@ -1,12 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { CREATORS_PAGE, FORM_URLS } from "@/constants/content";
+import { CREATORS_PAGE } from "@/constants/content";
 
-export function CreatorCTA() {
-  const handleCTAClick = () => {
-    window.open(FORM_URLS.creators, "_blank");
-  };
+interface CreatorCTAProps {
+  onApply?: () => void;
+}
 
+export function CreatorCTA({ onApply }: CreatorCTAProps) {
   return (
     <section className="py-16 bg-creator/5">
       <div className="container mx-auto px-4">
@@ -20,7 +20,7 @@ export function CreatorCTA() {
           
           <Button
             size="lg"
-            onClick={handleCTAClick}
+            onClick={onApply}
             className="bg-creator text-creator-foreground hover:bg-creator/90 text-base px-10 gap-2"
           >
             {CREATORS_PAGE.ctaText}

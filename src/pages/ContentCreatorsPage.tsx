@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Palette, Users, TrendingUp, Quote } from "lucide-react";
-import { CREATORS_PAGE, FORM_URLS } from "@/constants/content";
+import { CREATORS_PAGE } from "@/constants/content";
 import { CreatorTypeCard } from "@/components/CreatorTypeCard";
+import { CreatorApplicationForm } from "@/components/forms";
 import {
   Accordion,
   AccordionContent,
@@ -42,8 +44,10 @@ const testimonial = {
 };
 
 export default function ContentCreatorsPage() {
+  const [formOpen, setFormOpen] = useState(false);
+
   const handleCTAClick = () => {
-    window.open(FORM_URLS.creators, "_blank");
+    setFormOpen(true);
   };
 
   return (
@@ -304,6 +308,13 @@ export default function ContentCreatorsPage() {
         </section>
       </main>
       <Footer />
+
+      {/* ============ APPLICATION FORM MODAL ============ */}
+      <CreatorApplicationForm
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        preselectedType="content_creator"
+      />
     </div>
   );
 }

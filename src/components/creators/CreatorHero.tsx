@@ -1,14 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
-import { CREATORS_PAGE, FORM_URLS } from "@/constants/content";
+import { CREATORS_PAGE } from "@/constants/content";
 import rooftopGathering from "@/assets/austin/rooftop-gathering.jpg";
 import buggsFace from "@/assets/buggs-face.png";
 
-export function CreatorHero() {
-  const handleCTAClick = () => {
-    window.open(FORM_URLS.creators, "_blank");
-  };
+interface CreatorHeroProps {
+  onApply?: () => void;
+}
 
+export function CreatorHero({ onApply }: CreatorHeroProps) {
   return (
     <section className="py-16 md:py-24 relative overflow-hidden">
       <div 
@@ -38,7 +38,7 @@ export function CreatorHero() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button
               size="lg"
-              onClick={handleCTAClick}
+              onClick={onApply}
               className="bg-creator text-creator-foreground hover:bg-creator/90 text-base px-8 gap-2"
             >
               {CREATORS_PAGE.ctaText}

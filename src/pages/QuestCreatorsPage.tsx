@@ -4,7 +4,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, MapPin, Star, Briefcase, Tag, Sparkles, Users, Calendar, Clock, Quote, ChevronDown, ChevronUp, ChevronLeft, Check } from "lucide-react";
-import { FORM_URLS } from "@/constants/content";
+import { CreatorApplicationForm } from "@/components/forms";
 import buggsFace from "@/assets/buggs-face.png";
 import {
   Accordion,
@@ -199,8 +199,10 @@ function QuestExampleCard({ quest }: { quest: typeof exampleQuests[0] }) {
 }
 
 export default function QuestCreatorsPage() {
+  const [formOpen, setFormOpen] = useState(false);
+
   const handleCTAClick = () => {
-    window.open(FORM_URLS.creators, "_blank");
+    setFormOpen(true);
   };
 
   return (
@@ -474,7 +476,7 @@ export default function QuestCreatorsPage() {
                 Ready to Lead Your First Quest?
               </h2>
               <p className="text-muted-foreground mb-8">
-                Join local experts who are turning their knowledge into memorable experiences.
+                No experience needed. Just passion and local knowledge.
               </p>
               
               <Button
@@ -493,6 +495,13 @@ export default function QuestCreatorsPage() {
         </section>
       </main>
       <Footer />
+
+      {/* ============ APPLICATION FORM MODAL ============ */}
+      <CreatorApplicationForm
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        preselectedType="quest_creator"
+      />
     </div>
   );
 }

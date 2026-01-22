@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
-import { FORM_URLS } from "@/constants/content";
+import { useNavigate } from "react-router-dom";
 import type { LucideIcon } from "lucide-react";
 
 export interface PersonaData {
@@ -21,12 +21,15 @@ interface PersonaModalProps {
 }
 
 export function PersonaModal({ persona, open, onOpenChange }: PersonaModalProps) {
+  const navigate = useNavigate();
+  
   if (!persona) return null;
 
   const Icon = persona.icon;
 
   const handleCta = () => {
-    window.open(FORM_URLS.pilot, '_blank');
+    onOpenChange(false);
+    navigate('/quests');
   };
 
   return (
@@ -75,7 +78,7 @@ export function PersonaModal({ persona, open, onOpenChange }: PersonaModalProps)
 
         {/* CTA */}
         <Button onClick={handleCta} className="w-full mt-2">
-          Join the Pilot
+          Find Your Quest
         </Button>
       </DialogContent>
     </Dialog>
