@@ -135,8 +135,9 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
   return (
     <div 
       className={cn(
-        "flex-shrink-0 w-[300px] md:w-[340px] bg-card rounded-2xl p-6 border border-border shadow-sm",
+        "flex-shrink-0 w-[300px] md:w-[340px] h-[280px] bg-card rounded-2xl p-6 border border-border shadow-sm",
         "transition-all duration-300 hover:shadow-md hover:border-primary/20",
+        "flex flex-col", // Enable flexbox for consistent internal layout
         isExpandable && "cursor-pointer"
       )}
       onClick={() => isExpandable && setExpanded(!expanded)}
@@ -167,14 +168,11 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
         ))}
       </div>
 
-      {/* Quote */}
-      <div className="relative mb-4">
+      {/* Quote - flex-grow ensures this section expands to fill available space */}
+      <div className="relative mb-4 flex-grow">
         <Quote className="absolute -top-1 -left-1 w-6 h-6 text-primary/20" />
         <p className={cn(
-          "text-foreground pl-5",
-          testimonial.style === "minimal" && "text-sm",
-          testimonial.style === "fun" && "text-base",
-          testimonial.style === "elaborate" && "text-sm leading-relaxed"
+          "text-foreground pl-5 text-sm leading-relaxed"
         )}>
           {expanded && testimonial.fullText ? testimonial.fullText : testimonial.shortText}
         </p>
@@ -191,8 +189,8 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
         )}
       </div>
 
-      {/* Quest & Path Tags */}
-      <div className="flex flex-wrap gap-2">
+      {/* Quest & Path Tags - mt-auto pushes to bottom for consistent alignment */}
+      <div className="flex flex-wrap gap-2 mt-auto">
         <span className="text-xs px-2 py-1 bg-muted rounded-full text-muted-foreground">
           {testimonial.questName}
         </span>
