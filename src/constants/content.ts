@@ -17,8 +17,8 @@
 
 export const BRAND = {
   name: "OpenClique",
-  tagline: "Build the village you've been missing — One Quest at a time.",
-  description: "OpenClique brings people together in small, guided groups through real-world quests — curated activities that help turn shared interests into real friendships.",
+  tagline: "Build the village you've been missing. One Quest at a time.",
+  description: "OpenClique brings people together in small, guided groups through real-world quests: curated activities that help turn shared interests into real friendships.",
   launchCity: "Austin",
 };
 
@@ -188,7 +188,8 @@ export const WHO_ITS_FOR = {
 // =============================================================================
 
 export const HERO = {
-  headline: "Build the village you've been missing — One Quest at a time.",
+  headline: "Build the village you've been missing.",
+  headlineAccent: "One Quest at a time.",
   subheadline: "Join a small squad. Complete a curated adventure. Make real friends.",
   primaryCta: "Join the Pilot",
   secondaryCta: "Partner With Us",
