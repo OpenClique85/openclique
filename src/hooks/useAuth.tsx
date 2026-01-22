@@ -12,6 +12,7 @@ interface AuthContextType {
   isLoading: boolean;
   isAdmin: boolean;
   isCreator: boolean;
+  isSponsor: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string) => Promise<{ error: Error | null }>;
   signInWithGoogle: () => Promise<{ error: Error | null }>;
@@ -28,6 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isCreator, setIsCreator] = useState(false);
+  const [isSponsor, setIsSponsor] = useState(false);
 
   const fetchProfile = async (userId: string) => {
     const { data } = await supabase
@@ -56,6 +58,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsCreator(data === true);
   };
 
+  const checkSponsorStatus = async (userId: string) => {
+    const { data } = await supabase.rpc('has_role', {
+      _user_id: userId,
+      _role: 'sponsor'
+    });
+    setIsSponsor(data === true);
+  };
+
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -69,11 +79,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             fetchProfile(session.user.id);
             checkAdminStatus(session.user.id);
             checkCreatorStatus(session.user.id);
+            checkSponsorStatus(session.user.id);
           }, 0);
         } else {
           setProfile(null);
           setIsAdmin(false);
           setIsCreator(false);
+          setIsSponsor(false);
         }
       }
     );
@@ -87,6 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         fetchProfile(session.user.id);
         checkAdminStatus(session.user.id);
         checkCreatorStatus(session.user.id);
+        checkSponsorStatus(session.user.id);
       }
       setIsLoading(false);
     });
@@ -126,6 +139,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(null);
     setIsAdmin(false);
     setIsCreator(false);
+    setIsSponsor(false);
   };
 
   const refreshProfile = async () => {
@@ -142,6 +156,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isLoading,
       isAdmin,
       isCreator,
+      isSponsor,
       signIn,
       signUp,
       signInWithGoogle,

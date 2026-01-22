@@ -448,6 +448,7 @@ export type Database = {
           icon: string | null
           id: string
           image_url: string | null
+          is_sponsored: boolean | null
           meeting_address: string | null
           meeting_location_name: string | null
           objectives: string | null
@@ -458,6 +459,7 @@ export type Database = {
           rewards: string | null
           short_description: string | null
           slug: string
+          sponsor_id: string | null
           start_datetime: string | null
           status: Database["public"]["Enums"]["quest_status"] | null
           submitted_at: string | null
@@ -483,6 +485,7 @@ export type Database = {
           icon?: string | null
           id?: string
           image_url?: string | null
+          is_sponsored?: boolean | null
           meeting_address?: string | null
           meeting_location_name?: string | null
           objectives?: string | null
@@ -493,6 +496,7 @@ export type Database = {
           rewards?: string | null
           short_description?: string | null
           slug: string
+          sponsor_id?: string | null
           start_datetime?: string | null
           status?: Database["public"]["Enums"]["quest_status"] | null
           submitted_at?: string | null
@@ -518,6 +522,7 @@ export type Database = {
           icon?: string | null
           id?: string
           image_url?: string | null
+          is_sponsored?: boolean | null
           meeting_address?: string | null
           meeting_location_name?: string | null
           objectives?: string | null
@@ -528,6 +533,7 @@ export type Database = {
           rewards?: string | null
           short_description?: string | null
           slug?: string
+          sponsor_id?: string | null
           start_datetime?: string | null
           status?: Database["public"]["Enums"]["quest_status"] | null
           submitted_at?: string | null
@@ -545,6 +551,13 @@ export type Database = {
             columns: ["creator_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quests_sponsor_id_fkey"
+            columns: ["sponsor_id"]
+            isOneToOne: false
+            referencedRelation: "sponsor_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -586,6 +599,375 @@ export type Database = {
             columns: ["quest_id"]
             isOneToOne: false
             referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reward_redemptions: {
+        Row: {
+          id: string
+          quest_id: string | null
+          redeemed_at: string
+          reward_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          quest_id?: string | null
+          redeemed_at?: string
+          reward_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          quest_id?: string | null
+          redeemed_at?: string
+          reward_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reward_redemptions_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reward_redemptions_reward_id_fkey"
+            columns: ["reward_id"]
+            isOneToOne: false
+            referencedRelation: "rewards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rewards: {
+        Row: {
+          created_at: string
+          description: string | null
+          expires_at: string | null
+          fulfillment_data: string | null
+          fulfillment_type: string
+          id: string
+          max_redemptions: number | null
+          name: string
+          quest_requirements: Json | null
+          redemptions_count: number | null
+          sponsor_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          expires_at?: string | null
+          fulfillment_data?: string | null
+          fulfillment_type?: string
+          id?: string
+          max_redemptions?: number | null
+          name: string
+          quest_requirements?: Json | null
+          redemptions_count?: number | null
+          sponsor_id: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          expires_at?: string | null
+          fulfillment_data?: string | null
+          fulfillment_type?: string
+          id?: string
+          max_redemptions?: number | null
+          name?: string
+          quest_requirements?: Json | null
+          redemptions_count?: number | null
+          sponsor_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rewards_sponsor_id_fkey"
+            columns: ["sponsor_id"]
+            isOneToOne: false
+            referencedRelation: "sponsor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sponsor_applications: {
+        Row: {
+          business_name: string
+          contact_email: string
+          contact_name: string
+          created_at: string | null
+          description: string | null
+          id: string
+          internal_notes: string | null
+          message: string | null
+          preferred_quest_types: string[] | null
+          sponsor_type: string
+          status: string | null
+          target_audience: Json | null
+          website: string | null
+        }
+        Insert: {
+          business_name: string
+          contact_email: string
+          contact_name: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          internal_notes?: string | null
+          message?: string | null
+          preferred_quest_types?: string[] | null
+          sponsor_type?: string
+          status?: string | null
+          target_audience?: Json | null
+          website?: string | null
+        }
+        Update: {
+          business_name?: string
+          contact_email?: string
+          contact_name?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          internal_notes?: string | null
+          message?: string | null
+          preferred_quest_types?: string[] | null
+          sponsor_type?: string
+          status?: string | null
+          target_audience?: Json | null
+          website?: string | null
+        }
+        Relationships: []
+      }
+      sponsor_invites: {
+        Row: {
+          application_id: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          redeemed_at: string | null
+          token: string
+        }
+        Insert: {
+          application_id?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by: string
+          redeemed_at?: string | null
+          token?: string
+        }
+        Update: {
+          application_id?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          redeemed_at?: string | null
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsor_invites_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "sponsor_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sponsor_profiles: {
+        Row: {
+          brand_tone: string | null
+          budget_range: string | null
+          city: string | null
+          contact_email: string | null
+          contact_name: string | null
+          created_at: string
+          description: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          preferred_quest_types: string[] | null
+          slug: string | null
+          sponsor_type: string
+          status: string
+          target_audience: Json | null
+          updated_at: string
+          user_id: string
+          website: string | null
+        }
+        Insert: {
+          brand_tone?: string | null
+          budget_range?: string | null
+          city?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          preferred_quest_types?: string[] | null
+          slug?: string | null
+          sponsor_type?: string
+          status?: string
+          target_audience?: Json | null
+          updated_at?: string
+          user_id: string
+          website?: string | null
+        }
+        Update: {
+          brand_tone?: string | null
+          budget_range?: string | null
+          city?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          preferred_quest_types?: string[] | null
+          slug?: string | null
+          sponsor_type?: string
+          status?: string
+          target_audience?: Json | null
+          updated_at?: string
+          user_id?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      sponsored_quests: {
+        Row: {
+          analytics_access_level: string | null
+          created_at: string
+          id: string
+          proposal_id: string | null
+          quest_id: string
+          rewards_attached: string[] | null
+          sponsor_id: string
+        }
+        Insert: {
+          analytics_access_level?: string | null
+          created_at?: string
+          id?: string
+          proposal_id?: string | null
+          quest_id: string
+          rewards_attached?: string[] | null
+          sponsor_id: string
+        }
+        Update: {
+          analytics_access_level?: string | null
+          created_at?: string
+          id?: string
+          proposal_id?: string | null
+          quest_id?: string
+          rewards_attached?: string[] | null
+          sponsor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsored_quests_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "sponsorship_proposals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsored_quests_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsored_quests_sponsor_id_fkey"
+            columns: ["sponsor_id"]
+            isOneToOne: false
+            referencedRelation: "sponsor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sponsorship_proposals: {
+        Row: {
+          admin_approved_at: string | null
+          admin_notes: string | null
+          budget_or_reward: string | null
+          created_at: string
+          creator_id: string | null
+          creator_response_at: string | null
+          id: string
+          message: string | null
+          proposal_type: string
+          quest_id: string | null
+          reward_ids: string[] | null
+          sponsor_id: string
+          status: string
+          venue_offering_id: string | null
+        }
+        Insert: {
+          admin_approved_at?: string | null
+          admin_notes?: string | null
+          budget_or_reward?: string | null
+          created_at?: string
+          creator_id?: string | null
+          creator_response_at?: string | null
+          id?: string
+          message?: string | null
+          proposal_type: string
+          quest_id?: string | null
+          reward_ids?: string[] | null
+          sponsor_id: string
+          status?: string
+          venue_offering_id?: string | null
+        }
+        Update: {
+          admin_approved_at?: string | null
+          admin_notes?: string | null
+          budget_or_reward?: string | null
+          created_at?: string
+          creator_id?: string | null
+          creator_response_at?: string | null
+          id?: string
+          message?: string | null
+          proposal_type?: string
+          quest_id?: string | null
+          reward_ids?: string[] | null
+          sponsor_id?: string
+          status?: string
+          venue_offering_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsorship_proposals_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsorship_proposals_sponsor_id_fkey"
+            columns: ["sponsor_id"]
+            isOneToOne: false
+            referencedRelation: "sponsor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsorship_proposals_venue_offering_id_fkey"
+            columns: ["venue_offering_id"]
+            isOneToOne: false
+            referencedRelation: "venue_offerings"
             referencedColumns: ["id"]
           },
         ]
@@ -807,6 +1189,62 @@ export type Database = {
         }
         Relationships: []
       }
+      venue_offerings: {
+        Row: {
+          address: string | null
+          amenities: string[] | null
+          approval_required: boolean | null
+          available_days: string[] | null
+          available_time_blocks: Json | null
+          capacity: number | null
+          created_at: string
+          id: string
+          ideal_quest_types: string[] | null
+          sponsor_id: string
+          status: string
+          venue_name: string
+          venue_rules: string | null
+        }
+        Insert: {
+          address?: string | null
+          amenities?: string[] | null
+          approval_required?: boolean | null
+          available_days?: string[] | null
+          available_time_blocks?: Json | null
+          capacity?: number | null
+          created_at?: string
+          id?: string
+          ideal_quest_types?: string[] | null
+          sponsor_id: string
+          status?: string
+          venue_name: string
+          venue_rules?: string | null
+        }
+        Update: {
+          address?: string | null
+          amenities?: string[] | null
+          approval_required?: boolean | null
+          available_days?: string[] | null
+          available_time_blocks?: Json | null
+          capacity?: number | null
+          created_at?: string
+          id?: string
+          ideal_quest_types?: string[] | null
+          sponsor_id?: string
+          status?: string
+          venue_name?: string
+          venue_rules?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venue_offerings_sponsor_id_fkey"
+            columns: ["sponsor_id"]
+            isOneToOne: false
+            referencedRelation: "sponsor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       volunteer_applications: {
         Row: {
           created_at: string | null
@@ -878,7 +1316,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "user" | "quest_creator"
+      app_role: "admin" | "user" | "quest_creator" | "sponsor"
       comms_type:
         | "email_invite"
         | "email_confirm"
@@ -898,6 +1336,11 @@ export type Database = {
         | "quest_changes_requested"
         | "quest_rejected"
         | "creator_invite"
+        | "sponsorship_proposal_received"
+        | "sponsorship_proposal_accepted"
+        | "sponsorship_proposal_declined"
+        | "sponsored_quest_approved"
+        | "sponsor_quest_completed"
       quest_status: "draft" | "open" | "closed" | "completed" | "cancelled"
       review_status:
         | "draft"
@@ -1040,7 +1483,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user", "quest_creator"],
+      app_role: ["admin", "user", "quest_creator", "sponsor"],
       comms_type: [
         "email_invite",
         "email_confirm",
@@ -1061,6 +1504,11 @@ export const Constants = {
         "quest_changes_requested",
         "quest_rejected",
         "creator_invite",
+        "sponsorship_proposal_received",
+        "sponsorship_proposal_accepted",
+        "sponsorship_proposal_declined",
+        "sponsored_quest_approved",
+        "sponsor_quest_completed",
       ],
       quest_status: ["draft", "open", "closed", "completed", "cancelled"],
       review_status: [
