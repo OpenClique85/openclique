@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   Dialog,
   DialogContent,
@@ -8,13 +8,15 @@ import {
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import type { Quest } from '@/hooks/useQuests';
 import { useQuestRating } from '@/hooks/useQuestRatings';
+import { useCreatorSlug } from '@/hooks/useCreatorSlugs';
 import QuestProgressionSection from './progression/QuestProgressionSection';
-import { MapPin, Calendar, DollarSign, Users, Gift, Star } from 'lucide-react';
+import { MapPin, Calendar, DollarSign, Users, Gift, Star, ChevronRight } from 'lucide-react';
 
 interface QuestModalProps {
   quest: Quest | null;
@@ -51,6 +53,11 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
   
   // Fetch rating for this quest
   const { rating, reviewCount } = useQuestRating(quest?.id);
+  
+  // Fetch creator info for community quests
+  const { data: creatorInfo } = useCreatorSlug(
+    quest?.creatorType === 'community' ? quest?.creatorId : undefined
+  );
 
   if (!quest) return null;
 
@@ -204,6 +211,34 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
                 <p className="text-muted-foreground text-sm bg-primary/5 rounded-lg p-3">
                   {quest.rewards}
                 </p>
+              </section>
+            )}
+
+            {/* Quest Creator Section */}
+            {quest.creatorType === 'community' && quest.creatorId && creatorInfo && (
+              <section className="space-y-2">
+                <h4 className="font-display font-semibold text-foreground">Quest Creator</h4>
+                <Link
+                  to={`/creators/${creatorInfo.slug}`}
+                  onClick={() => onOpenChange(false)}
+                  className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors group"
+                >
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={creatorInfo.photo_url || undefined} />
+                    <AvatarFallback className="bg-creator/20 text-creator">
+                      {creatorInfo.display_name.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-foreground group-hover:text-primary transition-colors">
+                      {creatorInfo.display_name}
+                    </p>
+                    {creatorInfo.city && (
+                      <p className="text-sm text-muted-foreground">{creatorInfo.city}</p>
+                    )}
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                </Link>
               </section>
             )}
 
