@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,6 +19,8 @@ export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   
   const { user, signIn, signUp, signInWithGoogle } = useAuth();
@@ -38,7 +41,7 @@ export default function Auth() {
     }
   }, [user, navigate, from]);
 
-  const validateForm = () => {
+  const validateForm = (checkPassword = true) => {
     const newErrors: { email?: string; password?: string } = {};
     
     try {
@@ -49,11 +52,13 @@ export default function Auth() {
       }
     }
     
-    try {
-      passwordSchema.parse(password);
-    } catch (e) {
-      if (e instanceof z.ZodError) {
-        newErrors.password = e.errors[0].message;
+    if (checkPassword) {
+      try {
+        passwordSchema.parse(password);
+      } catch (e) {
+        if (e instanceof z.ZodError) {
+          newErrors.password = e.errors[0].message;
+        }
       }
     }
     
@@ -117,6 +122,92 @@ export default function Auth() {
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm(false)) return;
+    
+    setIsResettingPassword(true);
+    
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth?reset=true`,
+    });
+    
+    setIsResettingPassword(false);
+    
+    if (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Password reset failed',
+        description: error.message
+      });
+    } else {
+      toast({
+        title: 'Check your email',
+        description: 'We sent you a password reset link. Please check your inbox.'
+      });
+      setShowForgotPassword(false);
+    }
+  };
+
+  if (showForgotPassword) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        {/* Header */}
+        <header className="p-4">
+          <button 
+            onClick={() => setShowForgotPassword(false)}
+            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Back to sign in</span>
+          </button>
+        </header>
+
+        {/* Main Content */}
+        <main className="flex-1 flex items-center justify-center p-4">
+          <Card className="w-full max-w-md">
+            <CardHeader className="text-center space-y-4">
+              <Link to="/" className="inline-block mx-auto">
+                <img src={logo} alt="OpenClique" className="h-10" />
+              </Link>
+              <div>
+                <CardTitle className="text-2xl font-display">Reset Password</CardTitle>
+                <CardDescription>
+                  Enter your email and we'll send you a reset link
+                </CardDescription>
+              </div>
+            </CardHeader>
+            
+            <CardContent>
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="reset-email">Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="reset-email"
+                      type="email"
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                  {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+                </div>
+                
+                <Button type="submit" className="w-full" disabled={isResettingPassword}>
+                  {isResettingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Send Reset Link
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
@@ -168,7 +259,16 @@ export default function Auth() {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="signin-password">Password</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="signin-password">Password</Label>
+                      <button
+                        type="button"
+                        onClick={() => setShowForgotPassword(true)}
+                        className="text-xs text-primary hover:underline"
+                      >
+                        Forgot password?
+                      </button>
+                    </div>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
