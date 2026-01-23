@@ -101,6 +101,10 @@ interface FormData {
   briefing_html: string;
   capacity_total: number;
   whatsapp_invite_link: string;
+  // Gamification fields
+  base_xp: number;
+  min_level: number;
+  min_tree_xp: number;
 }
 
 const defaultFormData: FormData = {
@@ -125,6 +129,10 @@ const defaultFormData: FormData = {
   briefing_html: '',
   capacity_total: 6,
   whatsapp_invite_link: '',
+  // Gamification defaults
+  base_xp: 50,
+  min_level: 0,
+  min_tree_xp: 0,
 };
 
 export function QuestsManager() {
@@ -255,6 +263,9 @@ export function QuestsManager() {
         briefing_html: quest.briefing_html || '',
         capacity_total: quest.capacity_total || 6,
         whatsapp_invite_link: quest.whatsapp_invite_link || '',
+        base_xp: quest.base_xp ?? 50,
+        min_level: quest.min_level ?? 0,
+        min_tree_xp: quest.min_tree_xp ?? 0,
       });
     } else {
       setEditingQuest(null);
@@ -366,6 +377,9 @@ export function QuestsManager() {
       briefing_html: formData.briefing_html || null,
       capacity_total: formData.capacity_total,
       whatsapp_invite_link: formData.whatsapp_invite_link || null,
+      base_xp: formData.base_xp,
+      min_level: formData.min_level,
+      min_tree_xp: formData.min_tree_xp,
     };
     
     let error;
@@ -933,6 +947,51 @@ export function QuestsManager() {
                   <p className="text-sm text-amber-800 dark:text-amber-200">
                     ⚠️ These fields are for admin use only and won't be shown to users.
                   </p>
+                </div>
+                
+                {/* Gamification Section */}
+                <div className="border rounded-lg p-4 bg-primary/5">
+                  <h4 className="font-medium text-sm mb-3 flex items-center gap-2">
+                    🎮 Gamification Settings
+                  </h4>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="base_xp">Base XP</Label>
+                      <Input
+                        id="base_xp"
+                        type="number"
+                        min={0}
+                        max={500}
+                        value={formData.base_xp}
+                        onChange={(e) => setFormData(prev => ({ ...prev, base_xp: parseInt(e.target.value) || 50 }))}
+                      />
+                      <p className="text-xs text-muted-foreground">XP awarded on completion</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="min_level">Min Level</Label>
+                      <Input
+                        id="min_level"
+                        type="number"
+                        min={0}
+                        max={20}
+                        value={formData.min_level}
+                        onChange={(e) => setFormData(prev => ({ ...prev, min_level: parseInt(e.target.value) || 0 }))}
+                      />
+                      <p className="text-xs text-muted-foreground">0 = no restriction</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="min_tree_xp">Min Tree XP</Label>
+                      <Input
+                        id="min_tree_xp"
+                        type="number"
+                        min={0}
+                        max={1000}
+                        value={formData.min_tree_xp}
+                        onChange={(e) => setFormData(prev => ({ ...prev, min_tree_xp: parseInt(e.target.value) || 0 }))}
+                      />
+                      <p className="text-xs text-muted-foreground">In quest's tree</p>
+                    </div>
+                  </div>
                 </div>
                 
                 <div className="space-y-2">
