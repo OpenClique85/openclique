@@ -25,6 +25,7 @@ import {
   Shield,
   ExternalLink
 } from 'lucide-react';
+import { auditLog } from '@/lib/auditLog';
 
 type Quest = Tables<'quests'>;
 type ReviewStatus = Enums<'review_status'>;
@@ -77,6 +78,23 @@ export function QuestReviewModal({ quest, open, onOpenChange, onActionComplete }
         .eq('id', quest.id);
 
       if (updateError) throw updateError;
+
+      // Audit log the quest review action
+      await auditLog({
+        action: 'quest_review',
+        targetTable: 'quests',
+        targetId: quest.id,
+        oldValues: { 
+          review_status: quest.review_status, 
+          status: quest.status,
+          title: quest.title,
+        },
+        newValues: { 
+          review_status: newStatus, 
+          published: shouldPublish,
+          admin_notes: adminNotes || null,
+        },
+      });
 
       // Create notification for the creator
       if (quest.creator_id) {

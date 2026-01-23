@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { Loader2, Send, X, Check, Eye, UserX, UserCheck, ExternalLink, Users, FileText, Clock, CheckCircle } from 'lucide-react';
 import { QuestReviewModal } from './QuestReviewModal';
+import { auditLog } from '@/lib/auditLog';
 
 type CreatorApplication = Tables<'creator_applications'>;
 type CreatorProfile = Tables<'creator_profiles'>;
@@ -106,6 +107,15 @@ function ApplicationsTab() {
       
       if (updateError) throw updateError;
 
+      // Audit log the approval
+      await auditLog({
+        action: 'application_approve',
+        targetTable: 'creator_applications',
+        targetId: app.id,
+        oldValues: { status: 'pending' },
+        newValues: { status: 'approved', email: app.email, name: app.name },
+      });
+
       // Call edge function to create invite and send email
       const { error: inviteError } = await supabase.functions.invoke('send-creator-invite', {
         body: {
@@ -137,6 +147,15 @@ function ApplicationsTab() {
         .eq('id', selectedApp.id);
       
       if (error) throw error;
+
+      // Audit log the rejection
+      await auditLog({
+        action: 'application_reject',
+        targetTable: 'creator_applications',
+        targetId: selectedApp.id,
+        oldValues: { status: 'pending' },
+        newValues: { status: 'rejected', reason: rejectReason || null },
+      });
       
       toast.success('Application rejected');
       setRejectModalOpen(false);
@@ -388,6 +407,15 @@ function ActiveCreatorsTab() {
       toast.error('Failed to update creator status');
       console.error(error);
     } else {
+      // Audit log the status change
+      await auditLog({
+        action: 'status_change',
+        targetTable: 'creator_profiles',
+        targetId: creator.id,
+        oldValues: { status: creator.status, display_name: creator.display_name },
+        newValues: { status: newStatus },
+      });
+      
       toast.success(`Creator ${newStatus === 'active' ? 'activated' : 'suspended'}`);
       fetchCreators();
     }

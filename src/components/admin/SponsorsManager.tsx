@@ -37,6 +37,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import type { Tables } from '@/integrations/supabase/types';
+import { auditLog } from '@/lib/auditLog';
 
 type SponsorApplication = Tables<'sponsor_applications'>;
 type SponsorProfile = Tables<'sponsor_profiles'>;
@@ -101,6 +102,15 @@ function ApplicationsTab() {
 
       if (updateError) throw updateError;
 
+      // Audit log the approval
+      await auditLog({
+        action: 'application_approve',
+        targetTable: 'sponsor_applications',
+        targetId: app.id,
+        oldValues: { status: 'pending' },
+        newValues: { status: 'approved', email: app.contact_email, business_name: app.business_name },
+      });
+
       // Send invite
       const { error: inviteError } = await supabase.functions.invoke('send-sponsor-invite', {
         body: {
@@ -135,6 +145,15 @@ function ApplicationsTab() {
         .eq('id', selectedApp.id);
 
       if (error) throw error;
+
+      // Audit log the rejection
+      await auditLog({
+        action: 'application_reject',
+        targetTable: 'sponsor_applications',
+        targetId: selectedApp.id,
+        oldValues: { status: 'pending' },
+        newValues: { status: 'rejected', reason: rejectNotes || null },
+      });
 
       toast.success('Application rejected');
       setRejectDialogOpen(false);
@@ -333,6 +352,15 @@ function ActiveSponsorsTab() {
       toast.error('Failed to update status');
       return;
     }
+
+    // Audit log the status change
+    await auditLog({
+      action: 'status_change',
+      targetTable: 'sponsor_profiles',
+      targetId: sponsor.id,
+      oldValues: { status: sponsor.status, name: sponsor.name },
+      newValues: { status: newStatus },
+    });
 
     toast.success(`Sponsor ${newStatus === 'approved' ? 'activated' : 'paused'}`);
     queryClient.invalidateQueries({ queryKey: ['active-sponsors'] });
@@ -544,6 +572,19 @@ function ProposalReviewTab() {
 
       if (updateError) throw updateError;
 
+      // Audit log the proposal approval
+      await auditLog({
+        action: 'proposal_approve',
+        targetTable: 'sponsorship_proposals',
+        targetId: selectedProposal.id,
+        oldValues: { status: selectedProposal.status },
+        newValues: { 
+          status: 'approved', 
+          sponsor_name: selectedProposal.sponsor?.name || null,
+          quest_title: selectedProposal.quest?.title || null,
+        },
+      });
+
       // If quest exists, update it to be sponsored
       if (selectedProposal.quest?.id) {
         await supabase
@@ -604,6 +645,19 @@ function ProposalReviewTab() {
         .eq('id', selectedProposal.id);
 
       if (error) throw error;
+
+      // Audit log the proposal rejection
+      await auditLog({
+        action: 'proposal_reject',
+        targetTable: 'sponsorship_proposals',
+        targetId: selectedProposal.id,
+        oldValues: { status: selectedProposal.status },
+        newValues: { 
+          status: 'declined', 
+          sponsor_name: selectedProposal.sponsor?.name || null,
+          reason: adminNotes || 'Rejected by admin',
+        },
+      });
 
       // Notify sponsor
       if (selectedProposal.sponsor?.user_id) {

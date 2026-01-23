@@ -63,6 +63,7 @@ import { format } from 'date-fns';
 import type { Tables, Enums } from '@/integrations/supabase/types';
 import { SquadRecommendationModal } from './SquadRecommendationModal';
 import { showAchievementToast, showStreakToast } from '@/components/AchievementUnlockToast';
+import { auditLog } from '@/lib/auditLog';
 
 type Quest = Tables<'quests'>;
 type QuestSignup = Tables<'quest_signups'>;
@@ -218,6 +219,15 @@ export function SignupsManager() {
       toast({ variant: 'destructive', title: 'Failed to update status' });
       return;
     }
+    
+    // Audit log the status change
+    await auditLog({
+      action: 'status_change',
+      targetTable: 'quest_signups',
+      targetId: signupId,
+      oldValues: { status: signup.status, user_id: signup.user_id },
+      newValues: { status: newStatus },
+    });
     
     // Award XP when marking as completed (and wasn't already completed)
     if (newStatus === 'completed' && !wasAlreadyCompleted) {
