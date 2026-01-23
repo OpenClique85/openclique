@@ -40,7 +40,7 @@ import { ApprovalInbox, OpsAlerts, AuditLogViewer } from '@/components/admin/con
 
 export default function Admin() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
-  const [activeTab, setActiveTab] = useState('approval-inbox');
+  const [activeTab, setActiveTab] = useState('pilot-instances');
 
   if (authLoading) {
     return (

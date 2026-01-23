@@ -32,6 +32,7 @@ const STATUS_CONFIG: Record<InstanceStatus, { label: string; color: string; next
   completed: { label: 'Completed', color: 'bg-purple-500/20 text-purple-700', next: 'archived', nextLabel: 'Archive' },
   cancelled: { label: 'Cancelled', color: 'bg-destructive/20 text-destructive' },
   archived: { label: 'Archived', color: 'bg-muted text-muted-foreground' },
+  paused: { label: 'Paused', color: 'bg-orange-500/20 text-orange-700' },
 };
 
 export function InstanceOverviewPanel({ instance, onStatusChange }: InstanceOverviewPanelProps) {

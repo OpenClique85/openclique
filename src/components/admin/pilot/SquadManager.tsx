@@ -20,6 +20,7 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
 } from '@/components/ui/dialog';
+import { auditLog } from '@/lib/auditLog';
 
 interface SquadWithMembers {
   id: string;
@@ -114,25 +115,44 @@ export function SquadManager({ instanceId, targetSquadSize }: SquadManagerProps)
   const handleGenerateSquads = async () => {
     setIsGenerating(true);
     try {
+      // First get the instance title for naming
+      const { data: instanceData } = await supabase
+        .from('quest_instances')
+        .select('title')
+        .eq('id', instanceId)
+        .single();
+      
+      const instanceTitle = instanceData?.title || 'Quest';
+      
       const { data, error } = await supabase.functions.invoke('recommend-squads', {
         body: { quest_id: instanceId, squad_size: targetSquadSize }
       });
       
       if (error) throw error;
       
-      // Create squads and assign members
+      // Create squads and assign members with proper naming convention
+      let squadNumber = (squads?.length || 0) + 1;
+      
       for (const suggestion of data.squads || []) {
-        // Create squad with existing schema
+        // Create squad with "{Instance Title} Squad {N}" naming and formation_reason
+        const squadName = `${instanceTitle} Squad ${squadNumber++}`;
+        
         const { data: newSquad, error: createError } = await supabase
           .from('quest_squads')
           .insert({
             quest_id: instanceId,
-            squad_name: suggestion.suggested_name,
+            squad_name: squadName,
+            formation_reason: suggestion.formation_reason,
+            compatibility_score: suggestion.compatibility_score,
+            referral_bonds: suggestion.referral_bonds,
           })
           .select()
           .single();
         
-        if (createError) continue;
+        if (createError) {
+          console.error('Failed to create squad:', createError);
+          continue;
+        }
         
         // Assign members
         for (const member of suggestion.members) {
@@ -143,18 +163,30 @@ export function SquadManager({ instanceId, targetSquadSize }: SquadManagerProps)
               user_id: member.user_id,
             }, { onConflict: 'squad_id,user_id' });
           
-          // Note: squad_id on quest_signups is a new column from migration
-          // The actual assignment will work once types refresh
+          // Note the assignment in private notes
           await supabase
             .from('quest_signups')
-            .update({ notes_private: `Squad: ${newSquad.id}` } as any)
+            .update({ notes_private: `Assigned to: ${squadName}` })
             .eq('id', member.signup_id);
         }
+        
+        // Log squad formation using auditLog helper
+        await auditLog({
+          action: 'squad_formed',
+          targetTable: 'quest_squads',
+          targetId: newSquad.id,
+          newValues: {
+            squad_name: squadName,
+            member_count: suggestion.members.length,
+            compatibility_score: suggestion.compatibility_score,
+            referral_bonds: suggestion.referral_bonds,
+          },
+        });
       }
       
       queryClient.invalidateQueries({ queryKey: ['instance-squads-detail', instanceId] });
       queryClient.invalidateQueries({ queryKey: ['instance-unassigned', instanceId] });
-      toast({ title: 'Squads generated!', description: `Created ${data.squads?.length || 0} squads` });
+      toast({ title: 'Squads generated!', description: `Created ${data.squads?.length || 0} squads with "${instanceTitle} Squad N" naming` });
     } catch (err: any) {
       toast({ title: 'Failed to generate squads', description: err.message, variant: 'destructive' });
     } finally {

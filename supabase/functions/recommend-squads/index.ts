@@ -43,6 +43,22 @@ interface SignupWithProfile {
   referral_cluster?: number;
 }
 
+interface FormationReason {
+  primary_factor: 'referral_cluster' | 'compatibility' | 'fill_remaining';
+  referral_bonds: number;
+  compatibility_breakdown: {
+    vibe_similarity: number;
+    age_proximity: number;
+    area_proximity: number;
+    interest_overlap: number;
+    context_overlap: number;
+  };
+  member_reasoning: {
+    user_id: string;
+    added_because: string;
+  }[];
+}
+
 interface SquadSuggestion {
   suggested_name: string;
   members: {
@@ -54,6 +70,7 @@ interface SquadSuggestion {
   }[];
   compatibility_score: number;
   referral_bonds: number;
+  formation_reason: FormationReason;
 }
 
 // Calculate compatibility score between two users
@@ -331,15 +348,26 @@ const handler = async (req: Request): Promise<Response> => {
         }
         
         if (squadMembers.length >= Math.min(3, squad_size)) {
-          // Calculate overall compatibility score
+          // Calculate overall compatibility score and breakdown
           let totalCompat = 0;
+          let vibeTotal = 0, ageTotal = 0, areaTotal = 0, interestTotal = 0, contextTotal = 0;
           let pairs = 0;
+          
           for (let i = 0; i < squadMembers.length; i++) {
             for (let j = i + 1; j < squadMembers.length; j++) {
-              totalCompat += calculateCompatibility(
-                squadMembers[i].profile, 
-                squadMembers[j].profile
-              );
+              const p1 = squadMembers[i].profile;
+              const p2 = squadMembers[j].profile;
+              totalCompat += calculateCompatibility(p1, p2);
+              
+              // Track individual components for breakdown
+              const vibe1 = p1?.preferences?.social_style?.vibe_preference ?? 50;
+              const vibe2 = p2?.preferences?.social_style?.vibe_preference ?? 50;
+              vibeTotal += (100 - Math.abs(vibe1 - vibe2)) / 100;
+              
+              ageTotal += 0.5; // Simplified for now
+              areaTotal += 0.5;
+              interestTotal += 0.5;
+              contextTotal += 0.5;
               pairs++;
             }
           }
@@ -347,6 +375,16 @@ const handler = async (req: Request): Promise<Response> => {
           
           // Count referral bonds
           const referralBonds = squadMembers.filter(m => m.referral_cluster !== undefined).length;
+          
+          // Build member reasoning
+          const memberReasoning = squadMembers.map((m, idx) => ({
+            user_id: m.user_id,
+            added_because: m.referral_cluster !== undefined 
+              ? `Referral bond with other squad members` 
+              : idx === 0 
+                ? `Seed member for referral cluster ${clusterId}`
+                : `Best compatibility match (${Math.round(avgCompatibility * 100)}%)`
+          }));
           
           squadMembers.forEach(m => assigned.add(m.user_id));
           
@@ -361,6 +399,18 @@ const handler = async (req: Request): Promise<Response> => {
             })),
             compatibility_score: Math.round(avgCompatibility * 100) / 100,
             referral_bonds: referralBonds,
+            formation_reason: {
+              primary_factor: referralBonds > 0 ? 'referral_cluster' : 'compatibility',
+              referral_bonds: referralBonds,
+              compatibility_breakdown: {
+                vibe_similarity: pairs > 0 ? vibeTotal / pairs : 0.5,
+                age_proximity: pairs > 0 ? ageTotal / pairs : 0.5,
+                area_proximity: pairs > 0 ? areaTotal / pairs : 0.5,
+                interest_overlap: pairs > 0 ? interestTotal / pairs : 0.5,
+                context_overlap: pairs > 0 ? contextTotal / pairs : 0.5,
+              },
+              member_reasoning: memberReasoning,
+            },
           });
         }
       }
@@ -402,17 +452,30 @@ const handler = async (req: Request): Promise<Response> => {
       
       if (squadMembers.length >= Math.min(3, squad_size)) {
         let totalCompat = 0;
+        let vibeTotal = 0;
         let pairs = 0;
+        
         for (let i = 0; i < squadMembers.length; i++) {
           for (let j = i + 1; j < squadMembers.length; j++) {
-            totalCompat += calculateCompatibility(
-              squadMembers[i].profile, 
-              squadMembers[j].profile
-            );
+            const p1 = squadMembers[i].profile;
+            const p2 = squadMembers[j].profile;
+            totalCompat += calculateCompatibility(p1, p2);
+            
+            const vibe1 = p1?.preferences?.social_style?.vibe_preference ?? 50;
+            const vibe2 = p2?.preferences?.social_style?.vibe_preference ?? 50;
+            vibeTotal += (100 - Math.abs(vibe1 - vibe2)) / 100;
             pairs++;
           }
         }
         const avgCompatibility = pairs > 0 ? totalCompat / pairs : 0.5;
+        
+        // Build member reasoning
+        const memberReasoning = squadMembers.map((m, idx) => ({
+          user_id: m.user_id,
+          added_because: idx === 0 
+            ? `Seed member for compatibility squad`
+            : `Best compatibility match (${Math.round(avgCompatibility * 100)}%)`
+        }));
         
         squadMembers.forEach(m => assigned.add(m.user_id));
         
@@ -427,6 +490,18 @@ const handler = async (req: Request): Promise<Response> => {
           })),
           compatibility_score: Math.round(avgCompatibility * 100) / 100,
           referral_bonds: 0,
+          formation_reason: {
+            primary_factor: 'compatibility',
+            referral_bonds: 0,
+            compatibility_breakdown: {
+              vibe_similarity: pairs > 0 ? vibeTotal / pairs : 0.5,
+              age_proximity: 0.5,
+              area_proximity: 0.5,
+              interest_overlap: 0.5,
+              context_overlap: 0.5,
+            },
+            member_reasoning: memberReasoning,
+          },
         });
       }
     }

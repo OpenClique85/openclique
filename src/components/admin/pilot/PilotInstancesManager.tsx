@@ -68,6 +68,7 @@ const STATUS_COLORS: Record<InstanceStatus, string> = {
   completed: 'bg-purple-500/20 text-purple-700',
   cancelled: 'bg-destructive/20 text-destructive',
   archived: 'bg-muted text-muted-foreground',
+  paused: 'bg-orange-500/20 text-orange-700',
 };
 
 export function PilotInstancesManager() {

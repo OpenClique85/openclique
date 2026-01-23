@@ -5,8 +5,10 @@
  */
 
 export { InstanceOverviewPanel } from './InstanceOverviewPanel';
+export { InstanceNotificationPanel } from './InstanceNotificationPanel';
 export { ParticipantRoster } from './ParticipantRoster';
 export { SquadManager } from './SquadManager';
+export { SquadDetailModal } from './SquadDetailModal';
 export { RunOfShowControls } from './RunOfShowControls';
 export { ProofInbox } from './ProofInbox';
 export { PilotInstancesManager } from './PilotInstancesManager';

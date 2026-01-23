@@ -6,9 +6,9 @@
 
 import { cn } from '@/lib/utils';
 import { 
-  Map, Users, MessageSquare, BarChart3, Gamepad2,
-  ChevronDown, ChevronRight, Link2, Wrench, FileText,
-  Shield, AlertTriangle
+  Target, Users, MessageSquare, BarChart3, Gamepad2,
+  ChevronDown, ChevronRight, Wrench, FileText,
+  Shield, Library, CheckSquare, HeadphonesIcon
 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -23,38 +23,36 @@ export interface AdminSection {
 
 export const ADMIN_SECTIONS: AdminSection[] = [
   {
-    id: 'control-room',
-    label: 'Control Room',
-    icon: <Shield className="h-4 w-4" />,
+    id: 'mission-control',
+    label: 'Mission Control',
+    icon: <Target className="h-4 w-4" />,
     tabs: [
-      { id: 'approval-inbox', label: 'Approval Inbox' },
+      { id: 'pilot-instances', label: 'Active Instances' },
       { id: 'ops-alerts', label: 'Ops Alerts' },
+    ],
+  },
+  {
+    id: 'approvals',
+    label: 'Approvals',
+    icon: <CheckSquare className="h-4 w-4" />,
+    tabs: [
+      { id: 'approval-inbox', label: 'Quest Approvals' },
       { id: 'audit-log', label: 'Audit Log' },
     ],
   },
   {
-    id: 'quest-ops',
-    label: 'Quest Ops',
-    icon: <Map className="h-4 w-4" />,
+    id: 'catalog',
+    label: 'Quest Catalog',
+    icon: <Library className="h-4 w-4" />,
     tabs: [
-      { id: 'pilot-instances', label: 'Active Instances' },
-    ],
-  },
-  {
-    id: 'operations',
-    label: 'Operations',
-    icon: <Map className="h-4 w-4" />,
-    tabs: [
-      { id: 'quests', label: 'Quests' },
-      { id: 'signups', label: 'Signups' },
-      { id: 'squads', label: 'Squads' },
+      { id: 'quests', label: 'Quest Templates' },
       { id: 'orgs', label: 'Organizations' },
     ],
   },
   {
     id: 'support',
     label: 'Support',
-    icon: <MessageSquare className="h-4 w-4" />,
+    icon: <HeadphonesIcon className="h-4 w-4" />,
     tabs: [
       { id: 'support-inbox', label: 'Ticket Inbox' },
       { id: 'support-dm', label: 'Direct Messages' },
@@ -141,7 +139,7 @@ export function AdminSectionNav({ activeTab, onTabChange }: AdminSectionNavProps
     const activeSection = ADMIN_SECTIONS.find(section => 
       section.tabs.some(tab => tab.id === activeTab)
     );
-    return activeSection ? [activeSection.id] : ['operations'];
+    return activeSection ? [activeSection.id] : ['mission-control'];
   });
 
   const toggleSection = (sectionId: string) => {
