@@ -428,6 +428,7 @@ export default function FeedbackFlow() {
             totalXPEarned={totalXPEarned}
             xpBreakdown={xpBreakdown}
             questTitle={quest.title}
+            questId={questId}
           />
         ) : (
           <Card>
