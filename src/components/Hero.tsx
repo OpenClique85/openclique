@@ -35,6 +35,7 @@
 
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { HERO, SOCIAL_PROOF } from "@/constants/content";
 import logo from "@/assets/logo.png";
 import concertCrowd from "@/assets/austin/concert-crowd.jpg";
@@ -70,18 +71,27 @@ export function Hero() {
         <div className="max-w-3xl mx-auto text-center">
           
           {/* -------------------------------------------------------------- */}
+          {/* TAGLINE BADGE */}
+          {/* -------------------------------------------------------------- */}
+          <div className="flex justify-center mb-6 animate-fade-in">
+            <Badge variant="outline" className="px-4 py-1.5 text-sm font-medium border-primary/30 bg-primary/5 text-primary">
+              {HERO.tagline}
+            </Badge>
+          </div>
+
+          {/* -------------------------------------------------------------- */}
           {/* LOGO */}
           {/* -------------------------------------------------------------- */}
-          <div className="flex justify-center mb-8 animate-fade-in">
+          <div className="flex justify-center mb-8 animate-fade-in [animation-delay:50ms]">
             <img src={logo} alt="OpenClique" className="h-16 md:h-20" />
           </div>
 
           {/* -------------------------------------------------------------- */}
           {/* HEADLINE: Two-line structure for visual impact */}
-          {/* Line 1: "Build the village you've been missing." (main text) */}
-          {/* Line 2: "One Quest at a time." (accent color, slightly smaller) */}
+          {/* Line 1: "You've got a squad waiting." (main text) */}
+          {/* Line 2: "You just haven't met them yet." (accent color, slightly smaller) */}
           {/* -------------------------------------------------------------- */}
-          <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 animate-fade-in [animation-delay:100ms]">
+          <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 animate-fade-in [animation-delay:150ms]">
             {HERO.headline}
             <span className="block text-3xl md:text-4xl lg:text-5xl mt-3 text-primary font-semibold">
               {HERO.headlineAccent}
@@ -89,18 +99,18 @@ export function Hero() {
           </h1>
 
           {/* -------------------------------------------------------------- */}
-          {/* SUBHEADLINE: Quick explanation of what OpenClique is */}
+          {/* SUBHEADLINE: Flexibility message - solo, friends, or crew */}
           {/* -------------------------------------------------------------- */}
-          <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto animate-fade-in [animation-delay:200ms]">
+          <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto animate-fade-in [animation-delay:250ms]">
             {HERO.subheadline}
           </p>
 
           {/* -------------------------------------------------------------- */}
           {/* CTA BUTTONS */}
-          {/* Primary: "Join the Pilot" (solid button, links to /pilot) */}
+          {/* Primary: "Find Your Quest" (solid button, links to /quests) */}
           {/* Secondary: "Get Involved" dropdown with creator/partner links */}
           {/* -------------------------------------------------------------- */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in [animation-delay:300ms]">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in [animation-delay:350ms]">
             {/* Primary CTA - Main conversion goal */}
             <Button size="lg" asChild className="w-full sm:w-auto text-base px-10 py-6 text-lg font-semibold">
               <Link to="/quests">{HERO.primaryCta}</Link>
@@ -144,7 +154,7 @@ export function Hero() {
           {/* -------------------------------------------------------------- */}
           {/* SOCIAL PROOF: Builds trust and encourages exploration */}
           {/* -------------------------------------------------------------- */}
-          <div className="mt-8 animate-fade-in [animation-delay:400ms] flex flex-col items-center gap-2">
+          <div className="mt-8 animate-fade-in [animation-delay:450ms] flex flex-col items-center gap-2">
             {/* Status message (e.g., "Now accepting Austin pilot members") */}
             <p className="text-sm text-muted-foreground">
               {SOCIAL_PROOF.message}
