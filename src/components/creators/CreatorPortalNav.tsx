@@ -1,11 +1,12 @@
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, ClipboardList, BarChart3, User, FileText } from 'lucide-react';
+import { LayoutDashboard, ClipboardList, BarChart3, User, FileText, Inbox } from 'lucide-react';
 
 const navItems = [
   { href: '/creator', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/creator/quests', label: 'My Quests', icon: ClipboardList },
-  { href: '/creator/proposals', label: 'Proposals', icon: FileText },
+  { href: '/creator/proposals', label: 'Sponsor Proposals', icon: FileText },
+  { href: '/creator/org-requests', label: 'Org Requests', icon: Inbox },
   { href: '/creator/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/creator/profile', label: 'Profile', icon: User },
 ];
