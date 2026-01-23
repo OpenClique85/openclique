@@ -72,6 +72,7 @@ import SponsorDashboard from "./pages/SponsorDashboard";
 import SponsorRewards from "./pages/SponsorRewards";
 import SponsorVenues from "./pages/SponsorVenues";
 import SponsorDiscover from "./pages/SponsorDiscover";
+import SponsorBrowseCreators from "./pages/SponsorBrowseCreators";
 import SponsorBrowseOrgs from "./pages/SponsorBrowseOrgs";
 import SponsorOrgRequests from "./pages/SponsorOrgRequests";
 import SponsorProfile from "./pages/SponsorProfile";
@@ -146,6 +147,7 @@ const App = () => (
             <Route path="/sponsor/rewards" element={<ProtectedRoute><SponsorRewards /></ProtectedRoute>} />
             <Route path="/sponsor/venues" element={<ProtectedRoute><SponsorVenues /></ProtectedRoute>} />
             <Route path="/sponsor/discover" element={<ProtectedRoute><SponsorDiscover /></ProtectedRoute>} />
+            <Route path="/sponsor/browse-creators" element={<ProtectedRoute><SponsorBrowseCreators /></ProtectedRoute>} />
             <Route path="/sponsor/browse-orgs" element={<ProtectedRoute><SponsorBrowseOrgs /></ProtectedRoute>} />
             <Route path="/sponsor/org-requests" element={<ProtectedRoute><SponsorOrgRequests /></ProtectedRoute>} />
             <Route path="/sponsor/proposals" element={<ProtectedRoute><SponsorProposals /></ProtectedRoute>} />

@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils';
 const NAV_ITEMS = [
   { href: '/sponsor', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/sponsor/discover', label: 'Discover', icon: Search },
+  { href: '/sponsor/browse-creators', label: 'Creators', icon: User },
   { href: '/sponsor/browse-orgs', label: 'Organizations', icon: MapPin },
   { href: '/sponsor/org-requests', label: 'Org Requests', icon: FileText },
   { href: '/sponsor/venues', label: 'Venues', icon: MapPin },
