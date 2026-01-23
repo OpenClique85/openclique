@@ -1,5 +1,5 @@
 /**
- * CreatorUnifiedInbox - Combines sponsor proposals and org requests
+ * CreatorUnifiedInbox - Combines sponsor proposals, org requests, and applications
  * into a single inbox view for creators
  */
 
@@ -7,9 +7,10 @@ import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Building2 } from 'lucide-react';
+import { FileText, Building2, Send } from 'lucide-react';
 import { CreatorProposalInbox } from './CreatorProposalInbox';
 import { CreatorOrgRequestsInbox } from './CreatorOrgRequestsInbox';
+import { CreatorApplicationsInbox } from './CreatorApplicationsInbox';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -73,6 +74,21 @@ export function CreatorUnifiedInbox({ creatorProfileId }: CreatorUnifiedInboxPro
     enabled: !!creatorProfileId,
   });
 
+  // Count pending applications
+  const { data: applicationsCount = 0 } = useQuery({
+    queryKey: ['creator-applications-count', user?.id],
+    queryFn: async () => {
+      if (!user) return 0;
+      const { count } = await supabase
+        .from('listing_applications')
+        .select('*', { count: 'exact', head: true })
+        .eq('creator_id', user.id)
+        .eq('status', 'pending');
+      return count || 0;
+    },
+    enabled: !!user,
+  });
+
   const totalPending = sponsorCount + orgCount;
 
   return (
@@ -85,15 +101,15 @@ export function CreatorUnifiedInbox({ creatorProfileId }: CreatorUnifiedInboxPro
           )}
         </h2>
         <p className="text-muted-foreground text-sm">
-          Manage incoming partnership requests from sponsors and organizations
+          Manage partnership requests and track your applications
         </p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
+        <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="sponsors" className="gap-2">
             <FileText className="h-4 w-4" />
-            Sponsor Proposals
+            Proposals
             {sponsorCount > 0 && (
               <Badge variant="secondary" className="ml-1">{sponsorCount}</Badge>
             )}
@@ -105,6 +121,13 @@ export function CreatorUnifiedInbox({ creatorProfileId }: CreatorUnifiedInboxPro
               <Badge variant="secondary" className="ml-1">{orgCount}</Badge>
             )}
           </TabsTrigger>
+          <TabsTrigger value="applications" className="gap-2">
+            <Send className="h-4 w-4" />
+            My Applications
+            {applicationsCount > 0 && (
+              <Badge variant="secondary" className="ml-1">{applicationsCount}</Badge>
+            )}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="sponsors" className="mt-6">
@@ -113,6 +136,10 @@ export function CreatorUnifiedInbox({ creatorProfileId }: CreatorUnifiedInboxPro
 
         <TabsContent value="orgs" className="mt-6">
           <CreatorOrgRequestsInbox creatorProfileId={creatorProfileId} />
+        </TabsContent>
+
+        <TabsContent value="applications" className="mt-6">
+          <CreatorApplicationsInbox />
         </TabsContent>
       </Tabs>
     </div>
