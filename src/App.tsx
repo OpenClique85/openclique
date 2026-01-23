@@ -76,6 +76,7 @@ import SponsorProfile from "./pages/SponsorProfile";
 import SponsorProposals from "./pages/SponsorProposals";
 import SponsorAnalytics from "./pages/SponsorAnalytics";
 import CreatorProposals from "./pages/CreatorProposals";
+import OrgPortal from "./pages/OrgPortal";
 import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
@@ -119,6 +120,7 @@ const App = () => (
             
             {/* CREATOR PAGES */}
             <Route path="/creators" element={<CreatorsHub />} />
+            <Route path="/org/:slug" element={<OrgPortal />} />
             <Route path="/creators/content-creators" element={<ContentCreatorsPage />} />
             <Route path="/creators/quest-creators" element={<QuestCreatorsPage />} />
             <Route path="/creators/onboard" element={<CreatorOnboarding />} />
