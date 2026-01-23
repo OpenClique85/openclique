@@ -94,6 +94,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
       { id: 'flow-debugger', label: 'Flow Debugger' },
       { id: 'manual-overrides', label: 'Manual Overrides' },
       { id: 'feature-flags', label: 'Feature Flags' },
+      { id: 'security-tools', label: 'Security Tools' },
       { id: 'devtools', label: 'Dev Tools' },
     ],
   },
