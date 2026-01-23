@@ -11,7 +11,7 @@ const corsHeaders = {
 };
 
 interface NotifyAdminRequest {
-  type: "new_signup" | "quest_full" | "cancellation" | "feedback" | "custom";
+  type: "new_signup" | "quest_full" | "cancellation" | "feedback" | "custom" | "proposal_pending";
   data: Record<string, any>;
 }
 
@@ -127,6 +127,31 @@ const handler = async (req: Request): Promise<Response> => {
               <p><strong>Rating:</strong> ${"⭐".repeat(data.rating || 0)} (${data.rating}/5)</p>
               <p><strong>Belonging Delta:</strong> ${data.belonging_before || "?"} → ${data.belonging_after || "?"}</p>
               ${data.comments ? `<p><strong>Comments:</strong> ${data.comments}</p>` : ""}
+            </div>
+          </div>
+        `;
+        break;
+
+      case "proposal_pending":
+        subject = `🤝 Sponsorship Proposal Needs Review: ${data.sponsor_name || "Unknown Sponsor"}`;
+        html = `
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2 style="color: #f59e0b;">Sponsorship Proposal Pending Admin Review</h2>
+            <div style="background: #fffbeb; padding: 15px; border-radius: 8px; margin: 15px 0;">
+              <p><strong>Sponsor:</strong> ${data.sponsor_name || "Unknown"}</p>
+              <p><strong>Creator:</strong> ${data.creator_name || "Unknown"}</p>
+              ${data.quest_title ? `<p><strong>Quest:</strong> ${data.quest_title}</p>` : ""}
+              <p><strong>Proposal Type:</strong> ${data.proposal_type === "sponsor_quest" ? "Sponsor Existing Quest" : "Request Custom Quest"}</p>
+              ${data.budget ? `<p><strong>Budget/Offering:</strong> ${data.budget}</p>` : ""}
+            </div>
+            <p style="color: #666; font-size: 14px;">
+              The creator has accepted this proposal. Please review and approve or reject in the admin console.
+            </p>
+            <div style="margin-top: 20px;">
+              <a href="https://openclique.lovable.app/admin" 
+                 style="background: #14b8a6; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block;">
+                Review in Admin Console
+              </a>
             </div>
           </div>
         `;
