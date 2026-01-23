@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { sanitizeHtml } from '@/lib/sanitize';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables, Enums } from '@/integrations/supabase/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -343,7 +344,7 @@ export function QuestReviewModal({ quest, open, onOpenChange, onActionComplete }
                   <h4 className="font-medium">Full Description</h4>
                   <div 
                     className="text-sm prose prose-sm dark:prose-invert max-w-none"
-                    dangerouslySetInnerHTML={{ __html: quest.briefing_html }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(quest.briefing_html) }}
                   />
                 </div>
               </>
