@@ -18,10 +18,14 @@ interface CategoryBreakdown {
 interface ResolutionMetrics {
   avgResolutionHours: number | null;
   medianResolutionHours: number | null;
+  avgFirstResponseHours: number | null;
+  medianFirstResponseHours: number | null;
   resolvedCount: number;
   openCount: number;
   percentResolvedIn24h: number;
   percentResolvedIn48h: number;
+  percentRespondedIn1h: number;
+  percentRespondedIn4h: number;
 }
 
 interface UrgencyBreakdown {
@@ -81,6 +85,7 @@ export function useSupportAnalytics(days: number = 30) {
           urgency,
           created_at,
           resolved_at,
+          first_response_at,
           submitted_from_page,
           category:issue_categories(id, name)
         `)
@@ -156,11 +161,29 @@ export function useSupportAnalytics(days: number = 30) {
       const resolvedIn24h = resolutionHours.filter(h => h <= 24).length;
       const resolvedIn48h = resolutionHours.filter(h => h <= 48).length;
 
+      // First response time metrics
+      const respondedTickets = allTickets.filter(t => t.first_response_at);
+      const firstResponseHours = respondedTickets.map(t => 
+        differenceInHours(new Date(t.first_response_at!), new Date(t.created_at))
+      );
+
+      const sortedResponseHours = [...firstResponseHours].sort((a, b) => a - b);
+      const medianResponseHours = sortedResponseHours.length > 0
+        ? sortedResponseHours[Math.floor(sortedResponseHours.length / 2)]
+        : null;
+
+      const respondedIn1h = firstResponseHours.filter(h => h <= 1).length;
+      const respondedIn4h = firstResponseHours.filter(h => h <= 4).length;
+
       const resolutionMetrics: ResolutionMetrics = {
         avgResolutionHours: resolutionHours.length > 0
           ? resolutionHours.reduce((a, b) => a + b, 0) / resolutionHours.length
           : null,
         medianResolutionHours: medianHours,
+        avgFirstResponseHours: firstResponseHours.length > 0
+          ? firstResponseHours.reduce((a, b) => a + b, 0) / firstResponseHours.length
+          : null,
+        medianFirstResponseHours: medianResponseHours,
         resolvedCount: resolvedTickets.length,
         openCount: allTickets.filter(t => t.status !== 'resolved' && t.status !== 'closed').length,
         percentResolvedIn24h: resolvedTickets.length > 0
@@ -168,6 +191,12 @@ export function useSupportAnalytics(days: number = 30) {
           : 0,
         percentResolvedIn48h: resolvedTickets.length > 0
           ? (resolvedIn48h / resolvedTickets.length) * 100
+          : 0,
+        percentRespondedIn1h: respondedTickets.length > 0
+          ? (respondedIn1h / respondedTickets.length) * 100
+          : 0,
+        percentRespondedIn4h: respondedTickets.length > 0
+          ? (respondedIn4h / respondedTickets.length) * 100
           : 0,
       };
 

@@ -242,7 +242,7 @@ export function useUpdateTicket() {
 }
 
 // ============================================================================
-// Add Admin Message
+// Add Admin Message (with first response tracking + email notification)
 // ============================================================================
 export function useAddAdminMessage() {
   const { user } = useAuth();
@@ -252,12 +252,30 @@ export function useAddAdminMessage() {
     mutationFn: async ({
       ticketId,
       message,
+      sendEmail = true,
     }: {
       ticketId: string;
       message: string;
+      sendEmail?: boolean;
     }) => {
       if (!user) throw new Error('Must be logged in');
 
+      // First, get the ticket to check if this is the first admin response
+      const { data: ticket, error: ticketError } = await supabase
+        .from('support_tickets')
+        .select(`
+          id,
+          first_response_at,
+          description,
+          user_id,
+          user:profiles!support_tickets_user_id_fkey(id, display_name, email)
+        `)
+        .eq('id', ticketId)
+        .single();
+
+      if (ticketError) throw ticketError;
+
+      // Insert the message
       const { data, error } = await supabase
         .from('ticket_messages')
         .insert({
@@ -270,10 +288,46 @@ export function useAddAdminMessage() {
         .single();
 
       if (error) throw error;
+
+      // Set first_response_at if this is the first admin response
+      if (!ticket.first_response_at) {
+        await supabase
+          .from('support_tickets')
+          .update({ first_response_at: new Date().toISOString() } as any)
+          .eq('id', ticketId);
+      }
+
+      // Send email notification to user
+      const userProfile = ticket.user as any;
+      if (sendEmail && userProfile?.email) {
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          
+          await supabase.functions.invoke('send-email', {
+            body: {
+              to: userProfile.email,
+              subject: 'OpenClique Support: We\'ve responded to your ticket',
+              template: 'support_reply',
+              variables: {
+                display_name: userProfile.display_name || 'there',
+                ticket_subject: ticket.description?.substring(0, 50) + (ticket.description?.length > 50 ? '...' : '') || 'Your request',
+                message: message,
+                ticket_url: `${window.location.origin}/support/${ticketId}`,
+              },
+            },
+            headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : undefined,
+          });
+        } catch (emailError) {
+          console.error('Failed to send support reply email:', emailError);
+          // Don't throw - message was still sent successfully
+        }
+      }
+
       return data;
     },
     onSuccess: (_, { ticketId }) => {
       queryClient.invalidateQueries({ queryKey: ['admin-ticket-messages', ticketId] });
+      queryClient.invalidateQueries({ queryKey: ['admin-ticket', ticketId] });
     },
   });
 }

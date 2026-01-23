@@ -2216,6 +2216,7 @@ export type Database = {
           category_id: string
           created_at: string
           description: string
+          first_response_at: string | null
           id: string
           internal_notes: string | null
           metadata: Json | null
@@ -2234,6 +2235,7 @@ export type Database = {
           category_id: string
           created_at?: string
           description: string
+          first_response_at?: string | null
           id?: string
           internal_notes?: string | null
           metadata?: Json | null
@@ -2252,6 +2254,7 @@ export type Database = {
           category_id?: string
           created_at?: string
           description?: string
+          first_response_at?: string | null
           id?: string
           internal_notes?: string | null
           metadata?: Json | null
