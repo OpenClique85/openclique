@@ -78,9 +78,12 @@ import SponsorOrgRequests from "./pages/SponsorOrgRequests";
 import SponsorProfile from "./pages/SponsorProfile";
 import SponsorProposals from "./pages/SponsorProposals";
 import SponsorAnalytics from "./pages/SponsorAnalytics";
+import SponsorListings from "./pages/SponsorListings";
+import SponsorPublicProfile from "./pages/SponsorPublicProfile";
 import CreatorProposals from "./pages/CreatorProposals";
 import CreatorOrgRequests from "./pages/CreatorOrgRequests";
 import CreatorInbox from "./pages/CreatorInbox";
+import CreatorBrowseListings from "./pages/CreatorBrowseListings";
 import OrgPortal from "./pages/OrgPortal";
 import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -143,9 +146,11 @@ const App = () => (
             
             {/* SPONSOR PAGES */}
             <Route path="/sponsors/onboard" element={<SponsorOnboarding />} />
+            <Route path="/sponsors/:slug" element={<SponsorPublicProfile />} />
             <Route path="/sponsor" element={<ProtectedRoute><SponsorDashboard /></ProtectedRoute>} />
             <Route path="/sponsor/rewards" element={<ProtectedRoute><SponsorRewards /></ProtectedRoute>} />
             <Route path="/sponsor/venues" element={<ProtectedRoute><SponsorVenues /></ProtectedRoute>} />
+            <Route path="/sponsor/listings" element={<ProtectedRoute><SponsorListings /></ProtectedRoute>} />
             <Route path="/sponsor/discover" element={<ProtectedRoute><SponsorDiscover /></ProtectedRoute>} />
             <Route path="/sponsor/browse-creators" element={<ProtectedRoute><SponsorBrowseCreators /></ProtectedRoute>} />
             <Route path="/sponsor/browse-orgs" element={<ProtectedRoute><SponsorBrowseOrgs /></ProtectedRoute>} />
@@ -153,6 +158,9 @@ const App = () => (
             <Route path="/sponsor/proposals" element={<ProtectedRoute><SponsorProposals /></ProtectedRoute>} />
             <Route path="/sponsor/analytics" element={<ProtectedRoute><SponsorAnalytics /></ProtectedRoute>} />
             <Route path="/sponsor/profile" element={<ProtectedRoute><SponsorProfile /></ProtectedRoute>} />
+            
+            {/* CREATOR BROWSE */}
+            <Route path="/creator/browse-listings" element={<ProtectedRoute><CreatorBrowseListings /></ProtectedRoute>} />
             
             {/* LEGAL PAGES */}
             <Route path="/privacy" element={<Privacy />} />
