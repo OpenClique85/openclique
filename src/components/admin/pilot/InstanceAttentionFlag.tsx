@@ -6,13 +6,15 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { AlertTriangle, Users, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
+import { AlertTriangle, Users, AlertCircle, CheckCircle2, Clock, MessageCircle, ClipboardCheck, AlertOctagon } from 'lucide-react';
 import type { Enums } from '@/integrations/supabase/types';
 
 type InstanceStatus = Enums<'instance_status'>;
+// Extended squad status type to include warm-up states (may not be in generated types yet)
+type SquadStatus = 'draft' | 'confirmed' | 'warming_up' | 'ready_for_review' | 'approved' | 'active' | 'completed';
 
 export interface AttentionFlag {
-  type: 'ready_for_squad' | 'underfilled' | 'unassigned' | 'squad_incomplete' | 'ready_to_go' | 'starting_soon';
+  type: 'ready_for_squad' | 'underfilled' | 'unassigned' | 'squad_incomplete' | 'ready_to_go' | 'starting_soon' | 'squad_warming_up' | 'squad_pending_review' | 'squad_warmup_stalled';
   severity: 'info' | 'warning' | 'error' | 'success';
   message: string;
   shortLabel: string;
@@ -37,6 +39,12 @@ export function InstanceAttentionFlag({ flag }: AttentionFlagProps) {
         return <CheckCircle2 className="h-3 w-3" />;
       case 'starting_soon':
         return <Clock className="h-3 w-3" />;
+      case 'squad_warming_up':
+        return <MessageCircle className="h-3 w-3" />;
+      case 'squad_pending_review':
+        return <ClipboardCheck className="h-3 w-3" />;
+      case 'squad_warmup_stalled':
+        return <AlertOctagon className="h-3 w-3" />;
       default:
         return <AlertCircle className="h-3 w-3" />;
     }
@@ -76,6 +84,16 @@ export function InstanceAttentionFlag({ flag }: AttentionFlagProps) {
 }
 
 /**
+ * Squad warm-up state for attention flag calculation
+ */
+export interface SquadWarmUpState {
+  status: SquadStatus;
+  warmingUpSince?: string | null;
+  readyCount: number;
+  totalMembers: number;
+}
+
+/**
  * Calculate attention flag for an instance based on its state
  */
 export function calculateAttentionFlag(
@@ -87,7 +105,8 @@ export function calculateAttentionFlag(
     scheduled_date: string;
     start_time: string;
   },
-  squadCount: number
+  squadCount: number,
+  squadWarmUpStates?: SquadWarmUpState[]
 ): AttentionFlag | null {
   const signupCount = instance.current_signup_count || 0;
   const targetSquadSize = instance.target_squad_size || 6;
@@ -101,6 +120,49 @@ export function calculateAttentionFlag(
   // Past events - no flag
   if (hoursUntilStart < 0 && instance.status !== 'completed') {
     return null;
+  }
+
+  // Check squad warm-up states first (higher priority)
+  if (squadWarmUpStates && squadWarmUpStates.length > 0) {
+    // Check for squads pending review (highest priority warm-up flag)
+    const pendingReviewSquads = squadWarmUpStates.filter(s => s.status === 'ready_for_review');
+    if (pendingReviewSquads.length > 0) {
+      return {
+        type: 'squad_pending_review',
+        severity: 'warning',
+        message: `${pendingReviewSquads.length} squad${pendingReviewSquads.length > 1 ? 's' : ''} ready for admin approval`,
+        shortLabel: 'Needs Review',
+      };
+    }
+
+    // Check for stalled warm-ups (warming_up for > 24 hours)
+    const stalledSquads = squadWarmUpStates.filter(s => {
+      if (s.status !== 'warming_up' || !s.warmingUpSince) return false;
+      const warmUpStart = new Date(s.warmingUpSince);
+      const hoursSinceStart = (now.getTime() - warmUpStart.getTime()) / (1000 * 60 * 60);
+      return hoursSinceStart > 24;
+    });
+    if (stalledSquads.length > 0) {
+      return {
+        type: 'squad_warmup_stalled',
+        severity: 'error',
+        message: `${stalledSquads.length} squad${stalledSquads.length > 1 ? 's' : ''} stuck in warm-up for 24+ hours`,
+        shortLabel: 'Stalled',
+      };
+    }
+
+    // Check for squads actively warming up
+    const warmingUpSquads = squadWarmUpStates.filter(s => s.status === 'warming_up');
+    if (warmingUpSquads.length > 0) {
+      const totalReady = warmingUpSquads.reduce((acc, s) => acc + s.readyCount, 0);
+      const totalMembers = warmingUpSquads.reduce((acc, s) => acc + s.totalMembers, 0);
+      return {
+        type: 'squad_warming_up',
+        severity: 'info',
+        message: `${warmingUpSquads.length} squad${warmingUpSquads.length > 1 ? 's' : ''} warming up (${totalReady}/${totalMembers} members ready)`,
+        shortLabel: 'Warming Up',
+      };
+    }
   }
 
   // Ready to form squad - recruiting with enough signups but no squads
