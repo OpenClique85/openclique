@@ -1009,6 +1009,48 @@ export type Database = {
           },
         ]
       }
+      message_templates: {
+        Row: {
+          available_placeholders: string[] | null
+          body: string
+          category: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_system: boolean | null
+          name: string
+          subject: string | null
+          template_key: string
+          updated_at: string
+        }
+        Insert: {
+          available_placeholders?: string[] | null
+          body: string
+          category: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_system?: boolean | null
+          name: string
+          subject?: string | null
+          template_key: string
+          updated_at?: string
+        }
+        Update: {
+          available_placeholders?: string[] | null
+          body?: string
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_system?: boolean | null
+          name?: string
+          subject?: string | null
+          template_key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string | null
@@ -1324,6 +1366,72 @@ export type Database = {
         }
         Relationships: []
       }
+      participant_proofs: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          file_url: string | null
+          id: string
+          instance_id: string
+          objective_index: number | null
+          proof_type: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          signup_id: string | null
+          status: Database["public"]["Enums"]["proof_status"]
+          text_content: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          instance_id: string
+          objective_index?: number | null
+          proof_type: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          signup_id?: string | null
+          status?: Database["public"]["Enums"]["proof_status"]
+          text_content?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          instance_id?: string
+          objective_index?: number | null
+          proof_type?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          signup_id?: string | null
+          status?: Database["public"]["Enums"]["proof_status"]
+          text_content?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "participant_proofs_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "quest_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "participant_proofs_signup_id_fkey"
+            columns: ["signup_id"]
+            isOneToOne: false
+            referencedRelation: "quest_signups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_applications: {
         Row: {
           business_name: string
@@ -1465,11 +1573,169 @@ export type Database = {
         }
         Relationships: []
       }
+      quest_event_log: {
+        Row: {
+          actor_id: string | null
+          actor_type: string
+          created_at: string
+          event_type: Database["public"]["Enums"]["quest_event_type"]
+          id: string
+          instance_id: string | null
+          payload: Json | null
+          target_user_id: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          actor_type: string
+          created_at?: string
+          event_type: Database["public"]["Enums"]["quest_event_type"]
+          id?: string
+          instance_id?: string | null
+          payload?: Json | null
+          target_user_id?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          actor_type?: string
+          created_at?: string
+          event_type?: Database["public"]["Enums"]["quest_event_type"]
+          id?: string
+          instance_id?: string | null
+          payload?: Json | null
+          target_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_event_log_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "quest_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quest_instances: {
+        Row: {
+          capacity: number
+          check_in_closes_at: string | null
+          check_in_opens_at: string | null
+          created_at: string
+          created_by: string | null
+          current_signup_count: number | null
+          description: string | null
+          end_time: string | null
+          icon: string | null
+          id: string
+          instance_slug: string
+          meeting_point_address: string | null
+          meeting_point_coords: unknown
+          meeting_point_name: string | null
+          objectives: Json | null
+          operator_notes: string | null
+          progression_tree: string | null
+          quest_card_token: string
+          required_proof_types: string[] | null
+          safety_notes: string | null
+          scheduled_date: string
+          squads_locked: boolean | null
+          start_time: string
+          status: Database["public"]["Enums"]["instance_status"]
+          target_squad_size: number | null
+          template_id: string | null
+          timezone: string | null
+          title: string
+          updated_at: string
+          what_to_bring: string | null
+          xp_rules: Json | null
+        }
+        Insert: {
+          capacity?: number
+          check_in_closes_at?: string | null
+          check_in_opens_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_signup_count?: number | null
+          description?: string | null
+          end_time?: string | null
+          icon?: string | null
+          id?: string
+          instance_slug: string
+          meeting_point_address?: string | null
+          meeting_point_coords?: unknown
+          meeting_point_name?: string | null
+          objectives?: Json | null
+          operator_notes?: string | null
+          progression_tree?: string | null
+          quest_card_token?: string
+          required_proof_types?: string[] | null
+          safety_notes?: string | null
+          scheduled_date: string
+          squads_locked?: boolean | null
+          start_time: string
+          status?: Database["public"]["Enums"]["instance_status"]
+          target_squad_size?: number | null
+          template_id?: string | null
+          timezone?: string | null
+          title: string
+          updated_at?: string
+          what_to_bring?: string | null
+          xp_rules?: Json | null
+        }
+        Update: {
+          capacity?: number
+          check_in_closes_at?: string | null
+          check_in_opens_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_signup_count?: number | null
+          description?: string | null
+          end_time?: string | null
+          icon?: string | null
+          id?: string
+          instance_slug?: string
+          meeting_point_address?: string | null
+          meeting_point_coords?: unknown
+          meeting_point_name?: string | null
+          objectives?: Json | null
+          operator_notes?: string | null
+          progression_tree?: string | null
+          quest_card_token?: string
+          required_proof_types?: string[] | null
+          safety_notes?: string | null
+          scheduled_date?: string
+          squads_locked?: boolean | null
+          start_time?: string
+          status?: Database["public"]["Enums"]["instance_status"]
+          target_squad_size?: number | null
+          template_id?: string | null
+          timezone?: string | null
+          title?: string
+          updated_at?: string
+          what_to_bring?: string | null
+          xp_rules?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_instances_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "quest_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quest_signups: {
         Row: {
           cancellation_reason: string | null
+          checked_in_at: string | null
+          completed_at: string | null
           id: string
+          instance_id: string | null
+          last_activity_at: string | null
           notes_private: string | null
+          participant_token: string | null
+          phone: string | null
+          proof_submitted_at: string | null
           quest_id: string
           reenlist_answered_at: string | null
           signed_up_at: string
@@ -1477,11 +1743,19 @@ export type Database = {
           updated_at: string
           user_id: string
           wants_reenlist: boolean | null
+          whatsapp_joined: boolean | null
         }
         Insert: {
           cancellation_reason?: string | null
+          checked_in_at?: string | null
+          completed_at?: string | null
           id?: string
+          instance_id?: string | null
+          last_activity_at?: string | null
           notes_private?: string | null
+          participant_token?: string | null
+          phone?: string | null
+          proof_submitted_at?: string | null
           quest_id: string
           reenlist_answered_at?: string | null
           signed_up_at?: string
@@ -1489,11 +1763,19 @@ export type Database = {
           updated_at?: string
           user_id: string
           wants_reenlist?: boolean | null
+          whatsapp_joined?: boolean | null
         }
         Update: {
           cancellation_reason?: string | null
+          checked_in_at?: string | null
+          completed_at?: string | null
           id?: string
+          instance_id?: string | null
+          last_activity_at?: string | null
           notes_private?: string | null
+          participant_token?: string | null
+          phone?: string | null
+          proof_submitted_at?: string | null
           quest_id?: string
           reenlist_answered_at?: string | null
           signed_up_at?: string
@@ -1501,8 +1783,16 @@ export type Database = {
           updated_at?: string
           user_id?: string
           wants_reenlist?: boolean | null
+          whatsapp_joined?: boolean | null
         }
         Relationships: [
+          {
+            foreignKeyName: "quest_signups_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "quest_instances"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "quest_signups_quest_id_fkey"
             columns: ["quest_id"]
@@ -1552,6 +1842,81 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      quest_templates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          default_capacity: number | null
+          default_duration_minutes: number | null
+          default_squad_size: number | null
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          objectives: Json | null
+          progression_tree: string | null
+          required_proof_types: string[] | null
+          safety_notes: string | null
+          short_description: string | null
+          slug: string
+          tags: string[] | null
+          theme_color: string | null
+          timeline_prompts: Json | null
+          title: string
+          updated_at: string
+          what_to_bring: string | null
+          xp_rules: Json | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          default_capacity?: number | null
+          default_duration_minutes?: number | null
+          default_squad_size?: number | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          objectives?: Json | null
+          progression_tree?: string | null
+          required_proof_types?: string[] | null
+          safety_notes?: string | null
+          short_description?: string | null
+          slug: string
+          tags?: string[] | null
+          theme_color?: string | null
+          timeline_prompts?: Json | null
+          title: string
+          updated_at?: string
+          what_to_bring?: string | null
+          xp_rules?: Json | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          default_capacity?: number | null
+          default_duration_minutes?: number | null
+          default_squad_size?: number | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          objectives?: Json | null
+          progression_tree?: string | null
+          required_proof_types?: string[] | null
+          safety_notes?: string | null
+          short_description?: string | null
+          slug?: string
+          tags?: string[] | null
+          theme_color?: string | null
+          timeline_prompts?: Json | null
+          title?: string
+          updated_at?: string
+          what_to_bring?: string | null
+          xp_rules?: Json | null
+        }
+        Relationships: []
       }
       quests: {
         Row: {
@@ -3127,6 +3492,16 @@ export type Database = {
           streak_name: string
         }[]
       }
+      create_instance_from_template: {
+        Args: {
+          p_meeting_point_address?: string
+          p_meeting_point_name?: string
+          p_scheduled_date: string
+          p_start_time: string
+          p_template_id: string
+        }
+        Returns: string
+      }
       get_user_level: {
         Args: { p_user_id: string }
         Returns: {
@@ -3158,6 +3533,17 @@ export type Database = {
         }
         Returns: string
       }
+      log_quest_event: {
+        Args: {
+          p_actor_id?: string
+          p_actor_type: string
+          p_event_type: Database["public"]["Enums"]["quest_event_type"]
+          p_instance_id: string
+          p_payload?: Json
+          p_target_user_id?: string
+        }
+        Returns: string
+      }
       record_referral_signup: {
         Args: { p_referral_code: string; p_user_id: string }
         Returns: undefined
@@ -3181,6 +3567,14 @@ export type Database = {
         | "email_reminder"
         | "email_followup"
         | "email_whatsapp"
+      instance_status:
+        | "draft"
+        | "recruiting"
+        | "locked"
+        | "live"
+        | "completed"
+        | "cancelled"
+        | "archived"
       message_sender_role: "user" | "admin" | "system"
       notification_type:
         | "quest_recommendation"
@@ -3242,6 +3636,25 @@ export type Database = {
         | "company"
         | "nonprofit"
         | "other"
+      proof_status: "pending" | "approved" | "flagged" | "resubmit_requested"
+      quest_event_type:
+        | "instance_created"
+        | "status_change"
+        | "signup"
+        | "confirm"
+        | "cancel"
+        | "squad_assigned"
+        | "squad_moved"
+        | "whatsapp_joined"
+        | "check_in"
+        | "proof_submitted"
+        | "proof_approved"
+        | "proof_flagged"
+        | "completion"
+        | "xp_awarded"
+        | "message_sent"
+        | "admin_override"
+        | "no_show_marked"
       quest_status: "draft" | "open" | "closed" | "completed" | "cancelled"
       quest_visibility: "public" | "org_only" | "invite_only"
       review_status:
@@ -3406,6 +3819,15 @@ export const Constants = {
         "email_followup",
         "email_whatsapp",
       ],
+      instance_status: [
+        "draft",
+        "recruiting",
+        "locked",
+        "live",
+        "completed",
+        "cancelled",
+        "archived",
+      ],
       message_sender_role: ["user", "admin", "system"],
       notification_type: [
         "quest_recommendation",
@@ -3469,6 +3891,26 @@ export const Constants = {
         "company",
         "nonprofit",
         "other",
+      ],
+      proof_status: ["pending", "approved", "flagged", "resubmit_requested"],
+      quest_event_type: [
+        "instance_created",
+        "status_change",
+        "signup",
+        "confirm",
+        "cancel",
+        "squad_assigned",
+        "squad_moved",
+        "whatsapp_joined",
+        "check_in",
+        "proof_submitted",
+        "proof_approved",
+        "proof_flagged",
+        "completion",
+        "xp_awarded",
+        "message_sent",
+        "admin_override",
+        "no_show_marked",
       ],
       quest_status: ["draft", "open", "closed", "completed", "cancelled"],
       quest_visibility: ["public", "org_only", "invite_only"],

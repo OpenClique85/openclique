@@ -52,11 +52,13 @@ import Terms from "./pages/Terms";
 import Quests from "./pages/Quests";
 import QuestDetail from "./pages/QuestDetail";
 import SquadDetail from "./pages/SquadDetail";
+import QuestCard from "./pages/QuestCard";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import MyQuests from "./pages/MyQuests";
 import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
+import PilotControlRoom from "./pages/admin/PilotControlRoom";
 import FeedbackFlow from "./pages/FeedbackFlow";
 import Notifications from "./pages/Notifications";
 import Support from "./pages/Support";
@@ -113,6 +115,7 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/quests" element={<Quests />} />
             <Route path="/quests/:slug" element={<QuestDetail />} />
+            <Route path="/quest-card/:token" element={<QuestCard />} />
             
             {/* AUTH */}
             <Route path="/auth" element={<Auth />} />
@@ -123,6 +126,7 @@ const App = () => (
             <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
             <Route path="/support/:ticketId" element={<ProtectedRoute><SupportTicketDetail /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute requireAdmin><Admin /></ProtectedRoute>} />
+            <Route path="/admin/pilot/:instanceId" element={<ProtectedRoute requireAdmin><PilotControlRoom /></ProtectedRoute>} />
             <Route path="/feedback/:questId" element={<ProtectedRoute><FeedbackFlow /></ProtectedRoute>} />
             
             {/* SIGNUP/FUNNEL PAGES */}
