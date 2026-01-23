@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2 } from 'lucide-react';
 
 import { QuestsManager } from '@/components/admin/QuestsManager';
@@ -17,6 +16,11 @@ import { CreatorPreviewTab } from '@/components/admin/CreatorPreviewTab';
 import { SponsorPreviewTab } from '@/components/admin/SponsorPreviewTab';
 import { DevToolsSection } from '@/components/admin/DevToolsSection';
 import { TestimonialsManager } from '@/components/admin/TestimonialsManager';
+import { XPLevelsManager } from '@/components/admin/XPLevelsManager';
+import { AchievementsManager } from '@/components/admin/AchievementsManager';
+import { BadgesManager } from '@/components/admin/BadgesManager';
+import { StreaksManager } from '@/components/admin/StreaksManager';
+import { AdminSectionNav } from '@/components/admin/AdminSectionNav';
 
 export default function Admin() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
@@ -43,6 +47,28 @@ export default function Admin() {
     );
   }
 
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'quests': return <QuestsManager />;
+      case 'signups': return <SignupsManager />;
+      case 'squads': return <PersistentSquadsManager />;
+      case 'creators': return <CreatorsManager />;
+      case 'sponsors': return <SponsorsManager />;
+      case 'testimonials': return <TestimonialsManager />;
+      case 'creator-preview': return <CreatorPreviewTab />;
+      case 'sponsor-preview': return <SponsorPreviewTab />;
+      case 'messaging': return <MessagingCenter />;
+      case 'whatsapp': return <WhatsAppManager />;
+      case 'analytics': return <Analytics />;
+      case 'devtools': return <DevToolsSection />;
+      case 'xp-levels': return <XPLevelsManager />;
+      case 'achievements': return <AchievementsManager />;
+      case 'badges': return <BadgesManager />;
+      case 'streaks': return <StreaksManager />;
+      default: return <QuestsManager />;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
@@ -50,73 +76,27 @@ export default function Admin() {
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-display font-bold text-foreground">Quest Ops Console</h1>
-          <p className="text-muted-foreground mt-1">Manage quests, signups, and communications</p>
+          <p className="text-muted-foreground mt-1">Manage quests, partners, and gamification</p>
         </div>
         
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 lg:grid-cols-12 lg:w-auto lg:inline-grid">
-            <TabsTrigger value="quests">Quests</TabsTrigger>
-            <TabsTrigger value="signups">Signups</TabsTrigger>
-            <TabsTrigger value="squads">Squads</TabsTrigger>
-            <TabsTrigger value="creators">Creators</TabsTrigger>
-            <TabsTrigger value="sponsors">Sponsors</TabsTrigger>
-            <TabsTrigger value="testimonials">Testimonials</TabsTrigger>
-            <TabsTrigger value="creator-preview">Creator View</TabsTrigger>
-            <TabsTrigger value="sponsor-preview">Sponsor View</TabsTrigger>
-            <TabsTrigger value="messaging">Messaging</TabsTrigger>
-            <TabsTrigger value="whatsapp">WhatsApp</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="devtools">Dev Tools</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="quests">
-            <QuestsManager />
-          </TabsContent>
-          
-          <TabsContent value="signups">
-            <SignupsManager />
-          </TabsContent>
-          
-          <TabsContent value="squads">
-            <PersistentSquadsManager />
-          </TabsContent>
-          
-          <TabsContent value="creators">
-            <CreatorsManager />
-          </TabsContent>
-          
-          <TabsContent value="sponsors">
-            <SponsorsManager />
-          </TabsContent>
-          
-          <TabsContent value="testimonials">
-            <TestimonialsManager />
-          </TabsContent>
-          
-          <TabsContent value="creator-preview">
-            <CreatorPreviewTab />
-          </TabsContent>
-          
-          <TabsContent value="sponsor-preview">
-            <SponsorPreviewTab />
-          </TabsContent>
-          
-          <TabsContent value="messaging">
-            <MessagingCenter />
-          </TabsContent>
-          
-          <TabsContent value="whatsapp">
-            <WhatsAppManager />
-          </TabsContent>
-          
-          <TabsContent value="analytics">
-            <Analytics />
-          </TabsContent>
-          
-          <TabsContent value="devtools">
-            <DevToolsSection />
-          </TabsContent>
-        </Tabs>
+        <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-8">
+          {/* Sidebar Navigation */}
+          <aside className="hidden lg:block">
+            <div className="sticky top-24">
+              <AdminSectionNav activeTab={activeTab} onTabChange={setActiveTab} />
+            </div>
+          </aside>
+
+          {/* Mobile Navigation */}
+          <div className="lg:hidden mb-4">
+            <AdminSectionNav activeTab={activeTab} onTabChange={setActiveTab} />
+          </div>
+
+          {/* Content */}
+          <div className="min-w-0">
+            {renderContent()}
+          </div>
+        </div>
       </main>
       
       <Footer />
