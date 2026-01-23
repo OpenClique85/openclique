@@ -14,6 +14,95 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievement_templates: {
+        Row: {
+          badge_id: string | null
+          category: string | null
+          created_at: string | null
+          criteria: Json
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          is_hidden: boolean | null
+          name: string
+          sort_order: number | null
+          xp_reward: number | null
+        }
+        Insert: {
+          badge_id?: string | null
+          category?: string | null
+          created_at?: string | null
+          criteria: Json
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_hidden?: boolean | null
+          name: string
+          sort_order?: number | null
+          xp_reward?: number | null
+        }
+        Update: {
+          badge_id?: string | null
+          category?: string | null
+          created_at?: string | null
+          criteria?: Json
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_hidden?: boolean | null
+          name?: string
+          sort_order?: number | null
+          xp_reward?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "achievement_templates_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badge_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      badge_templates: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          name: string
+          rarity: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name: string
+          rarity?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name?: string
+          rarity?: string | null
+        }
+        Relationships: []
+      }
       comms_log: {
         Row: {
           id: string
@@ -391,6 +480,30 @@ export type Database = {
           },
         ]
       }
+      level_thresholds: {
+        Row: {
+          created_at: string | null
+          id: string
+          level: number
+          min_xp: number
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          level: number
+          min_xp: number
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          level?: number
+          min_xp?: number
+          name?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string | null
@@ -592,6 +705,7 @@ export type Database = {
       quests: {
         Row: {
           admin_notes: string | null
+          base_xp: number | null
           briefing_html: string | null
           capacity_total: number | null
           cost_description: string | null
@@ -607,9 +721,12 @@ export type Database = {
           is_sponsored: boolean | null
           meeting_address: string | null
           meeting_location_name: string | null
+          min_level: number | null
+          min_tree_xp: number | null
           objectives: string | null
           progression_tree: string | null
           published_at: string | null
+          required_achievement_id: string | null
           review_status: Database["public"]["Enums"]["review_status"] | null
           revision_count: number | null
           rewards: string | null
@@ -629,6 +746,7 @@ export type Database = {
         }
         Insert: {
           admin_notes?: string | null
+          base_xp?: number | null
           briefing_html?: string | null
           capacity_total?: number | null
           cost_description?: string | null
@@ -644,9 +762,12 @@ export type Database = {
           is_sponsored?: boolean | null
           meeting_address?: string | null
           meeting_location_name?: string | null
+          min_level?: number | null
+          min_tree_xp?: number | null
           objectives?: string | null
           progression_tree?: string | null
           published_at?: string | null
+          required_achievement_id?: string | null
           review_status?: Database["public"]["Enums"]["review_status"] | null
           revision_count?: number | null
           rewards?: string | null
@@ -666,6 +787,7 @@ export type Database = {
         }
         Update: {
           admin_notes?: string | null
+          base_xp?: number | null
           briefing_html?: string | null
           capacity_total?: number | null
           cost_description?: string | null
@@ -681,9 +803,12 @@ export type Database = {
           is_sponsored?: boolean | null
           meeting_address?: string | null
           meeting_location_name?: string | null
+          min_level?: number | null
+          min_tree_xp?: number | null
           objectives?: string | null
           progression_tree?: string | null
           published_at?: string | null
+          required_achievement_id?: string | null
           review_status?: Database["public"]["Enums"]["review_status"] | null
           revision_count?: number | null
           rewards?: string | null
@@ -707,6 +832,13 @@ export type Database = {
             columns: ["creator_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quests_required_achievement_id_fkey"
+            columns: ["required_achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievement_templates"
             referencedColumns: ["id"]
           },
           {
@@ -1330,6 +1462,103 @@ export type Database = {
           },
         ]
       }
+      streak_rules: {
+        Row: {
+          created_at: string | null
+          grace_periods: number | null
+          id: string
+          interval: string
+          is_active: boolean | null
+          name: string
+          xp_bonus: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          grace_periods?: number | null
+          id?: string
+          interval: string
+          is_active?: boolean | null
+          name: string
+          xp_bonus?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          grace_periods?: number | null
+          id?: string
+          interval?: string
+          is_active?: boolean | null
+          name?: string
+          xp_bonus?: number | null
+        }
+        Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          created_at: string | null
+          id: string
+          progress: Json | null
+          unlocked_at: string | null
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          created_at?: string | null
+          id?: string
+          progress?: Json | null
+          unlocked_at?: string | null
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          created_at?: string | null
+          id?: string
+          progress?: Json | null
+          unlocked_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievement_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_badges: {
+        Row: {
+          awarded_at: string | null
+          badge_id: string
+          id: string
+          is_featured: boolean | null
+          user_id: string
+        }
+        Insert: {
+          awarded_at?: string | null
+          badge_id: string
+          id?: string
+          is_featured?: boolean | null
+          user_id: string
+        }
+        Update: {
+          awarded_at?: string | null
+          badge_id?: string
+          id?: string
+          is_featured?: boolean | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badge_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1347,6 +1576,74 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_streaks: {
+        Row: {
+          created_at: string | null
+          current_count: number | null
+          id: string
+          last_activity_at: string | null
+          longest_count: number | null
+          streak_broken_at: string | null
+          streak_rule_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          current_count?: number | null
+          id?: string
+          last_activity_at?: string | null
+          longest_count?: number | null
+          streak_broken_at?: string | null
+          streak_rule_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          current_count?: number | null
+          id?: string
+          last_activity_at?: string | null
+          longest_count?: number | null
+          streak_broken_at?: string | null
+          streak_rule_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_streaks_streak_rule_id_fkey"
+            columns: ["streak_rule_id"]
+            isOneToOne: false
+            referencedRelation: "streak_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_tree_xp: {
+        Row: {
+          created_at: string | null
+          id: string
+          tree_id: string
+          tree_xp: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          tree_id: string
+          tree_xp?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          tree_id?: string
+          tree_xp?: number | null
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
@@ -1511,6 +1808,14 @@ export type Database = {
       }
     }
     Functions: {
+      award_quest_xp: {
+        Args: { p_quest_id: string; p_user_id: string }
+        Returns: number
+      }
+      award_tree_xp: {
+        Args: { p_amount: number; p_tree_id: string; p_user_id: string }
+        Returns: number
+      }
       award_xp: {
         Args: {
           p_amount: number
@@ -1519,6 +1824,15 @@ export type Database = {
           p_user_id: string
         }
         Returns: number
+      }
+      get_user_level: {
+        Args: { p_user_id: string }
+        Returns: {
+          current_xp: number
+          level: number
+          name: string
+          next_level_xp: number
+        }[]
       }
       has_role: {
         Args: {
