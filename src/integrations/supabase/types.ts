@@ -1605,6 +1605,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          listing_templates: Json | null
           logo_url: string | null
           name: string
           preferred_quest_types: string[] | null
@@ -1627,6 +1628,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          listing_templates?: Json | null
           logo_url?: string | null
           name: string
           preferred_quest_types?: string[] | null
@@ -1649,6 +1651,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          listing_templates?: Json | null
           logo_url?: string | null
           name?: string
           preferred_quest_types?: string[] | null

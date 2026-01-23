@@ -26,6 +26,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { Loader2, X } from 'lucide-react';
+import { ListingTemplateManager, ListingTemplate } from './ListingTemplateManager';
 
 const QUEST_TYPES = [
   { value: 'culture', label: 'Culture & Arts' },
@@ -247,6 +248,18 @@ export function SponsorListingFormModal({
     }));
   };
 
+  const handleLoadTemplate = (template: ListingTemplate) => {
+    setFormData((prev) => ({
+      ...prev,
+      quest_type: template.quest_type || prev.quest_type,
+      budget_range: template.budget_range || prev.budget_range,
+      description: template.description || prev.description,
+      target_audience: template.target_audience || prev.target_audience,
+      creator_requirements: template.creator_requirements || prev.creator_requirements,
+      includes_branding: template.includes_branding ?? prev.includes_branding,
+    }));
+  };
+
   const canProceed = () => {
     if (step === 1) return formData.title.trim().length > 0;
     return true;
@@ -260,6 +273,24 @@ export function SponsorListingFormModal({
             {editingListing ? 'Edit Listing' : 'Create Listing'} - Step {step} of 4
           </DialogTitle>
         </DialogHeader>
+
+        {/* Template Manager */}
+        {!editingListing && (
+          <div className="mb-4">
+            <ListingTemplateManager
+              sponsorId={sponsorId}
+              currentData={{
+                quest_type: formData.quest_type,
+                budget_range: formData.budget_range,
+                description: formData.description,
+                target_audience: formData.target_audience,
+                creator_requirements: formData.creator_requirements,
+                includes_branding: formData.includes_branding,
+              }}
+              onLoadTemplate={handleLoadTemplate}
+            />
+          </div>
+        )}
 
         {/* Progress indicator */}
         <div className="flex gap-2 mb-4">
