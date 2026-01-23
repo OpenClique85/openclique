@@ -42,6 +42,9 @@ import { SquadComparisonView } from '@/components/admin/SquadComparisonView';
 import { SquadHealthDashboard } from '@/components/admin/SquadHealthDashboard';
 import { SquadArchivalManager } from '@/components/admin/SquadArchivalManager';
 import { UGCManager } from '@/components/admin/UGCManager';
+import { InviteCodesManager } from '@/components/admin/InviteCodesManager';
+import { OnboardingFeedbackManager } from '@/components/admin/OnboardingFeedbackManager';
+
 export default function Admin() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState('pilot-instances');
@@ -101,6 +104,10 @@ export default function Admin() {
       case 'whatsapp': return <WhatsAppManager />;
       case 'links': return <LinksManager />;
       case 'notification-console': return <NotificationConsole />;
+      // Growth
+      case 'invite-codes': return <InviteCodesManager />;
+      case 'onboarding-feedback': return <OnboardingFeedbackManager />;
+      // Insights
       // Insights
       case 'analytics': return <Analytics />;
       // Gamification
