@@ -1,6 +1,26 @@
 /**
  * =============================================================================
- * USER LEVEL HOOK - Calculate user level from XP using level thresholds
+ * USER LEVEL HOOK
+ * =============================================================================
+ * 
+ * Purpose: Calculate and display user's current level based on total XP.
+ * 
+ * Database Dependencies:
+ *   - level_thresholds: Defines XP requirements for each level
+ *   - user_xp: Stores user's total accumulated XP
+ * 
+ * Usage:
+ *   const { level, name, currentXP, progressPercent, xpToNext } = useUserLevel();
+ * 
+ * Example Output:
+ *   { level: 3, name: "Adventurer", currentXP: 275, progressPercent: 75, xpToNext: 25 }
+ * 
+ * Related Files:
+ *   - src/components/profile/ProfileGamificationSection.tsx (displays level)
+ *   - src/components/admin/XPLevelsManager.tsx (manages thresholds)
+ *   - supabase/functions: get_user_level() SQL function
+ * 
+ * @module hooks/useUserLevel
  * =============================================================================
  */
 

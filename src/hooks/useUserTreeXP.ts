@@ -1,6 +1,29 @@
 /**
  * =============================================================================
- * USER TREE XP HOOK - Track XP per progression tree (culture, wellness, connector)
+ * USER TREE XP HOOK
+ * =============================================================================
+ * 
+ * Purpose: Track XP earned in each progression tree (culture, wellness, connector).
+ *          Tree XP is earned when completing quests tagged with a progression_tree.
+ * 
+ * Database Dependencies:
+ *   - user_tree_xp: Stores XP per tree per user
+ *   - quests.progression_tree: Determines which tree gets XP
+ * 
+ * Usage:
+ *   const { treeXP } = useUserTreeXP();
+ *   console.log(treeXP.culture);  // 150
+ *   console.log(treeXP.wellness); // 75
+ * 
+ * XP Award Flow:
+ *   Quest completed → award_quest_xp() → award_tree_xp() → user_tree_xp updated
+ * 
+ * Related Files:
+ *   - src/components/profile/ProfileGamificationSection.tsx (displays tree XP)
+ *   - src/components/progression/* (progression tree visualization)
+ *   - DB function: award_tree_xp(user_id, tree_id, amount)
+ * 
+ * @module hooks/useUserTreeXP
  * =============================================================================
  */
 
