@@ -48,6 +48,7 @@ import { HowItWorksMini } from "@/components/HowItWorksMini";
 import { BenefitsSection } from "@/components/BenefitsSection";
 import { WhoItsForSection } from "@/components/WhoItsForSection";
 import { TestimonialsSection } from "@/components/TestimonialsSection";
+import { UGCShowcase } from "@/components/UGCShowcase";
 import { FAQ } from "@/components/FAQ";
 import { CTASection } from "@/components/CTASection";
 import { Footer } from "@/components/Footer";
@@ -87,7 +88,11 @@ const Index = () => {
         {/* Horizontal carousel of user testimonials */}
         <TestimonialsSection />
         
-        {/* ============ SECTION 6: FAQ ============ */}
+        {/* ============ SECTION 6: Community UGC ============ */}
+        {/* Approved user photos/videos from quests */}
+        <UGCShowcase limit={6} />
+        
+        {/* ============ SECTION 7: FAQ ============ */}
         {/* Expandable accordion with common questions */}
         <FAQ />
         
