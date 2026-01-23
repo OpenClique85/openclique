@@ -100,6 +100,111 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_direct_messages: {
+        Row: {
+          body: string
+          context_quest_id: string | null
+          context_squad_id: string | null
+          context_ticket_id: string | null
+          created_at: string
+          email_sent: boolean
+          from_admin_id: string
+          id: string
+          message_type: Database["public"]["Enums"]["admin_message_type"]
+          read_at: string | null
+          reply_allowed: boolean
+          subject: string
+          to_user_id: string
+        }
+        Insert: {
+          body: string
+          context_quest_id?: string | null
+          context_squad_id?: string | null
+          context_ticket_id?: string | null
+          created_at?: string
+          email_sent?: boolean
+          from_admin_id: string
+          id?: string
+          message_type?: Database["public"]["Enums"]["admin_message_type"]
+          read_at?: string | null
+          reply_allowed?: boolean
+          subject: string
+          to_user_id: string
+        }
+        Update: {
+          body?: string
+          context_quest_id?: string | null
+          context_squad_id?: string | null
+          context_ticket_id?: string | null
+          created_at?: string
+          email_sent?: boolean
+          from_admin_id?: string
+          id?: string
+          message_type?: Database["public"]["Enums"]["admin_message_type"]
+          read_at?: string | null
+          reply_allowed?: boolean
+          subject?: string
+          to_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_direct_messages_context_quest_id_fkey"
+            columns: ["context_quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_direct_messages_context_squad_id_fkey"
+            columns: ["context_squad_id"]
+            isOneToOne: false
+            referencedRelation: "quest_squads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_direct_messages_context_ticket_id_fkey"
+            columns: ["context_ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_dm_replies: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          message_id: string
+          sender_id: string
+          sender_role: Database["public"]["Enums"]["message_sender_role"]
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          message_id: string
+          sender_id: string
+          sender_role: Database["public"]["Enums"]["message_sender_role"]
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          message_id?: string
+          sender_id?: string
+          sender_role?: Database["public"]["Enums"]["message_sender_role"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_dm_replies_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "admin_direct_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       badge_templates: {
         Row: {
           category: string | null
@@ -455,6 +560,54 @@ export type Database = {
           },
         ]
       }
+      feedback_pulses: {
+        Row: {
+          context_quest_id: string | null
+          context_squad_id: string | null
+          created_at: string
+          id: string
+          metadata: Json | null
+          page_path: string
+          reaction: string
+          user_id: string | null
+        }
+        Insert: {
+          context_quest_id?: string | null
+          context_squad_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          page_path: string
+          reaction: string
+          user_id?: string | null
+        }
+        Update: {
+          context_quest_id?: string | null
+          context_squad_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          page_path?: string
+          reaction?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_pulses_context_quest_id_fkey"
+            columns: ["context_quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_pulses_context_squad_id_fkey"
+            columns: ["context_squad_id"]
+            isOneToOne: false
+            referencedRelation: "quest_squads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feedback_quest_design: {
         Row: {
           comfort_score: number | null
@@ -551,6 +704,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      issue_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          is_active: boolean
+          name: string
+          requires_escalation: boolean
+          severity_default: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          requires_escalation?: boolean
+          severity_default?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          requires_escalation?: boolean
+          severity_default?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       level_thresholds: {
         Row: {
@@ -2021,6 +2210,161 @@ export type Database = {
         }
         Relationships: []
       }
+      support_tickets: {
+        Row: {
+          assigned_admin_id: string | null
+          category_id: string
+          created_at: string
+          description: string
+          id: string
+          internal_notes: string | null
+          metadata: Json | null
+          related_quest_id: string | null
+          related_squad_id: string | null
+          related_user_id: string | null
+          resolved_at: string | null
+          status: Database["public"]["Enums"]["ticket_status"]
+          submitted_from_page: string | null
+          updated_at: string
+          urgency: Database["public"]["Enums"]["ticket_urgency"]
+          user_id: string
+        }
+        Insert: {
+          assigned_admin_id?: string | null
+          category_id: string
+          created_at?: string
+          description: string
+          id?: string
+          internal_notes?: string | null
+          metadata?: Json | null
+          related_quest_id?: string | null
+          related_squad_id?: string | null
+          related_user_id?: string | null
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["ticket_status"]
+          submitted_from_page?: string | null
+          updated_at?: string
+          urgency?: Database["public"]["Enums"]["ticket_urgency"]
+          user_id: string
+        }
+        Update: {
+          assigned_admin_id?: string | null
+          category_id?: string
+          created_at?: string
+          description?: string
+          id?: string
+          internal_notes?: string | null
+          metadata?: Json | null
+          related_quest_id?: string | null
+          related_squad_id?: string | null
+          related_user_id?: string | null
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["ticket_status"]
+          submitted_from_page?: string | null
+          updated_at?: string
+          urgency?: Database["public"]["Enums"]["ticket_urgency"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "issue_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_related_quest_id_fkey"
+            columns: ["related_quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_related_squad_id_fkey"
+            columns: ["related_squad_id"]
+            isOneToOne: false
+            referencedRelation: "quest_squads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ticket_attachments: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_size_bytes: number
+          file_type: string
+          file_url: string
+          id: string
+          ticket_id: string
+          uploaded_by: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_size_bytes: number
+          file_type: string
+          file_url: string
+          id?: string
+          ticket_id: string
+          uploaded_by: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_size_bytes?: number
+          file_type?: string
+          file_url?: string
+          id?: string
+          ticket_id?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_attachments_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ticket_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          sender_id: string
+          sender_role: Database["public"]["Enums"]["message_sender_role"]
+          ticket_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          sender_id: string
+          sender_role: Database["public"]["Enums"]["message_sender_role"]
+          ticket_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          sender_id?: string
+          sender_role?: Database["public"]["Enums"]["message_sender_role"]
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_achievements: {
         Row: {
           achievement_id: string
@@ -2402,6 +2746,11 @@ export type Database = {
       update_user_streaks: { Args: { p_user_id: string }; Returns: undefined }
     }
     Enums: {
+      admin_message_type:
+        | "support"
+        | "announcement"
+        | "feedback_request"
+        | "quest_related"
       app_role: "admin" | "user" | "quest_creator" | "sponsor"
       comms_type:
         | "email_invite"
@@ -2409,6 +2758,7 @@ export type Database = {
         | "email_reminder"
         | "email_followup"
         | "email_whatsapp"
+      message_sender_role: "user" | "admin" | "system"
       notification_type:
         | "quest_recommendation"
         | "quest_shared"
@@ -2433,6 +2783,9 @@ export type Database = {
         | "org_sponsor_request"
         | "sponsor_org_request"
         | "collaboration_message"
+        | "support_ticket_update"
+        | "support_ticket_assigned"
+        | "admin_direct_message"
       org_member_role: "member" | "admin" | "creator"
       organization_type:
         | "university"
@@ -2458,6 +2811,13 @@ export type Database = {
         | "no_show"
         | "completed"
       squad_status: "draft" | "confirmed" | "active" | "completed"
+      ticket_status:
+        | "open"
+        | "investigating"
+        | "waiting_response"
+        | "resolved"
+        | "closed"
+      ticket_urgency: "low" | "medium" | "urgent"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2585,6 +2945,12 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      admin_message_type: [
+        "support",
+        "announcement",
+        "feedback_request",
+        "quest_related",
+      ],
       app_role: ["admin", "user", "quest_creator", "sponsor"],
       comms_type: [
         "email_invite",
@@ -2593,6 +2959,7 @@ export const Constants = {
         "email_followup",
         "email_whatsapp",
       ],
+      message_sender_role: ["user", "admin", "system"],
       notification_type: [
         "quest_recommendation",
         "quest_shared",
@@ -2617,6 +2984,9 @@ export const Constants = {
         "org_sponsor_request",
         "sponsor_org_request",
         "collaboration_message",
+        "support_ticket_update",
+        "support_ticket_assigned",
+        "admin_direct_message",
       ],
       org_member_role: ["member", "admin", "creator"],
       organization_type: [
@@ -2646,6 +3016,14 @@ export const Constants = {
         "completed",
       ],
       squad_status: ["draft", "confirmed", "active", "completed"],
+      ticket_status: [
+        "open",
+        "investigating",
+        "waiting_response",
+        "resolved",
+        "closed",
+      ],
+      ticket_urgency: ["low", "medium", "urgent"],
     },
   },
 } as const
