@@ -17,6 +17,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { GetHelpButton } from '@/components/support';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -286,6 +287,15 @@ export default function QuestCard() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Floating Help Button */}
+      <GetHelpButton
+        variant="floating"
+        contextQuestId={instance.id}
+        contextQuestTitle={instance.title}
+        contextSquadId={participant?.squad_id}
+        contextSquadName={participant?.squad_name}
+      />
+      
       {/* Header */}
       <div className="bg-primary text-primary-foreground p-6 pb-8">
         <div className="max-w-lg mx-auto">

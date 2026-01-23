@@ -14,6 +14,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { SquadWarmUpRoom } from '@/components/squads/SquadWarmUpRoom';
+import { GetHelpButton } from '@/components/support';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -201,13 +202,22 @@ export default function SquadWarmUp() {
       <main className="flex-1 container max-w-4xl mx-auto py-6 px-4">
         {/* Header */}
         <div className="mb-6">
-          <Link 
-            to="/my-quests" 
-            className="text-sm text-muted-foreground hover:text-primary flex items-center gap-1 mb-4"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to My Quests
-          </Link>
+          <div className="flex items-center justify-between mb-4">
+            <Link 
+              to="/my-quests" 
+              className="text-sm text-muted-foreground hover:text-primary flex items-center gap-1"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to My Quests
+            </Link>
+            <GetHelpButton
+              variant="link"
+              contextQuestId={instance?.id}
+              contextQuestTitle={instance?.title}
+              contextSquadId={squadId}
+              contextSquadName={squad.squad_name}
+            />
+          </div>
           
           <div className="flex items-center gap-3">
             <span className="text-3xl">{instance?.icon}</span>
