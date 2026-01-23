@@ -21,3 +21,5 @@ export { InstanceStatusBadge, getStatusShortLabel } from './InstanceStatusBadge'
 export { InstanceSummaryStats } from './InstanceSummaryStats';
 export { InstanceBroadcastModal } from './InstanceBroadcastModal';
 export { DragDropSquadBuilder } from './DragDropSquadBuilder';
+export { SquadWarmUpReview } from './SquadWarmUpReview';
+export { SquadWarmUpTab } from './SquadWarmUpTab';
