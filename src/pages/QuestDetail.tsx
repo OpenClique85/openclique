@@ -8,6 +8,7 @@ import { useUserTreeXP } from '@/hooks/useUserTreeXP';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import ShareQuestButton from '@/components/ShareQuestButton';
+import { InstancePicker, QuestInstance } from '@/components/quests';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -59,6 +60,11 @@ export default function QuestDetail() {
   const [isJoining, setIsJoining] = useState(false);
   const [userSignup, setUserSignup] = useState<{ status: string } | null>(null);
   const [signupCount, setSignupCount] = useState(0);
+  
+  // Instance picker state
+  const [showInstancePicker, setShowInstancePicker] = useState(false);
+  const [upcomingInstances, setUpcomingInstances] = useState<QuestInstance[]>([]);
+  const [selectedInstanceId, setSelectedInstanceId] = useState<string | null>(null);
   
   const referralCode = searchParams.get('ref');
 
@@ -120,7 +126,7 @@ export default function QuestDetail() {
     fetchQuest();
   }, [slug, user, referralCode]);
 
-  const handleJoin = async () => {
+  const handleJoin = async (instanceIdOverride?: string) => {
     if (!quest) return;
     
     if (!user) {
@@ -138,6 +144,30 @@ export default function QuestDetail() {
           : `You need ${quest.min_tree_xp} XP in the ${quest.progression_tree} path.`,
       });
       return;
+    }
+    
+    // If quest is repeatable, check for instances
+    if (quest.is_repeatable && !instanceIdOverride) {
+      // Fetch upcoming instances via RPC
+      const { data: instanceResult } = await supabase.rpc('get_or_create_instance', {
+        p_quest_id: quest.id
+      }) as { data: { instance_id: string | null; needs_picker: boolean; instance_count: number }[] | null };
+      
+      if (instanceResult && instanceResult[0]?.needs_picker) {
+        // Fetch the full list of instances for the picker
+        const { data: instances } = await supabase.rpc('get_upcoming_instances', {
+          p_quest_id: quest.id
+        }) as { data: QuestInstance[] | null };
+        
+        if (instances && instances.length > 1) {
+          setUpcomingInstances(instances);
+          setShowInstancePicker(true);
+          return;
+        }
+      } else if (instanceResult && instanceResult[0]?.instance_id) {
+        // Auto-assigned to single instance
+        setSelectedInstanceId(instanceResult[0].instance_id);
+      }
     }
     
     setIsJoining(true);
@@ -163,11 +193,13 @@ export default function QuestDetail() {
       // Determine signup status based on capacity
       const status = isAtCapacity ? 'standby' : 'pending';
       
-      // Create signup
+      // Create signup with instance_id if available
+      const instanceId = instanceIdOverride || selectedInstanceId;
       const { error } = await supabase.from('quest_signups').insert({
         user_id: user.id,
         quest_id: quest.id,
         status,
+        instance_id: instanceId,
       });
       
       if (error) {
@@ -198,6 +230,7 @@ export default function QuestDetail() {
       });
       
       setUserSignup({ status });
+      setShowInstancePicker(false);
       navigate('/my-quests');
     } catch (error: any) {
       console.error('Error joining quest:', error);
@@ -209,6 +242,12 @@ export default function QuestDetail() {
     } finally {
       setIsJoining(false);
     }
+  };
+
+  // Handle instance selection from picker
+  const handleInstanceSelect = (instanceId: string) => {
+    setSelectedInstanceId(instanceId);
+    handleJoin(instanceId);
   };
 
   const getDuration = () => {
@@ -466,7 +505,7 @@ export default function QuestDetail() {
                   </Button>
                 </>
               ) : canJoin ? (
-                <Button size="lg" onClick={handleJoin} disabled={isJoining}>
+                <Button size="lg" onClick={() => handleJoin()} disabled={isJoining}>
                   {isJoining ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -484,7 +523,7 @@ export default function QuestDetail() {
                   Locked
                 </Button>
               ) : !user && statusConfig.canJoin ? (
-                <Button size="lg" onClick={handleJoin}>
+                <Button size="lg" onClick={() => handleJoin()}>
                   Sign In to Join
                 </Button>
               ) : (
@@ -496,6 +535,16 @@ export default function QuestDetail() {
           </div>
         </div>
       </main>
+      
+      {/* Instance Picker Modal */}
+      <InstancePicker
+        open={showInstancePicker}
+        onOpenChange={setShowInstancePicker}
+        instances={upcomingInstances}
+        questTitle={quest.title}
+        onSelectInstance={handleInstanceSelect}
+        isLoading={isJoining}
+      />
       
       <Footer />
     </div>
