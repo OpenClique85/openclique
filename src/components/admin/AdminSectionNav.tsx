@@ -7,7 +7,7 @@
 import { cn } from '@/lib/utils';
 import { 
   Map, Users, MessageSquare, BarChart3, Gamepad2,
-  ChevronDown, ChevronRight
+  ChevronDown, ChevronRight, Link2
 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -51,6 +51,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
     tabs: [
       { id: 'messaging', label: 'Messaging' },
       { id: 'whatsapp', label: 'WhatsApp' },
+      { id: 'links', label: 'Signup Links' },
     ],
   },
   {

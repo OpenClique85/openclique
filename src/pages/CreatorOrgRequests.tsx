@@ -11,11 +11,13 @@ import { useToast } from '@/hooks/use-toast';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { CreatorPortalNav } from '@/components/creators/CreatorPortalNav';
+import { OrgCreatorChat } from '@/components/org/OrgCreatorChat';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   Dialog,
   DialogContent,
@@ -37,6 +39,8 @@ import {
   Inbox,
   ArrowLeft,
   Sparkles,
+  ChevronDown,
+  ChevronRight,
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 
@@ -104,6 +108,7 @@ export default function CreatorOrgRequests() {
   const [isRespondModalOpen, setIsRespondModalOpen] = useState(false);
   const [isResponding, setIsResponding] = useState(false);
   const [declineReason, setDeclineReason] = useState('');
+  const [expandedChatId, setExpandedChatId] = useState<string | null>(null);
 
   const fetchData = async () => {
     if (!user) return;
@@ -425,13 +430,40 @@ export default function CreatorOrgRequests() {
                                 )}
 
                                 {request.status === 'accepted' && (
-                                  <Button variant="outline" size="sm" asChild>
-                                    <Link to={`/org/${request.organization?.slug}`}>
-                                      View Organization
-                                    </Link>
-                                  </Button>
+                                  <div className="flex gap-2">
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm"
+                                      onClick={() => setExpandedChatId(expandedChatId === request.id ? null : request.id)}
+                                    >
+                                      <MessageSquare className="h-4 w-4 mr-1" />
+                                      {expandedChatId === request.id ? 'Hide Chat' : 'Message'}
+                                    </Button>
+                                    <Button variant="outline" size="sm" asChild>
+                                      <Link to={`/org/${request.organization?.slug}`}>
+                                        View Org
+                                      </Link>
+                                    </Button>
+                                  </div>
                                 )}
                               </div>
+
+                              {/* Chat for accepted requests */}
+                              {request.status === 'accepted' && expandedChatId === request.id && (
+                                <div className="mt-4 border-t pt-4">
+                                  <OrgCreatorChat
+                                    requestId={request.id}
+                                    requestTitle={request.title}
+                                    creatorProfile={creatorProfile}
+                                    orgInfo={{
+                                      name: request.organization?.name || 'Organization',
+                                      logo_url: request.organization?.logo_url,
+                                    }}
+                                    requesterId={request.requester_id}
+                                    userRole="creator"
+                                  />
+                                </div>
+                              )}
 
                               {/* Decline reason */}
                               {request.status === 'declined' && request.decline_reason && (
