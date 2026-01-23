@@ -3,8 +3,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, TrendingUp, Clock, AlertTriangle, CheckCircle, PieChart as PieChartIcon, BarChart3, MapPin, Download, MessageSquare } from 'lucide-react';
+import { Loader2, TrendingUp, Clock, AlertTriangle, CheckCircle, PieChart as PieChartIcon, BarChart3, MapPin, Download, MessageSquare, Star, Bell } from 'lucide-react';
 import { useSupportAnalytics, SupportAnalytics as SupportAnalyticsData } from '@/hooks/useSupportAnalytics';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import {
   AreaChart,
   Area,
@@ -37,9 +39,18 @@ const CATEGORY_COLORS = [
   'hsl(var(--muted-foreground))',
 ];
 
+const RATING_COLORS = [
+  'hsl(var(--destructive))',
+  'hsl(var(--warning))',
+  'hsl(var(--muted-foreground))',
+  'hsl(var(--primary))',
+  'hsl(var(--success))',
+];
+
 export function SupportAnalytics() {
   const [timeRange, setTimeRange] = useState<string>('30');
   const [isExporting, setIsExporting] = useState(false);
+  const [isCheckingSLA, setIsCheckingSLA] = useState(false);
   const { data: analytics, isLoading } = useSupportAnalytics(parseInt(timeRange));
 
   const formatHours = (hours: number | null): string => {
@@ -47,6 +58,27 @@ export function SupportAnalytics() {
     if (hours < 1) return '<1h';
     if (hours < 24) return `${Math.round(hours)}h`;
     return `${Math.round(hours / 24)}d`;
+  };
+
+  const checkSLABreaches = async () => {
+    setIsCheckingSLA(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('check-sla-breaches');
+      if (error) throw error;
+      
+      if (data.breachCount > 0) {
+        toast.warning(`Found ${data.breachCount} SLA breach(es)`, {
+          description: `${data.firstResponseBreaches || 0} first response, ${data.resolutionBreaches || 0} resolution`,
+        });
+      } else {
+        toast.success('No SLA breaches found');
+      }
+    } catch (error: any) {
+      console.error('SLA check error:', error);
+      toast.error('Failed to check SLA breaches');
+    } finally {
+      setIsCheckingSLA(false);
+    }
   };
 
   const exportCSV = (analytics: SupportAnalyticsData) => {
@@ -182,6 +214,15 @@ export function SupportAnalytics() {
               <SelectItem value="90">Last 90 days</SelectItem>
             </SelectContent>
           </Select>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={checkSLABreaches}
+            disabled={isCheckingSLA}
+          >
+            {isCheckingSLA ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Bell className="h-4 w-4 mr-1" />}
+            Check SLA
+          </Button>
           <Button 
             variant="outline" 
             size="sm" 
@@ -543,6 +584,94 @@ export function SupportAnalytics() {
               ))}
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* CSAT Metrics */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Star className="h-4 w-4" />
+            Customer Satisfaction (CSAT)
+          </CardTitle>
+          <CardDescription>
+            Satisfaction ratings from resolved tickets
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* CSAT Score */}
+            <div className="space-y-4">
+              <div className="text-center p-6 rounded-lg bg-muted/50">
+                <div className="flex items-center justify-center gap-1 mb-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      className={`h-6 w-6 ${
+                        star <= Math.round(analytics.csatMetrics.avgRating || 0)
+                          ? 'fill-warning text-warning'
+                          : 'text-muted-foreground'
+                      }`}
+                    />
+                  ))}
+                </div>
+                <p className="text-3xl font-bold">
+                  {analytics.csatMetrics.avgRating?.toFixed(1) || '—'}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Average Rating ({analytics.csatMetrics.totalResponses} responses)
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center p-4 rounded-lg border">
+                  <p className="text-2xl font-bold text-primary">
+                    {analytics.csatMetrics.responseRate.toFixed(0)}%
+                  </p>
+                  <p className="text-xs text-muted-foreground">Response Rate</p>
+                </div>
+                <div className="text-center p-4 rounded-lg border">
+                  <p className="text-2xl font-bold text-success">
+                    {analytics.csatMetrics.ratingDistribution
+                      .filter(r => r.rating >= 4)
+                      .reduce((sum, r) => sum + r.count, 0)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Satisfied (4-5★)</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Rating Distribution */}
+            <div>
+              <p className="text-sm font-medium mb-3">Rating Distribution</p>
+              <div className="space-y-2">
+                {analytics.csatMetrics.ratingDistribution.map((item) => {
+                  const total = analytics.csatMetrics.totalResponses || 1;
+                  const percentage = (item.count / total) * 100;
+                  return (
+                    <div key={item.rating} className="flex items-center gap-3">
+                      <div className="flex items-center gap-1 w-16">
+                        <span className="text-sm font-medium">{item.rating}</span>
+                        <Star className="h-3.5 w-3.5 fill-warning text-warning" />
+                      </div>
+                      <div className="flex-1 h-4 bg-muted rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all"
+                          style={{
+                            width: `${percentage}%`,
+                            backgroundColor: RATING_COLORS[item.rating - 1],
+                          }}
+                        />
+                      </div>
+                      <span className="text-sm text-muted-foreground w-12 text-right">
+                        {item.count}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
 

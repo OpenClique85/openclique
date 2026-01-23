@@ -9,7 +9,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { useAuth } from '@/hooks/useAuth';
 import { useTicketDetail } from '@/hooks/useSupportTickets';
-import { TicketThread } from '@/components/support/TicketThread';
+import { TicketThread, TicketSatisfactionSurvey } from '@/components/support';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -212,6 +212,11 @@ export default function SupportTicketDetail() {
                   ))}
                 </CardContent>
               </Card>
+            )}
+
+            {/* Satisfaction Survey - shown for resolved tickets */}
+            {isResolved && (
+              <TicketSatisfactionSurvey ticketId={ticket.id} isResolved={isResolved} />
             )}
           </div>
         </div>

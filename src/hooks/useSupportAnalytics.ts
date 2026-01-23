@@ -45,6 +45,13 @@ interface StatusBreakdown {
   count: number;
 }
 
+interface CSATMetrics {
+  avgRating: number | null;
+  totalResponses: number;
+  ratingDistribution: { rating: number; count: number }[];
+  responseRate: number;
+}
+
 export interface SupportAnalytics {
   ticketTrends: TicketTrend[];
   categoryBreakdown: CategoryBreakdown[];
@@ -52,6 +59,7 @@ export interface SupportAnalytics {
   urgencyBreakdown: UrgencyBreakdown[];
   frictionPoints: FrictionPoint[];
   statusBreakdown: StatusBreakdown[];
+  csatMetrics: CSATMetrics;
   totalTickets: number;
   ticketsLast7Days: number;
   ticketsLast30Days: number;
@@ -260,6 +268,30 @@ export function useSupportAnalytics(days: number = 30) {
         new Date(t.created_at) >= sevenDaysAgo
       ).length;
 
+      // Fetch CSAT scores
+      const ticketIds = allTickets.map(t => t.id);
+      const { data: satisfactionData } = await supabase
+        .from('ticket_satisfaction')
+        .select('rating, ticket_id')
+        .in('ticket_id', ticketIds.length > 0 ? ticketIds : ['00000000-0000-0000-0000-000000000000']);
+
+      const ratings = satisfactionData?.map(s => s.rating) || [];
+      const ratingDistribution = [1, 2, 3, 4, 5].map(rating => ({
+        rating,
+        count: ratings.filter(r => r === rating).length,
+      }));
+
+      const csatMetrics: CSATMetrics = {
+        avgRating: ratings.length > 0
+          ? ratings.reduce((a, b) => a + b, 0) / ratings.length
+          : null,
+        totalResponses: ratings.length,
+        ratingDistribution,
+        responseRate: resolvedTickets.length > 0
+          ? (ratings.length / resolvedTickets.length) * 100
+          : 0,
+      };
+
       return {
         ticketTrends,
         categoryBreakdown,
@@ -267,6 +299,7 @@ export function useSupportAnalytics(days: number = 30) {
         urgencyBreakdown,
         frictionPoints,
         statusBreakdown,
+        csatMetrics,
         totalTickets: allTickets.length,
         ticketsLast7Days,
         ticketsLast30Days: allTickets.length,
