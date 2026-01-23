@@ -35,14 +35,6 @@ import {
   notifySponsorProposalDeclined,
   notifyAdminByEmail 
 } from '@/lib/notifications';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 
 interface Proposal {
   id: string;
