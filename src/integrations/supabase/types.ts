@@ -581,6 +581,78 @@ export type Database = {
           },
         ]
       }
+      org_creator_requests: {
+        Row: {
+          budget_range: string | null
+          created_at: string
+          creator_id: string
+          creator_response_at: string | null
+          decline_reason: string | null
+          description: string | null
+          estimated_participants: number | null
+          id: string
+          notes: string | null
+          org_id: string
+          preferred_dates: string | null
+          quest_theme: string | null
+          requester_id: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          budget_range?: string | null
+          created_at?: string
+          creator_id: string
+          creator_response_at?: string | null
+          decline_reason?: string | null
+          description?: string | null
+          estimated_participants?: number | null
+          id?: string
+          notes?: string | null
+          org_id: string
+          preferred_dates?: string | null
+          quest_theme?: string | null
+          requester_id: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          budget_range?: string | null
+          created_at?: string
+          creator_id?: string
+          creator_response_at?: string | null
+          decline_reason?: string | null
+          description?: string | null
+          estimated_participants?: number | null
+          id?: string
+          notes?: string | null
+          org_id?: string
+          preferred_dates?: string | null
+          quest_theme?: string | null
+          requester_id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_creator_requests_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "creator_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_creator_requests_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           contact_email: string | null
@@ -2031,6 +2103,8 @@ export type Database = {
         | "sponsorship_proposal_declined"
         | "sponsored_quest_approved"
         | "sponsor_quest_completed"
+        | "org_quest_announcement"
+        | "org_creator_request"
       org_member_role: "member" | "admin" | "creator"
       organization_type:
         | "university"
@@ -2209,6 +2283,8 @@ export const Constants = {
         "sponsorship_proposal_declined",
         "sponsored_quest_approved",
         "sponsor_quest_completed",
+        "org_quest_announcement",
+        "org_creator_request",
       ],
       org_member_role: ["member", "admin", "creator"],
       organization_type: [

@@ -2,7 +2,8 @@
  * OrgPortal - Organization dashboard for org admins and members
  * - View org info and members
  * - Create org-only quests (admins)
- * - Browse creators to hire
+ * - Browse creators to hire and request custom quests
+ * - Send quest notifications to all members
  * - Copy invite link to share
  */
 
@@ -43,11 +44,14 @@ import {
   CheckCircle,
   Building2,
   LogIn,
+  Bell,
+  Sparkles,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import type { Tables } from '@/integrations/supabase/types';
 import { DisplayNameWithBadges } from '@/components/DisplayNameWithBadges';
 import { UserPreferences } from '@/types/profile';
+import { SendQuestToMembersButton, OrgCreatorRequestModal } from '@/components/org';
 
 type Organization = Tables<'organizations'>;
 type Quest = Tables<'quests'>;
@@ -90,6 +94,8 @@ export default function OrgPortal() {
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
+  const [selectedCreator, setSelectedCreator] = useState<CreatorProfile | null>(null);
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
 
   const fetchOrg = async () => {
     if (!slug) return;
@@ -571,12 +577,25 @@ export default function OrgPortal() {
                                 )}
                               </div>
                             </div>
-                            <Button variant="outline" asChild>
-                              <Link to={`/quests/${quest.slug}`}>
-                                <ExternalLink className="h-4 w-4 mr-2" />
-                                View
-                              </Link>
-                            </Button>
+                            <div className="flex flex-col sm:flex-row gap-2">
+                              {isAdmin && quest.status === 'open' && (
+                                <SendQuestToMembersButton
+                                  orgId={org.id}
+                                  orgName={org.name}
+                                  questId={quest.id}
+                                  questTitle={quest.title}
+                                  memberCount={members.length}
+                                  variant="outline"
+                                  size="sm"
+                                />
+                              )}
+                              <Button variant="outline" size="sm" asChild>
+                                <Link to={`/quests/${quest.slug}`}>
+                                  <ExternalLink className="h-4 w-4 mr-2" />
+                                  View
+                                </Link>
+                              </Button>
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
@@ -707,9 +726,16 @@ export default function OrgPortal() {
                               <Button variant="outline" size="sm" asChild className="flex-1">
                                 <Link to={`/creators/${creator.slug}`}>View Profile</Link>
                               </Button>
-                              <Button size="sm" className="flex-1">
-                                <Send className="h-4 w-4 mr-2" />
-                                Contact
+                              <Button 
+                                size="sm" 
+                                className="flex-1"
+                                onClick={() => {
+                                  setSelectedCreator(creator);
+                                  setIsRequestModalOpen(true);
+                                }}
+                              >
+                                <Sparkles className="h-4 w-4 mr-2" />
+                                Request Quest
                               </Button>
                             </div>
                           </CardContent>
@@ -760,6 +786,20 @@ export default function OrgPortal() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Request Creator Modal */}
+      {selectedCreator && org && (
+        <OrgCreatorRequestModal
+          isOpen={isRequestModalOpen}
+          onClose={() => {
+            setIsRequestModalOpen(false);
+            setSelectedCreator(null);
+          }}
+          creator={selectedCreator}
+          org={{ id: org.id, name: org.name }}
+          memberCount={members.length}
+        />
+      )}
     </div>
   );
 }
