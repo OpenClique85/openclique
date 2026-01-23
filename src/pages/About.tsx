@@ -38,6 +38,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { FAQ } from "@/components/FAQ";
 import { CTASection } from "@/components/CTASection";
+import { UGCShowcase } from "@/components/UGCShowcase";
 import { ABOUT } from "@/constants/content";
 import { Shield, Heart, Target } from "lucide-react";
 
@@ -282,7 +283,11 @@ export default function About() {
           </div>
         </section>
 
-        {/* ============ SECTION 4 & 5: FAQ and CTA ============ */}
+        {/* ============ SECTION 4: Community UGC ============ */}
+        {/* Approved user photos/videos from quests */}
+        <UGCShowcase limit={6} />
+
+        {/* ============ SECTION 5 & 6: FAQ and CTA ============ */}
         <FAQ />
         <CTASection />
       </main>
