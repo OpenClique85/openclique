@@ -1,7 +1,7 @@
 /**
- * Pilot Control Room Components
+ * Quest Ops Components
  * 
- * Admin components for managing quest instances during pilot runs.
+ * Admin components for managing quest instances and runs.
  */
 
 export { InstanceOverviewPanel } from './InstanceOverviewPanel';
@@ -10,4 +10,3 @@ export { SquadManager } from './SquadManager';
 export { RunOfShowControls } from './RunOfShowControls';
 export { ProofInbox } from './ProofInbox';
 export { PilotInstancesManager } from './PilotInstancesManager';
-export { QuestTemplatesManager } from './QuestTemplatesManager';

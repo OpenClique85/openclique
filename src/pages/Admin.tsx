@@ -35,7 +35,7 @@ import { FeatureFlagsManager } from '@/components/admin/ops/FeatureFlagsManager'
 import { SecurityTools } from '@/components/admin/ops/SecurityTools';
 import { NotificationConsole } from '@/components/admin/notifications';
 import { DocsManager, DocsExportPanel, DocsPlaybookManager } from '@/components/admin/docs';
-import { PilotInstancesManager, QuestTemplatesManager } from '@/components/admin/pilot';
+import { PilotInstancesManager } from '@/components/admin/pilot';
 
 export default function Admin() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
@@ -64,9 +64,8 @@ export default function Admin() {
 
   const renderContent = () => {
     switch (activeTab) {
-      // Pilot Runtime
+      // Quest Ops
       case 'pilot-instances': return <PilotInstancesManager />;
-      case 'pilot-templates': return <QuestTemplatesManager />;
       case 'quests': return <QuestsManager />;
       case 'squads': return <PersistentSquadsManager />;
       case 'orgs': return <OrgsManager />;

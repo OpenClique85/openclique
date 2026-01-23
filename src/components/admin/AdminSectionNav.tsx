@@ -22,12 +22,11 @@ export interface AdminSection {
 
 export const ADMIN_SECTIONS: AdminSection[] = [
   {
-    id: 'pilot',
-    label: 'Pilot Runtime',
+    id: 'quest-ops',
+    label: 'Quest Ops',
     icon: <Map className="h-4 w-4" />,
     tabs: [
-      { id: 'pilot-instances', label: 'Active Pilots' },
-      { id: 'pilot-templates', label: 'Templates' },
+      { id: 'pilot-instances', label: 'Active Instances' },
     ],
   },
   {
