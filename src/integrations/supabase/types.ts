@@ -1825,6 +1825,14 @@ export type Database = {
         }
         Returns: number
       }
+      check_and_unlock_achievements: {
+        Args: { p_user_id: string }
+        Returns: {
+          achievement_id: string
+          achievement_name: string
+          xp_reward: number
+        }[]
+      }
       get_user_level: {
         Args: { p_user_id: string }
         Returns: {
