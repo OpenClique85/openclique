@@ -1826,6 +1826,8 @@ export type Database = {
       }
       quest_squads: {
         Row: {
+          archived_at: string | null
+          archived_reason: string | null
           compatibility_score: number | null
           confirmed_at: string | null
           created_at: string
@@ -1840,6 +1842,8 @@ export type Database = {
           whatsapp_link: string | null
         }
         Insert: {
+          archived_at?: string | null
+          archived_reason?: string | null
           compatibility_score?: number | null
           confirmed_at?: string | null
           created_at?: string
@@ -1854,6 +1858,8 @@ export type Database = {
           whatsapp_link?: string | null
         }
         Update: {
+          archived_at?: string | null
+          archived_reason?: string | null
           compatibility_score?: number | null
           confirmed_at?: string | null
           created_at?: string
@@ -2688,6 +2694,44 @@ export type Database = {
           },
         ]
       }
+      squad_archive_reports: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          export_format: string
+          file_url: string | null
+          id: string
+          report_data: Json
+          squad_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          export_format?: string
+          file_url?: string | null
+          id?: string
+          report_data?: Json
+          squad_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          export_format?: string
+          file_url?: string | null
+          id?: string
+          report_data?: Json
+          squad_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "squad_archive_reports_squad_id_fkey"
+            columns: ["squad_id"]
+            isOneToOne: false
+            referencedRelation: "quest_squads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       squad_leader_votes: {
         Row: {
           created_at: string
@@ -3500,6 +3544,7 @@ export type Database = {
     }
     Functions: {
       auto_archive_instances: { Args: never; Returns: number }
+      auto_archive_squads: { Args: never; Returns: number }
       award_quest_xp: {
         Args: { p_quest_id: string; p_user_id: string }
         Returns: number

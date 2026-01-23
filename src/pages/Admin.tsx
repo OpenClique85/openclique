@@ -38,7 +38,9 @@ import { DocsManager, DocsExportPanel, DocsPlaybookManager } from '@/components/
 import { PilotInstancesManager } from '@/components/admin/pilot';
 import { ApprovalInbox, OpsAlerts, AuditLogViewer } from '@/components/admin/control-room';
 import { SquadsDirectory } from '@/components/admin/SquadsDirectory';
-
+import { SquadComparisonView } from '@/components/admin/SquadComparisonView';
+import { SquadHealthDashboard } from '@/components/admin/SquadHealthDashboard';
+import { SquadArchivalManager } from '@/components/admin/SquadArchivalManager';
 export default function Admin() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState('pilot-instances');
@@ -76,6 +78,9 @@ export default function Admin() {
       case 'quests': return <QuestsManager />;
       case 'squads': return <PersistentSquadsManager />;
       case 'squads-directory': return <SquadsDirectory />;
+      case 'squad-comparison': return <SquadComparisonView />;
+      case 'squad-health': return <SquadHealthDashboard />;
+      case 'squad-archival': return <SquadArchivalManager />;
       case 'orgs': return <OrgsManager />;
       // Support
       case 'support-inbox': return <SupportDashboard />;
