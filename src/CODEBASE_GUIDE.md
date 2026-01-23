@@ -1,6 +1,28 @@
 # OpenClique Codebase Guide
 
-> **For Non-Developers**: This guide explains how the codebase is organized so you can find and edit content easily.
+> **For Non-Developers & New Engineers**: This guide explains how the codebase is organized so you can find and edit content easily. For detailed architecture docs, see `/docs/`.
+
+---
+
+## 🚀 Quick Start for New Engineers
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/your-org/openclique.git
+cd openclique
+
+# 2. Install dependencies
+npm install
+
+# 3. Start development server
+npm run dev
+
+# 4. Run tests
+npm test
+```
+
+### Environment Setup
+The project uses Lovable Cloud (Supabase-powered backend). Environment variables are auto-configured. If you need to add new secrets, use the Lovable secrets manager.
 
 ---
 
@@ -10,12 +32,97 @@
 src/
 ├── assets/              ← Images, logos, photos
 ├── components/          ← Reusable UI building blocks
+│   ├── admin/           ← Admin dashboard components
+│   ├── creators/        ← Creator portal components
+│   ├── feedback/        ← Post-quest feedback flow
+│   ├── forms/           ← Application forms
+│   ├── profile/         ← User profile sections
+│   ├── progression/     ← Quest progression tree UI
+│   ├── quest-builder/   ← Creator quest wizard
+│   ├── rewards/         ← Sponsor rewards components
+│   ├── sponsors/        ← Sponsor portal components
+│   ├── squads/          ← Squad management UI
+│   └── ui/              ← shadcn/ui primitives (don't edit)
 ├── constants/           ← ⭐ EDIT CONTENT HERE (text, links, data)
-├── hooks/               ← Shared logic (don't touch unless developer)
-├── lib/                 ← Utility functions (don't touch)
+│   └── quests/          ← Quest catalog by category
+├── hooks/               ← Custom React hooks
+│   ├── useAuth.tsx      ← Authentication context
+│   ├── useUserLevel.ts  ← XP/Level calculations
+│   ├── useUserTreeXP.ts ← Progression tree XP
+│   └── ...              ← Other shared logic
+├── integrations/        ← Auto-generated (DO NOT EDIT)
+│   └── supabase/        ← Types & client
+├── lib/                 ← Utility functions
 ├── pages/               ← Full page layouts
-└── test/                ← Testing files (don't touch)
+└── test/                ← Testing files
 ```
+
+---
+
+## 🎮 Gamification System Architecture
+
+### Overview
+The gamification system incentivizes quest participation through XP, levels, achievements, and streaks.
+
+### Database Tables
+| Table | Purpose |
+|-------|---------|
+| `user_xp` | Total XP per user |
+| `xp_transactions` | XP award history with source tracking |
+| `user_tree_xp` | XP per progression tree (culture/wellness/connector) |
+| `level_thresholds` | Level names and XP requirements |
+| `achievement_templates` | Achievement definitions with criteria |
+| `user_achievements` | User's unlocked achievements |
+| `streak_rules` | Streak definitions (weekly/monthly) |
+| `user_streaks` | User's active streaks |
+
+### Key Database Functions
+```sql
+-- Award XP after quest completion (auto-checks achievements)
+award_quest_xp(p_user_id UUID, p_quest_id UUID) → INTEGER
+
+-- Check and unlock any qualified achievements
+check_and_unlock_achievements(p_user_id UUID) → TABLE
+
+-- Get user's current level info
+get_user_level(p_user_id UUID) → TABLE
+```
+
+### Achievement Criteria Types
+```typescript
+// Supported criteria in achievement_templates.criteria JSONB:
+{ type: 'quest_count', count: 5 }           // Complete N quests
+{ type: 'tree_xp', tree: 'culture', amount: 100 }  // Tree-specific XP
+{ type: 'total_xp', amount: 500 }           // Overall XP threshold
+{ type: 'feedback_count', count: 3 }        // Feedback submissions
+```
+
+### XP Flow Diagram
+```
+Quest Completed (Admin marks 'completed')
+        ↓
+SignupsManager.updateStatus()
+        ↓
+supabase.rpc('award_quest_xp', { user_id, quest_id })
+        ↓
+┌───────────────────────────────────────┐
+│  award_quest_xp()                     │
+│  1. Get quest.base_xp & tree_id       │
+│  2. award_xp() → global XP            │
+│  3. award_tree_xp() → tree XP         │
+│  4. check_and_unlock_achievements()   │
+└───────────────────────────────────────┘
+        ↓
+Toast: "+50 XP awarded, 3 achievements unlocked!"
+```
+
+### React Hooks
+| Hook | Purpose | Returns |
+|------|---------|---------|
+| `useUserLevel()` | Current level, XP, progress | `{ level, name, currentXP, progressPercent }` |
+| `useUserTreeXP()` | XP per tree | `{ treeXP: { culture, wellness, connector } }` |
+| `useUserAchievements()` | All achievements + unlock status | `{ achievements, unlockedCount }` |
+| `useUserStreaks()` | Active streaks | `{ streaks, totalActiveStreaks }` |
 
 ---
 
@@ -85,14 +192,11 @@ Each page on the website has its own file in `src/pages/`:
 | `HowItWorks.tsx` | `/how-it-works` | Process explanation |
 | `About.tsx` | `/about` | Company story |
 | `Quests.tsx` | `/quests` | Quest catalog |
-| `Pilot.tsx` | `/pilot` | User signup |
-| `Partners.tsx` | `/partners` | Partner signup |
-| `WorkWithUs.tsx` | `/work-with-us` | Jobs/volunteer |
-| `CreatorsHub.tsx` | `/creators` | Creator landing |
-| `ContentCreatorsPage.tsx` | `/creators/content-creators` | Influencer info |
-| `QuestCreatorsPage.tsx` | `/creators/quest-creators` | Quest designer info |
-| `Privacy.tsx` | `/privacy` | Privacy policy |
-| `Terms.tsx` | `/terms` | Terms of service |
+| `Profile.tsx` | `/profile` | User dashboard + gamification |
+| `MyQuests.tsx` | `/my-quests` | User's quest signups |
+| `Admin.tsx` | `/admin` | Admin operations console |
+| `CreatorDashboard.tsx` | `/creator/dashboard` | Creator portal |
+| `SponsorDashboard.tsx` | `/sponsor/dashboard` | Sponsor portal |
 
 ---
 
@@ -137,6 +241,12 @@ className="text-muted-foreground"  // Gray secondary text
 | `FAQ.tsx` | Expandable FAQ section |
 | `CTASection.tsx` | Call-to-action blocks |
 
+### Gamification Components
+| Component | Purpose |
+|-----------|---------|
+| `ProfileGamificationSection.tsx` | Full gamification display on profile |
+| `XPBadge.tsx` | Compact XP display |
+
 ### UI Components (in `components/ui/`)
 These are pre-built, reusable elements. Generally don't edit these:
 - `button.tsx` - All buttons
@@ -168,6 +278,71 @@ These are pre-built, reusable elements. Generally don't edit these:
 2. Copy an existing quest object
 3. Update all fields with new quest info
 4. Quest automatically appears on the site
+
+### Add a New Achievement (Admin)
+1. Go to Admin Console → Gamification → Achievements
+2. Click "Add Achievement"
+3. Fill in name, description, icon, criteria, and XP reward
+4. Save - it's automatically available for unlock
+
+---
+
+## 🔒 Authentication & Roles
+
+### Role-Based Access
+| Role | Access | How to Assign |
+|------|--------|---------------|
+| `admin` | Full admin console | Add to `user_roles` table |
+| `creator` | Creator portal | Approve creator application |
+| `sponsor` | Sponsor portal | Approve sponsor application |
+
+### Protected Routes
+```typescript
+// Example: Check if user is admin
+const { isAdmin } = useAuth();
+if (!isAdmin) return <AccessDenied />;
+```
+
+---
+
+## 🧪 Testing
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run specific test file
+npm test -- src/test/example.test.ts
+```
+
+---
+
+## 📝 Git Workflow
+
+### Branch Naming
+```
+feature/add-streak-bonuses
+fix/xp-calculation-bug
+refactor/signups-manager
+```
+
+### Commit Messages
+```
+feat: add achievement auto-unlock on XP award
+fix: prevent double XP award on status update
+refactor: extract gamification hooks
+docs: update codebase guide with gamification
+```
+
+### Pull Request Checklist
+- [ ] Tests pass locally
+- [ ] No TypeScript errors
+- [ ] UI tested on mobile and desktop
+- [ ] Database migrations reviewed
+- [ ] Documentation updated if needed
 
 ---
 

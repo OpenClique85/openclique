@@ -1,6 +1,26 @@
 /**
  * =============================================================================
- * PROFILE GAMIFICATION SECTION - Level, XP, Achievements, Streaks display
+ * PROFILE GAMIFICATION SECTION
+ * =============================================================================
+ * 
+ * Purpose: Comprehensive gamification display showing user's progress across
+ *          all gamification systems: Level, XP, Tree Progress, Achievements, Streaks.
+ * 
+ * UI Sections:
+ *   1. Level & XP Card - Current level, XP progress bar, XP to next level
+ *   2. Path Progress - XP breakdown by tree (culture/wellness/connector)
+ *   3. Achievements - Locked/unlocked achievements with criteria descriptions
+ *   4. Streaks - Weekly/monthly activity streaks with longest record
+ * 
+ * Dependencies:
+ *   - useUserLevel(): Fetches level info from level_thresholds + user_xp
+ *   - useUserTreeXP(): Fetches tree-specific XP from user_tree_xp
+ *   - useUserAchievements(): Fetches templates + user unlocks
+ *   - useUserStreaks(): Fetches streak rules + user streaks
+ * 
+ * Location: Displayed on /profile page in "Progress" tab
+ * 
+ * @component ProfileGamificationSection
  * =============================================================================
  */
 

@@ -1,6 +1,32 @@
 /**
  * =============================================================================
- * USER STREAKS HOOK - Track active streaks and consistency rewards
+ * USER STREAKS HOOK
+ * =============================================================================
+ * 
+ * Purpose: Track user's activity streaks for consistent quest participation.
+ *          Streaks encourage weekly/monthly engagement with XP bonuses.
+ * 
+ * Database Dependencies:
+ *   - streak_rules: Defines streak types (weekly, monthly) and bonuses
+ *   - user_streaks: Tracks each user's current and longest streaks
+ * 
+ * Streak Types:
+ *   - weekly: Complete at least one quest per week
+ *   - monthly: Complete at least one quest per month
+ * 
+ * Usage:
+ *   const { streaks, totalActiveStreaks, longestStreak } = useUserStreaks();
+ *   streaks.map(s => `${s.name}: ${s.currentCount} weeks`)
+ * 
+ * Future Enhancement:
+ *   - Add streak_updated trigger on quest completion
+ *   - Implement grace periods for streak maintenance
+ * 
+ * Related Files:
+ *   - src/components/profile/ProfileGamificationSection.tsx (displays streaks)
+ *   - src/components/admin/StreaksManager.tsx (manages streak rules)
+ * 
+ * @module hooks/useUserStreaks
  * =============================================================================
  */
 

@@ -1,3 +1,36 @@
+/**
+ * =============================================================================
+ * SIGNUPS MANAGER - Admin tool for managing quest signups and attendance
+ * =============================================================================
+ * 
+ * Purpose: View and manage user signups for quests. Key admin operations:
+ *   - View all signups filtered by status
+ *   - Update signup status (pending → confirmed → completed)
+ *   - Generate squad recommendations for group quests
+ *   - Send feedback reminder notifications
+ * 
+ * XP Award Flow:
+ *   When status is changed to 'completed', the updateStatus() function:
+ *   1. Updates quest_signups.status to 'completed'
+ *   2. Calls award_quest_xp(user_id, quest_id) RPC
+ *   3. award_quest_xp() internally calls:
+ *      - award_xp() for global XP
+ *      - award_tree_xp() for tree-specific XP
+ *      - check_and_unlock_achievements() for auto-unlocks
+ *   4. Shows toast with XP awarded and new total
+ * 
+ * Database Dependencies:
+ *   - quest_signups: User signup records with status
+ *   - quests: Quest metadata including base_xp
+ *   - profiles: User display names and emails
+ *   - notifications: For feedback reminder creation
+ * 
+ * Location: Admin Console → Operations → Signups
+ * 
+ * @component SignupsManager
+ * =============================================================================
+ */
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';

@@ -1,6 +1,34 @@
 /**
  * =============================================================================
- * USER ACHIEVEMENTS HOOK - Track achievement progress and unlocks
+ * USER ACHIEVEMENTS HOOK
+ * =============================================================================
+ * 
+ * Purpose: Fetch achievement templates and user's unlock status. Achievements
+ *          are auto-unlocked via check_and_unlock_achievements() when XP is awarded.
+ * 
+ * Database Dependencies:
+ *   - achievement_templates: Defines all available achievements
+ *   - user_achievements: Tracks which achievements each user has unlocked
+ * 
+ * Achievement Criteria Types (stored in achievement_templates.criteria JSONB):
+ *   - quest_count: { type: 'quest_count', count: 5 }
+ *   - tree_xp: { type: 'tree_xp', tree: 'culture', amount: 100 }
+ *   - total_xp: { type: 'total_xp', amount: 500 }
+ *   - feedback_count: { type: 'feedback_count', count: 3 }
+ * 
+ * Usage:
+ *   const { achievements, unlockedCount, totalCount } = useUserAchievements();
+ *   achievements.map(a => a.unlocked ? '✅' : '🔒')
+ * 
+ * Auto-Unlock Flow:
+ *   XP awarded → award_quest_xp() → check_and_unlock_achievements() → user_achievements inserted
+ * 
+ * Related Files:
+ *   - src/components/profile/ProfileGamificationSection.tsx (displays achievements)
+ *   - src/components/admin/AchievementsManager.tsx (CRUD achievements)
+ *   - DB function: check_and_unlock_achievements(user_id)
+ * 
+ * @module hooks/useUserAchievements
  * =============================================================================
  */
 
