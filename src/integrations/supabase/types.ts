@@ -797,6 +797,7 @@ export type Database = {
           logo_url: string | null
           name: string
           preferred_quest_types: string[] | null
+          proposal_templates: Json | null
           slug: string | null
           sponsor_type: string
           status: string
@@ -817,6 +818,7 @@ export type Database = {
           logo_url?: string | null
           name: string
           preferred_quest_types?: string[] | null
+          proposal_templates?: Json | null
           slug?: string | null
           sponsor_type?: string
           status?: string
@@ -837,6 +839,7 @@ export type Database = {
           logo_url?: string | null
           name?: string
           preferred_quest_types?: string[] | null
+          proposal_templates?: Json | null
           slug?: string | null
           sponsor_type?: string
           status?: string
@@ -907,6 +910,7 @@ export type Database = {
           created_at: string
           creator_id: string | null
           creator_response_at: string | null
+          decline_reason: string | null
           id: string
           message: string | null
           proposal_type: string
@@ -923,6 +927,7 @@ export type Database = {
           created_at?: string
           creator_id?: string | null
           creator_response_at?: string | null
+          decline_reason?: string | null
           id?: string
           message?: string | null
           proposal_type: string
@@ -939,6 +944,7 @@ export type Database = {
           created_at?: string
           creator_id?: string | null
           creator_response_at?: string | null
+          decline_reason?: string | null
           id?: string
           message?: string | null
           proposal_type?: string

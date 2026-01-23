@@ -30,6 +30,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { 
+  notifySponsorProposalAccepted, 
+  notifySponsorProposalDeclined,
+  notifyAdminByEmail 
+} from '@/lib/notifications';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 interface Proposal {
   id: string;
@@ -153,16 +166,54 @@ export function CreatorProposalInbox({ creatorId }: CreatorProposalInboxProps) {
 
   // Accept proposal
   const acceptProposal = useMutation({
-    mutationFn: async (proposalId: string) => {
+    mutationFn: async (proposal: Proposal) => {
       const { error } = await supabase
         .from('sponsorship_proposals')
         .update({ 
           status: 'accepted',
           creator_response_at: new Date().toISOString()
         })
-        .eq('id', proposalId);
+        .eq('id', proposal.id);
       
       if (error) throw error;
+
+      // Get creator name for notification
+      const { data: creatorProfile } = await supabase
+        .from('creator_profiles')
+        .select('display_name')
+        .eq('user_id', effectiveCreatorId)
+        .single();
+
+      // Notify sponsor
+      if (proposal.sponsor) {
+        const { data: sponsorProfile } = await supabase
+          .from('sponsor_profiles')
+          .select('user_id')
+          .eq('id', proposal.sponsor_id)
+          .single();
+
+        if (sponsorProfile?.user_id) {
+          await notifySponsorProposalAccepted({
+            sponsorUserId: sponsorProfile.user_id,
+            creatorName: creatorProfile?.display_name || 'Creator',
+            questTitle: proposal.quest?.title,
+          });
+        }
+
+        // Email admin about pending review
+        await notifyAdminByEmail({
+          type: 'proposal_pending',
+          data: {
+            sponsor_name: proposal.sponsor.name,
+            creator_name: creatorProfile?.display_name,
+            quest_title: proposal.quest?.title,
+            proposal_type: proposal.proposal_type,
+            budget: proposal.budget_or_reward,
+          },
+        });
+      }
+
+      return proposal;
     },
     onSuccess: () => {
       toast.success('Proposal accepted! The sponsor will be notified.');
@@ -175,21 +226,42 @@ export function CreatorProposalInbox({ creatorId }: CreatorProposalInboxProps) {
 
   // Decline proposal
   const declineProposal = useMutation({
-    mutationFn: async ({ proposalId, reason }: { proposalId: string; reason?: string }) => {
+    mutationFn: async ({ proposal, reason }: { proposal: Proposal; reason?: string }) => {
       const updateData: Record<string, unknown> = {
         status: 'declined',
         creator_response_at: new Date().toISOString(),
+        decline_reason: reason || null,
       };
-      if (reason) {
-        updateData.admin_notes = `Creator declined: ${reason}`;
-      }
       
       const { error } = await supabase
         .from('sponsorship_proposals')
         .update(updateData)
-        .eq('id', proposalId);
+        .eq('id', proposal.id);
       
       if (error) throw error;
+
+      // Get creator name for notification
+      const { data: creatorProfile } = await supabase
+        .from('creator_profiles')
+        .select('display_name')
+        .eq('user_id', effectiveCreatorId)
+        .single();
+
+      // Notify sponsor
+      const { data: sponsorProfile } = await supabase
+        .from('sponsor_profiles')
+        .select('user_id')
+        .eq('id', proposal.sponsor_id)
+        .single();
+
+      if (sponsorProfile?.user_id) {
+        await notifySponsorProposalDeclined({
+          sponsorUserId: sponsorProfile.user_id,
+          creatorName: creatorProfile?.display_name || 'Creator',
+          questTitle: proposal.quest?.title,
+          reason,
+        });
+      }
     },
     onSuccess: () => {
       toast.success('Proposal declined');
@@ -247,7 +319,7 @@ export function CreatorProposalInbox({ creatorId }: CreatorProposalInboxProps) {
               <ProposalCard 
                 key={proposal.id} 
                 proposal={proposal}
-                onAccept={() => acceptProposal.mutate(proposal.id)}
+                onAccept={() => acceptProposal.mutate(proposal)}
                 onDecline={() => handleDeclineClick(proposal)}
                 isAccepting={acceptProposal.isPending}
               />
@@ -294,7 +366,7 @@ export function CreatorProposalInbox({ creatorId }: CreatorProposalInboxProps) {
             <Button 
               variant="destructive"
               onClick={() => selectedProposal && declineProposal.mutate({ 
-                proposalId: selectedProposal.id, 
+                proposal: selectedProposal, 
                 reason: declineReason 
               })}
               disabled={declineProposal.isPending}

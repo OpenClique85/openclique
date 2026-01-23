@@ -24,6 +24,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import type { Tables } from '@/integrations/supabase/types';
+import { ProposalTemplateManager, type ProposalTemplate } from './ProposalTemplateManager';
+import { notifyCreatorOfProposal } from '@/lib/notifications';
 
 type Reward = Tables<'rewards'>;
 type VenueOffering = Tables<'venue_offerings'>;
@@ -49,6 +51,22 @@ export function SponsorshipProposalModal({
     budget_or_reward: '',
     venue_offering_id: '',
     reward_ids: [] as string[],
+  });
+
+  // Fetch sponsor profile for name and templates
+  const { data: sponsorProfile } = useQuery({
+    queryKey: ['sponsor-profile-for-proposal', sponsorId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('sponsor_profiles')
+        .select('id, name, user_id')
+        .eq('id', sponsorId)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: isOpen && !!sponsorId,
   });
 
   // Fetch sponsor's rewards
@@ -94,6 +112,14 @@ export function SponsorshipProposalModal({
     }
   }, [isOpen]);
 
+  const handleLoadTemplate = (template: ProposalTemplate) => {
+    setFormData(prev => ({
+      ...prev,
+      message: template.message,
+      budget_or_reward: template.budget_or_reward,
+    }));
+  };
+
   const toggleReward = (rewardId: string) => {
     setFormData(prev => ({
       ...prev,
@@ -113,9 +139,10 @@ export function SponsorshipProposalModal({
 
     setIsSubmitting(true);
     try {
+      const proposalType = quest ? 'sponsor_quest' : 'request_quest';
       const proposalData: any = {
         sponsor_id: sponsorId,
-        proposal_type: quest ? 'sponsor_quest' : 'request_quest',
+        proposal_type: proposalType,
         message: formData.message.trim(),
         budget_or_reward: formData.budget_or_reward.trim() || null,
         venue_offering_id: formData.venue_offering_id || null,
@@ -123,13 +150,18 @@ export function SponsorshipProposalModal({
         status: 'sent',
       };
 
+      // Determine creator to notify
+      let creatorUserId: string | null = null;
+
       if (quest) {
         proposalData.quest_id = quest.id;
         if (quest.creator_id) {
           proposalData.creator_id = quest.creator_id;
+          creatorUserId = quest.creator_id;
         }
       } else if (creator) {
         proposalData.creator_id = creator.user_id;
+        creatorUserId = creator.user_id;
       }
 
       const { error } = await supabase
@@ -137,6 +169,16 @@ export function SponsorshipProposalModal({
         .insert(proposalData);
 
       if (error) throw error;
+
+      // Send in-app notification to creator
+      if (creatorUserId && sponsorProfile?.name) {
+        await notifyCreatorOfProposal({
+          creatorUserId,
+          sponsorName: sponsorProfile.name,
+          questTitle: quest?.title,
+          proposalType,
+        });
+      }
 
       toast.success('Proposal sent successfully!');
       onClose();
@@ -167,6 +209,16 @@ export function SponsorshipProposalModal({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Template Manager */}
+          <div className="border-b pb-3">
+            <ProposalTemplateManager
+              sponsorId={sponsorId}
+              currentMessage={formData.message}
+              currentBudget={formData.budget_or_reward}
+              onLoadTemplate={handleLoadTemplate}
+            />
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="message">Your Message *</Label>
             <Textarea
