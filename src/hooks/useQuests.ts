@@ -24,6 +24,9 @@ export interface Quest {
   creatorName?: string;
   creatorSocialUrl?: string;
   startDatetime?: string;
+  isSponsored?: boolean;
+  sponsorId?: string;
+  sponsorName?: string;
   metadata: {
     date: string;
     cost: string;
@@ -105,7 +108,7 @@ const calculateDuration = (start: string | null, end: string | null): string => 
 };
 
 // Transform database quest to UI quest format
-export const transformQuest = (dbQuest: DbQuest): Quest => {
+export const transformQuest = (dbQuest: DbQuest & { sponsor_profiles?: { name: string } | null }): Quest => {
   return {
     id: dbQuest.id,
     slug: dbQuest.slug,
@@ -124,6 +127,9 @@ export const transformQuest = (dbQuest: DbQuest): Quest => {
     creatorName: (dbQuest as DbQuest & { creator_name?: string }).creator_name || undefined,
     creatorSocialUrl: (dbQuest as DbQuest & { creator_social_url?: string }).creator_social_url || undefined,
     startDatetime: dbQuest.start_datetime || undefined,
+    isSponsored: dbQuest.is_sponsored || false,
+    sponsorId: dbQuest.sponsor_id || undefined,
+    sponsorName: dbQuest.sponsor_profiles?.name || undefined,
     metadata: {
       date: formatDateRange(dbQuest.start_datetime, dbQuest.end_datetime),
       cost: dbQuest.cost_description || 'Free',
@@ -151,7 +157,10 @@ export function useQuests() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('quests')
-        .select('*')
+        .select(`
+          *,
+          sponsor_profiles(name)
+        `)
         .in('status', ['open', 'closed', 'completed'])
         .order('start_datetime', { ascending: true });
       
@@ -171,7 +180,10 @@ export function useQuest(slug: string | undefined) {
       
       const { data, error } = await supabase
         .from('quests')
-        .select('*')
+        .select(`
+          *,
+          sponsor_profiles(name)
+        `)
         .eq('slug', slug)
         .single();
       

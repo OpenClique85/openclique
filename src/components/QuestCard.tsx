@@ -3,7 +3,9 @@ import { Calendar, DollarSign, Clock, Users, Gift, ExternalLink, Star, Sparkles 
 import type { Quest } from '@/hooks/useQuests';
 import { useQuestRating } from '@/hooks/useQuestRatings';
 import { useCreatorSlug } from '@/hooks/useCreatorSlugs';
+import { Badge } from '@/components/ui/badge';
 import logo from '@/assets/oc-icon.png';
+
 const QUEST_STATUS_CONFIG: Record<Quest['status'], { label: string; color: string; ctaDisabled?: boolean }> = {
   'open': { label: 'Open', color: 'green' },
   'closed': { label: 'Full', color: 'yellow' },
@@ -66,11 +68,14 @@ const QuestCard = ({ quest, onClick }: QuestCardProps) => {
           {statusLabel}
         </span>
         {/* Sponsored Badge */}
-        {'isSponsored' in quest && quest.isSponsored && (
-          <span className="absolute top-3 left-3 text-xs font-medium px-2.5 py-1 rounded-full backdrop-blur-sm bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 flex items-center gap-1">
-            <Sparkles className="h-3 w-3" />
+        {quest.isSponsored && (
+          <Badge 
+            variant="secondary" 
+            className="absolute top-3 left-3 text-xs backdrop-blur-sm bg-sunset/90 text-white border-sunset hover:bg-sunset"
+          >
+            <Sparkles className="h-3 w-3 mr-1" />
             Sponsored
-          </span>
+          </Badge>
         )}
         {/* Theme Tag Overlay */}
         <span className={`absolute bottom-3 left-3 text-xs font-medium px-2.5 py-1 rounded-full backdrop-blur-sm ${themeStyles}`}>
@@ -115,9 +120,20 @@ const QuestCard = ({ quest, onClick }: QuestCardProps) => {
         </p>
 
         {/* Rewards Preview */}
-        <div className="flex items-start gap-2 text-sm font-medium text-primary mb-3 bg-primary/5 rounded-lg p-2.5">
+        <div className={`flex items-start gap-2 text-sm font-medium mb-3 rounded-lg p-2.5 ${
+          quest.isSponsored 
+            ? 'bg-sunset/10 text-sunset' 
+            : 'bg-primary/5 text-primary'
+        }`}>
           <Gift className="w-4 h-4 shrink-0 mt-0.5" />
-          <span>{quest.rewards}</span>
+          <div className="flex-1">
+            <span>{quest.rewards}</span>
+            {quest.isSponsored && quest.sponsorName && (
+              <span className="block text-xs opacity-75 mt-0.5">
+                Sponsored by {quest.sponsorName}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Rating + Creator Attribution Row */}

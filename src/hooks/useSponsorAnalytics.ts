@@ -5,7 +5,10 @@ interface SponsorAnalytics {
   totalSponsoredQuests: number;
   totalParticipants: number;
   totalRedemptions: number;
+  totalRewards: number;
   averageRating: number | null;
+  redemptionRate: number;
+  completionRate: number;
   questBreakdown: Array<{
     questId: string;
     questTitle: string;
@@ -14,6 +17,7 @@ interface SponsorAnalytics {
     completionRate: number;
     avgRating: number | null;
     redemptions: number;
+    rewardsAttached: number;
   }>;
   testimonials: Array<{
     questTitle: string;
@@ -25,29 +29,41 @@ interface SponsorAnalytics {
     month: string;
     count: number;
   }>;
+  engagementTrend: Array<{
+    month: string;
+    participants: number;
+    redemptions: number;
+  }>;
 }
 
 export function useSponsorAnalytics(sponsorId: string | undefined) {
   return useQuery({
     queryKey: ['sponsor-analytics', sponsorId],
     queryFn: async (): Promise<SponsorAnalytics> => {
+      const emptyAnalytics: SponsorAnalytics = {
+        totalSponsoredQuests: 0,
+        totalParticipants: 0,
+        totalRedemptions: 0,
+        totalRewards: 0,
+        averageRating: null,
+        redemptionRate: 0,
+        completionRate: 0,
+        questBreakdown: [],
+        testimonials: [],
+        redemptionsByMonth: [],
+        engagementTrend: [],
+      };
+
       if (!sponsorId) {
-        return {
-          totalSponsoredQuests: 0,
-          totalParticipants: 0,
-          totalRedemptions: 0,
-          averageRating: null,
-          questBreakdown: [],
-          testimonials: [],
-          redemptionsByMonth: [],
-        };
+        return emptyAnalytics;
       }
 
-      // Get sponsored quests with quest details
+      // Get sponsored quests with quest details and rewards attached
       const { data: sponsoredQuests, error: sqError } = await supabase
         .from('sponsored_quests')
         .select(`
           quest_id,
+          rewards_attached,
           quests:quest_id(id, title, start_datetime, status)
         `)
         .eq('sponsor_id', sponsorId);
@@ -57,15 +73,7 @@ export function useSponsorAnalytics(sponsorId: string | undefined) {
       const questIds = sponsoredQuests?.map(sq => sq.quest_id).filter(Boolean) || [];
 
       if (questIds.length === 0) {
-        return {
-          totalSponsoredQuests: 0,
-          totalParticipants: 0,
-          totalRedemptions: 0,
-          averageRating: null,
-          questBreakdown: [],
-          testimonials: [],
-          redemptionsByMonth: [],
-        };
+        return emptyAnalytics;
       }
 
       // Get signups for sponsored quests
@@ -95,11 +103,22 @@ export function useSponsorAnalytics(sponsorId: string | undefined) {
         .in('reward_id', rewardIds);
 
       // Calculate metrics
-      const totalParticipants = signups?.filter(s => 
+      const confirmedSignups = signups?.filter(s => 
         ['confirmed', 'completed'].includes(s.status || '')
-      ).length || 0;
-
+      ) || [];
+      const completedSignups = signups?.filter(s => s.status === 'completed') || [];
+      
+      const totalParticipants = confirmedSignups.length;
       const totalRedemptions = redemptions?.length || 0;
+      const totalRewards = rewards?.length || 0;
+
+      // Calculate rates
+      const redemptionRate = totalParticipants > 0 
+        ? (totalRedemptions / totalParticipants) * 100 
+        : 0;
+      const overallCompletionRate = confirmedSignups.length > 0 
+        ? (completedSignups.length / confirmedSignups.length) * 100 
+        : 0;
 
       const ratings = feedback?.filter(f => f.rating_1_5).map(f => f.rating_1_5!) || [];
       const averageRating = ratings.length > 0 
@@ -122,6 +141,7 @@ export function useSponsorAnalytics(sponsorId: string | undefined) {
           : null;
 
         const questRedemptions = redemptions?.filter(r => r.quest_id === quest.id).length || 0;
+        const rewardsAttached = Array.isArray(sq.rewards_attached) ? sq.rewards_attached.length : 0;
 
         return {
           questId: quest.id,
@@ -131,6 +151,7 @@ export function useSponsorAnalytics(sponsorId: string | undefined) {
           completionRate: confirmed > 0 ? (completed / confirmed) * 100 : 0,
           avgRating: questAvgRating,
           redemptions: questRedemptions,
+          rewardsAttached,
         };
       }).filter(Boolean) as SponsorAnalytics['questBreakdown'];
 
@@ -159,14 +180,45 @@ export function useSponsorAnalytics(sponsorId: string | undefined) {
         .sort(([a], [b]) => a.localeCompare(b))
         .map(([month, count]) => ({ month, count }));
 
+      // Engagement trend by month (participants + redemptions)
+      const engagementByMonth: Record<string, { participants: number; redemptions: number }> = {};
+      
+      // Add participants by quest date
+      questBreakdown.forEach(q => {
+        if (q.questDate) {
+          const month = new Date(q.questDate).toISOString().slice(0, 7);
+          if (!engagementByMonth[month]) {
+            engagementByMonth[month] = { participants: 0, redemptions: 0 };
+          }
+          engagementByMonth[month].participants += q.participants;
+        }
+      });
+
+      // Add redemptions
+      Object.entries(redemptionsByMonth).forEach(([month, count]) => {
+        if (!engagementByMonth[month]) {
+          engagementByMonth[month] = { participants: 0, redemptions: 0 };
+        }
+        engagementByMonth[month].redemptions = count;
+      });
+
+      const engagementTrend = Object.entries(engagementByMonth)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .slice(-12) // Last 12 months
+        .map(([month, data]) => ({ month, ...data }));
+
       return {
         totalSponsoredQuests: questIds.length,
         totalParticipants,
         totalRedemptions,
+        totalRewards,
         averageRating,
+        redemptionRate,
+        completionRate: overallCompletionRate,
         questBreakdown,
         testimonials,
         redemptionsByMonth: sortedMonths,
+        engagementTrend,
       };
     },
     enabled: !!sponsorId,

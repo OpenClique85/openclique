@@ -500,6 +500,13 @@ function ActiveSponsorsTab() {
 }
 
 function ProposalReviewTab() {
+  const [selectedProposal, setSelectedProposal] = useState<any>(null);
+  const [approveDialogOpen, setApproveDialogOpen] = useState(false);
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [adminNotes, setAdminNotes] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const queryClient = useQueryClient();
+
   const { data: proposals, isLoading } = useQuery({
     queryKey: ['pending-proposals'],
     queryFn: async () => {
@@ -507,50 +514,118 @@ function ProposalReviewTab() {
         .from('sponsorship_proposals')
         .select(`
           *,
-          sponsor:sponsor_profiles(name, slug),
-          quest:quests(title, slug)
+          sponsor:sponsor_profiles(id, name, slug, user_id),
+          quest:quests(id, title, slug, creator_id),
+          creator:creator_profiles!sponsorship_proposals_creator_id_fkey(display_name, user_id),
+          venue:venue_offerings(venue_name)
         `)
         .in('status', ['accepted', 'pending_admin'])
-        .order('created_at', { ascending: false });
+        .order('creator_response_at', { ascending: false });
 
       if (error) throw error;
       return data;
     },
   });
 
-  const queryClient = useQueryClient();
+  const handleApprove = async () => {
+    if (!selectedProposal) return;
+    setIsProcessing(true);
+    
+    try {
+      // Update proposal status
+      const { error: updateError } = await supabase
+        .from('sponsorship_proposals')
+        .update({ 
+          status: 'approved',
+          admin_approved_at: new Date().toISOString(),
+          admin_notes: adminNotes || null,
+        })
+        .eq('id', selectedProposal.id);
 
-  const handleApprove = async (proposalId: string) => {
-    const { error } = await supabase
-      .from('sponsorship_proposals')
-      .update({ 
-        status: 'approved',
-        admin_approved_at: new Date().toISOString(),
-      })
-      .eq('id', proposalId);
+      if (updateError) throw updateError;
 
-    if (error) {
+      // If quest exists, update it to be sponsored
+      if (selectedProposal.quest?.id) {
+        await supabase
+          .from('quests')
+          .update({ 
+            is_sponsored: true,
+            sponsor_id: selectedProposal.sponsor?.id,
+          })
+          .eq('id', selectedProposal.quest.id);
+
+        // Create sponsored_quests link
+        await supabase
+          .from('sponsored_quests')
+          .insert({
+            quest_id: selectedProposal.quest.id,
+            sponsor_id: selectedProposal.sponsor?.id,
+            proposal_id: selectedProposal.id,
+            rewards_attached: selectedProposal.reward_ids || [],
+          });
+      }
+
+      // Send notification to sponsor
+      if (selectedProposal.sponsor?.user_id) {
+        await supabase.from('notifications').insert({
+          user_id: selectedProposal.sponsor.user_id,
+          type: 'sponsored_quest_approved',
+          title: 'Sponsorship approved!',
+          body: selectedProposal.quest?.title 
+            ? `Your sponsorship for "${selectedProposal.quest.title}" is now live.`
+            : 'Your sponsorship has been approved by the admin team.',
+        });
+      }
+
+      toast.success('Proposal approved and sponsorship activated');
+      setApproveDialogOpen(false);
+      setSelectedProposal(null);
+      setAdminNotes('');
+      queryClient.invalidateQueries({ queryKey: ['pending-proposals'] });
+    } catch (error) {
+      console.error('Error approving proposal:', error);
       toast.error('Failed to approve proposal');
-      return;
+    } finally {
+      setIsProcessing(false);
     }
-
-    toast.success('Proposal approved');
-    queryClient.invalidateQueries({ queryKey: ['pending-proposals'] });
   };
 
-  const handleReject = async (proposalId: string) => {
-    const { error } = await supabase
-      .from('sponsorship_proposals')
-      .update({ status: 'declined' })
-      .eq('id', proposalId);
+  const handleReject = async () => {
+    if (!selectedProposal) return;
+    setIsProcessing(true);
 
-    if (error) {
+    try {
+      const { error } = await supabase
+        .from('sponsorship_proposals')
+        .update({ 
+          status: 'declined',
+          admin_notes: adminNotes || 'Rejected by admin',
+        })
+        .eq('id', selectedProposal.id);
+
+      if (error) throw error;
+
+      // Notify sponsor
+      if (selectedProposal.sponsor?.user_id) {
+        await supabase.from('notifications').insert({
+          user_id: selectedProposal.sponsor.user_id,
+          type: 'sponsorship_proposal_declined',
+          title: 'Sponsorship proposal not approved',
+          body: adminNotes || 'Your sponsorship proposal was not approved at this time.',
+        });
+      }
+
+      toast.success('Proposal rejected');
+      setRejectDialogOpen(false);
+      setSelectedProposal(null);
+      setAdminNotes('');
+      queryClient.invalidateQueries({ queryKey: ['pending-proposals'] });
+    } catch (error) {
+      console.error('Error rejecting proposal:', error);
       toast.error('Failed to reject proposal');
-      return;
+    } finally {
+      setIsProcessing(false);
     }
-
-    toast.success('Proposal rejected');
-    queryClient.invalidateQueries({ queryKey: ['pending-proposals'] });
   };
 
   if (isLoading) {
@@ -561,20 +636,53 @@ function ProposalReviewTab() {
     );
   }
 
+  const pendingCount = proposals?.filter(p => p.status === 'accepted' || p.status === 'pending_admin').length || 0;
+
   return (
     <div className="space-y-4">
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold text-amber-600">{pendingCount}</div>
+            <p className="text-sm text-muted-foreground">Awaiting Review</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold">
+              {proposals?.filter(p => p.proposal_type === 'sponsor_quest').length || 0}
+            </div>
+            <p className="text-sm text-muted-foreground">Quest Sponsorships</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold">
+              {proposals?.filter(p => p.proposal_type === 'request_quest').length || 0}
+            </div>
+            <p className="text-sm text-muted-foreground">Custom Requests</p>
+          </CardContent>
+        </Card>
+      </div>
+
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Proposals Awaiting Admin Review</CardTitle>
+          <CardTitle className="text-lg flex items-center gap-2">
+            Proposals Awaiting Admin Review
+            {pendingCount > 0 && (
+              <Badge variant="destructive">{pendingCount}</Badge>
+            )}
+          </CardTitle>
         </CardHeader>
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Sponsor</TableHead>
-              <TableHead>Quest</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Submitted</TableHead>
+              <TableHead>Quest / Request</TableHead>
+              <TableHead>Creator</TableHead>
+              <TableHead>Budget</TableHead>
+              <TableHead>Accepted</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -588,24 +696,50 @@ function ProposalReviewTab() {
             ) : (
               proposals?.map((proposal: any) => (
                 <TableRow key={proposal.id}>
-                  <TableCell className="font-medium">
-                    {proposal.sponsor?.name || 'Unknown'}
-                  </TableCell>
-                  <TableCell>{proposal.quest?.title || 'Custom Request'}</TableCell>
-                  <TableCell className="capitalize">
-                    {proposal.proposal_type.replace('_', ' ')}
+                  <TableCell>
+                    <div className="font-medium">{proposal.sponsor?.name || 'Unknown'}</div>
+                    <div className="text-xs text-muted-foreground capitalize">
+                      {proposal.proposal_type.replace('_', ' ')}
+                    </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="secondary">{proposal.status}</Badge>
+                    {proposal.quest?.title || (
+                      <span className="text-muted-foreground italic">Custom Request</span>
+                    )}
+                    {proposal.venue?.venue_name && (
+                      <div className="text-xs text-muted-foreground flex items-center gap-1">
+                        <MapPin className="h-3 w-3" />
+                        {proposal.venue.venue_name}
+                      </div>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {proposal.creator?.display_name || 'N/A'}
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-sm">{proposal.budget_or_reward || '—'}</span>
                   </TableCell>
                   <TableCell className="text-sm">
-                    {format(new Date(proposal.created_at), 'MMM d, yyyy')}
+                    {proposal.creator_response_at 
+                      ? format(new Date(proposal.creator_response_at), 'MMM d, h:mm a')
+                      : '—'
+                    }
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Button
                         size="sm"
-                        onClick={() => handleApprove(proposal.id)}
+                        variant="ghost"
+                        onClick={() => setSelectedProposal(proposal)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          setSelectedProposal(proposal);
+                          setApproveDialogOpen(true);
+                        }}
                       >
                         <Check className="h-4 w-4 mr-1" />
                         Approve
@@ -613,7 +747,11 @@ function ProposalReviewTab() {
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => handleReject(proposal.id)}
+                        className="text-destructive hover:text-destructive"
+                        onClick={() => {
+                          setSelectedProposal(proposal);
+                          setRejectDialogOpen(true);
+                        }}
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -625,6 +763,143 @@ function ProposalReviewTab() {
           </TableBody>
         </Table>
       </Card>
+
+      {/* Detail Preview Dialog */}
+      <Dialog open={!!selectedProposal && !approveDialogOpen && !rejectDialogOpen} onOpenChange={() => setSelectedProposal(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Proposal Details</DialogTitle>
+          </DialogHeader>
+          {selectedProposal && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-muted-foreground">Sponsor</p>
+                  <p className="font-medium">{selectedProposal.sponsor?.name}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Type</p>
+                  <p className="font-medium capitalize">{selectedProposal.proposal_type.replace('_', ' ')}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Quest</p>
+                  <p className="font-medium">{selectedProposal.quest?.title || 'Custom Request'}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Creator</p>
+                  <p className="font-medium">{selectedProposal.creator?.display_name || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Budget/Offering</p>
+                  <p className="font-medium">{selectedProposal.budget_or_reward || '—'}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Status</p>
+                  <Badge variant="secondary">{selectedProposal.status}</Badge>
+                </div>
+              </div>
+              
+              {selectedProposal.message && (
+                <div>
+                  <p className="text-muted-foreground text-sm mb-1">Message</p>
+                  <p className="text-sm bg-muted p-3 rounded-lg">{selectedProposal.message}</p>
+                </div>
+              )}
+
+              {selectedProposal.reward_ids && selectedProposal.reward_ids.length > 0 && (
+                <div>
+                  <p className="text-muted-foreground text-sm mb-1">Rewards Attached</p>
+                  <Badge variant="outline">{selectedProposal.reward_ids.length} reward(s)</Badge>
+                </div>
+              )}
+
+              <div className="flex gap-2 pt-4">
+                <Button 
+                  className="flex-1"
+                  onClick={() => setApproveDialogOpen(true)}
+                >
+                  <Check className="h-4 w-4 mr-2" />
+                  Approve Sponsorship
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="flex-1 text-destructive hover:text-destructive"
+                  onClick={() => setRejectDialogOpen(true)}
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Reject
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Approve Confirmation Dialog */}
+      <Dialog open={approveDialogOpen} onOpenChange={setApproveDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Approve Sponsorship</DialogTitle>
+            <DialogDescription>
+              This will activate the sponsorship and notify the sponsor.
+              {selectedProposal?.quest?.title && (
+                <span className="block mt-2 font-medium">
+                  Quest: "{selectedProposal.quest.title}"
+                </span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label>Admin Notes (optional)</Label>
+            <Textarea
+              value={adminNotes}
+              onChange={(e) => setAdminNotes(e.target.value)}
+              placeholder="Internal notes about this approval..."
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setApproveDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleApprove} disabled={isProcessing}>
+              {isProcessing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Check className="h-4 w-4 mr-2" />}
+              Approve & Activate
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reject Confirmation Dialog */}
+      <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reject Proposal</DialogTitle>
+            <DialogDescription>
+              Reject the proposal from {selectedProposal?.sponsor?.name}?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label>Reason (optional, shared with sponsor)</Label>
+            <Textarea
+              value={adminNotes}
+              onChange={(e) => setAdminNotes(e.target.value)}
+              placeholder="Reason for rejection..."
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRejectDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleReject}
+              disabled={isProcessing}
+            >
+              {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Reject'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
