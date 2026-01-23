@@ -1,3 +1,34 @@
+/**
+ * =============================================================================
+ * USER XP HOOK
+ * =============================================================================
+ * 
+ * Purpose: Fetch and manage user XP data including total XP and transaction history.
+ *          XP is the core currency of the gamification system.
+ * 
+ * Database Dependencies:
+ *   - user_xp: Stores total XP per user
+ *   - xp_transactions: Individual XP awards with source tracking
+ * 
+ * XP Sources:
+ *   - quest_complete: Completing a quest (base_xp from quest)
+ *   - feedback_basic/extended/pricing/testimonial: Feedback submissions
+ *   - achievement: Bonus XP from unlocking achievements
+ *   - streak_bonus: Milestone bonuses for maintaining streaks
+ *   - referral: Bonus for successful referrals
+ * 
+ * Usage:
+ *   const { totalXP, recentTransactions, isLoading } = useUserXP();
+ * 
+ * Related Files:
+ *   - src/components/XPBadge.tsx (displays XP in navbar)
+ *   - src/components/profile/ProfileGamificationSection.tsx
+ *   - DB function: award_xp(user_id, amount, source, source_id)
+ * 
+ * @module hooks/useUserXP
+ * =============================================================================
+ */
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -97,14 +128,33 @@ export function useAwardXP() {
   });
 }
 
-// Helper to format XP source for display
+/**
+ * Format XP source key to human-readable label
+ * @param source - The source key from xp_transactions
+ * @returns Human-readable label
+ */
 export function formatXPSource(source: string): string {
   const labels: Record<string, string> = {
+    // Quest completion
+    quest_complete: 'Quest Completed',
+    
+    // Feedback submissions
     feedback_basic: 'Quick Feedback',
     feedback_extended: 'Quest Insights',
     feedback_pricing: 'Pricing Survey',
     feedback_testimonial: 'Testimonial',
-    quest_complete: 'Quest Completed',
+    
+    // Gamification bonuses
+    achievement: 'Achievement Bonus',
+    streak_bonus: 'Streak Milestone',
+    
+    // Social/referrals
+    referral: 'Referral Bonus',
+    referral_signup: 'Friend Joined',
+    
+    // Admin/manual
+    admin_bonus: 'Bonus Award',
+    welcome_bonus: 'Welcome Bonus',
   };
-  return labels[source] || source;
+  return labels[source] || source.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 }

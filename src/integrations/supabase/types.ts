@@ -1833,6 +1833,14 @@ export type Database = {
           xp_reward: number
         }[]
       }
+      check_streak_bonus: {
+        Args: { p_user_id: string }
+        Returns: {
+          bonus_xp: number
+          current_count: number
+          streak_name: string
+        }[]
+      }
       get_user_level: {
         Args: { p_user_id: string }
         Returns: {
@@ -1862,6 +1870,7 @@ export type Database = {
         Args: { p_referral_code: string }
         Returns: undefined
       }
+      update_user_streaks: { Args: { p_user_id: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "user" | "quest_creator" | "sponsor"

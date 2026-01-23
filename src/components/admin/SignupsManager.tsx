@@ -58,10 +58,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, MoreHorizontal, Eye, EyeOff, Users, Mail } from 'lucide-react';
+import { Loader2, MoreHorizontal, Eye, EyeOff, Users, Mail, Trophy, Flame } from 'lucide-react';
 import { format } from 'date-fns';
 import type { Tables, Enums } from '@/integrations/supabase/types';
 import { SquadRecommendationModal } from './SquadRecommendationModal';
+import { showAchievementToast, showStreakToast } from '@/components/AchievementUnlockToast';
 
 type Quest = Tables<'quests'>;
 type QuestSignup = Tables<'quest_signups'>;
@@ -220,6 +221,15 @@ export function SignupsManager() {
     
     // Award XP when marking as completed (and wasn't already completed)
     if (newStatus === 'completed' && !wasAlreadyCompleted) {
+      // Get achievements before awarding XP to compare after
+      const { data: achievementsBefore } = await supabase
+        .from('user_achievements')
+        .select('achievement_id')
+        .eq('user_id', signup.user_id);
+      
+      const beforeIds = new Set(achievementsBefore?.map(a => a.achievement_id) || []);
+      
+      // Award XP (this also triggers streak updates and achievement checks)
       const { data: xpAwarded, error: xpError } = await supabase
         .rpc('award_quest_xp', {
           p_user_id: signup.user_id,
@@ -238,6 +248,35 @@ export function SignupsManager() {
           title: `Completed! +${selectedQuest?.base_xp || 50} XP awarded`,
           description: `${signup.profile?.display_name || 'User'} now has ${xpAwarded} total XP`
         });
+        
+        // Check for newly unlocked achievements
+        const { data: achievementsAfter } = await supabase
+          .from('user_achievements')
+          .select('achievement_id, achievement:achievement_templates(name, icon, xp_reward)')
+          .eq('user_id', signup.user_id);
+        
+        const newAchievements = achievementsAfter
+          ?.filter(a => !beforeIds.has(a.achievement_id))
+          .map(a => ({
+            name: (a.achievement as any)?.name || 'Achievement',
+            icon: (a.achievement as any)?.icon || null,
+            xp_reward: (a.achievement as any)?.xp_reward || 0,
+          })) || [];
+        
+        if (newAchievements.length > 0) {
+          // Show achievement toast (will be visible to admin, but demonstrates the feature)
+          showAchievementToast(newAchievements);
+          
+          // Also create in-app notifications for the user
+          const notifications = newAchievements.map(achievement => ({
+            user_id: signup.user_id,
+            type: 'general' as const,
+            title: `🏆 Achievement Unlocked: ${achievement.name}`,
+            body: `You earned +${achievement.xp_reward} XP bonus!`,
+          }));
+          
+          await supabase.from('notifications').insert(notifications);
+        }
       }
     } else {
       toast({ title: `Status updated to ${newStatus}` });
