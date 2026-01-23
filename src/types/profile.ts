@@ -39,6 +39,42 @@ export type ContextTag = 'new_to_city' | 'remote_wfh' | 'student' | 'career_tran
 export type AgeRange = '18_24' | '25_34' | '35_44' | '45_54' | '55_plus';
 export type AustinArea = 'downtown' | 'east_austin' | 'south_austin' | 'north_austin' | 'central' | 'round_rock_pflugerville' | 'cedar_park_leander' | 'other';
 
+// School/University types
+export type VerificationTier = 'self_reported' | 'email_verified';
+
+export interface SchoolInfo {
+  school_id: string;
+  school_name: string;
+  verification_tier: VerificationTier;
+  verified_at?: string; // ISO timestamp
+}
+
+export interface AustinSchool {
+  id: string;
+  name: string;
+  domain: string | null; // Email domain for verification
+  emoji: string;
+  color: string; // Hex color
+}
+
+// Austin-area schools constant
+export const AUSTIN_SCHOOLS: AustinSchool[] = [
+  { id: 'ut_austin', name: 'UT Austin', domain: 'utexas.edu', emoji: '🤘', color: '#BF5700' },
+  { id: 'texas_state', name: 'Texas State', domain: 'txstate.edu', emoji: '🐱', color: '#501214' },
+  { id: 'st_edwards', name: "St. Edward's University", domain: 'stedwards.edu', emoji: '⛪', color: '#003087' },
+  { id: 'acc', name: 'Austin Community College', domain: 'austincc.edu', emoji: '📚', color: '#00563F' },
+  { id: 'concordia', name: 'Concordia University', domain: 'concordia.edu', emoji: '🎓', color: '#002855' },
+  { id: 'huston_tillotson', name: 'Huston-Tillotson University', domain: 'htu.edu', emoji: '🏛️', color: '#FFC72C' },
+  { id: 'southwestern', name: 'Southwestern University', domain: 'southwestern.edu', emoji: '🏴', color: '#000000' },
+  { id: 'texas_aandm', name: 'Texas A&M', domain: 'tamu.edu', emoji: '👍', color: '#500000' },
+  { id: 'rice', name: 'Rice University', domain: 'rice.edu', emoji: '🦉', color: '#00205B' },
+  { id: 'baylor', name: 'Baylor University', domain: 'baylor.edu', emoji: '🐻', color: '#154734' },
+  { id: 'texas_tech', name: 'Texas Tech', domain: 'ttu.edu', emoji: '🔴', color: '#CC0000' },
+  { id: 'utsa', name: 'UTSA', domain: 'utsa.edu', emoji: '🏃', color: '#0C2340' },
+  { id: 'txst_round_rock', name: 'Texas State (Round Rock)', domain: 'txstate.edu', emoji: '🐱', color: '#501214' },
+  { id: 'other', name: 'Other', domain: null, emoji: '🎓', color: '#6B7280' },
+];
+
 // Full preferences interface
 export interface UserPreferences {
   // Existing field
@@ -48,6 +84,8 @@ export interface UserPreferences {
   demographics?: {
     age_range?: AgeRange;
     area?: AustinArea;
+    school?: SchoolInfo; // NEW: School/university info
+    show_school_publicly?: boolean; // NEW: Privacy toggle
   };
   
   // Social Energy & Style
@@ -88,6 +126,22 @@ export interface UserPreferences {
   
   // Open-ended
   ideal_experience?: string; // max 140 chars
+}
+
+// Helper to get school info by ID
+export function getSchoolById(schoolId: string): AustinSchool | undefined {
+  return AUSTIN_SCHOOLS.find(s => s.id === schoolId);
+}
+
+// Check if profile is UT Austin student
+export function isUTAustinStudent(preferences: UserPreferences | null | undefined): boolean {
+  return preferences?.demographics?.school?.school_id === 'ut_austin';
+}
+
+// Check if UT Austin student is email-verified
+export function isUTAustinVerified(preferences: UserPreferences | null | undefined): boolean {
+  const school = preferences?.demographics?.school;
+  return school?.school_id === 'ut_austin' && school?.verification_tier === 'email_verified';
 }
 
 // Option definitions for UI rendering

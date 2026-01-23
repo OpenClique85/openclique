@@ -10,6 +10,7 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   isLoading: boolean;
+  isProfileLoaded: boolean; // NEW: tracks if profile fetch completed
   isAdmin: boolean;
   isCreator: boolean;
   isSponsor: boolean;
@@ -27,6 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isProfileLoaded, setIsProfileLoaded] = useState(false); // NEW
   const [isAdmin, setIsAdmin] = useState(false);
   const [isCreator, setIsCreator] = useState(false);
   const [isSponsor, setIsSponsor] = useState(false);
@@ -39,6 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .maybeSingle();
     
     setProfile(data);
+    setIsProfileLoaded(true); // Mark profile as loaded (even if null = no profile yet)
     return data;
   };
 
@@ -75,6 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Defer Supabase calls with setTimeout to prevent deadlock
         if (session?.user) {
+          setIsProfileLoaded(false); // Reset before fetching
           setTimeout(() => {
             fetchProfile(session.user.id);
             checkAdminStatus(session.user.id);
@@ -83,6 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }, 0);
         } else {
           setProfile(null);
+          setIsProfileLoaded(true); // No user = profile loading complete (null)
           setIsAdmin(false);
           setIsCreator(false);
           setIsSponsor(false);
@@ -96,12 +101,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        fetchProfile(session.user.id);
+        setIsProfileLoaded(false); // Reset before fetching
+        fetchProfile(session.user.id).then(() => {
+          setIsLoading(false);
+        });
         checkAdminStatus(session.user.id);
         checkCreatorStatus(session.user.id);
         checkSponsorStatus(session.user.id);
+      } else {
+        setIsProfileLoaded(true);
+        setIsLoading(false);
       }
-      setIsLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -154,6 +164,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       session,
       profile,
       isLoading,
+      isProfileLoaded,
       isAdmin,
       isCreator,
       isSponsor,
