@@ -27,6 +27,11 @@ import { SupportDashboard } from '@/components/admin/SupportDashboard';
 import { IssueCategoriesManager } from '@/components/admin/IssueCategoriesManager';
 import { AdminDirectMessages } from '@/components/admin/AdminDirectMessages';
 import { SupportAnalytics } from '@/components/admin/SupportAnalytics';
+import { ShadowModeViewer } from '@/components/admin/ops/ShadowModeViewer';
+import { EventTimeline } from '@/components/admin/ops/EventTimeline';
+import { FlowDebugger } from '@/components/admin/ops/FlowDebugger';
+import { ManualOverrides } from '@/components/admin/ops/ManualOverrides';
+import { FeatureFlagsManager } from '@/components/admin/ops/FeatureFlagsManager';
 
 export default function Admin() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
@@ -72,11 +77,17 @@ export default function Admin() {
       case 'whatsapp': return <WhatsAppManager />;
       case 'links': return <LinksManager />;
       case 'analytics': return <Analytics />;
-      case 'devtools': return <DevToolsSection />;
       case 'xp-levels': return <XPLevelsManager />;
       case 'achievements': return <AchievementsManager />;
       case 'badges': return <BadgesManager />;
       case 'streaks': return <StreaksManager />;
+      // Ops & Dev Tools
+      case 'shadow-mode': return <ShadowModeViewer />;
+      case 'event-timeline': return <EventTimeline />;
+      case 'flow-debugger': return <FlowDebugger />;
+      case 'manual-overrides': return <ManualOverrides />;
+      case 'feature-flags': return <FeatureFlagsManager />;
+      case 'devtools': return <DevToolsSection />;
       default: return <QuestsManager />;
     }
   };
