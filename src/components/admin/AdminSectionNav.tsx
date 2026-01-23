@@ -105,6 +105,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
     icon: <FileText className="h-4 w-4" />,
     tabs: [
       { id: 'docs-manager', label: 'System Docs' },
+      { id: 'docs-playbooks', label: 'Operations Playbooks' },
       { id: 'docs-export', label: 'Export Handoff Pack' },
     ],
   },
