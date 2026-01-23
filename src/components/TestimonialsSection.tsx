@@ -1,154 +1,170 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Star, ChevronLeft, ChevronRight, Quote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Testimonial {
-  id: number;
+  id: string;
   name: string;
-  profileType: "New to Austin" | "Austinite" | "Visitor" | "Transplant";
+  profileType: string;
   avatar: string;
   rating: number;
   questName: string;
-  path: "Culture" | "Wellness" | "Connector";
+  questIcon: string;
   shortText: string;
   fullText?: string;
-  style: "minimal" | "fun" | "elaborate";
+  hasFullText: boolean;
 }
 
-const testimonials: Testimonial[] = [
+// Static fallback testimonials for when no approved ones exist
+const fallbackTestimonials: Testimonial[] = [
   {
-    id: 1,
+    id: "fallback-1",
     name: "Maya R.",
     profileType: "New to Austin",
     avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
     rating: 5,
     questName: "First Friday Art Walk",
-    path: "Culture",
+    questIcon: "🎨",
     shortText: "I moved here knowing nobody. Now I have a group chat that's actually active.",
     fullText: "I moved here knowing absolutely nobody. Three months of eating dinner alone, scrolling through apps that promised 'connection.' Then I tried OpenClique. My first quest was an art walk on South Congress. By the second gallery, we were laughing about our shared terrible taste in wine. Now I have a group chat that's actually active — we've done four more quests together and they came to my birthday.",
-    style: "elaborate",
+    hasFullText: true,
   },
   {
-    id: 2,
+    id: "fallback-2",
     name: "Marcus T.",
     profileType: "Austinite",
     avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
     rating: 5,
     questName: "Sunrise Zilker Run",
-    path: "Wellness",
+    questIcon: "🏃",
     shortText: "Finally found running buddies who match my pace. 5am crew for life. 🏃‍♂️",
-    style: "minimal",
+    hasFullText: false,
   },
   {
-    id: 3,
+    id: "fallback-3",
     name: "Jordan K.",
     profileType: "Transplant",
     avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
     rating: 5,
     questName: "Secret Speakeasy Crawl",
-    path: "Culture",
+    questIcon: "🍸",
     shortText: "Was super nervous showing up alone. BUGGS kept things flowing naturally.",
     fullText: "Honestly? I almost didn't go. Standing outside the first bar, I nearly turned around. But then this girl walked up looking just as nervous and said 'OpenClique?' We laughed, went in together, and BUGGS had sent everyone these fun icebreaker prompts. By bar three we were sharing embarrassing stories. No forced networking energy — just vibes.",
-    style: "elaborate",
+    hasFullText: true,
   },
   {
-    id: 4,
+    id: "fallback-4",
     name: "Priya S.",
     profileType: "Austinite",
     avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
     rating: 5,
     questName: "Hidden Taco Trail",
-    path: "Culture",
+    questIcon: "🌮",
     shortText: "Discovered 3 taco spots I'd never heard of. New foodie friends acquired. 🌮✨",
-    style: "fun",
+    hasFullText: false,
   },
   {
-    id: 5,
+    id: "fallback-5",
     name: "David L.",
     profileType: "Visitor",
     avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
     rating: 4,
     questName: "Live Music Discovery",
-    path: "Culture",
+    questIcon: "🎵",
     shortText: "Saw an amazing band with strangers. Way better than going alone.",
-    fullText: "I was in Austin for work and had one free night. Normally I'd just stay in the hotel, but I saw OpenClique mentioned somewhere. Joined a live music quest — ended up at this tiny venue seeing a band I'd never heard of with five locals who knew all the best spots. They even invited me to their group's next quest when I'm back in town.",
-    style: "elaborate",
-  },
-  {
-    id: 6,
-    name: "Sam W.",
-    profileType: "New to Austin",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-    rating: 5,
-    questName: "Kayak & Coffee",
-    path: "Wellness",
-    shortText: "Big company, no friends at work. OpenClique made the room feel smaller.",
-    fullText: "I work at one of those big tech companies — thousands of employees, but somehow no real connections. Everyone's head down in their laptops. OpenClique matched me with a squad for paddleboarding on Lady Bird Lake. Turns out two of them work in my building! Now we grab lunch weekly. The room finally feels smaller.",
-    style: "elaborate",
-  },
-  {
-    id: 7,
-    name: "Aisha M.",
-    profileType: "Austinite",
-    avatar: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=150&h=150&fit=crop&crop=face",
-    rating: 5,
-    questName: "Yoga & Brunch Flow",
-    path: "Wellness",
-    shortText: "Different clique for different sides of me. Love having my wellness crew. 🧘‍♀️",
-    style: "fun",
-  },
-  {
-    id: 8,
-    name: "Chris P.",
-    profileType: "Transplant",
-    avatar: "https://images.unsplash.com/photo-1599566150163-29194dcabd31?w=150&h=150&fit=crop&crop=face",
-    rating: 5,
-    questName: "Mural Hunt Challenge",
-    path: "Connector",
-    shortText: "The rewards are actually sick. Got exclusive merch from a local artist. 🎨",
-    style: "minimal",
-  },
-  {
-    id: 9,
-    name: "Elena V.",
-    profileType: "New to Austin",
-    avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&crop=face",
-    rating: 5,
-    questName: "Comedy Night Squad",
-    path: "Connector",
-    shortText: "None of my friends like stand-up. Found my people. We go every month now. 😂",
-    style: "fun",
+    hasFullText: false,
   },
 ];
 
+function useApprovedTestimonials() {
+  return useQuery({
+    queryKey: ['approved-testimonials'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('feedback')
+        .select(`
+          id,
+          testimonial_text,
+          recommendation_text,
+          consent_type,
+          rating_1_5,
+          submitted_at,
+          profile:profiles!feedback_user_id_fkey(display_name, city),
+          quest:quests!feedback_quest_id_fkey(title, icon)
+        `)
+        .eq('is_testimonial_approved', true)
+        .or('testimonial_text.neq.null,recommendation_text.neq.null')
+        .order('submitted_at', { ascending: false })
+        .limit(12);
+
+      if (error) {
+        console.error('Error fetching testimonials:', error);
+        return [];
+      }
+
+      // Transform database records to testimonial format
+      return (data || []).map((item: any): Testimonial => {
+        const displayName = item.consent_type === 'first_name_city' 
+          ? `${item.profile?.display_name?.split(' ')[0] || 'Quester'} ${item.profile?.display_name?.split(' ')[1]?.[0] || ''}.`.trim()
+          : 'Anonymous Quester';
+        
+        const city = item.profile?.city || 'Austin';
+        const profileType = `${city} Quester`;
+        
+        // Use first letter of name as avatar placeholder
+        const avatarLetter = displayName[0] || 'Q';
+        
+        const text = item.testimonial_text || item.recommendation_text || '';
+        const isLong = text.length > 150;
+        
+        return {
+          id: item.id,
+          name: displayName,
+          profileType,
+          avatar: '', // Will use letter avatar
+          rating: item.rating_1_5 || 5,
+          questName: item.quest?.title || 'OpenClique Quest',
+          questIcon: item.quest?.icon || '🎯',
+          shortText: isLong ? text.slice(0, 150) + '...' : text,
+          fullText: isLong ? text : undefined,
+          hasFullText: isLong,
+        };
+      });
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+}
+
 function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
   const [expanded, setExpanded] = useState(false);
-  const isExpandable = testimonial.style === "elaborate" && testimonial.fullText;
-  
-  const pathColors = {
-    Culture: "bg-sunset/10 text-sunset border-sunset/20",
-    Wellness: "bg-primary/10 text-primary border-primary/20",
-    Connector: "bg-creator/10 text-creator border-creator/20",
-  };
+  const isExpandable = testimonial.hasFullText && testimonial.fullText;
 
   return (
     <div 
       className={cn(
         "flex-shrink-0 w-[300px] md:w-[340px] h-[280px] bg-card rounded-2xl p-6 border border-border shadow-sm",
         "transition-all duration-300 hover:shadow-md hover:border-primary/20",
-        "flex flex-col", // Enable flexbox for consistent internal layout
+        "flex flex-col",
         isExpandable && "cursor-pointer"
       )}
       onClick={() => isExpandable && setExpanded(!expanded)}
     >
       {/* Header */}
       <div className="flex items-start gap-4 mb-4">
-        <img 
-          src={testimonial.avatar} 
-          alt={testimonial.name}
-          className="w-12 h-12 rounded-full object-cover ring-2 ring-primary/20"
-        />
+        {testimonial.avatar ? (
+          <img 
+            src={testimonial.avatar} 
+            alt={testimonial.name}
+            className="w-12 h-12 rounded-full object-cover ring-2 ring-primary/20"
+          />
+        ) : (
+          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold ring-2 ring-primary/20">
+            {testimonial.name[0]}
+          </div>
+        )}
         <div className="flex-1 min-w-0">
           <h4 className="font-semibold text-foreground truncate">{testimonial.name}</h4>
           <p className="text-sm text-muted-foreground">{testimonial.profileType}</p>
@@ -168,12 +184,10 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
         ))}
       </div>
 
-      {/* Quote - flex-grow ensures this section expands to fill available space */}
+      {/* Quote */}
       <div className="relative mb-4 flex-grow">
         <Quote className="absolute -top-1 -left-1 w-6 h-6 text-primary/20" />
-        <p className={cn(
-          "text-foreground pl-5 text-sm leading-relaxed"
-        )}>
+        <p className="text-foreground pl-5 text-sm leading-relaxed">
           {expanded && testimonial.fullText ? testimonial.fullText : testimonial.shortText}
         </p>
         {isExpandable && (
@@ -189,16 +203,10 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
         )}
       </div>
 
-      {/* Quest & Path Tags - mt-auto pushes to bottom for consistent alignment */}
+      {/* Quest Tag */}
       <div className="flex flex-wrap gap-2 mt-auto">
         <span className="text-xs px-2 py-1 bg-muted rounded-full text-muted-foreground">
-          {testimonial.questName}
-        </span>
-        <span className={cn(
-          "text-xs px-2 py-1 rounded-full border",
-          pathColors[testimonial.path]
-        )}>
-          {testimonial.path}
+          {testimonial.questIcon} {testimonial.questName}
         </span>
       </div>
     </div>
@@ -207,6 +215,12 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
 
 export function TestimonialsSection() {
   const [scrollPosition, setScrollPosition] = useState(0);
+  const { data: dbTestimonials, isLoading } = useApprovedTestimonials();
+  
+  // Use database testimonials if available, otherwise fall back to static
+  const testimonials = (dbTestimonials && dbTestimonials.length > 0) 
+    ? dbTestimonials 
+    : fallbackTestimonials;
   
   const scroll = (direction: "left" | "right") => {
     const container = document.getElementById("testimonials-container");

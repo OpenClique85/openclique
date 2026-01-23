@@ -16,6 +16,7 @@ import { SponsorsManager } from '@/components/admin/SponsorsManager';
 import { CreatorPreviewTab } from '@/components/admin/CreatorPreviewTab';
 import { SponsorPreviewTab } from '@/components/admin/SponsorPreviewTab';
 import { DevToolsSection } from '@/components/admin/DevToolsSection';
+import { TestimonialsManager } from '@/components/admin/TestimonialsManager';
 
 export default function Admin() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
@@ -53,12 +54,13 @@ export default function Admin() {
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-11 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-6 lg:grid-cols-12 lg:w-auto lg:inline-grid">
             <TabsTrigger value="quests">Quests</TabsTrigger>
             <TabsTrigger value="signups">Signups</TabsTrigger>
             <TabsTrigger value="squads">Squads</TabsTrigger>
             <TabsTrigger value="creators">Creators</TabsTrigger>
             <TabsTrigger value="sponsors">Sponsors</TabsTrigger>
+            <TabsTrigger value="testimonials">Testimonials</TabsTrigger>
             <TabsTrigger value="creator-preview">Creator View</TabsTrigger>
             <TabsTrigger value="sponsor-preview">Sponsor View</TabsTrigger>
             <TabsTrigger value="messaging">Messaging</TabsTrigger>
@@ -85,6 +87,10 @@ export default function Admin() {
           
           <TabsContent value="sponsors">
             <SponsorsManager />
+          </TabsContent>
+          
+          <TabsContent value="testimonials">
+            <TestimonialsManager />
           </TabsContent>
           
           <TabsContent value="creator-preview">
