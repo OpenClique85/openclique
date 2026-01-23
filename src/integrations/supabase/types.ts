@@ -3929,7 +3929,13 @@ export type Database = {
         | "cancelled"
         | "archived"
         | "paused"
-      invite_code_type: "admin" | "tester" | "early_access"
+      invite_code_type:
+        | "admin"
+        | "tester"
+        | "early_access"
+        | "creator"
+        | "organization"
+        | "sponsor"
       message_sender_role: "user" | "admin" | "system"
       notification_type:
         | "quest_recommendation"
@@ -4197,7 +4203,14 @@ export const Constants = {
         "archived",
         "paused",
       ],
-      invite_code_type: ["admin", "tester", "early_access"],
+      invite_code_type: [
+        "admin",
+        "tester",
+        "early_access",
+        "creator",
+        "organization",
+        "sponsor",
+      ],
       message_sender_role: ["user", "admin", "system"],
       notification_type: [
         "quest_recommendation",
