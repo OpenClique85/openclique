@@ -576,6 +576,53 @@ export type Database = {
         }
         Relationships: []
       }
+      listing_applications: {
+        Row: {
+          availability: string | null
+          created_at: string | null
+          creator_id: string
+          id: string
+          listing_id: string
+          pitch_message: string
+          proposed_concept: string | null
+          response_at: string | null
+          sponsor_notes: string | null
+          status: string | null
+        }
+        Insert: {
+          availability?: string | null
+          created_at?: string | null
+          creator_id: string
+          id?: string
+          listing_id: string
+          pitch_message: string
+          proposed_concept?: string | null
+          response_at?: string | null
+          sponsor_notes?: string | null
+          status?: string | null
+        }
+        Update: {
+          availability?: string | null
+          created_at?: string | null
+          creator_id?: string
+          id?: string
+          listing_id?: string
+          pitch_message?: string
+          proposed_concept?: string | null
+          response_at?: string | null
+          sponsor_notes?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listing_applications_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "sponsor_listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string | null
@@ -1400,6 +1447,84 @@ export type Database = {
             columns: ["application_id"]
             isOneToOne: false
             referencedRelation: "sponsor_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sponsor_listings: {
+        Row: {
+          applications_count: number | null
+          budget_range: string | null
+          created_at: string | null
+          creator_requirements: string | null
+          description: string | null
+          expected_attendance: string | null
+          expires_at: string | null
+          id: string
+          includes_branding: boolean | null
+          preferred_dates: string | null
+          quest_type: string | null
+          rewards_offered: Json | null
+          sponsor_id: string
+          status: string
+          target_audience: Json | null
+          title: string
+          updated_at: string | null
+          venue_offered: string | null
+        }
+        Insert: {
+          applications_count?: number | null
+          budget_range?: string | null
+          created_at?: string | null
+          creator_requirements?: string | null
+          description?: string | null
+          expected_attendance?: string | null
+          expires_at?: string | null
+          id?: string
+          includes_branding?: boolean | null
+          preferred_dates?: string | null
+          quest_type?: string | null
+          rewards_offered?: Json | null
+          sponsor_id: string
+          status?: string
+          target_audience?: Json | null
+          title: string
+          updated_at?: string | null
+          venue_offered?: string | null
+        }
+        Update: {
+          applications_count?: number | null
+          budget_range?: string | null
+          created_at?: string | null
+          creator_requirements?: string | null
+          description?: string | null
+          expected_attendance?: string | null
+          expires_at?: string | null
+          id?: string
+          includes_branding?: boolean | null
+          preferred_dates?: string | null
+          quest_type?: string | null
+          rewards_offered?: Json | null
+          sponsor_id?: string
+          status?: string
+          target_audience?: Json | null
+          title?: string
+          updated_at?: string | null
+          venue_offered?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsor_listings_sponsor_id_fkey"
+            columns: ["sponsor_id"]
+            isOneToOne: false
+            referencedRelation: "sponsor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsor_listings_venue_offered_fkey"
+            columns: ["venue_offered"]
+            isOneToOne: false
+            referencedRelation: "venue_offerings"
             referencedColumns: ["id"]
           },
         ]
