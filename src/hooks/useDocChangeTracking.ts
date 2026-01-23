@@ -31,6 +31,9 @@ export interface ExportHistoryEntry {
   included_categories: string[];
   document_count: number;
   total_size_bytes: number | null;
+  file_path: string | null;
+  file_url: string | null;
+  expires_at: string | null;
 }
 
 export interface ChangeStats {
@@ -42,7 +45,7 @@ export interface ChangeStats {
   changesByCategory: Record<string, { total: number; changed: number }>;
 }
 
-export function useDocChangeTracking() {
+export function useDocChangeTracking(autoRefreshInterval?: number) {
   const queryClient = useQueryClient();
 
   // Fetch all docs with change tracking info
@@ -74,10 +77,11 @@ export function useDocChangeTracking() {
 
       return docsWithChangeInfo;
     },
+    refetchInterval: autoRefreshInterval, // Auto-refresh if interval provided
   });
 
   // Fetch export history
-  const { data: exportHistory, isLoading: isLoadingHistory } = useQuery({
+  const { data: exportHistory, isLoading: isLoadingHistory, refetch: refetchHistory } = useQuery({
     queryKey: ['doc-export-history'],
     queryFn: async () => {
       // Cast to any since doc_export_history table was just created
@@ -85,11 +89,12 @@ export function useDocChangeTracking() {
         .from('doc_export_history' as any)
         .select('*')
         .order('exported_at', { ascending: false })
-        .limit(20) as any);
+        .limit(50) as any);
 
       if (error) throw error;
       return (data || []) as ExportHistoryEntry[];
     },
+    refetchInterval: autoRefreshInterval, // Auto-refresh if interval provided
   });
 
   // Compute change statistics
@@ -170,6 +175,21 @@ export function useDocChangeTracking() {
     };
   };
 
+  // Refresh signed URLs for expired exports
+  const refreshExportUrl = async (exportId: string, filePath: string): Promise<string | null> => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('doc-exports')
+        .createSignedUrl(filePath, 60 * 60 * 24 * 7); // 7 days
+      
+      if (error) throw error;
+      return data?.signedUrl || null;
+    } catch (err) {
+      console.error('Failed to refresh export URL:', err);
+      return null;
+    }
+  };
+
   return {
     docsWithChanges,
     exportHistory,
@@ -178,5 +198,7 @@ export function useDocChangeTracking() {
     markExported,
     getChangesForCategories,
     refetchDocs,
+    refetchHistory,
+    refreshExportUrl,
   };
 }

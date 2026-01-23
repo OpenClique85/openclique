@@ -520,6 +520,54 @@ export type Database = {
           },
         ]
       }
+      doc_export_history: {
+        Row: {
+          content_snapshot: Json | null
+          document_count: number
+          expires_at: string | null
+          export_format: string
+          exported_at: string
+          exported_by: string
+          file_path: string | null
+          file_url: string | null
+          id: string
+          included_categories: string[]
+          metadata: Json | null
+          pack_type: string
+          total_size_bytes: number | null
+        }
+        Insert: {
+          content_snapshot?: Json | null
+          document_count?: number
+          expires_at?: string | null
+          export_format: string
+          exported_at?: string
+          exported_by: string
+          file_path?: string | null
+          file_url?: string | null
+          id?: string
+          included_categories: string[]
+          metadata?: Json | null
+          pack_type: string
+          total_size_bytes?: number | null
+        }
+        Update: {
+          content_snapshot?: Json | null
+          document_count?: number
+          expires_at?: string | null
+          export_format?: string
+          exported_at?: string
+          exported_by?: string
+          file_path?: string | null
+          file_url?: string | null
+          id?: string
+          included_categories?: string[]
+          metadata?: Json | null
+          pack_type?: string
+          total_size_bytes?: number | null
+        }
+        Relationships: []
+      }
       feature_flag_audit: {
         Row: {
           changed_by: string
