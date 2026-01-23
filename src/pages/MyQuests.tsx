@@ -7,19 +7,27 @@ import { Footer } from '@/components/Footer';
 import { ProfileModal } from '@/components/ProfileModal';
 import { CancelModal } from '@/components/CancelModal';
 import { MySquadsSection } from '@/components/squads/MySquadsSection';
+import { RewardClaimCard, RewardClaimModal } from '@/components/rewards';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, MapPin, Calendar, MessageCircle, ExternalLink, Search, Star, CheckCircle } from 'lucide-react';
+import { Loader2, MapPin, Calendar, MessageCircle, ExternalLink, Search, Star, CheckCircle, Gift, Sparkles } from 'lucide-react';
 import { format } from 'date-fns';
 import type { Tables } from '@/integrations/supabase/types';
 
 type QuestSignup = Tables<'quest_signups'>;
 type Quest = Tables<'quests'>;
-type Feedback = Tables<'feedback'>;
+type Reward = Tables<'rewards'>;
 
 type SignupWithQuest = QuestSignup & {
-  quest: Quest;
+  quest: Quest & {
+    sponsor_profiles?: { id: string; name: string } | null;
+  };
+};
+
+type RewardWithSponsor = Reward & {
+  sponsorName?: string;
+  questId?: string;
 };
 
 const STATUS_BADGES: Record<string, { label: string; variant: 'default' | 'secondary' | 'outline' | 'destructive' }> = {
@@ -34,6 +42,8 @@ const STATUS_BADGES: Record<string, { label: string; variant: 'default' | 'secon
 export default function MyQuests() {
   const { user, profile, isLoading: authLoading } = useAuth();
   const [signups, setSignups] = useState<SignupWithQuest[]>([]);
+  const [availableRewards, setAvailableRewards] = useState<RewardWithSponsor[]>([]);
+  const [claimedRewardIds, setClaimedRewardIds] = useState<Set<string>>(new Set());
   const [feedbackSubmitted, setFeedbackSubmitted] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -42,6 +52,10 @@ export default function MyQuests() {
     signupId: string;
     questTitle: string;
   }>({ open: false, signupId: '', questTitle: '' });
+  const [claimModal, setClaimModal] = useState<{
+    open: boolean;
+    reward: RewardWithSponsor | null;
+  }>({ open: false, reward: null });
 
   useEffect(() => {
     if (user && !profile && !authLoading) {
@@ -53,11 +67,16 @@ export default function MyQuests() {
     if (!user) return;
     
     setIsLoading(true);
+    
+    // Fetch signups with quest and sponsor info
     const { data, error } = await supabase
       .from('quest_signups')
       .select(`
         *,
-        quest:quests(*)
+        quest:quests(
+          *,
+          sponsor_profiles(id, name)
+        )
       `)
       .eq('user_id', user.id)
       .order('signed_up_at', { ascending: false });
@@ -75,6 +94,56 @@ export default function MyQuests() {
       
       if (feedbackData) {
         setFeedbackSubmitted(new Set(feedbackData.map(f => f.quest_id)));
+      }
+
+      // Fetch rewards for sponsored quests where user is confirmed
+      const sponsoredSignups = data.filter(
+        s => s.quest.is_sponsored && 
+        s.quest.sponsor_id && 
+        ['confirmed', 'completed'].includes(s.status || '')
+      );
+
+      if (sponsoredSignups.length > 0) {
+        const sponsorIds = [...new Set(sponsoredSignups.map(s => s.quest.sponsor_id).filter(Boolean))];
+        
+        // Fetch rewards for these sponsors
+        const { data: rewardsData } = await supabase
+          .from('rewards')
+          .select('*')
+          .in('sponsor_id', sponsorIds as string[])
+          .eq('status', 'active');
+
+        if (rewardsData) {
+          // Filter out expired and maxed out rewards
+          const now = new Date().toISOString();
+          const validRewards = rewardsData.filter(r => {
+            if (r.expires_at && r.expires_at < now) return false;
+            if (r.max_redemptions && (r.redemptions_count || 0) >= r.max_redemptions) return false;
+            return true;
+          });
+
+          // Enrich with sponsor names
+          const enrichedRewards: RewardWithSponsor[] = validRewards.map(reward => {
+            const signup = sponsoredSignups.find(s => s.quest.sponsor_id === reward.sponsor_id);
+            return {
+              ...reward,
+              sponsorName: signup?.quest.sponsor_profiles?.name,
+              questId: signup?.quest_id,
+            };
+          });
+
+          setAvailableRewards(enrichedRewards);
+        }
+
+        // Fetch user's existing redemptions
+        const { data: redemptions } = await supabase
+          .from('reward_redemptions')
+          .select('reward_id')
+          .eq('user_id', user.id);
+
+        if (redemptions) {
+          setClaimedRewardIds(new Set(redemptions.map(r => r.reward_id)));
+        }
       }
     }
     setIsLoading(false);
@@ -106,6 +175,20 @@ export default function MyQuests() {
     });
   };
 
+  const handleClaimReward = (reward: RewardWithSponsor) => {
+    setClaimModal({ open: true, reward });
+  };
+
+  const handleRewardClaimed = () => {
+    if (claimModal.reward) {
+      setClaimedRewardIds(prev => new Set([...prev, claimModal.reward!.id]));
+    }
+  };
+
+  // Filter rewards to show unclaimed ones first
+  const unclaimedRewards = availableRewards.filter(r => !claimedRewardIds.has(r.id));
+  const claimedRewards = availableRewards.filter(r => claimedRewardIds.has(r.id));
+
   if (authLoading || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -135,6 +218,37 @@ export default function MyQuests() {
             </Link>
           </Button>
         </div>
+
+        {/* Your Rewards Section */}
+        {availableRewards.length > 0 && (
+          <section className="mb-12">
+            <h2 className="text-xl font-display font-semibold mb-4 flex items-center gap-2">
+              <Gift className="h-5 w-5 text-sunset" />
+              Your Rewards ({unclaimedRewards.length} available)
+            </h2>
+            
+            <div className="grid gap-4 md:grid-cols-2">
+              {unclaimedRewards.map(reward => (
+                <RewardClaimCard
+                  key={reward.id}
+                  reward={reward}
+                  sponsorName={reward.sponsorName}
+                  isClaimed={false}
+                  onClaim={() => handleClaimReward(reward)}
+                />
+              ))}
+              {claimedRewards.map(reward => (
+                <RewardClaimCard
+                  key={reward.id}
+                  reward={reward}
+                  sponsorName={reward.sponsorName}
+                  isClaimed={true}
+                  onClaim={() => {}}
+                />
+              ))}
+            </div>
+          </section>
+        )}
         
         {/* My Squads Section */}
         {user && <MySquadsSection userId={user.id} />}
@@ -166,9 +280,17 @@ export default function MyQuests() {
                       <div className="flex items-center gap-3">
                         <span className="text-3xl">{signup.quest.icon || '🎯'}</span>
                         <div>
-                          <CardTitle className="font-display text-lg">
-                            {signup.quest.title}
-                          </CardTitle>
+                          <div className="flex items-center gap-2">
+                            <CardTitle className="font-display text-lg">
+                              {signup.quest.title}
+                            </CardTitle>
+                            {signup.quest.is_sponsored && (
+                              <Badge variant="outline" className="text-sunset border-sunset text-xs">
+                                <Sparkles className="h-3 w-3 mr-1" />
+                                Sponsored
+                              </Badge>
+                            )}
+                          </div>
                           {signup.quest.start_datetime && (
                             <p className="text-sm text-muted-foreground">
                               {format(new Date(signup.quest.start_datetime), 'EEEE, MMMM d @ h:mm a')}
@@ -208,6 +330,14 @@ export default function MyQuests() {
                             Join WhatsApp Group
                             <ExternalLink className="h-3 w-3" />
                           </a>
+                        )}
+
+                        {/* Rewards indicator for sponsored quests */}
+                        {signup.quest.is_sponsored && unclaimedRewards.some(r => r.questId === signup.quest_id) && (
+                          <div className="flex items-center gap-2 text-sm text-sunset mb-3">
+                            <Gift className="h-4 w-4" />
+                            <span>Rewards available! Check the Rewards section above.</span>
+                          </div>
                         )}
                       </>
                     )}
@@ -267,7 +397,15 @@ export default function MyQuests() {
                         <div className="flex items-center gap-3">
                           <span className="text-2xl opacity-60">{signup.quest.icon || '🎯'}</span>
                           <div>
-                            <p className="font-medium">{signup.quest.title}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium">{signup.quest.title}</p>
+                              {signup.quest.is_sponsored && (
+                                <Badge variant="outline" className="text-sunset/60 border-sunset/40 text-xs">
+                                  <Sparkles className="h-3 w-3 mr-1" />
+                                  Sponsored
+                                </Badge>
+                              )}
+                            </div>
                             {signup.quest.start_datetime && (
                               <p className="text-sm text-muted-foreground">
                                 {format(new Date(signup.quest.start_datetime), 'MMMM d, yyyy')}
@@ -323,6 +461,19 @@ export default function MyQuests() {
         questTitle={cancelModal.questTitle}
         onCancelled={fetchSignups}
       />
+
+      {/* Reward Claim Modal */}
+      {user && (
+        <RewardClaimModal
+          isOpen={claimModal.open}
+          onClose={() => setClaimModal({ open: false, reward: null })}
+          reward={claimModal.reward}
+          sponsorName={claimModal.reward?.sponsorName}
+          questId={claimModal.reward?.questId}
+          userId={user.id}
+          onClaimed={handleRewardClaimed}
+        />
+      )}
     </div>
   );
 }
