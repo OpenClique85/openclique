@@ -8,6 +8,7 @@ import { ProfileModal } from '@/components/ProfileModal';
 import { CancelModal } from '@/components/CancelModal';
 import { MySquadsSection } from '@/components/squads/MySquadsSection';
 import { RewardClaimCard, RewardClaimModal } from '@/components/rewards';
+import { QuestJourneyTimeline } from '@/components/quests';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -23,6 +24,14 @@ type SignupWithQuest = QuestSignup & {
   quest: Quest & {
     sponsor_profiles?: { id: string; name: string } | null;
   };
+};
+
+// Extended type with squad journey data
+type SignupWithJourney = SignupWithQuest & {
+  squadId?: string | null;
+  squadStatus?: string | null;
+  squadName?: string | null;
+  questCardToken?: string | null;
 };
 
 type RewardWithSponsor = Reward & {
@@ -41,7 +50,7 @@ const STATUS_BADGES: Record<string, { label: string; variant: 'default' | 'secon
 
 export default function MyQuests() {
   const { user, profile, isLoading: authLoading, isProfileLoaded } = useAuth();
-  const [signups, setSignups] = useState<SignupWithQuest[]>([]);
+  const [signups, setSignups] = useState<SignupWithJourney[]>([]);
   const [availableRewards, setAvailableRewards] = useState<RewardWithSponsor[]>([]);
   const [claimedRewardIds, setClaimedRewardIds] = useState<Set<string>>(new Set());
   const [feedbackSubmitted, setFeedbackSubmitted] = useState<Set<string>>(new Set());
@@ -83,10 +92,67 @@ export default function MyQuests() {
       .order('signed_up_at', { ascending: false });
     
     if (!error && data) {
-      setSignups(data as SignupWithQuest[]);
+      const signupData = data as SignupWithQuest[];
+      
+      // Fetch squad memberships for these signups
+      const signupIds = signupData.map(s => s.id);
+      const { data: squadMemberships } = await supabase
+        .from('squad_members')
+        .select(`
+          signup_id,
+          squad_id,
+          quest_squads(
+            id,
+            status,
+            squad_name,
+            quest_instances(quest_card_token)
+          )
+        `)
+        .eq('user_id', user.id)
+        .in('signup_id', signupIds)
+        .neq('status', 'dropped');
+      
+      // Create lookup map for enriching signups with squad data
+      const squadBySignup = new Map<string, {
+        squadId: string;
+        squadStatus: string;
+        squadName: string | null;
+        questCardToken: string | null;
+      }>();
+      
+      squadMemberships?.forEach(m => {
+        if (m.quest_squads) {
+          const squad = m.quest_squads as unknown as {
+            id: string;
+            status: string;
+            squad_name: string | null;
+            quest_instances: { quest_card_token: string | null } | null;
+          };
+          squadBySignup.set(m.signup_id, {
+            squadId: squad.id,
+            squadStatus: squad.status,
+            squadName: squad.squad_name,
+            questCardToken: squad.quest_instances?.quest_card_token || null,
+          });
+        }
+      });
+      
+      // Enrich signups with squad data
+      const enrichedSignups: SignupWithJourney[] = signupData.map(signup => {
+        const squadInfo = squadBySignup.get(signup.id);
+        return {
+          ...signup,
+          squadId: squadInfo?.squadId || null,
+          squadStatus: squadInfo?.squadStatus || null,
+          squadName: squadInfo?.squadName || null,
+          questCardToken: squadInfo?.questCardToken || null,
+        };
+      });
+      
+      setSignups(enrichedSignups);
       
       // Check which quests already have feedback
-      const questIds = data.map(s => s.quest_id);
+      const questIds = signupData.map(s => s.quest_id);
       const { data: feedbackData } = await supabase
         .from('feedback')
         .select('quest_id')
@@ -305,6 +371,17 @@ export default function MyQuests() {
                     </div>
                   </CardHeader>
                   
+                  {/* Journey Timeline */}
+                  <CardContent className="py-4 border-t bg-muted/20">
+                    <QuestJourneyTimeline
+                      signupStatus={signup.status as 'pending' | 'confirmed' | 'standby' | 'dropped' | 'no_show' | 'completed'}
+                      squadId={signup.squadId}
+                      squadStatus={signup.squadStatus}
+                      questCardToken={signup.questCardToken}
+                      questStartDate={signup.quest.start_datetime ? new Date(signup.quest.start_datetime) : null}
+                    />
+                  </CardContent>
+                  
                   <CardContent className="pt-0">
                     {signup.status === 'confirmed' && (
                       <>
@@ -341,18 +418,6 @@ export default function MyQuests() {
                           </div>
                         )}
                       </>
-                    )}
-                    
-                    {signup.status === 'pending' && (
-                      <p className="text-sm text-muted-foreground mb-3">
-                        Your signup is being reviewed. You'll be notified once confirmed!
-                      </p>
-                    )}
-                    
-                    {signup.status === 'standby' && (
-                      <p className="text-sm text-amber-600 mb-3">
-                        You're on the waitlist. We'll notify you if a spot opens up!
-                      </p>
                     )}
                     
                     <div className="flex gap-2 pt-2">
