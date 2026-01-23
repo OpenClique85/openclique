@@ -36,10 +36,11 @@ import { SecurityTools } from '@/components/admin/ops/SecurityTools';
 import { NotificationConsole } from '@/components/admin/notifications';
 import { DocsManager, DocsExportPanel, DocsPlaybookManager } from '@/components/admin/docs';
 import { PilotInstancesManager } from '@/components/admin/pilot';
+import { ApprovalInbox, OpsAlerts, AuditLogViewer } from '@/components/admin/control-room';
 
 export default function Admin() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
-  const [activeTab, setActiveTab] = useState('quests');
+  const [activeTab, setActiveTab] = useState('approval-inbox');
 
   if (authLoading) {
     return (
@@ -64,25 +65,35 @@ export default function Admin() {
 
   const renderContent = () => {
     switch (activeTab) {
+      // Control Room
+      case 'approval-inbox': return <ApprovalInbox />;
+      case 'ops-alerts': return <OpsAlerts />;
+      case 'audit-log': return <AuditLogViewer />;
       // Quest Ops
       case 'pilot-instances': return <PilotInstancesManager />;
+      // Operations
       case 'quests': return <QuestsManager />;
       case 'squads': return <PersistentSquadsManager />;
       case 'orgs': return <OrgsManager />;
+      // Support
       case 'support-inbox': return <SupportDashboard />;
       case 'support-dm': return <AdminDirectMessages />;
       case 'support-analytics': return <SupportAnalytics />;
       case 'support-categories': return <IssueCategoriesManager />;
+      // Partners
       case 'creators': return <CreatorsManager />;
       case 'sponsors': return <SponsorsManager />;
       case 'testimonials': return <TestimonialsManager />;
       case 'creator-preview': return <CreatorPreviewTab />;
       case 'sponsor-preview': return <SponsorPreviewTab />;
+      // Communications
       case 'messaging': return <MessagingCenter />;
       case 'whatsapp': return <WhatsAppManager />;
       case 'links': return <LinksManager />;
       case 'notification-console': return <NotificationConsole />;
+      // Insights
       case 'analytics': return <Analytics />;
+      // Gamification
       case 'xp-levels': return <XPLevelsManager />;
       case 'achievements': return <AchievementsManager />;
       case 'badges': return <BadgesManager />;
@@ -99,7 +110,7 @@ export default function Admin() {
       case 'docs-manager': return <DocsManager />;
       case 'docs-playbooks': return <DocsPlaybookManager />;
       case 'docs-export': return <DocsExportPanel />;
-      default: return <QuestsManager />;
+      default: return <ApprovalInbox />;
     }
   };
 

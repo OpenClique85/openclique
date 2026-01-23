@@ -53,6 +53,8 @@ const STATUS_COLORS: Record<QuestStatus, string> = {
   closed: 'bg-amber-100 text-amber-700',
   completed: 'bg-blue-100 text-blue-700',
   cancelled: 'bg-red-100 text-red-700',
+  paused: 'bg-orange-100 text-orange-700',
+  revoked: 'bg-red-200 text-red-800',
 };
 
 const THEME_COLORS = ['pink', 'green', 'amber', 'purple'] as const;

@@ -1859,6 +1859,7 @@ export type Database = {
           base_xp: number | null
           briefing_html: string | null
           capacity_total: number | null
+          city: string | null
           cost_description: string | null
           created_at: string
           creator_id: string | null
@@ -1868,6 +1869,7 @@ export type Database = {
           default_capacity: number | null
           default_duration_minutes: number | null
           default_squad_size: number | null
+          deleted_at: string | null
           dress_code: string | null
           duration_notes: string | null
           emergency_contact: string | null
@@ -1886,13 +1888,21 @@ export type Database = {
           min_tree_xp: number | null
           objectives: string | null
           org_id: string | null
+          paused_at: string | null
+          paused_by: string | null
+          paused_reason: string | null
           physical_requirements: string | null
+          previous_status: Database["public"]["Enums"]["quest_status"] | null
+          priority_flag: boolean | null
           progression_tree: string | null
           published_at: string | null
           required_achievement_id: string | null
           required_proof_types: string[] | null
           review_status: Database["public"]["Enums"]["review_status"] | null
           revision_count: number | null
+          revoked_at: string | null
+          revoked_by: string | null
+          revoked_reason: string | null
           rewards: string | null
           safety_notes: string | null
           short_description: string | null
@@ -1920,6 +1930,7 @@ export type Database = {
           base_xp?: number | null
           briefing_html?: string | null
           capacity_total?: number | null
+          city?: string | null
           cost_description?: string | null
           created_at?: string
           creator_id?: string | null
@@ -1929,6 +1940,7 @@ export type Database = {
           default_capacity?: number | null
           default_duration_minutes?: number | null
           default_squad_size?: number | null
+          deleted_at?: string | null
           dress_code?: string | null
           duration_notes?: string | null
           emergency_contact?: string | null
@@ -1947,13 +1959,21 @@ export type Database = {
           min_tree_xp?: number | null
           objectives?: string | null
           org_id?: string | null
+          paused_at?: string | null
+          paused_by?: string | null
+          paused_reason?: string | null
           physical_requirements?: string | null
+          previous_status?: Database["public"]["Enums"]["quest_status"] | null
+          priority_flag?: boolean | null
           progression_tree?: string | null
           published_at?: string | null
           required_achievement_id?: string | null
           required_proof_types?: string[] | null
           review_status?: Database["public"]["Enums"]["review_status"] | null
           revision_count?: number | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          revoked_reason?: string | null
           rewards?: string | null
           safety_notes?: string | null
           short_description?: string | null
@@ -1981,6 +2001,7 @@ export type Database = {
           base_xp?: number | null
           briefing_html?: string | null
           capacity_total?: number | null
+          city?: string | null
           cost_description?: string | null
           created_at?: string
           creator_id?: string | null
@@ -1990,6 +2011,7 @@ export type Database = {
           default_capacity?: number | null
           default_duration_minutes?: number | null
           default_squad_size?: number | null
+          deleted_at?: string | null
           dress_code?: string | null
           duration_notes?: string | null
           emergency_contact?: string | null
@@ -2008,13 +2030,21 @@ export type Database = {
           min_tree_xp?: number | null
           objectives?: string | null
           org_id?: string | null
+          paused_at?: string | null
+          paused_by?: string | null
+          paused_reason?: string | null
           physical_requirements?: string | null
+          previous_status?: Database["public"]["Enums"]["quest_status"] | null
+          priority_flag?: boolean | null
           progression_tree?: string | null
           published_at?: string | null
           required_achievement_id?: string | null
           required_proof_types?: string[] | null
           review_status?: Database["public"]["Enums"]["review_status"] | null
           revision_count?: number | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          revoked_reason?: string | null
           rewards?: string | null
           safety_notes?: string | null
           short_description?: string | null
@@ -3677,7 +3707,14 @@ export type Database = {
         | "message_sent"
         | "admin_override"
         | "no_show_marked"
-      quest_status: "draft" | "open" | "closed" | "completed" | "cancelled"
+      quest_status:
+        | "draft"
+        | "open"
+        | "closed"
+        | "completed"
+        | "cancelled"
+        | "paused"
+        | "revoked"
       quest_visibility: "public" | "org_only" | "invite_only"
       review_status:
         | "draft"
@@ -3934,7 +3971,15 @@ export const Constants = {
         "admin_override",
         "no_show_marked",
       ],
-      quest_status: ["draft", "open", "closed", "completed", "cancelled"],
+      quest_status: [
+        "draft",
+        "open",
+        "closed",
+        "completed",
+        "cancelled",
+        "paused",
+        "revoked",
+      ],
       quest_visibility: ["public", "org_only", "invite_only"],
       review_status: [
         "draft",
