@@ -72,6 +72,8 @@ import SponsorDashboard from "./pages/SponsorDashboard";
 import SponsorRewards from "./pages/SponsorRewards";
 import SponsorVenues from "./pages/SponsorVenues";
 import SponsorDiscover from "./pages/SponsorDiscover";
+import SponsorBrowseOrgs from "./pages/SponsorBrowseOrgs";
+import SponsorOrgRequests from "./pages/SponsorOrgRequests";
 import SponsorProfile from "./pages/SponsorProfile";
 import SponsorProposals from "./pages/SponsorProposals";
 import SponsorAnalytics from "./pages/SponsorAnalytics";
@@ -142,6 +144,8 @@ const App = () => (
             <Route path="/sponsor/rewards" element={<ProtectedRoute><SponsorRewards /></ProtectedRoute>} />
             <Route path="/sponsor/venues" element={<ProtectedRoute><SponsorVenues /></ProtectedRoute>} />
             <Route path="/sponsor/discover" element={<ProtectedRoute><SponsorDiscover /></ProtectedRoute>} />
+            <Route path="/sponsor/browse-orgs" element={<ProtectedRoute><SponsorBrowseOrgs /></ProtectedRoute>} />
+            <Route path="/sponsor/org-requests" element={<ProtectedRoute><SponsorOrgRequests /></ProtectedRoute>} />
             <Route path="/sponsor/proposals" element={<ProtectedRoute><SponsorProposals /></ProtectedRoute>} />
             <Route path="/sponsor/analytics" element={<ProtectedRoute><SponsorAnalytics /></ProtectedRoute>} />
             <Route path="/sponsor/profile" element={<ProtectedRoute><SponsorProfile /></ProtectedRoute>} />

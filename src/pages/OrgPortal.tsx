@@ -51,7 +51,8 @@ import { format } from 'date-fns';
 import type { Tables } from '@/integrations/supabase/types';
 import { DisplayNameWithBadges } from '@/components/DisplayNameWithBadges';
 import { UserPreferences } from '@/types/profile';
-import { SendQuestToMembersButton, OrgCreatorRequestModal } from '@/components/org';
+import { SendQuestToMembersButton, OrgCreatorRequestModal, OrgMyRequestsSection } from '@/components/org';
+import { OrgSponsorRequestModal } from '@/components/collaboration';
 
 type Organization = Tables<'organizations'>;
 type Quest = Tables<'quests'>;
@@ -361,10 +362,13 @@ export default function OrgPortal() {
         <section className="py-8">
           <div className="container mx-auto px-4">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList>
+              <TabsList className="flex-wrap">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="quests">Quests ({orgQuests.length})</TabsTrigger>
                 <TabsTrigger value="members">Members ({members.length})</TabsTrigger>
+                {isAdmin && (
+                  <TabsTrigger value="requests">My Requests</TabsTrigger>
+                )}
                 {(isAdmin || memberRole === 'creator') && (
                   <TabsTrigger value="create">Create Quest</TabsTrigger>
                 )}
@@ -654,6 +658,13 @@ export default function OrgPortal() {
                   </div>
                 )}
               </TabsContent>
+
+              {/* My Requests Tab */}
+              {isAdmin && (
+                <TabsContent value="requests">
+                  <OrgMyRequestsSection orgId={org.id} orgName={org.name} />
+                </TabsContent>
+              )}
 
               {/* Create Quest Tab */}
               {(isAdmin || memberRole === 'creator') && (
