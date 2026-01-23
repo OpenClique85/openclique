@@ -12,6 +12,7 @@ import { Analytics } from '@/components/admin/Analytics';
 import { PersistentSquadsManager } from '@/components/admin/PersistentSquadsManager';
 import { CreatorsManager } from '@/components/admin/CreatorsManager';
 import { SponsorsManager } from '@/components/admin/SponsorsManager';
+import { OrgsManager } from '@/components/admin/OrgsManager';
 import { CreatorPreviewTab } from '@/components/admin/CreatorPreviewTab';
 import { SponsorPreviewTab } from '@/components/admin/SponsorPreviewTab';
 import { DevToolsSection } from '@/components/admin/DevToolsSection';
@@ -52,6 +53,7 @@ export default function Admin() {
       case 'quests': return <QuestsManager />;
       case 'signups': return <SignupsManager />;
       case 'squads': return <PersistentSquadsManager />;
+      case 'orgs': return <OrgsManager />;
       case 'creators': return <CreatorsManager />;
       case 'sponsors': return <SponsorsManager />;
       case 'testimonials': return <TestimonialsManager />;

@@ -29,6 +29,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
       { id: 'quests', label: 'Quests' },
       { id: 'signups', label: 'Signups' },
       { id: 'squads', label: 'Squads' },
+      { id: 'orgs', label: 'Organizations' },
     ],
   },
   {
