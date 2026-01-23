@@ -2,11 +2,12 @@
  * Instance Calendar View
  * 
  * Calendar visualization of scheduled quest instances.
+ * Supports drag-and-drop rescheduling.
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -18,7 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ChevronLeft, ChevronRight, Loader2, Calendar as CalendarIcon } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { ChevronLeft, ChevronRight, Loader2, GripVertical } from 'lucide-react';
 import {
   startOfMonth,
   endOfMonth,
@@ -27,7 +29,6 @@ import {
   eachDayOfInterval,
   format,
   isSameMonth,
-  isSameDay,
   isToday,
   addMonths,
   subMonths,
@@ -70,8 +71,12 @@ const STATUS_DOT_COLORS: Record<InstanceStatus, string> = {
 
 export function InstanceCalendarView() {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [statusFilter, setStatusFilter] = useState<InstanceStatus | 'all'>('all');
+  const [draggedInstance, setDraggedInstance] = useState<string | null>(null);
+  const [dragOverDate, setDragOverDate] = useState<string | null>(null);
 
   // Fetch all non-archived instances
   const { data: instances, isLoading } = useQuery({
@@ -84,6 +89,42 @@ export function InstanceCalendarView() {
         .order('scheduled_date', { ascending: true });
       if (error) throw error;
       return data as CalendarInstance[];
+    },
+  });
+
+  // Mutation for rescheduling
+  const rescheduleMutation = useMutation({
+    mutationFn: async ({ instanceId, newDate }: { instanceId: string; newDate: string }) => {
+      const { error } = await supabase
+        .from('quest_instances')
+        .update({ scheduled_date: newDate })
+        .eq('id', instanceId);
+      
+      if (error) throw error;
+
+      // Log the event
+      await supabase.from('ops_events').insert({
+        event_type: 'manual_override',
+        quest_id: instanceId,
+        metadata: { action: 'instance_rescheduled', new_date: newDate },
+        actor_type: 'admin',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['quest-instances-calendar'] });
+      queryClient.invalidateQueries({ queryKey: ['quest-instances-week'] });
+      queryClient.invalidateQueries({ queryKey: ['quest-instances'] });
+      toast({
+        title: 'Instance rescheduled',
+        description: 'The quest instance has been moved to the new date.',
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Reschedule failed',
+        description: error instanceof Error ? error.message : 'Failed to reschedule instance',
+        variant: 'destructive',
+      });
     },
   });
 
@@ -114,6 +155,43 @@ export function InstanceCalendarView() {
   const goToPrevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
   const goToNextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
   const goToToday = () => setCurrentMonth(new Date());
+
+  // Drag handlers
+  const handleDragStart = useCallback((e: React.DragEvent, instanceId: string) => {
+    e.dataTransfer.setData('instanceId', instanceId);
+    e.dataTransfer.effectAllowed = 'move';
+    setDraggedInstance(instanceId);
+  }, []);
+
+  const handleDragEnd = useCallback(() => {
+    setDraggedInstance(null);
+    setDragOverDate(null);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent, dateKey: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverDate(dateKey);
+  }, []);
+
+  const handleDragLeave = useCallback(() => {
+    setDragOverDate(null);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent, dateKey: string) => {
+    e.preventDefault();
+    const instanceId = e.dataTransfer.getData('instanceId');
+    
+    if (instanceId) {
+      const instance = instances?.find(i => i.id === instanceId);
+      if (instance && instance.scheduled_date !== dateKey) {
+        rescheduleMutation.mutate({ instanceId, newDate: dateKey });
+      }
+    }
+    
+    setDraggedInstance(null);
+    setDragOverDate(null);
+  }, [instances, rescheduleMutation]);
 
   if (isLoading) {
     return (
@@ -158,6 +236,11 @@ export function InstanceCalendarView() {
         </Select>
       </div>
 
+      {/* Drag hint */}
+      <p className="text-xs text-muted-foreground">
+        💡 Drag instances to reschedule them to a different day
+      </p>
+
       {/* Legend */}
       <div className="flex flex-wrap gap-3 text-xs">
         {Object.entries(STATUS_DOT_COLORS).filter(([status]) => status !== 'archived').map(([status, color]) => (
@@ -187,13 +270,19 @@ export function InstanceCalendarView() {
               const dayInstances = instancesByDate.get(dateKey) || [];
               const isCurrentMonth = isSameMonth(day, currentMonth);
               const isTodayDate = isToday(day);
+              const isDragOver = dragOverDate === dateKey;
 
               return (
                 <div
                   key={idx}
-                  className={`min-h-[100px] border-b border-r p-1 ${
+                  className={`min-h-[100px] border-b border-r p-1 transition-colors ${
                     !isCurrentMonth ? 'bg-muted/30' : ''
-                  } ${isTodayDate ? 'bg-primary/5' : ''}`}
+                  } ${isTodayDate ? 'bg-primary/5' : ''} ${
+                    isDragOver ? 'ring-2 ring-inset ring-blue-500 bg-blue-50/50 dark:bg-blue-900/20' : ''
+                  }`}
+                  onDragOver={(e) => handleDragOver(e, dateKey)}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, dateKey)}
                 >
                   <div className={`text-sm mb-1 ${
                     isTodayDate 
@@ -207,14 +296,20 @@ export function InstanceCalendarView() {
                   
                   <div className="space-y-1">
                     {dayInstances.slice(0, 3).map((instance) => (
-                      <button
+                      <div
                         key={instance.id}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, instance.id)}
+                        onDragEnd={handleDragEnd}
                         onClick={() => navigate(`/admin/pilot/${instance.id}`)}
-                        className={`w-full text-left px-1.5 py-0.5 rounded text-xs truncate border-l-2 hover:opacity-80 transition-opacity ${STATUS_COLORS[instance.status]}`}
+                        className={`w-full text-left px-1.5 py-0.5 rounded text-xs truncate border-l-2 hover:opacity-80 transition-all cursor-pointer flex items-center gap-0.5 ${
+                          STATUS_COLORS[instance.status]
+                        } ${draggedInstance === instance.id ? 'opacity-50 scale-95' : ''}`}
                       >
+                        <GripVertical className="h-3 w-3 text-muted-foreground shrink-0 cursor-grab" />
                         <span className="mr-1">{instance.icon}</span>
-                        {instance.title}
-                      </button>
+                        <span className="truncate">{instance.title}</span>
+                      </div>
                     ))}
                     {dayInstances.length > 3 && (
                       <div className="text-xs text-muted-foreground px-1">

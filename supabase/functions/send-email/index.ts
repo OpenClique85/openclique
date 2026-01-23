@@ -13,7 +13,7 @@ const corsHeaders = {
 interface SendEmailRequest {
   to: string | string[];
   subject: string;
-  template: "quest_confirmation" | "quest_reminder" | "quest_cancelled" | "quest_approved" | "quest_needs_changes" | "quest_rejected" | "support_reply" | "admin_dm" | "custom";
+  template: "quest_confirmation" | "quest_reminder" | "quest_cancelled" | "quest_approved" | "quest_needs_changes" | "quest_rejected" | "quest_paused" | "quest_revoked" | "quest_resumed" | "support_reply" | "admin_dm" | "custom";
   variables?: Record<string, string>;
   customHtml?: string;
 }
@@ -79,14 +79,78 @@ const templates: Record<string, (vars: Record<string, string>) => string> = {
   quest_cancelled: (vars) => `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #ef4444; margin: 0;">Quest Update</h1>
+        <h1 style="color: #ef4444; margin: 0;">Quest Cancelled</h1>
       </div>
       <p style="font-size: 16px; color: #333;">Hey ${escapeHtml(vars.display_name || "Adventurer")},</p>
       <p style="font-size: 16px; color: #333;">We're sorry to let you know that <strong>${escapeHtml(vars.quest_name || "your quest")}</strong> has been cancelled.</p>
       
-      ${vars.reason ? `<p style="font-size: 14px; color: #666;"><strong>Reason:</strong> ${escapeHtml(vars.reason)}</p>` : ""}
+      ${vars.reason ? `
+        <div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0;">
+          <p style="margin: 0 0 5px 0; font-weight: bold;">Reason:</p>
+          <p style="margin: 0; font-size: 14px;">${escapeHtml(vars.reason)}</p>
+        </div>
+      ` : ""}
       
       <p style="font-size: 14px; color: #666;">We know this is disappointing. Keep an eye out for new quests — there's always another adventure around the corner!</p>
+      <p style="font-size: 14px; color: #666;">— The OpenClique Team</p>
+    </div>
+  `,
+  
+  quest_paused: (vars) => `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #f97316; margin: 0;">⏸️ Quest Paused</h1>
+      </div>
+      <p style="font-size: 16px; color: #333;">Hey ${escapeHtml(vars.display_name || "there")},</p>
+      <p style="font-size: 16px; color: #333;">The quest <strong>${escapeHtml(vars.quest_name || "your quest")}</strong> has been temporarily paused.</p>
+      
+      ${vars.reason ? `
+        <div style="background: #fff7ed; border-left: 4px solid #f97316; padding: 15px; margin: 20px 0;">
+          <p style="margin: 0 0 5px 0; font-weight: bold;">Reason:</p>
+          <p style="margin: 0; font-size: 14px;">${escapeHtml(vars.reason)}</p>
+        </div>
+      ` : ""}
+      
+      <p style="font-size: 14px; color: #666;">Your spot is still reserved. We'll notify you as soon as the quest resumes or if there are any updates.</p>
+      <p style="font-size: 14px; color: #666;">— The OpenClique Team</p>
+    </div>
+  `,
+  
+  quest_revoked: (vars) => `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #dc2626; margin: 0;">🚫 Quest Revoked</h1>
+      </div>
+      <p style="font-size: 16px; color: #333;">Hey ${escapeHtml(vars.display_name || "there")},</p>
+      <p style="font-size: 16px; color: #333;">We need to inform you that <strong>${escapeHtml(vars.quest_name || "a quest you signed up for")}</strong> has been revoked by our team.</p>
+      
+      ${vars.reason ? `
+        <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 15px; margin: 20px 0;">
+          <p style="margin: 0 0 5px 0; font-weight: bold;">Reason:</p>
+          <p style="margin: 0; font-size: 14px;">${escapeHtml(vars.reason)}</p>
+        </div>
+      ` : ""}
+      
+      <p style="font-size: 14px; color: #666;">This quest has been permanently removed and is no longer available. We apologize for any inconvenience.</p>
+      <p style="font-size: 14px; color: #666;">Browse other quests to find your next adventure!</p>
+      <p style="font-size: 14px; color: #666;">— The OpenClique Team</p>
+    </div>
+  `,
+  
+  quest_resumed: (vars) => `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #10b981; margin: 0;">▶️ Quest Resumed!</h1>
+      </div>
+      <p style="font-size: 16px; color: #333;">Hey ${escapeHtml(vars.display_name || "there")}!</p>
+      <p style="font-size: 16px; color: #333;">Great news — <strong>${escapeHtml(vars.quest_name || "your quest")}</strong> is back on!</p>
+      
+      <div style="background: #ecfdf5; border-left: 4px solid #10b981; padding: 15px; margin: 20px 0;">
+        <p style="margin: 0 0 10px 0;"><strong>📅 When:</strong> ${escapeHtml(vars.quest_date || "Check the app for details")}</p>
+        <p style="margin: 0;"><strong>📍 Where:</strong> ${escapeHtml(vars.quest_location || "Check the app for details")}</p>
+      </div>
+      
+      <p style="font-size: 14px; color: #666;">Your spot is still confirmed. See you there!</p>
       <p style="font-size: 14px; color: #666;">— The OpenClique Team</p>
     </div>
   `,
