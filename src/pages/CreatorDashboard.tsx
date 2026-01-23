@@ -12,10 +12,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { usePendingOrgRequests } from '@/hooks/usePendingOrgRequests';
 
 export default function CreatorDashboard() {
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, isAdmin, profile } = useAuth();
   const { data: pendingOrgRequests = 0 } = usePendingOrgRequests();
+  
   // Fetch creator profile
-  const { data: creatorProfile, isLoading: profileLoading } = useQuery({
+  const { data: creatorProfile, isLoading: profileLoading, refetch: refetchProfile } = useQuery({
     queryKey: ['creator-profile', user?.id],
     queryFn: async () => {
       if (!user) return null;
@@ -32,6 +33,44 @@ export default function CreatorDashboard() {
       return data;
     },
     enabled: !!user,
+  });
+
+  // Auto-create creator profile for admins who don't have one
+  useQuery({
+    queryKey: ['admin-creator-profile-setup', user?.id, isAdmin, creatorProfile?.id],
+    queryFn: async () => {
+      if (!user || !isAdmin || creatorProfile) return null;
+      
+      // Create a creator profile for the admin
+      const displayName = profile?.display_name || user.email?.split('@')[0] || 'Admin';
+      
+      const { error: profileError } = await supabase
+        .from('creator_profiles')
+        .insert({
+          user_id: user.id,
+          display_name: displayName,
+          bio: 'OpenClique Admin & Quest Creator',
+          city: 'Austin',
+          status: 'active',
+          onboarded_at: new Date().toISOString(),
+        });
+      
+      if (profileError && !profileError.message.includes('duplicate')) {
+        console.error('Error creating admin creator profile:', profileError);
+        return null;
+      }
+      
+      // Also add quest_creator role if not present
+      await supabase
+        .from('user_roles')
+        .insert({ user_id: user.id, role: 'quest_creator' })
+        .single();
+      
+      // Refetch the creator profile
+      refetchProfile();
+      return true;
+    },
+    enabled: !!user && isAdmin && !profileLoading && !creatorProfile,
   });
 
   // Fetch creator's quests stats
