@@ -2,8 +2,9 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
 import { QuestFormData } from '../types';
-import { Users, DollarSign, Gift } from 'lucide-react';
+import { Users, DollarSign, Gift, Repeat, UsersRound } from 'lucide-react';
 
 interface CapacityStepProps {
   formData: QuestFormData;
@@ -25,26 +26,75 @@ export function CapacityStep({ formData, updateFormData }: CapacityStepProps) {
         </div>
       </div>
 
-      {/* Capacity */}
+      {/* Repeatable Quest Toggle */}
+      <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/30">
+        <div className="flex items-center gap-3">
+          <Repeat className="w-5 h-5 text-primary" />
+          <div>
+            <Label htmlFor="is_repeatable" className="text-base font-medium cursor-pointer">
+              Repeatable Quest
+            </Label>
+            <p className="text-sm text-muted-foreground">
+              Run this quest multiple times with different dates
+            </p>
+          </div>
+        </div>
+        <Switch
+          id="is_repeatable"
+          checked={formData.is_repeatable}
+          onCheckedChange={(checked) => updateFormData({ is_repeatable: checked })}
+        />
+      </div>
+
+      {/* Total Capacity */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <Label className="text-base font-medium">Squad Size</Label>
+          <div className="flex items-center gap-2">
+            <Users className="w-4 h-4 text-muted-foreground" />
+            <Label className="text-base font-medium">Total Capacity</Label>
+          </div>
           <span className="text-2xl font-bold text-creator">{formData.capacity_total}</span>
         </div>
         <Slider
           value={[formData.capacity_total]}
           onValueChange={([value]) => updateFormData({ capacity_total: value })}
           min={2}
-          max={25}
+          max={50}
           step={1}
           className="w-full"
         />
         <div className="flex justify-between text-sm text-muted-foreground">
           <span>2 (Intimate)</span>
-          <span>25 (Large Group)</span>
+          <span>50 (Large Event)</span>
         </div>
         <p className="text-sm text-muted-foreground">
-          Smaller groups (4-8) create stronger connections. Larger groups work for events.
+          Maximum number of participants for this quest.
+        </p>
+      </div>
+
+      {/* Squad Size */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <UsersRound className="w-4 h-4 text-muted-foreground" />
+            <Label className="text-base font-medium">Squad Size</Label>
+          </div>
+          <span className="text-2xl font-bold text-primary">{formData.default_squad_size}</span>
+        </div>
+        <Slider
+          value={[formData.default_squad_size]}
+          onValueChange={([value]) => updateFormData({ default_squad_size: value })}
+          min={2}
+          max={Math.min(12, formData.capacity_total)}
+          step={1}
+          className="w-full"
+        />
+        <div className="flex justify-between text-sm text-muted-foreground">
+          <span>2 (Pairs)</span>
+          <span>{Math.min(12, formData.capacity_total)} (Max)</span>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Smaller squads (4-6) create stronger connections. Participants will be grouped into squads of this size.
         </p>
       </div>
 
