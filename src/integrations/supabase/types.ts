@@ -3543,6 +3543,10 @@ export type Database = {
       }
     }
     Functions: {
+      approve_squad: {
+        Args: { p_force?: boolean; p_notes?: string; p_squad_id: string }
+        Returns: undefined
+      }
       auto_archive_instances: { Args: never; Returns: number }
       auto_archive_squads: { Args: never; Returns: number }
       award_quest_xp: {
@@ -3570,6 +3574,7 @@ export type Database = {
           xp_reward: number
         }[]
       }
+      check_squad_readiness: { Args: { p_squad_id: string }; Returns: Json }
       check_streak_bonus: {
         Args: { p_user_id: string }
         Returns: {
@@ -3577,6 +3582,10 @@ export type Database = {
           current_count: number
           streak_name: string
         }[]
+      }
+      confirm_warm_up_readiness: {
+        Args: { p_squad_id: string }
+        Returns: undefined
       }
       create_instance_from_quest: {
         Args: {
@@ -3668,6 +3677,11 @@ export type Database = {
       }
       record_referral_signup: {
         Args: { p_referral_code: string; p_user_id: string }
+        Returns: undefined
+      }
+      start_squad_warm_up: { Args: { p_squad_id: string }; Returns: undefined }
+      submit_warm_up_prompt: {
+        Args: { p_response: string; p_squad_id: string }
         Returns: undefined
       }
       track_referral_click: {
@@ -3778,6 +3792,12 @@ export type Database = {
         | "message_sent"
         | "admin_override"
         | "no_show_marked"
+        | "warm_up_started"
+        | "prompt_answered"
+        | "readiness_confirmed"
+        | "squad_ready_for_review"
+        | "squad_approved"
+        | "squad_force_approved"
       quest_status:
         | "draft"
         | "open"
@@ -4042,6 +4062,12 @@ export const Constants = {
         "message_sent",
         "admin_override",
         "no_show_marked",
+        "warm_up_started",
+        "prompt_answered",
+        "readiness_confirmed",
+        "squad_ready_for_review",
+        "squad_approved",
+        "squad_force_approved",
       ],
       quest_status: [
         "draft",
