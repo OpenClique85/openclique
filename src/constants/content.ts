@@ -28,10 +28,10 @@
  * - If you break something, use Ctrl+Z to undo
  * 
  * EXAMPLE:
- * To change the tagline from "Build the village..." to "Find your people...":
- *   BEFORE: tagline: "Build the village you've been missing.",
- *   AFTER:  tagline: "Find your people. One Quest at a time.",
- * 
+ * To change the tagline from "You've got a squad waiting..." to something else:
+ *   BEFORE: tagline: "You've got a squad waiting. You just haven't met them yet.",
+ *   AFTER:  tagline: "Your new tagline here.",
+ *
  * =============================================================================
  */
 
@@ -44,8 +44,8 @@
 
 export const BRAND = {
   name: "OpenClique",                                    // Company/product name
-  tagline: "Build the village you've been missing. One Quest at a time.", // Main slogan
-  description: "OpenClique brings people together in small, guided groups through real-world quests: curated activities that help turn shared interests into real friendships.",
+  tagline: "You've got a squad waiting. You just haven't met them yet.", // Main slogan
+  description: "We plan the adventure. You bring yourself—plus whoever you want. Match with a squad, complete curated quests, and make real friends.",
   launchCity: "Austin",                                  // Current pilot city
 };
 
@@ -310,7 +310,7 @@ export const ABOUT = {
   
   story: {
     title: "Our Story",
-    description: "We're two UT Austin MBAs who believe that community shouldn't be this hard. With backgrounds in Teach For America and the U.S. Navy, we've seen firsthand how powerful it is when people come together around shared purpose. But somewhere along the way, our cities lost the structures that used to bring us together — the block parties, the neighborhood hangouts, the organic ways we used to meet. OpenClique is our answer: rebuilding the village our cities forgot, one quest at a time.",
+    description: "We're two UT Austin MBAs who believe that community shouldn't be this hard. With backgrounds in Teach For America and the U.S. Navy, we've seen firsthand how powerful it is when people come together around shared purpose. But somewhere along the way, our cities lost the structures that used to bring us together — the block parties, the neighborhood hangouts, the organic ways we used to meet. OpenClique is our answer: your squad is waiting, you just haven't met them yet.",
   },
   
   team: [
@@ -397,13 +397,13 @@ export const FAQ = [
 // =============================================================================
 
 export const PILOT_PAGE = {
-  title: "Find Your First Quest",
-  subtitle: "Browse open quests, join a squad, and start your adventure. It's that simple.",
+  title: "Find Your Quest",
+  subtitle: "Your squad is waiting. Pick an adventure and show up.",
   whatToExpect: [
-    "Browse quests that match your interests",
-    "Join a small squad of 3-6 people",
-    "Complete adventures and earn rewards",
-    "Make real friends along the way",
+    "Come solo, bring friends, or rally your crew",
+    "Get matched with a small squad of 3-6 people",
+    "We plan the adventure—you just show up",
+    "Keep coming back to the people you vibe with",
   ],
   ctaText: "Browse Quests",
   note: "Sign up to join quests and track your progress.",

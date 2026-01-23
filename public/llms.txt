@@ -1,23 +1,23 @@
-# OpenClique - Quest with Us
+# OpenClique — You've Got a Squad Waiting
 
-> OpenClique is a social platform launching in Austin that helps people make real-world friendships through small squad activities called "quests."
+> You've got a squad waiting. You just haven't met them yet. We plan the adventure—you bring yourself, plus whoever you want.
 
 ## What is OpenClique?
 
-OpenClique matches you with 3-5 compatible people based on your interests, vibe, and availability. Our AI curates fun activities ("quests") like trying a new coffee shop, playing pickleball, or exploring a local brewery. You just show up—no awkward planning required.
+OpenClique is a social platform launching in Austin that helps people make real-world friendships through small squad activities called "quests." Come solo and get matched, bring a friend and expand your circle, or rally your crew to something new. We handle the planning—you just show up.
 
 ## How It Works
 
-1. **Take the Quiz** - Answer questions about your interests, personality, and availability
-2. **Get Matched** - Our AI groups you with compatible people into small squads
-3. **Receive Quests** - Get curated activity suggestions based on your squad's shared interests
-4. **Show Up & Connect** - Meet your squad, complete quests, and build real friendships
+1. **Match** - Sign up, tell us your interests, and get matched with your squad
+2. **Meet** - Show up at curated adventures designed for small groups
+3. **Return** - Keep questing with the people you vibe with
 
 ## Key Features
 
-- **Small Squads**: Groups of 3-5 people for meaningful connections
-- **AI-Curated Quests**: Activities matched to your group's interests
-- **No Planning Required**: Just show up at the suggested time and place
+- **Small Squads**: Groups of 3-6 people for meaningful connections
+- **Curated Quests**: Adventures matched to your group's interests
+- **We Plan Everything**: Just show up at the time and place
+- **Flexible Entry**: Come solo, bring friends, or rally your crew
 - **Austin Launch**: Currently piloting in Austin, Texas
 
 ## Who It's For
@@ -26,10 +26,11 @@ OpenClique matches you with 3-5 compatible people based on your interests, vibe,
 - Anyone tired of superficial networking events
 - Young professionals seeking genuine connections
 - People who want to try new activities with compatible strangers
+- Friend groups looking for curated experiences
 
 ## Current Status
 
-OpenClique is currently in pilot phase, launching in Austin, Texas. Users can sign up for early access through the pilot program.
+OpenClique is currently in pilot phase, launching in Austin, Texas. Users can browse quests and sign up to join.
 
 ## Contact
 
@@ -41,8 +42,8 @@ OpenClique is currently in pilot phase, launching in Austin, Texas. Users can si
 ## Pages
 
 - Home: https://openclique.lovable.app/
+- Find Your Quest: https://openclique.lovable.app/quests
 - About Us: https://openclique.lovable.app/about
 - How It Works: https://openclique.lovable.app/how-it-works
-- Join the Pilot: https://openclique.lovable.app/pilot
 - Partner With Us: https://openclique.lovable.app/partners
 - Work With Us: https://openclique.lovable.app/work-with-us

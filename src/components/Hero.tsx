@@ -17,18 +17,24 @@
  * ┌─────────────────────────────────────────────────────────────┐
  * │  [Background: Concert image with gradient overlay]          │
  * │                                                              │
+ * │              ┌─────────────────────┐                        │
+ * │              │  Match. Meet. Return. │  ← Tagline badge     │
+ * │              └─────────────────────┘                        │
+ * │                                                              │
  * │                    [OpenClique Logo]                         │
  * │                                                              │
- * │           Build the village you've been missing.            │
- * │                  One Quest at a time.                        │
+ * │             You've got a squad waiting.                      │
+ * │           You just haven't met them yet.                     │
  * │                                                              │
- * │    Join a small squad. Complete an adventure. Make friends. │
+ * │   We plan the adventure. You bring yourself—plus whoever    │
+ * │                       you want.                              │
  * │                                                              │
- * │         [Join the Pilot]    [Get Involved ▼]                │
+ * │         [Find Your Quest]    [Get Involved ▼]               │
  * │                                                              │
- * │              Now accepting Austin pilot members              │
+ * │              Now launching in Austin                         │
  * │              See what adventures await →                     │
  * └─────────────────────────────────────────────────────────────┘
+ *
  * 
  * =============================================================================
  */

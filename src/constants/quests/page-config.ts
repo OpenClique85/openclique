@@ -5,7 +5,7 @@
  */
 
 export const QUESTS_PAGE = {
-  heroTitle: 'Find Your Adventure',
-  heroSubtitle: 'Curated adventures designed for small groups. Pick a quest, join a squad, and make real connections.',
-  heroExplainer: 'Each quest is a curated, time-boxed adventure for a small group. Pick one that speaks to you.',
+  heroTitle: 'Find Your Quest',
+  heroSubtitle: 'Your squad is waiting. Pick an adventure and show up.',
+  heroExplainer: 'Each quest is a curated adventure for a small group. Come solo, bring friends, or rally your crew.',
 };
