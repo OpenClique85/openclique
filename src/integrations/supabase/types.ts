@@ -1894,6 +1894,7 @@ export type Database = {
           review_status: Database["public"]["Enums"]["review_status"] | null
           revision_count: number | null
           rewards: string | null
+          safety_notes: string | null
           short_description: string | null
           slug: string
           sponsor_id: string | null
@@ -1954,6 +1955,7 @@ export type Database = {
           review_status?: Database["public"]["Enums"]["review_status"] | null
           revision_count?: number | null
           rewards?: string | null
+          safety_notes?: string | null
           short_description?: string | null
           slug: string
           sponsor_id?: string | null
@@ -2014,6 +2016,7 @@ export type Database = {
           review_status?: Database["public"]["Enums"]["review_status"] | null
           revision_count?: number | null
           rewards?: string | null
+          safety_notes?: string | null
           short_description?: string | null
           slug?: string
           sponsor_id?: string | null

@@ -17,6 +17,7 @@ export interface QuestFormData {
   start_datetime: string;
   end_datetime: string;
   duration_notes: string;
+  default_duration_minutes: number;
   
   // Step 3: Experience
   full_description: string;
@@ -36,10 +37,12 @@ export interface QuestFormData {
   emergency_contact: string;
   age_restriction: string;
   
-  // Step 7: Capacity
+  // Step 7: Capacity & Settings
   capacity_total: number;
+  default_squad_size: number;
   cost_description: string;
   rewards: string;
+  is_repeatable: boolean;
   
   // Step 8: Media
   image_url: string;
@@ -66,6 +69,7 @@ export const defaultFormData: QuestFormData = {
   start_datetime: '',
   end_datetime: '',
   duration_notes: '',
+  default_duration_minutes: 120,
   
   // Experience
   full_description: '',
@@ -85,10 +89,12 @@ export const defaultFormData: QuestFormData = {
   emergency_contact: '',
   age_restriction: '',
   
-  // Capacity
+  // Capacity & Settings
   capacity_total: 6,
+  default_squad_size: 4,
   cost_description: 'Free',
   rewards: '',
+  is_repeatable: false,
   
   // Media
   image_url: '',
