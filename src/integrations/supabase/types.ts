@@ -136,6 +136,42 @@ export type Database = {
         }
         Relationships: []
       }
+      collaboration_messages: {
+        Row: {
+          attachments: Json | null
+          collaboration_id: string
+          collaboration_type: string
+          created_at: string
+          id: string
+          message: string
+          read_at: string | null
+          sender_id: string
+          sender_role: string
+        }
+        Insert: {
+          attachments?: Json | null
+          collaboration_id: string
+          collaboration_type: string
+          created_at?: string
+          id?: string
+          message: string
+          read_at?: string | null
+          sender_id: string
+          sender_role: string
+        }
+        Update: {
+          attachments?: Json | null
+          collaboration_id?: string
+          collaboration_type?: string
+          created_at?: string
+          id?: string
+          message?: string
+          read_at?: string | null
+          sender_id?: string
+          sender_role?: string
+        }
+        Relationships: []
+      }
       comms_log: {
         Row: {
           id: string
@@ -259,6 +295,7 @@ export type Database = {
           onboarded_at: string | null
           payout_placeholder: Json | null
           photo_url: string | null
+          seeking: string[] | null
           slug: string | null
           socials: Json | null
           status: string
@@ -275,6 +312,7 @@ export type Database = {
           onboarded_at?: string | null
           payout_placeholder?: Json | null
           photo_url?: string | null
+          seeking?: string[] | null
           slug?: string | null
           socials?: Json | null
           status?: string
@@ -291,6 +329,7 @@ export type Database = {
           onboarded_at?: string | null
           payout_placeholder?: Json | null
           photo_url?: string | null
+          seeking?: string[] | null
           slug?: string | null
           socials?: Json | null
           status?: string
@@ -653,6 +692,88 @@ export type Database = {
           },
         ]
       }
+      org_sponsor_requests: {
+        Row: {
+          budget_ask: string | null
+          created_at: string
+          decline_reason: string | null
+          description: string | null
+          event_type: string | null
+          expected_attendance: number | null
+          id: string
+          offering_request: Json | null
+          org_id: string
+          preferred_dates: string | null
+          quest_id: string | null
+          requester_id: string
+          sponsor_id: string
+          sponsor_response_at: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          budget_ask?: string | null
+          created_at?: string
+          decline_reason?: string | null
+          description?: string | null
+          event_type?: string | null
+          expected_attendance?: number | null
+          id?: string
+          offering_request?: Json | null
+          org_id: string
+          preferred_dates?: string | null
+          quest_id?: string | null
+          requester_id: string
+          sponsor_id: string
+          sponsor_response_at?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          budget_ask?: string | null
+          created_at?: string
+          decline_reason?: string | null
+          description?: string | null
+          event_type?: string | null
+          expected_attendance?: number | null
+          id?: string
+          offering_request?: Json | null
+          org_id?: string
+          preferred_dates?: string | null
+          quest_id?: string | null
+          requester_id?: string
+          sponsor_id?: string
+          sponsor_response_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_sponsor_requests_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_sponsor_requests_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_sponsor_requests_sponsor_id_fkey"
+            columns: ["sponsor_id"]
+            isOneToOne: false
+            referencedRelation: "sponsor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           contact_email: string | null
@@ -665,6 +786,7 @@ export type Database = {
           name: string
           primary_color: string | null
           school_affiliation: string | null
+          seeking: string[] | null
           slug: string
           type: Database["public"]["Enums"]["organization_type"]
           updated_at: string
@@ -681,6 +803,7 @@ export type Database = {
           name: string
           primary_color?: string | null
           school_affiliation?: string | null
+          seeking?: string[] | null
           slug: string
           type?: Database["public"]["Enums"]["organization_type"]
           updated_at?: string
@@ -697,6 +820,7 @@ export type Database = {
           name?: string
           primary_color?: string | null
           school_affiliation?: string | null
+          seeking?: string[] | null
           slug?: string
           type?: Database["public"]["Enums"]["organization_type"]
           updated_at?: string
@@ -926,6 +1050,7 @@ export type Database = {
           short_description: string | null
           slug: string
           sponsor_id: string | null
+          sponsor_offering: Json | null
           start_datetime: string | null
           status: Database["public"]["Enums"]["quest_status"] | null
           submitted_at: string | null
@@ -969,6 +1094,7 @@ export type Database = {
           short_description?: string | null
           slug: string
           sponsor_id?: string | null
+          sponsor_offering?: Json | null
           start_datetime?: string | null
           status?: Database["public"]["Enums"]["quest_status"] | null
           submitted_at?: string | null
@@ -1012,6 +1138,7 @@ export type Database = {
           short_description?: string | null
           slug?: string
           sponsor_id?: string | null
+          sponsor_offering?: Json | null
           start_datetime?: string | null
           status?: Database["public"]["Enums"]["quest_status"] | null
           submitted_at?: string | null
@@ -1277,6 +1404,72 @@ export type Database = {
           },
         ]
       }
+      sponsor_org_requests: {
+        Row: {
+          created_at: string
+          decline_reason: string | null
+          description: string | null
+          id: string
+          offering: Json | null
+          org_id: string
+          org_response_at: string | null
+          preferred_dates: string | null
+          requester_id: string
+          sponsor_id: string
+          status: string
+          target_demographics: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          decline_reason?: string | null
+          description?: string | null
+          id?: string
+          offering?: Json | null
+          org_id: string
+          org_response_at?: string | null
+          preferred_dates?: string | null
+          requester_id: string
+          sponsor_id: string
+          status?: string
+          target_demographics?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          decline_reason?: string | null
+          description?: string | null
+          id?: string
+          offering?: Json | null
+          org_id?: string
+          org_response_at?: string | null
+          preferred_dates?: string | null
+          requester_id?: string
+          sponsor_id?: string
+          status?: string
+          target_demographics?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsor_org_requests_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsor_org_requests_sponsor_id_fkey"
+            columns: ["sponsor_id"]
+            isOneToOne: false
+            referencedRelation: "sponsor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sponsor_profiles: {
         Row: {
           brand_tone: string | null
@@ -1291,6 +1484,7 @@ export type Database = {
           name: string
           preferred_quest_types: string[] | null
           proposal_templates: Json | null
+          seeking: string[] | null
           slug: string | null
           sponsor_type: string
           status: string
@@ -1312,6 +1506,7 @@ export type Database = {
           name: string
           preferred_quest_types?: string[] | null
           proposal_templates?: Json | null
+          seeking?: string[] | null
           slug?: string | null
           sponsor_type?: string
           status?: string
@@ -1333,6 +1528,7 @@ export type Database = {
           name?: string
           preferred_quest_types?: string[] | null
           proposal_templates?: Json | null
+          seeking?: string[] | null
           slug?: string | null
           sponsor_type?: string
           status?: string
@@ -2106,6 +2302,9 @@ export type Database = {
         | "org_quest_announcement"
         | "org_creator_request"
         | "org_creator_message"
+        | "org_sponsor_request"
+        | "sponsor_org_request"
+        | "collaboration_message"
       org_member_role: "member" | "admin" | "creator"
       organization_type:
         | "university"
@@ -2287,6 +2486,9 @@ export const Constants = {
         "org_quest_announcement",
         "org_creator_request",
         "org_creator_message",
+        "org_sponsor_request",
+        "sponsor_org_request",
+        "collaboration_message",
       ],
       org_member_role: ["member", "admin", "creator"],
       organization_type: [
