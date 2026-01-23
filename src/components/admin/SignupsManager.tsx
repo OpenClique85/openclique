@@ -165,6 +165,16 @@ export function SignupsManager() {
   };
 
   const updateStatus = async (signupId: string, newStatus: SignupStatus) => {
+    // Find the signup to get user_id
+    const signup = signups.find(s => s.id === signupId);
+    if (!signup) {
+      toast({ variant: 'destructive', title: 'Signup not found' });
+      return;
+    }
+    
+    // Check if already completed (prevent double XP)
+    const wasAlreadyCompleted = signup.status === 'completed';
+    
     const { error } = await supabase
       .from('quest_signups')
       .update({ status: newStatus })
@@ -175,7 +185,31 @@ export function SignupsManager() {
       return;
     }
     
-    toast({ title: `Status updated to ${newStatus}` });
+    // Award XP when marking as completed (and wasn't already completed)
+    if (newStatus === 'completed' && !wasAlreadyCompleted) {
+      const { data: xpAwarded, error: xpError } = await supabase
+        .rpc('award_quest_xp', {
+          p_user_id: signup.user_id,
+          p_quest_id: selectedQuestId
+        });
+      
+      if (xpError) {
+        console.error('Failed to award XP:', xpError);
+        toast({ 
+          variant: 'destructive', 
+          title: 'Status updated but XP award failed',
+          description: xpError.message
+        });
+      } else {
+        toast({ 
+          title: `Completed! +${selectedQuest?.base_xp || 50} XP awarded`,
+          description: `${signup.profile?.display_name || 'User'} now has ${xpAwarded} total XP`
+        });
+      }
+    } else {
+      toast({ title: `Status updated to ${newStatus}` });
+    }
+    
     fetchSignups();
   };
 
