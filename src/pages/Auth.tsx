@@ -7,10 +7,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Mail, Lock, ArrowLeft } from 'lucide-react';
+import { Loader2, Mail, Lock, ArrowLeft, Ticket, CheckCircle } from 'lucide-react';
 import { z } from 'zod';
 import logo from '@/assets/logo.png';
+import { OnboardingFeedbackModal } from '@/components/OnboardingFeedbackModal';
 
 const emailSchema = z.string().email('Please enter a valid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
@@ -18,10 +20,14 @@ const passwordSchema = z.string().min(6, 'Password must be at least 6 characters
 export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [redemptionId, setRedemptionId] = useState<string | undefined>();
+  const [inviteCodeLabel, setInviteCodeLabel] = useState<string | null>(null);
   
   const { user, signIn, signUp, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
@@ -29,17 +35,29 @@ export default function Auth() {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   
+  // Get invite code from URL
+  const urlInviteCode = searchParams.get('invite');
+  
+  useEffect(() => {
+    if (urlInviteCode) {
+      setInviteCode(urlInviteCode);
+    }
+  }, [urlInviteCode]);
+  
   // Support both location.state.from and ?redirect= query param
   const redirectParam = searchParams.get('redirect');
   const from = redirectParam 
     || (location.state as { from?: { pathname: string } })?.from?.pathname 
     || '/my-quests';
 
+  // After sign up with invite code, show feedback modal
   useEffect(() => {
-    if (user) {
+    if (user && redemptionId) {
+      setShowFeedbackModal(true);
+    } else if (user && !redemptionId) {
       navigate(from, { replace: true });
     }
-  }, [user, navigate, from]);
+  }, [user, redemptionId, navigate, from]);
 
   const validateForm = (checkPassword = true) => {
     const newErrors: { email?: string; password?: string } = {};
@@ -66,12 +84,35 @@ export default function Auth() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const redeemInviteCode = async () => {
+    if (!inviteCode.trim()) return null;
+    
+    const { data, error } = await supabase.rpc('redeem_invite_code', {
+      p_code: inviteCode.trim(),
+      p_user_agent: navigator.userAgent,
+      p_referral_source: document.referrer || null,
+    });
+    
+    if (error) {
+      console.error('Invite code error:', error);
+      return null;
+    }
+    
+    return data as { success: boolean; redemption_id?: string; code_type?: string; code_label?: string; error?: string };
+  };
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
     
     setIsSubmitting(true);
     const { error } = await signIn(email, password);
+    
+    if (!error && inviteCode) {
+      // Try to redeem invite code after sign in
+      await redeemInviteCode();
+    }
+    
     setIsSubmitting(false);
     
     if (error) {
@@ -91,6 +132,16 @@ export default function Auth() {
     
     setIsSubmitting(true);
     const { error } = await signUp(email, password);
+    
+    if (!error && inviteCode) {
+      // Redeem invite code after successful signup
+      const result = await redeemInviteCode();
+      if (result?.success && result.redemption_id) {
+        setRedemptionId(result.redemption_id);
+        setInviteCodeLabel(result.code_label || null);
+      }
+    }
+    
     setIsSubmitting(false);
     
     if (error) {
@@ -103,7 +154,7 @@ export default function Auth() {
         title: 'Sign up failed',
         description: message
       });
-    } else {
+    } else if (!inviteCode) {
       toast({
         title: 'Account created!',
         description: 'Welcome to OpenClique. You can now access your quests.'
@@ -147,6 +198,11 @@ export default function Auth() {
       });
       setShowForgotPassword(false);
     }
+  };
+
+  const handleFeedbackClose = () => {
+    setShowFeedbackModal(false);
+    navigate(from, { replace: true });
   };
 
   if (showForgotPassword) {
@@ -210,6 +266,13 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      {/* Feedback Modal */}
+      <OnboardingFeedbackModal 
+        open={showFeedbackModal} 
+        onClose={handleFeedbackClose}
+        redemptionId={redemptionId}
+      />
+
       {/* Header */}
       <header className="p-4">
         <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
@@ -228,13 +291,42 @@ export default function Auth() {
             <div>
               <CardTitle className="text-2xl font-display">Welcome</CardTitle>
               <CardDescription>
-                Sign in to join quests and connect with your community
+                {inviteCode 
+                  ? "You've been invited! Create an account to join."
+                  : "Sign in to join quests and connect with your community"
+                }
               </CardDescription>
+              {inviteCode && (
+                <Badge variant="secondary" className="mt-2">
+                  <CheckCircle className="h-3 w-3 mr-1" />
+                  Invite code: {inviteCode}
+                </Badge>
+              )}
             </div>
           </CardHeader>
           
           <CardContent>
-            <Tabs defaultValue="signin" className="space-y-6">
+            {/* Invite code input (if not from URL) */}
+            {!urlInviteCode && (
+              <div className="mb-6">
+                <div className="space-y-2">
+                  <Label htmlFor="invite-code">Have an invite code? (optional)</Label>
+                  <div className="relative">
+                    <Ticket className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="invite-code"
+                      type="text"
+                      placeholder="COFOUNDER-2025"
+                      value={inviteCode}
+                      onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                      className="pl-10 uppercase"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <Tabs defaultValue={inviteCode ? "signup" : "signin"} className="space-y-6">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="signin">Sign In</TabsTrigger>
                 <TabsTrigger value="signup">Sign Up</TabsTrigger>

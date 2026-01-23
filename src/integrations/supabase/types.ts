@@ -902,6 +902,83 @@ export type Database = {
           },
         ]
       }
+      invite_codes: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          label: string | null
+          max_uses: number | null
+          notes: string | null
+          type: Database["public"]["Enums"]["invite_code_type"]
+          uses_count: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          label?: string | null
+          max_uses?: number | null
+          notes?: string | null
+          type?: Database["public"]["Enums"]["invite_code_type"]
+          uses_count?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          label?: string | null
+          max_uses?: number | null
+          notes?: string | null
+          type?: Database["public"]["Enums"]["invite_code_type"]
+          uses_count?: number
+        }
+        Relationships: []
+      }
+      invite_redemptions: {
+        Row: {
+          code_id: string
+          id: string
+          redeemed_at: string
+          referral_source: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          code_id: string
+          id?: string
+          redeemed_at?: string
+          referral_source?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          code_id?: string
+          id?: string
+          redeemed_at?: string
+          referral_source?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invite_redemptions_code_id_fkey"
+            columns: ["code_id"]
+            isOneToOne: false
+            referencedRelation: "invite_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       issue_categories: {
         Row: {
           created_at: string
@@ -1091,6 +1168,56 @@ export type Database = {
             columns: ["quest_id"]
             isOneToOne: false
             referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      onboarding_feedback: {
+        Row: {
+          clarity_rating: number | null
+          created_at: string
+          excitement_rating: number | null
+          id: string
+          redemption_id: string | null
+          signup_experience_rating: number | null
+          suggestions: string | null
+          user_id: string
+          what_confused_you: string | null
+          what_excited_you: string | null
+          would_recommend: boolean | null
+        }
+        Insert: {
+          clarity_rating?: number | null
+          created_at?: string
+          excitement_rating?: number | null
+          id?: string
+          redemption_id?: string | null
+          signup_experience_rating?: number | null
+          suggestions?: string | null
+          user_id: string
+          what_confused_you?: string | null
+          what_excited_you?: string | null
+          would_recommend?: boolean | null
+        }
+        Update: {
+          clarity_rating?: number | null
+          created_at?: string
+          excitement_rating?: number | null
+          id?: string
+          redemption_id?: string | null
+          signup_experience_rating?: number | null
+          suggestions?: string | null
+          user_id?: string
+          what_confused_you?: string | null
+          what_excited_you?: string | null
+          would_recommend?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_feedback_redemption_id_fkey"
+            columns: ["redemption_id"]
+            isOneToOne: false
+            referencedRelation: "invite_redemptions"
             referencedColumns: ["id"]
           },
         ]
@@ -3680,6 +3807,16 @@ export type Database = {
         }
         Returns: string
       }
+      generate_invite_code: {
+        Args: {
+          p_expires_days?: number
+          p_label?: string
+          p_max_uses?: number
+          p_notes?: string
+          p_type?: Database["public"]["Enums"]["invite_code_type"]
+        }
+        Returns: string
+      }
       get_or_create_instance: {
         Args: { p_quest_id: string }
         Returns: {
@@ -3751,6 +3888,14 @@ export type Database = {
         Args: { p_referral_code: string; p_user_id: string }
         Returns: undefined
       }
+      redeem_invite_code: {
+        Args: {
+          p_code: string
+          p_referral_source?: string
+          p_user_agent?: string
+        }
+        Returns: Json
+      }
       start_squad_warm_up: { Args: { p_squad_id: string }; Returns: undefined }
       submit_warm_up_prompt: {
         Args: { p_response: string; p_squad_id: string }
@@ -3784,6 +3929,7 @@ export type Database = {
         | "cancelled"
         | "archived"
         | "paused"
+      invite_code_type: "admin" | "tester" | "early_access"
       message_sender_role: "user" | "admin" | "system"
       notification_type:
         | "quest_recommendation"
@@ -4051,6 +4197,7 @@ export const Constants = {
         "archived",
         "paused",
       ],
+      invite_code_type: ["admin", "tester", "early_access"],
       message_sender_role: ["user", "admin", "system"],
       notification_type: [
         "quest_recommendation",
