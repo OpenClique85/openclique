@@ -2,6 +2,7 @@
  * Squad Manager
  * 
  * Generate squads, assign WhatsApp links, and manage squad composition.
+ * Includes broadcast messaging and drag-and-drop manual squad formation.
  */
 
 import { useState } from 'react';
@@ -15,12 +16,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { 
   Users, Wand2, Lock, Copy, MessageSquare, 
-  Loader2, AlertCircle, CheckCircle, Link2
+  Loader2, AlertCircle, CheckCircle, Link2,
+  Megaphone, MousePointerClick
 } from 'lucide-react';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
 } from '@/components/ui/dialog';
 import { auditLog } from '@/lib/auditLog';
+import { InstanceBroadcastModal } from './InstanceBroadcastModal';
+import { DragDropSquadBuilder } from './DragDropSquadBuilder';
 
 interface SquadWithMembers {
   id: string;
@@ -38,15 +42,18 @@ interface SquadWithMembers {
 
 interface SquadManagerProps {
   instanceId: string;
+  instanceTitle?: string;
   targetSquadSize: number;
 }
 
-export function SquadManager({ instanceId, targetSquadSize }: SquadManagerProps) {
+export function SquadManager({ instanceId, instanceTitle = 'Quest', targetSquadSize }: SquadManagerProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isGenerating, setIsGenerating] = useState(false);
   const [editingSquad, setEditingSquad] = useState<string | null>(null);
   const [whatsappLink, setWhatsappLink] = useState('');
+  const [isBroadcastOpen, setIsBroadcastOpen] = useState(false);
+  const [isDragDropOpen, setIsDragDropOpen] = useState(false);
 
   // Fetch squads with members
   const { data: squads, isLoading } = useQuery({
@@ -231,14 +238,33 @@ export function SquadManager({ instanceId, targetSquadSize }: SquadManagerProps)
       {/* Actions Bar */}
       <Card>
         <CardContent className="py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-3">
             <div className="flex items-center gap-4">
               <p className="text-sm text-muted-foreground">
                 {squads?.length || 0} squads • {unassigned?.length || 0} unassigned
               </p>
             </div>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Broadcast Button */}
+              <Button 
+                variant="outline"
+                onClick={() => setIsBroadcastOpen(true)}
+              >
+                <Megaphone className="h-4 w-4 mr-2" />
+                Broadcast
+              </Button>
+              
+              {/* Manual Assignment Button */}
+              <Button 
+                variant="outline"
+                onClick={() => setIsDragDropOpen(true)}
+              >
+                <MousePointerClick className="h-4 w-4 mr-2" />
+                Manual Assign
+              </Button>
+              
+              {/* Auto Generate */}
               <Button 
                 onClick={handleGenerateSquads}
                 disabled={isGenerating || !unassigned?.length}
@@ -385,6 +411,30 @@ export function SquadManager({ instanceId, targetSquadSize }: SquadManagerProps)
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Broadcast Modal */}
+      <InstanceBroadcastModal
+        open={isBroadcastOpen}
+        onOpenChange={setIsBroadcastOpen}
+        instanceId={instanceId}
+        instanceTitle={instanceTitle}
+      />
+
+      {/* Drag & Drop Squad Builder */}
+      <DragDropSquadBuilder
+        open={isDragDropOpen}
+        onOpenChange={(open) => {
+          setIsDragDropOpen(open);
+          if (!open) {
+            // Refresh data when modal closes
+            queryClient.invalidateQueries({ queryKey: ['instance-squads-detail', instanceId] });
+            queryClient.invalidateQueries({ queryKey: ['instance-unassigned', instanceId] });
+          }
+        }}
+        instanceId={instanceId}
+        instanceTitle={instanceTitle}
+        targetSquadSize={targetSquadSize}
+      />
     </div>
   );
 }

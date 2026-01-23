@@ -325,7 +325,11 @@ export default function PilotControlRoom() {
           </TabsContent>
 
           <TabsContent value="squads">
-            <SquadManager instanceId={instance.id} targetSquadSize={instance.target_squad_size || 6} />
+            <SquadManager 
+              instanceId={instance.id} 
+              instanceTitle={instance.title}
+              targetSquadSize={instance.target_squad_size || 6} 
+            />
           </TabsContent>
 
           <TabsContent value="run-of-show">
