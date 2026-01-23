@@ -32,6 +32,8 @@ import { format } from 'date-fns';
 import {
   BarChart,
   Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -40,6 +42,7 @@ import {
   PieChart,
   Pie,
   Cell,
+  Legend,
 } from 'recharts';
 
 const RATING_COLORS = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e'];
@@ -221,8 +224,110 @@ export default function SponsorAnalytics() {
                 </Card>
               </div>
 
+              {/* ROI Metrics */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <Card className="bg-gradient-to-br from-sunset/5 to-transparent border-sunset/20">
+                  <CardContent className="pt-6">
+                    <p className="text-3xl font-bold text-sunset">
+                      {analytics?.redemptionRate?.toFixed(1) || 0}%
+                    </p>
+                    <p className="text-sm text-muted-foreground">Redemption Rate</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Rewards claimed per participant
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-primary/5 to-transparent border-primary/20">
+                  <CardContent className="pt-6">
+                    <p className="text-3xl font-bold text-primary">
+                      {analytics?.completionRate?.toFixed(0) || 0}%
+                    </p>
+                    <p className="text-sm text-muted-foreground">Completion Rate</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Participants who completed quests
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="pt-6">
+                    <p className="text-3xl font-bold">
+                      {analytics?.totalRewards || 0}
+                    </p>
+                    <p className="text-sm text-muted-foreground">Active Rewards</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Rewards offered to participants
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="pt-6">
+                    <p className="text-3xl font-bold">
+                      {analytics?.testimonials?.length || 0}
+                    </p>
+                    <p className="text-sm text-muted-foreground">Testimonials</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Approved participant feedback
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
               {/* Charts Row */}
               <div className="grid lg:grid-cols-2 gap-6 mb-8">
+                {/* Engagement Trend */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Engagement Over Time</CardTitle>
+                    <CardDescription>Monthly participants and redemptions</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {analytics?.engagementTrend && analytics.engagementTrend.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={300}>
+                        <LineChart data={analytics.engagementTrend}>
+                          <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                          <XAxis 
+                            dataKey="month" 
+                            tick={{ fontSize: 12 }}
+                            tickFormatter={(value) => {
+                              const [year, month] = value.split('-');
+                              return new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('en-US', { month: 'short' });
+                            }}
+                          />
+                          <YAxis />
+                          <Tooltip 
+                            labelFormatter={(value) => {
+                              const [year, month] = value.split('-');
+                              return new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                            }}
+                          />
+                          <Legend />
+                          <Line 
+                            type="monotone" 
+                            dataKey="participants" 
+                            stroke="hsl(var(--primary))" 
+                            strokeWidth={2}
+                            name="Participants"
+                          />
+                          <Line 
+                            type="monotone" 
+                            dataKey="redemptions" 
+                            stroke="hsl(24 95% 53%)" 
+                            strokeWidth={2}
+                            name="Redemptions"
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                        No trend data yet
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
                 {/* Participants by Quest */}
                 <Card>
                   <CardHeader>
