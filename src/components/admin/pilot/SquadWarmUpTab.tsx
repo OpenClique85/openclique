@@ -29,8 +29,10 @@ import {
   AlertCircle,
   Eye,
   Loader2,
-  ThermometerSun
+  ThermometerSun,
+  AlertOctagon
 } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { SquadWarmUpReview } from './SquadWarmUpReview';
 import { 
   SQUAD_STATUS_LABELS, 
@@ -51,6 +53,9 @@ interface SquadSummary {
   readyCount: number;
   progressPct: number;
   lastActivity: string | null;
+  warmingUpSince: string | null;
+  isStalled: boolean;
+  stalledHours: number;
 }
 
 export function SquadWarmUpTab({ instanceId }: SquadWarmUpTabProps) {
@@ -73,6 +78,8 @@ export function SquadWarmUpTab({ instanceId }: SquadWarmUpTabProps) {
         .order('squad_name');
 
       if (squadError) throw squadError;
+      
+      const now = new Date();
 
       // For each squad, get member count
       const squadsWithProgress: SquadSummary[] = await Promise.all(
@@ -104,6 +111,18 @@ export function SquadWarmUpTab({ instanceId }: SquadWarmUpTabProps) {
             progressPct = 50;
             readyCount = Math.floor(activeMembers / 2);
           }
+          
+          // Calculate stalled status (warming_up for > 24 hours)
+          // Using created_at as proxy for when warm-up started
+          let isStalled = false;
+          let stalledHours = 0;
+          const warmingUpSince = squad.created_at;
+          
+          if (squadStatus === 'warming_up' && warmingUpSince) {
+            const warmUpStart = new Date(warmingUpSince);
+            stalledHours = Math.floor((now.getTime() - warmUpStart.getTime()) / (1000 * 60 * 60));
+            isStalled = stalledHours >= 24;
+          }
 
           return {
             id: squad.id,
@@ -112,6 +131,9 @@ export function SquadWarmUpTab({ instanceId }: SquadWarmUpTabProps) {
             memberCount: totalMembers,
             readyCount: readyCount,
             progressPct: progressPct,
+            warmingUpSince,
+            isStalled,
+            stalledHours,
             lastActivity: squad.created_at,
           };
         })
@@ -122,11 +144,13 @@ export function SquadWarmUpTab({ instanceId }: SquadWarmUpTabProps) {
   });
 
   // Calculate summary stats
+  const stalledSquads = squads?.filter(s => s.isStalled) || [];
   const stats = {
     total: squads?.length || 0,
     warmingUp: squads?.filter(s => s.status === 'warming_up').length || 0,
     readyForReview: squads?.filter(s => s.status === 'ready_for_review').length || 0,
     approved: squads?.filter(s => ['approved', 'active', 'completed'].includes(s.status)).length || 0,
+    stalled: stalledSquads.length,
   };
 
   const getStatusIcon = (status: SquadStatus, progressPct: number) => {
@@ -179,6 +203,37 @@ export function SquadWarmUpTab({ instanceId }: SquadWarmUpTabProps) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Stalled squads alert */}
+      {stats.stalled > 0 && (
+        <Card className="border-destructive/50 bg-destructive/10">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2 text-destructive">
+              <AlertOctagon className="h-4 w-4" />
+              Stalled Warm-Ups ({stats.stalled})
+            </CardTitle>
+            <CardDescription>
+              These squads have been in warm-up for 24+ hours without completing. Consider reaching out or reassigning members.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {stalledSquads.map(squad => (
+                <Button
+                  key={squad.id}
+                  variant="outline"
+                  size="sm"
+                  className="border-destructive/50 hover:bg-destructive/20"
+                  onClick={() => setSelectedSquadId(squad.id)}
+                >
+                  <AlertOctagon className="h-3 w-3 mr-1" />
+                  {squad.name} ({squad.stalledHours}h)
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Squads needing attention */}
       {stats.readyForReview > 0 && (
@@ -233,6 +288,7 @@ export function SquadWarmUpTab({ instanceId }: SquadWarmUpTabProps) {
                   <TableRow>
                     <TableHead>Squad</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Attention</TableHead>
                     <TableHead>Progress</TableHead>
                     <TableHead>Members Ready</TableHead>
                     <TableHead>Last Activity</TableHead>
@@ -246,7 +302,7 @@ export function SquadWarmUpTab({ instanceId }: SquadWarmUpTabProps) {
                     return (
                       <TableRow 
                         key={squad.id}
-                        className="cursor-pointer hover:bg-muted/50"
+                        className={`cursor-pointer hover:bg-muted/50 ${squad.isStalled ? 'bg-destructive/5' : ''}`}
                         onClick={() => setSelectedSquadId(squad.id)}
                       >
                         <TableCell className="font-medium">
@@ -263,9 +319,48 @@ export function SquadWarmUpTab({ instanceId }: SquadWarmUpTabProps) {
                           </Badge>
                         </TableCell>
                         <TableCell>
+                          {squad.isStalled ? (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Badge 
+                                    variant="outline" 
+                                    className="bg-destructive/20 text-destructive border-destructive/30 gap-1 cursor-help"
+                                  >
+                                    <AlertOctagon className="h-3 w-3" />
+                                    Stalled
+                                  </Badge>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p className="text-xs">In warm-up for {squad.stalledHours} hours</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          ) : squad.status === 'ready_for_review' ? (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Badge 
+                                    variant="outline" 
+                                    className="bg-amber-500/20 text-amber-700 dark:text-amber-400 border-amber-500/30 gap-1 cursor-help"
+                                  >
+                                    <AlertCircle className="h-3 w-3" />
+                                    Needs Review
+                                  </Badge>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p className="text-xs">Ready for admin approval</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          ) : (
+                            <span className="text-muted-foreground text-xs">—</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
                           <div className="w-24">
                             <Progress 
-                              value={squad.progressPct} 
+                              value={squad.progressPct}
                               className={`h-2 ${squad.progressPct === 100 ? '[&>div]:bg-emerald-500' : ''}`}
                             />
                           </div>
