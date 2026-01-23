@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from '@/components/ui/select';
@@ -26,8 +27,10 @@ import {
 } from '@/components/ui/table';
 import { 
   Plus, Rocket, Calendar, MapPin, Users, 
-  ExternalLink, Copy, Loader2, Clock
+  ExternalLink, Copy, Loader2, Clock, List, CalendarDays, Settings2
 } from 'lucide-react';
+import { BulkStatusUpdateDialog } from './BulkStatusUpdateDialog';
+import { InstanceCalendarView } from './InstanceCalendarView';
 import type { Tables, Enums } from '@/integrations/supabase/types';
 
 type InstanceStatus = Enums<'instance_status'>;
@@ -71,6 +74,8 @@ export function PilotInstancesManager() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isBulkUpdateOpen, setIsBulkUpdateOpen] = useState(false);
+  const [activeView, setActiveView] = useState<'list' | 'calendar'>('list');
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
   const [formData, setFormData] = useState({
     scheduled_date: '',
@@ -173,109 +178,142 @@ export function PilotInstancesManager() {
           <h2 className="text-xl font-semibold">Quest Instances</h2>
           <p className="text-sm text-muted-foreground">Active and upcoming quest runs</p>
         </div>
-        <Button onClick={() => setIsCreateOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          New Instance
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setIsBulkUpdateOpen(true)}>
+            <Settings2 className="h-4 w-4 mr-2" />
+            Bulk Update
+          </Button>
+          <Button onClick={() => setIsCreateOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            New Instance
+          </Button>
+        </div>
       </div>
 
-      {/* Instances Table */}
-      {instances && instances.length > 0 ? (
-        <Card>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Quest</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Countdown</TableHead>
-                  <TableHead>Capacity</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead className="w-24"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {instances.map((instance) => (
-                  <TableRow key={instance.id} className="cursor-pointer hover:bg-muted/50">
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg">{instance.icon}</span>
-                        <div>
-                          <p className="font-medium">{instance.title}</p>
-                          <p className="text-xs text-muted-foreground">{instance.instance_slug}</p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={STATUS_COLORS[instance.status]}>
-                        {instance.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {new Date(instance.scheduled_date).toLocaleDateString('en-US', {
-                        month: 'short', day: 'numeric'
-                      })}
-                      <span className="text-muted-foreground ml-1">
-                        {instance.start_time?.slice(0, 5)}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {getCountdown(instance.scheduled_date, instance.start_time || '00:00')}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      {instance.current_signup_count || 0} / {instance.capacity}
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {instance.meeting_point_name || '—'}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-8 w-8"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            copyQuestCardUrl(instance.quest_card_token);
-                          }}
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => navigate(`/admin/pilot/${instance.id}`)}
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <Rocket className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="font-medium mb-2">No Pilot Instances</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Create your first quest instance from a template.
-            </p>
-            <Button onClick={() => setIsCreateOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Instance
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+      {/* View Toggle */}
+      <Tabs value={activeView} onValueChange={(v) => setActiveView(v as 'list' | 'calendar')}>
+        <TabsList>
+          <TabsTrigger value="list" className="flex items-center gap-1">
+            <List className="h-4 w-4" />
+            List
+          </TabsTrigger>
+          <TabsTrigger value="calendar" className="flex items-center gap-1">
+            <CalendarDays className="h-4 w-4" />
+            Calendar
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="list" className="mt-4">
+          {/* Instances Table */}
+          {instances && instances.length > 0 ? (
+            <Card>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Quest</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Countdown</TableHead>
+                      <TableHead>Capacity</TableHead>
+                      <TableHead>Location</TableHead>
+                      <TableHead className="w-24"></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {instances.map((instance) => (
+                      <TableRow key={instance.id} className="cursor-pointer hover:bg-muted/50">
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg">{instance.icon}</span>
+                            <div>
+                              <p className="font-medium">{instance.title}</p>
+                              <p className="text-xs text-muted-foreground">{instance.instance_slug}</p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={STATUS_COLORS[instance.status]}>
+                            {instance.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {new Date(instance.scheduled_date).toLocaleDateString('en-US', {
+                            month: 'short', day: 'numeric'
+                          })}
+                          <span className="text-muted-foreground ml-1">
+                            {instance.start_time?.slice(0, 5)}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {getCountdown(instance.scheduled_date, instance.start_time || '00:00')}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          {instance.current_signup_count || 0} / {instance.capacity}
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {instance.meeting_point_name || '—'}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                copyQuestCardUrl(instance.quest_card_token);
+                              }}
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => navigate(`/admin/pilot/${instance.id}`)}
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <Rocket className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="font-medium mb-2">No Pilot Instances</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Create your first quest instance from a template.
+                </p>
+                <Button onClick={() => setIsCreateOpen(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Instance
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="calendar" className="mt-4">
+          <InstanceCalendarView />
+        </TabsContent>
+      </Tabs>
+
+      {/* Bulk Status Update Dialog */}
+      <BulkStatusUpdateDialog
+        open={isBulkUpdateOpen}
+        onOpenChange={setIsBulkUpdateOpen}
+        instances={instances || []}
+      />
 
       {/* Create Instance Dialog */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
