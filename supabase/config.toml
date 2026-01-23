@@ -53,3 +53,9 @@ verify_jwt = false
 
 [functions.auto-archive-instances]
 verify_jwt = false
+
+[functions.auto-archive-squads]
+verify_jwt = false
+
+[functions.check-warmup-status]
+verify_jwt = false
