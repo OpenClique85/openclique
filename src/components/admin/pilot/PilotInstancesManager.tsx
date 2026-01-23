@@ -2,19 +2,18 @@
  * Pilot Instances Manager
  * 
  * Admin component for listing, creating, and managing quest instances.
+ * Features operational status labels, attention flags, squad counts, and clickable rows.
  */
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
@@ -26,13 +25,17 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from '@/components/ui/table';
 import { 
-  Plus, Rocket, Calendar, MapPin, Users, 
-  ExternalLink, Copy, Loader2, Clock, List, CalendarDays, Settings2
+  Plus, Rocket, Calendar, MapPin, 
+  ExternalLink, Copy, Loader2, Clock, List, CalendarDays, Settings2, Users
 } from 'lucide-react';
 import { BulkStatusUpdateDialog } from './BulkStatusUpdateDialog';
 import { InstanceCalendarView } from './InstanceCalendarView';
 import { WeekCalendarView } from './WeekCalendarView';
-import type { Tables, Enums } from '@/integrations/supabase/types';
+import { InstanceStatusBadge } from './InstanceStatusBadge';
+import { InstanceAttentionFlag, calculateAttentionFlag } from './InstanceAttentionFlag';
+import { InstanceSummaryStats } from './InstanceSummaryStats';
+import { useInstanceSquadCounts } from '@/hooks/useInstanceSquadCounts';
+import type { Enums } from '@/integrations/supabase/types';
 
 type InstanceStatus = Enums<'instance_status'>;
 
@@ -40,13 +43,14 @@ interface QuestInstance {
   id: string;
   instance_slug: string;
   title: string;
-  icon: string;
+  icon: string | null;
   status: InstanceStatus;
   scheduled_date: string;
   start_time: string;
   meeting_point_name: string | null;
   capacity: number;
-  current_signup_count: number;
+  current_signup_count: number | null;
+  target_squad_size: number | null;
   quest_card_token: string;
   created_at: string;
 }
@@ -59,17 +63,6 @@ interface QuestForPicker {
   default_capacity: number | null;
   is_repeatable: boolean;
 }
-
-const STATUS_COLORS: Record<InstanceStatus, string> = {
-  draft: 'bg-muted text-muted-foreground',
-  recruiting: 'bg-blue-500/20 text-blue-700',
-  locked: 'bg-amber-500/20 text-amber-700',
-  live: 'bg-green-500/20 text-green-700',
-  completed: 'bg-purple-500/20 text-purple-700',
-  cancelled: 'bg-destructive/20 text-destructive',
-  archived: 'bg-muted text-muted-foreground',
-  paused: 'bg-orange-500/20 text-orange-700',
-};
 
 export function PilotInstancesManager() {
   const navigate = useNavigate();
@@ -92,13 +85,17 @@ export function PilotInstancesManager() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('quest_instances')
-        .select('*')
+        .select('id, instance_slug, title, icon, status, scheduled_date, start_time, meeting_point_name, capacity, current_signup_count, target_squad_size, quest_card_token, created_at')
         .not('status', 'eq', 'archived')
         .order('scheduled_date', { ascending: true });
       if (error) throw error;
       return data as QuestInstance[];
     },
   });
+
+  // Fetch squad counts for all instances
+  const instanceIds = useMemo(() => instances?.map(i => i.id) || [], [instances]);
+  const { data: squadCounts } = useInstanceSquadCounts(instanceIds);
 
   // Fetch quests (as templates)
   const { data: quests } = useQuery({
@@ -136,6 +133,13 @@ export function PilotInstancesManager() {
     onSuccess: (instanceId) => {
       queryClient.invalidateQueries({ queryKey: ['quest-instances'] });
       setIsCreateOpen(false);
+      setSelectedTemplate('');
+      setFormData({
+        scheduled_date: '',
+        start_time: '10:00',
+        meeting_point_name: '',
+        meeting_point_address: '',
+      });
       toast({ title: 'Instance created!' });
       navigate(`/admin/pilot/${instanceId}`);
     },
@@ -144,7 +148,8 @@ export function PilotInstancesManager() {
     }
   });
 
-  const copyQuestCardUrl = (token: string) => {
+  const copyQuestCardUrl = (token: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     const url = `${window.location.origin}/quest-card/${token}`;
     navigator.clipboard.writeText(url);
     toast({ title: 'Quest Card URL copied!' });
@@ -161,8 +166,40 @@ export function PilotInstancesManager() {
     if (days > 0) return `${days}d`;
     
     const hours = Math.floor(diff / (1000 * 60 * 60));
-    return `${hours}h`;
+    if (hours > 0) return `${hours}h`;
+    
+    const minutes = Math.floor(diff / (1000 * 60));
+    return `${minutes}m`;
   };
+
+  const handleRowClick = (instanceId: string) => {
+    navigate(`/admin/pilot/${instanceId}`);
+  };
+
+  // Calculate summary stats
+  const summaryStats = useMemo(() => {
+    if (!instances) return { totalInstances: 0, todayCount: 0, needsAttention: 0, totalConfirmed: 0 };
+
+    const today = new Date().toISOString().split('T')[0];
+    let needsAttention = 0;
+    let totalConfirmed = 0;
+
+    instances.forEach(instance => {
+      totalConfirmed += instance.current_signup_count || 0;
+      const squadCount = squadCounts?.[instance.id] || 0;
+      const flag = calculateAttentionFlag(instance, squadCount);
+      if (flag && (flag.severity === 'warning' || flag.severity === 'error')) {
+        needsAttention++;
+      }
+    });
+
+    return {
+      totalInstances: instances.length,
+      todayCount: instances.filter(i => i.scheduled_date === today).length,
+      needsAttention,
+      totalConfirmed,
+    };
+  }, [instances, squadCounts]);
 
   if (isLoading) {
     return (
@@ -192,8 +229,11 @@ export function PilotInstancesManager() {
         </div>
       </div>
 
+      {/* Summary Stats */}
+      <InstanceSummaryStats {...summaryStats} />
+
       {/* View Toggle */}
-      <Tabs value={activeView} onValueChange={(v) => setActiveView(v as 'list' | 'calendar')}>
+      <Tabs value={activeView} onValueChange={(v) => setActiveView(v as 'list' | 'calendar' | 'week')}>
         <TabsList>
           <TabsTrigger value="list" className="flex items-center gap-1">
             <List className="h-4 w-4" />
@@ -219,75 +259,113 @@ export function PilotInstancesManager() {
                     <TableRow>
                       <TableHead>Quest</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Date</TableHead>
+                      <TableHead>Date & Time</TableHead>
                       <TableHead>Countdown</TableHead>
-                      <TableHead>Capacity</TableHead>
+                      <TableHead>Signups</TableHead>
+                      <TableHead>Squads</TableHead>
                       <TableHead>Location</TableHead>
-                      <TableHead className="w-24"></TableHead>
+                      <TableHead>Attention</TableHead>
+                      <TableHead className="w-20"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {instances.map((instance) => (
-                      <TableRow key={instance.id} className="cursor-pointer hover:bg-muted/50">
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <span className="text-lg">{instance.icon}</span>
-                            <div>
-                              <p className="font-medium">{instance.title}</p>
-                              <p className="text-xs text-muted-foreground">{instance.instance_slug}</p>
+                    {instances.map((instance) => {
+                      const squadCount = squadCounts?.[instance.id] || 0;
+                      const attentionFlag = calculateAttentionFlag(instance, squadCount);
+
+                      return (
+                        <TableRow 
+                          key={instance.id} 
+                          className="cursor-pointer hover:bg-muted/50 transition-colors"
+                          onClick={() => handleRowClick(instance.id)}
+                        >
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <span className="text-lg">{instance.icon || '🎯'}</span>
+                              <div>
+                                <p className="font-medium">{instance.title}</p>
+                                <p className="text-xs text-muted-foreground font-mono">
+                                  {instance.instance_slug}
+                                </p>
+                              </div>
                             </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={STATUS_COLORS[instance.status]}>
-                            {instance.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {new Date(instance.scheduled_date).toLocaleDateString('en-US', {
-                            month: 'short', day: 'numeric'
-                          })}
-                          <span className="text-muted-foreground ml-1">
-                            {instance.start_time?.slice(0, 5)}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {getCountdown(instance.scheduled_date, instance.start_time || '00:00')}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          {instance.current_signup_count || 0} / {instance.capacity}
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {instance.meeting_point_name || '—'}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1">
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="h-8 w-8"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                copyQuestCardUrl(instance.quest_card_token);
-                              }}
-                            >
-                              <Copy className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => navigate(`/admin/pilot/${instance.id}`)}
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          </TableCell>
+                          <TableCell>
+                            <InstanceStatusBadge status={instance.status} size="sm" />
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-col">
+                              <span className="font-medium">
+                                {new Date(instance.scheduled_date).toLocaleDateString('en-US', {
+                                  weekday: 'short',
+                                  month: 'short', 
+                                  day: 'numeric'
+                                })}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {instance.start_time?.slice(0, 5)}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <span className="flex items-center gap-1 text-sm">
+                              <Clock className="h-3 w-3 text-muted-foreground" />
+                              {getCountdown(instance.scheduled_date, instance.start_time || '00:00')}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <Users className="h-3 w-3 text-muted-foreground" />
+                              <span className="font-medium">{instance.current_signup_count || 0}</span>
+                              <span className="text-muted-foreground">/ {instance.capacity}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-sm font-medium">
+                              {squadCount > 0 ? squadCount : '—'}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1 text-sm text-muted-foreground max-w-32 truncate">
+                              {instance.meeting_point_name ? (
+                                <>
+                                  <MapPin className="h-3 w-3 flex-shrink-0" />
+                                  <span className="truncate">{instance.meeting_point_name}</span>
+                                </>
+                              ) : (
+                                '—'
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <InstanceAttentionFlag flag={attentionFlag} />
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-8 w-8"
+                                onClick={(e) => copyQuestCardUrl(instance.quest_card_token, e)}
+                              >
+                                <Copy className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/admin/pilot/${instance.id}`);
+                                }}
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </CardContent>

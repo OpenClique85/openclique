@@ -11,7 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
-  AlertTriangle, Users, Clock, UserX, CheckCircle2, 
+  AlertTriangle, Users, Clock, CheckCircle2, 
   ChevronDown, ChevronUp, Info, AlertCircle
 } from 'lucide-react';
 import { useState } from 'react';
@@ -26,6 +26,8 @@ interface InstanceNotification {
   severity: 'info' | 'warning' | 'error' | 'success';
   title: string;
   description: string;
+  instanceId?: string;
+  instanceTitle?: string;
   action?: {
     label: string;
     onClick: () => void;
@@ -33,34 +35,44 @@ interface InstanceNotification {
 }
 
 interface InstanceNotificationPanelProps {
-  instance: QuestInstance;
-  onFormSquads?: () => void;
-  onOpenSquadTab?: () => void;
+  instance?: QuestInstance;
+  instances?: QuestInstance[];
+  onFormSquads?: (instanceId: string) => void;
+  onOpenSquadTab?: (instanceId: string) => void;
+  onNavigateToInstance?: (instanceId: string) => void;
 }
 
 export function InstanceNotificationPanel({ 
   instance, 
+  instances,
   onFormSquads,
-  onOpenSquadTab 
+  onOpenSquadTab,
+  onNavigateToInstance,
 }: InstanceNotificationPanelProps) {
   const [isOpen, setIsOpen] = useState(true);
 
+  // Determine which instances to check
+  const instancesToCheck = instances || (instance ? [instance] : []);
+  const instanceIds = instancesToCheck.map(i => i.id);
+
   // Fetch signup and squad data for notifications
   const { data: stats } = useQuery({
-    queryKey: ['instance-notification-stats', instance.id],
+    queryKey: ['instance-notification-stats', instanceIds],
     queryFn: async () => {
-      // Get signup counts
+      if (instanceIds.length === 0) return [];
+
+      // Get all signups for these instances
       const { data: signups } = await supabase
         .from('quest_signups')
-        .select('id, status')
-        .eq('instance_id', instance.id)
+        .select('id, status, instance_id')
+        .in('instance_id', instanceIds)
         .in('status', ['pending', 'confirmed']);
 
-      // Get squad counts
+      // Get all squads for these instances
       const { data: squads } = await supabase
         .from('quest_squads')
-        .select('id, squad_name')
-        .eq('quest_id', instance.id);
+        .select('id, squad_name, quest_id')
+        .in('quest_id', instanceIds);
 
       // Get squad member counts
       const squadIds = (squads || []).map(s => s.id);
@@ -71,138 +83,169 @@ export function InstanceNotificationPanel({
             .in('squad_id', squadIds)
         : { data: [] };
 
-      const confirmedCount = (signups || []).filter(s => s.status === 'confirmed').length;
-      const pendingCount = (signups || []).filter(s => s.status === 'pending').length;
-      const squadCount = squads?.length || 0;
-      
-      // Get assigned user IDs from squad members
-      const assignedUserIds = new Set((squadMembers || []).map(m => m.user_id));
-      
-      // Count members per squad
-      const squadMemberCounts = new Map<string, number>();
-      (squadMembers || []).forEach(m => {
-        const count = squadMemberCounts.get(m.squad_id) || 0;
-        squadMemberCounts.set(m.squad_id, count + 1);
+      // Build stats per instance
+      return instancesToCheck.map(inst => {
+        const instanceSignups = (signups || []).filter(s => s.instance_id === inst.id);
+        const instanceSquads = (squads || []).filter(s => s.quest_id === inst.id);
+        const instanceSquadIds = instanceSquads.map(s => s.id);
+        const instanceMembers = (squadMembers || []).filter(m => instanceSquadIds.includes(m.squad_id));
+
+        const confirmedCount = instanceSignups.filter(s => s.status === 'confirmed').length;
+        const squadCount = instanceSquads.length;
+        
+        const assignedUserIds = new Set(instanceMembers.map(m => m.user_id));
+        
+        const squadMemberCounts = new Map<string, number>();
+        instanceMembers.forEach(m => {
+          const count = squadMemberCounts.get(m.squad_id) || 0;
+          squadMemberCounts.set(m.squad_id, count + 1);
+        });
+
+        const incompleteSquads = instanceSquads.filter(squad => {
+          const memberCount = squadMemberCounts.get(squad.id) || 0;
+          return memberCount < (inst.target_squad_size || 6);
+        });
+
+        const unassignedCount = squadCount > 0 
+          ? Math.max(0, confirmedCount - assignedUserIds.size)
+          : 0;
+
+        return {
+          instanceId: inst.id,
+          instanceTitle: inst.title,
+          instanceStatus: inst.status,
+          instanceDate: inst.scheduled_date,
+          instanceTime: inst.start_time,
+          targetSquadSize: inst.target_squad_size || 6,
+          confirmedCount,
+          squadCount,
+          unassignedCount,
+          incompleteSquads,
+        };
       });
-
-      const incompleteSquads = (squads || []).filter(squad => {
-        const memberCount = squadMemberCounts.get(squad.id) || 0;
-        return memberCount < (instance.target_squad_size || 6);
-      });
-
-      // Count unassigned as confirmed users not in any squad
-      const unassignedCount = squadCount > 0 
-        ? confirmedCount - assignedUserIds.size 
-        : 0;
-
-      return {
-        confirmedCount,
-        pendingCount,
-        unassignedCount: Math.max(0, unassignedCount),
-        squadCount,
-        incompleteSquads,
-        totalSignups: confirmedCount + pendingCount,
-      };
     },
-    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchInterval: 30000,
+    enabled: instanceIds.length > 0,
   });
 
   // Calculate time until start
-  const getHoursUntilStart = (): number => {
-    const eventDate = new Date(`${instance.scheduled_date}T${instance.start_time}`);
+  const getHoursUntilStart = (date: string, time: string): number => {
+    const eventDate = new Date(`${date}T${time}`);
     const now = new Date();
     const diff = eventDate.getTime() - now.getTime();
     return diff / (1000 * 60 * 60);
   };
 
-  // Generate notifications based on instance state
+  // Generate notifications based on instance states
   const notifications: InstanceNotification[] = [];
 
   if (stats) {
-    const threshold = Math.ceil((instance.target_squad_size || 6) * 0.8);
-    const hoursUntilStart = getHoursUntilStart();
+    stats.forEach(stat => {
+      const threshold = Math.ceil(stat.targetSquadSize * 0.8);
+      const hoursUntilStart = getHoursUntilStart(stat.instanceDate, stat.instanceTime);
 
-    // Ready to form squad
-    if (
-      stats.confirmedCount >= threshold &&
-      stats.squadCount === 0 &&
-      instance.status === 'recruiting'
-    ) {
-      notifications.push({
-        id: 'ready-for-squad',
-        type: 'signup_threshold',
-        severity: 'warning',
-        title: 'Ready to Form Squads',
-        description: `${stats.confirmedCount} users signed up — you can now form squads.`,
-        action: onFormSquads
-          ? { label: 'Form Squads', onClick: onFormSquads }
-          : undefined,
-      });
-    }
+      // Ready to form squad
+      if (
+        stat.confirmedCount >= threshold &&
+        stat.squadCount === 0 &&
+        stat.instanceStatus === 'recruiting'
+      ) {
+        notifications.push({
+          id: `ready-for-squad-${stat.instanceId}`,
+          type: 'signup_threshold',
+          severity: 'warning',
+          title: 'Ready to Form Squads',
+          description: `${stat.confirmedCount} users signed up — you can now form squads.`,
+          instanceId: stat.instanceId,
+          instanceTitle: stat.instanceTitle,
+          action: onFormSquads
+            ? { label: 'Form Squads', onClick: () => onFormSquads(stat.instanceId) }
+            : onNavigateToInstance
+            ? { label: 'View Instance', onClick: () => onNavigateToInstance(stat.instanceId) }
+            : undefined,
+        });
+      }
 
-    // Underfilled near start time
-    if (
-      hoursUntilStart > 0 &&
-      hoursUntilStart < 2 &&
-      stats.confirmedCount < 3 &&
-      instance.status === 'recruiting'
-    ) {
-      notifications.push({
-        id: 'underfilled',
-        type: 'underfilled',
-        severity: 'error',
-        title: 'Underfilled Instance',
-        description: `Only ${stats.confirmedCount} users confirmed, starts in ${Math.round(hoursUntilStart * 60)} minutes. Consider pausing or boosting recruitment.`,
-      });
-    }
+      // Underfilled near start time
+      if (
+        hoursUntilStart > 0 &&
+        hoursUntilStart < 2 &&
+        stat.confirmedCount < 3 &&
+        stat.instanceStatus === 'recruiting'
+      ) {
+        notifications.push({
+          id: `underfilled-${stat.instanceId}`,
+          type: 'underfilled',
+          severity: 'error',
+          title: 'Underfilled Instance',
+          description: `Only ${stat.confirmedCount} users confirmed, starts in ${Math.round(hoursUntilStart * 60)} minutes. Consider pausing or boosting recruitment.`,
+          instanceId: stat.instanceId,
+          instanceTitle: stat.instanceTitle,
+          action: onNavigateToInstance
+            ? { label: 'View Instance', onClick: () => onNavigateToInstance(stat.instanceId) }
+            : undefined,
+        });
+      }
 
-    // Unassigned users after squads formed
-    if (
-      stats.unassignedCount > 0 &&
-      stats.squadCount > 0 &&
-      instance.status === 'locked'
-    ) {
-      notifications.push({
-        id: 'unassigned',
-        type: 'unassigned',
-        severity: 'warning',
-        title: 'Unassigned Users',
-        description: `${stats.unassignedCount} confirmed user${stats.unassignedCount > 1 ? 's are' : ' is'} not assigned to any squad.`,
-        action: onOpenSquadTab
-          ? { label: 'Manage Squads', onClick: onOpenSquadTab }
-          : undefined,
-      });
-    }
+      // Unassigned users after squads formed
+      if (
+        stat.unassignedCount > 0 &&
+        stat.squadCount > 0 &&
+        stat.instanceStatus === 'locked'
+      ) {
+        notifications.push({
+          id: `unassigned-${stat.instanceId}`,
+          type: 'unassigned',
+          severity: 'warning',
+          title: 'Unassigned Users',
+          description: `${stat.unassignedCount} confirmed user${stat.unassignedCount > 1 ? 's are' : ' is'} not assigned to any squad.`,
+          instanceId: stat.instanceId,
+          instanceTitle: stat.instanceTitle,
+          action: onOpenSquadTab
+            ? { label: 'Manage Squads', onClick: () => onOpenSquadTab(stat.instanceId) }
+            : onNavigateToInstance
+            ? { label: 'View Instance', onClick: () => onNavigateToInstance(stat.instanceId) }
+            : undefined,
+        });
+      }
 
-    // Incomplete squads
-    if (stats.incompleteSquads.length > 0 && instance.status === 'locked') {
-      notifications.push({
-        id: 'incomplete-squads',
-        type: 'squad_incomplete',
-        severity: 'info',
-        title: 'Incomplete Squads',
-        description: `${stats.incompleteSquads.length} squad${stats.incompleteSquads.length > 1 ? 's have' : ' has'} fewer than ${instance.target_squad_size || 6} members.`,
-        action: onOpenSquadTab
-          ? { label: 'View Squads', onClick: onOpenSquadTab }
-          : undefined,
-      });
-    }
+      // Incomplete squads
+      if (stat.incompleteSquads.length > 0 && stat.instanceStatus === 'locked') {
+        notifications.push({
+          id: `incomplete-squads-${stat.instanceId}`,
+          type: 'squad_incomplete',
+          severity: 'info',
+          title: 'Incomplete Squads',
+          description: `${stat.incompleteSquads.length} squad${stat.incompleteSquads.length > 1 ? 's have' : ' has'} fewer than ${stat.targetSquadSize} members.`,
+          instanceId: stat.instanceId,
+          instanceTitle: stat.instanceTitle,
+          action: onOpenSquadTab
+            ? { label: 'View Squads', onClick: () => onOpenSquadTab(stat.instanceId) }
+            : onNavigateToInstance
+            ? { label: 'View Instance', onClick: () => onNavigateToInstance(stat.instanceId) }
+            : undefined,
+        });
+      }
 
-    // All good - ready to go live
-    if (
-      instance.status === 'locked' &&
-      stats.unassignedCount === 0 &&
-      stats.squadCount > 0 &&
-      stats.incompleteSquads.length === 0
-    ) {
-      notifications.push({
-        id: 'ready-to-go',
-        type: 'ready_to_go',
-        severity: 'success',
-        title: 'Ready to Go Live',
-        description: `All ${stats.confirmedCount} users are assigned to ${stats.squadCount} complete squads.`,
-      });
-    }
+      // All good - ready to go live (only show for single instance view)
+      if (
+        !instances &&
+        stat.instanceStatus === 'locked' &&
+        stat.unassignedCount === 0 &&
+        stat.squadCount > 0 &&
+        stat.incompleteSquads.length === 0
+      ) {
+        notifications.push({
+          id: `ready-to-go-${stat.instanceId}`,
+          type: 'ready_to_go',
+          severity: 'success',
+          title: 'Ready to Go Live',
+          description: `All ${stat.confirmedCount} users are assigned to ${stat.squadCount} complete squads.`,
+          instanceId: stat.instanceId,
+          instanceTitle: stat.instanceTitle,
+        });
+      }
+    });
   }
 
   if (notifications.length === 0) {
@@ -281,8 +324,13 @@ export function InstanceNotificationPanel({
             <div className="flex items-start gap-3">
               {getSeverityIcon(notification.severity)}
               <div className="flex-1">
-                <AlertTitle className="text-sm font-medium mb-1">
+                <AlertTitle className="text-sm font-medium mb-1 flex items-center gap-2">
                   {notification.title}
+                  {instances && notification.instanceTitle && (
+                    <Badge variant="outline" className="text-xs font-normal">
+                      {notification.instanceTitle}
+                    </Badge>
+                  )}
                 </AlertTitle>
                 <AlertDescription className="text-xs text-muted-foreground">
                   {notification.description}
