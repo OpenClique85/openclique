@@ -39,6 +39,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
     tabs: [
       { id: 'support-inbox', label: 'Ticket Inbox' },
       { id: 'support-dm', label: 'Direct Messages' },
+      { id: 'support-analytics', label: 'Analytics' },
       { id: 'support-categories', label: 'Issue Categories' },
     ],
   },

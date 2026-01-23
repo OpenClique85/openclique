@@ -26,6 +26,7 @@ import { LinksManager } from '@/components/admin/LinksManager';
 import { SupportDashboard } from '@/components/admin/SupportDashboard';
 import { IssueCategoriesManager } from '@/components/admin/IssueCategoriesManager';
 import { AdminDirectMessages } from '@/components/admin/AdminDirectMessages';
+import { SupportAnalytics } from '@/components/admin/SupportAnalytics';
 
 export default function Admin() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
@@ -60,6 +61,7 @@ export default function Admin() {
       case 'orgs': return <OrgsManager />;
       case 'support-inbox': return <SupportDashboard />;
       case 'support-dm': return <AdminDirectMessages />;
+      case 'support-analytics': return <SupportAnalytics />;
       case 'support-categories': return <IssueCategoriesManager />;
       case 'creators': return <CreatorsManager />;
       case 'sponsors': return <SponsorsManager />;
