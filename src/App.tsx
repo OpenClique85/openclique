@@ -59,6 +59,8 @@ import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
 import FeedbackFlow from "./pages/FeedbackFlow";
 import Notifications from "./pages/Notifications";
+import Support from "./pages/Support";
+import SupportTicketDetail from "./pages/SupportTicketDetail";
 import CreatorOnboarding from "./pages/CreatorOnboarding";
 import CreatorDashboard from "./pages/CreatorDashboard";
 import CreatorQuests from "./pages/CreatorQuests";
@@ -118,6 +120,8 @@ const App = () => (
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/squads/:squadId" element={<ProtectedRoute><SquadDetail /></ProtectedRoute>} />
             <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+            <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
+            <Route path="/support/:ticketId" element={<ProtectedRoute><SupportTicketDetail /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute requireAdmin><Admin /></ProtectedRoute>} />
             <Route path="/feedback/:questId" element={<ProtectedRoute><FeedbackFlow /></ProtectedRoute>} />
             

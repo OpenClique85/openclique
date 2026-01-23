@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Instagram, Linkedin } from "lucide-react";
 import { FOOTER, SOCIAL_LINKS, BRAND } from "@/constants/content";
+import { GetHelpButton } from "@/components/support/GetHelpButton";
 
 export function Footer() {
   return (
@@ -37,10 +38,11 @@ export function Footer() {
             <h4 className="font-display font-semibold mb-4">Connect</h4>
             <a
               href={`mailto:${FOOTER.contactEmail}`}
-              className="text-sm text-background/70 hover:text-background transition-colors block mb-4"
+              className="text-sm text-background/70 hover:text-background transition-colors block mb-3"
             >
               {FOOTER.contactEmail}
             </a>
+            <GetHelpButton variant="link" className="text-background/70 hover:text-background mb-4" />
             <div className="flex gap-4">
               <a
                 href={SOCIAL_LINKS.instagram}
