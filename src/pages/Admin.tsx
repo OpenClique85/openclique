@@ -23,6 +23,8 @@ import { BadgesManager } from '@/components/admin/BadgesManager';
 import { StreaksManager } from '@/components/admin/StreaksManager';
 import { AdminSectionNav } from '@/components/admin/AdminSectionNav';
 import { LinksManager } from '@/components/admin/LinksManager';
+import { SupportDashboard } from '@/components/admin/SupportDashboard';
+import { IssueCategoriesManager } from '@/components/admin/IssueCategoriesManager';
 
 export default function Admin() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
@@ -55,6 +57,8 @@ export default function Admin() {
       case 'signups': return <SignupsManager />;
       case 'squads': return <PersistentSquadsManager />;
       case 'orgs': return <OrgsManager />;
+      case 'support-inbox': return <SupportDashboard />;
+      case 'support-categories': return <IssueCategoriesManager />;
       case 'creators': return <CreatorsManager />;
       case 'sponsors': return <SponsorsManager />;
       case 'testimonials': return <TestimonialsManager />;
