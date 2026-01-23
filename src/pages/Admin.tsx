@@ -34,6 +34,7 @@ import { ManualOverrides } from '@/components/admin/ops/ManualOverrides';
 import { FeatureFlagsManager } from '@/components/admin/ops/FeatureFlagsManager';
 import { SecurityTools } from '@/components/admin/ops/SecurityTools';
 import { NotificationConsole } from '@/components/admin/notifications';
+import { DocsManager, DocsExportPanel } from '@/components/admin/docs';
 
 export default function Admin() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
@@ -92,6 +93,9 @@ export default function Admin() {
       case 'feature-flags': return <FeatureFlagsManager />;
       case 'security-tools': return <SecurityTools />;
       case 'devtools': return <DevToolsSection />;
+      // Documentation
+      case 'docs-manager': return <DocsManager />;
+      case 'docs-export': return <DocsExportPanel />;
       default: return <QuestsManager />;
     }
   };
