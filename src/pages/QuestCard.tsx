@@ -12,7 +12,7 @@
  */
 
 import { useState, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -26,7 +26,7 @@ import {
   MapPin, Calendar, Clock, Users, Package, 
   Shield, CheckCircle, Camera, Video, FileText,
   MessageSquare, Loader2, AlertCircle, ExternalLink,
-  Star, Trophy
+  Star, Trophy, MessageCircleMore
 } from 'lucide-react';
 
 interface QuestInstanceData {
@@ -53,7 +53,9 @@ interface ParticipantData {
   checked_in_at: string | null;
   completed_at: string | null;
   whatsapp_joined: boolean;
+  squad_id?: string;
   squad_name?: string;
+  squad_status?: string;
   whatsapp_link?: string;
 }
 
@@ -87,18 +89,36 @@ export default function QuestCard() {
         const { data: signup } = await supabase
           .from('quest_signups')
           .select(`
-            id, user_id, status, checked_in_at, completed_at, whatsapp_joined,
-            quest_squads(squad_name, whatsapp_link)
+            id, user_id, status, checked_in_at, completed_at, whatsapp_joined
           `)
           .eq('instance_id', instance.id)
           .eq('user_id', user.id)
           .single();
         
         if (signup) {
+          // Get squad membership separately
+          const { data: squadMember } = await supabase
+            .from('squad_members')
+            .select(`
+              quest_squads(id, squad_name, status, whatsapp_link)
+            `)
+            .eq('user_id', user.id)
+            .eq('quest_squads.instance_id', instance.id)
+            .maybeSingle();
+          
+          const squadData = squadMember?.quest_squads as any;
+          
           participant = {
-            ...signup,
-            squad_name: (signup.quest_squads as any)?.squad_name,
-            whatsapp_link: (signup.quest_squads as any)?.whatsapp_link,
+            id: signup.id,
+            user_id: signup.user_id,
+            status: signup.status,
+            checked_in_at: signup.checked_in_at,
+            completed_at: signup.completed_at,
+            whatsapp_joined: signup.whatsapp_joined,
+            squad_id: squadData?.id,
+            squad_name: squadData?.squad_name,
+            squad_status: squadData?.status,
+            whatsapp_link: squadData?.whatsapp_link,
           };
         }
       }
@@ -251,6 +271,9 @@ export default function QuestCard() {
   const isCheckedIn = !!participant?.checked_in_at;
   const isCompleted = !!participant?.completed_at;
   const hasProof = proofCount > 0;
+  
+  // Check if squad is in warm-up phase
+  const isSquadWarmingUp = participant?.squad_status === 'warming_up' || participant?.squad_status === 'ready_for_review';
 
   // Check-in window
   const now = new Date();
@@ -342,6 +365,29 @@ export default function QuestCard() {
         </Card>
 
         {/* Status-based Action Cards */}
+        
+        {/* Squad Warm-Up Redirect */}
+        {participant && isSquadWarmingUp && participant.squad_id && (
+          <Card className="border-primary bg-primary/5">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3 mb-4">
+                <MessageCircleMore className="h-6 w-6 text-primary" />
+                <div>
+                  <p className="font-medium">Squad Warm-Up in Progress</p>
+                  <p className="text-sm text-muted-foreground">
+                    Meet your squad and confirm readiness before quest details unlock
+                  </p>
+                </div>
+              </div>
+              <Link to={`/warmup/${participant.squad_id}`}>
+                <Button className="w-full">
+                  <MessageCircleMore className="h-4 w-4 mr-2" />
+                  Join Warm-Up Chat
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        )}
         
         {/* WhatsApp Join */}
         {participant && participant.whatsapp_link && !participant.whatsapp_joined && (

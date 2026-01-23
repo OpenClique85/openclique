@@ -52,6 +52,7 @@ import Terms from "./pages/Terms";
 import Quests from "./pages/Quests";
 import QuestDetail from "./pages/QuestDetail";
 import SquadDetail from "./pages/SquadDetail";
+import SquadWarmUp from "./pages/SquadWarmUp";
 import QuestCard from "./pages/QuestCard";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
@@ -122,6 +123,7 @@ const App = () => (
             <Route path="/my-quests" element={<ProtectedRoute><MyQuests /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/squads/:squadId" element={<ProtectedRoute><SquadDetail /></ProtectedRoute>} />
+            <Route path="/warmup/:squadId" element={<ProtectedRoute><SquadWarmUp /></ProtectedRoute>} />
             <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
             <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
             <Route path="/support/:ticketId" element={<ProtectedRoute><SupportTicketDetail /></ProtectedRoute>} />
