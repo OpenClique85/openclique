@@ -2,6 +2,7 @@
  * Quest Lifecycle Management
  * 
  * Centralized logic for quest status transitions, validation, and audit logging.
+ * Includes email notifications for lifecycle changes.
  */
 
 import { supabase } from '@/integrations/supabase/client';
@@ -147,6 +148,18 @@ export async function transitionQuestStatus(
     // Send notifications if requested
     if (options.notifyCreator && quest.creator_id) {
       await createStatusNotification(quest.creator_id, quest.title, newStatus, options.reason);
+    }
+
+    // Send email notifications for lifecycle changes (paused, cancelled, revoked)
+    if (options.notifyUsers) {
+      if (newStatus === 'paused' || newStatus === 'cancelled' || newStatus === 'revoked') {
+        await sendLifecycleEmails(questId, quest.title, newStatus, options.reason);
+      }
+    }
+    
+    // Send resume emails when unpausing
+    if (currentStatus === 'paused' && newStatus === 'open') {
+      await sendLifecycleEmails(questId, quest.title, 'resumed', undefined);
     }
 
     return { success: true, newStatus };
@@ -391,4 +404,99 @@ async function createReviewNotification(
     title: `Quest Review: ${questTitle}`,
     body: `Your quest "${questTitle}" ${bodyText}`,
   }]);
+}
+
+/**
+ * Send lifecycle email notifications to all signed-up users
+ */
+async function sendLifecycleEmails(
+  questId: string,
+  questTitle: string,
+  status: 'paused' | 'cancelled' | 'revoked' | 'resumed',
+  reason?: string
+): Promise<void> {
+  try {
+    // Get quest details for email
+    const { data: quest } = await supabase
+      .from('quests')
+      .select('start_datetime, meeting_location_name')
+      .eq('id', questId)
+      .single();
+
+    // Get all confirmed users with their profiles
+    const { data: signups } = await supabase
+      .from('quest_signups')
+      .select(`
+        user_id,
+        profiles!inner(email, display_name)
+      `)
+      .eq('quest_id', questId)
+      .eq('status', 'confirmed');
+
+    if (!signups || signups.length === 0) return;
+
+    // Collect email addresses
+    const emailData: { email: string; displayName: string }[] = [];
+    
+    for (const signup of signups) {
+      const profile = signup.profiles as unknown as { email: string | null; display_name: string };
+      if (profile?.email) {
+        emailData.push({
+          email: profile.email,
+          displayName: profile.display_name || 'Adventurer',
+        });
+      }
+    }
+
+    if (emailData.length === 0) return;
+
+    // Map status to template
+    const templateMap: Record<string, string> = {
+      paused: 'quest_paused',
+      cancelled: 'quest_cancelled',
+      revoked: 'quest_revoked',
+      resumed: 'quest_resumed',
+    };
+
+    const subjectMap: Record<string, string> = {
+      paused: `Quest Paused: ${questTitle}`,
+      cancelled: `Quest Cancelled: ${questTitle}`,
+      revoked: `Quest Revoked: ${questTitle}`,
+      resumed: `Quest Resumed: ${questTitle}`,
+    };
+
+    // Send emails via edge function
+    for (const { email, displayName } of emailData) {
+      try {
+        await supabase.functions.invoke('send-email', {
+          body: {
+            to: email,
+            subject: subjectMap[status],
+            template: templateMap[status],
+            variables: {
+              display_name: displayName,
+              quest_name: questTitle,
+              reason: reason || '',
+              quest_date: quest?.start_datetime 
+                ? new Date(quest.start_datetime).toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    month: 'long', 
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit'
+                  })
+                : 'TBD',
+              quest_location: quest?.meeting_location_name || 'Check the app',
+            },
+          },
+        });
+      } catch (emailErr) {
+        console.error(`Failed to send ${status} email to ${email}:`, emailErr);
+      }
+    }
+
+    console.log(`Sent ${status} emails to ${emailData.length} users for quest ${questId}`);
+  } catch (err) {
+    console.error('Error sending lifecycle emails:', err);
+  }
 }
