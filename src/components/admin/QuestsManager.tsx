@@ -79,6 +79,7 @@ interface QuestWithCounts extends Quest {
     dropped: number;
   };
   referral_count?: number;
+  instance_count?: number;
 }
 
 interface FormData {
@@ -175,10 +176,10 @@ export function QuestsManager() {
       return;
     }
     
-    // Fetch signup counts and referral counts for each quest
+    // Fetch signup counts, referral counts, and instance counts for each quest
     const questsWithCounts: QuestWithCounts[] = await Promise.all(
       (questsData || []).map(async (quest) => {
-        const [signupsResult, referralsResult] = await Promise.all([
+        const [signupsResult, referralsResult, instancesResult] = await Promise.all([
           supabase
             .from('quest_signups')
             .select('status')
@@ -186,7 +187,12 @@ export function QuestsManager() {
           supabase
             .from('referrals')
             .select('id')
+            .eq('quest_id', quest.id),
+          supabase
+            .from('quest_instances')
+            .select('id')
             .eq('quest_id', quest.id)
+            .not('status', 'eq', 'archived')
         ]);
         
         const counts = {
@@ -205,7 +211,8 @@ export function QuestsManager() {
         return { 
           ...quest, 
           signup_counts: counts,
-          referral_count: referralsResult.data?.length || 0
+          referral_count: referralsResult.data?.length || 0,
+          instance_count: instancesResult.data?.length || 0
         };
       })
     );
@@ -547,6 +554,12 @@ export function QuestsManager() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
+                    {quest.instance_count !== undefined && quest.instance_count > 0 && (
+                      <Badge variant="secondary" className="text-xs flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        {quest.instance_count} instance{quest.instance_count !== 1 ? 's' : ''}
+                      </Badge>
+                    )}
                     <Badge className={STATUS_COLORS[quest.status || 'draft']}>
                       {quest.status}
                     </Badge>
