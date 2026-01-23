@@ -205,6 +205,39 @@ export type Database = {
           },
         ]
       }
+      admin_shadow_sessions: {
+        Row: {
+          accessed_tables: string[] | null
+          actions_taken: Json | null
+          admin_user_id: string
+          ended_at: string | null
+          id: string
+          reason: string
+          started_at: string | null
+          target_user_id: string
+        }
+        Insert: {
+          accessed_tables?: string[] | null
+          actions_taken?: Json | null
+          admin_user_id: string
+          ended_at?: string | null
+          id?: string
+          reason: string
+          started_at?: string | null
+          target_user_id: string
+        }
+        Update: {
+          accessed_tables?: string[] | null
+          actions_taken?: Json | null
+          admin_user_id?: string
+          ended_at?: string | null
+          id?: string
+          reason?: string
+          started_at?: string | null
+          target_user_id?: string
+        }
+        Relationships: []
+      }
       badge_templates: {
         Row: {
           category: string | null
@@ -279,28 +312,37 @@ export type Database = {
       }
       comms_log: {
         Row: {
+          error_message: string | null
           id: string
+          metadata: Json | null
           provider_message_id: string | null
           quest_id: string | null
           sent_at: string
+          status: string | null
           subject: string | null
           type: Database["public"]["Enums"]["comms_type"]
           user_id: string | null
         }
         Insert: {
+          error_message?: string | null
           id?: string
+          metadata?: Json | null
           provider_message_id?: string | null
           quest_id?: string | null
           sent_at?: string
+          status?: string | null
           subject?: string | null
           type: Database["public"]["Enums"]["comms_type"]
           user_id?: string | null
         }
         Update: {
+          error_message?: string | null
           id?: string
+          metadata?: Json | null
           provider_message_id?: string | null
           quest_id?: string | null
           sent_at?: string
+          status?: string | null
           subject?: string | null
           type?: Database["public"]["Enums"]["comms_type"]
           user_id?: string | null
@@ -450,6 +492,86 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      feature_flag_audit: {
+        Row: {
+          changed_by: string
+          created_at: string | null
+          flag_id: string | null
+          id: string
+          new_state: Json | null
+          old_state: Json | null
+        }
+        Insert: {
+          changed_by: string
+          created_at?: string | null
+          flag_id?: string | null
+          id?: string
+          new_state?: Json | null
+          old_state?: Json | null
+        }
+        Update: {
+          changed_by?: string
+          created_at?: string | null
+          flag_id?: string | null
+          id?: string
+          new_state?: Json | null
+          old_state?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feature_flag_audit_flag_id_fkey"
+            columns: ["flag_id"]
+            isOneToOne: false
+            referencedRelation: "feature_flags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feature_flags: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          is_enabled: boolean | null
+          key: string
+          name: string
+          rollout_percentage: number | null
+          target_org_ids: string[] | null
+          target_roles: Database["public"]["Enums"]["app_role"][] | null
+          target_user_ids: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          key: string
+          name: string
+          rollout_percentage?: number | null
+          target_org_ids?: string[] | null
+          target_roles?: Database["public"]["Enums"]["app_role"][] | null
+          target_user_ids?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          key?: string
+          name?: string
+          rollout_percentage?: number | null
+          target_org_ids?: string[] | null
+          target_roles?: Database["public"]["Enums"]["app_role"][] | null
+          target_user_ids?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       feedback: {
         Row: {
@@ -855,6 +977,69 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      ops_events: {
+        Row: {
+          actor_type: string | null
+          actor_user_id: string | null
+          after_state: Json | null
+          before_state: Json | null
+          correlation_id: string | null
+          created_at: string | null
+          creator_id: string | null
+          event_type: Database["public"]["Enums"]["ops_event_type"]
+          id: string
+          listing_id: string | null
+          metadata: Json | null
+          org_id: string | null
+          quest_id: string | null
+          signup_id: string | null
+          sponsor_id: string | null
+          squad_id: string | null
+          ticket_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          actor_type?: string | null
+          actor_user_id?: string | null
+          after_state?: Json | null
+          before_state?: Json | null
+          correlation_id?: string | null
+          created_at?: string | null
+          creator_id?: string | null
+          event_type: Database["public"]["Enums"]["ops_event_type"]
+          id?: string
+          listing_id?: string | null
+          metadata?: Json | null
+          org_id?: string | null
+          quest_id?: string | null
+          signup_id?: string | null
+          sponsor_id?: string | null
+          squad_id?: string | null
+          ticket_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          actor_type?: string | null
+          actor_user_id?: string | null
+          after_state?: Json | null
+          before_state?: Json | null
+          correlation_id?: string | null
+          created_at?: string | null
+          creator_id?: string | null
+          event_type?: Database["public"]["Enums"]["ops_event_type"]
+          id?: string
+          listing_id?: string | null
+          metadata?: Json | null
+          org_id?: string | null
+          quest_id?: string | null
+          signup_id?: string | null
+          sponsor_id?: string | null
+          squad_id?: string | null
+          ticket_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
       org_creator_requests: {
         Row: {
@@ -2219,8 +2404,10 @@ export type Database = {
           first_response_at: string | null
           first_response_sla_breached_at: string | null
           id: string
+          incident_id: string | null
           internal_notes: string | null
           metadata: Json | null
+          parent_ticket_id: string | null
           related_quest_id: string | null
           related_squad_id: string | null
           related_user_id: string | null
@@ -2240,8 +2427,10 @@ export type Database = {
           first_response_at?: string | null
           first_response_sla_breached_at?: string | null
           id?: string
+          incident_id?: string | null
           internal_notes?: string | null
           metadata?: Json | null
+          parent_ticket_id?: string | null
           related_quest_id?: string | null
           related_squad_id?: string | null
           related_user_id?: string | null
@@ -2261,8 +2450,10 @@ export type Database = {
           first_response_at?: string | null
           first_response_sla_breached_at?: string | null
           id?: string
+          incident_id?: string | null
           internal_notes?: string | null
           metadata?: Json | null
+          parent_ticket_id?: string | null
           related_quest_id?: string | null
           related_squad_id?: string | null
           related_user_id?: string | null
@@ -2280,6 +2471,13 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "issue_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_parent_ticket_id_fkey"
+            columns: ["parent_ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
             referencedColumns: ["id"]
           },
           {
@@ -2830,6 +3028,30 @@ export type Database = {
         | "support_ticket_update"
         | "support_ticket_assigned"
         | "admin_direct_message"
+      ops_event_type:
+        | "signup_created"
+        | "signup_status_changed"
+        | "signup_xp_awarded"
+        | "squad_created"
+        | "squad_member_added"
+        | "squad_member_removed"
+        | "quest_created"
+        | "quest_published"
+        | "quest_status_changed"
+        | "xp_awarded"
+        | "achievement_unlocked"
+        | "streak_updated"
+        | "notification_sent"
+        | "notification_failed"
+        | "email_sent"
+        | "email_failed"
+        | "ticket_created"
+        | "ticket_resolved"
+        | "admin_action"
+        | "manual_override"
+        | "feature_flag_changed"
+        | "shadow_session_started"
+        | "shadow_session_ended"
       org_member_role: "member" | "admin" | "creator"
       organization_type:
         | "university"
@@ -3031,6 +3253,31 @@ export const Constants = {
         "support_ticket_update",
         "support_ticket_assigned",
         "admin_direct_message",
+      ],
+      ops_event_type: [
+        "signup_created",
+        "signup_status_changed",
+        "signup_xp_awarded",
+        "squad_created",
+        "squad_member_added",
+        "squad_member_removed",
+        "quest_created",
+        "quest_published",
+        "quest_status_changed",
+        "xp_awarded",
+        "achievement_unlocked",
+        "streak_updated",
+        "notification_sent",
+        "notification_failed",
+        "email_sent",
+        "email_failed",
+        "ticket_created",
+        "ticket_resolved",
+        "admin_action",
+        "manual_override",
+        "feature_flag_changed",
+        "shadow_session_started",
+        "shadow_session_ended",
       ],
       org_member_role: ["member", "admin", "creator"],
       organization_type: [

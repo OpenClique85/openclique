@@ -7,7 +7,7 @@
 import { cn } from '@/lib/utils';
 import { 
   Map, Users, MessageSquare, BarChart3, Gamepad2,
-  ChevronDown, ChevronRight, Link2
+  ChevronDown, ChevronRight, Link2, Wrench
 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -71,7 +71,6 @@ export const ADMIN_SECTIONS: AdminSection[] = [
     icon: <BarChart3 className="h-4 w-4" />,
     tabs: [
       { id: 'analytics', label: 'Analytics' },
-      { id: 'devtools', label: 'Dev Tools' },
     ],
   },
   {
@@ -83,6 +82,19 @@ export const ADMIN_SECTIONS: AdminSection[] = [
       { id: 'achievements', label: 'Achievements' },
       { id: 'badges', label: 'Badges' },
       { id: 'streaks', label: 'Streaks' },
+    ],
+  },
+  {
+    id: 'ops-dev',
+    label: 'Ops & Dev',
+    icon: <Wrench className="h-4 w-4" />,
+    tabs: [
+      { id: 'shadow-mode', label: 'Shadow Mode' },
+      { id: 'event-timeline', label: 'Event Timeline' },
+      { id: 'flow-debugger', label: 'Flow Debugger' },
+      { id: 'manual-overrides', label: 'Manual Overrides' },
+      { id: 'feature-flags', label: 'Feature Flags' },
+      { id: 'devtools', label: 'Dev Tools' },
     ],
   },
 ];
