@@ -40,7 +40,7 @@ const STATUS_BADGES: Record<string, { label: string; variant: 'default' | 'secon
 };
 
 export default function MyQuests() {
-  const { user, profile, isLoading: authLoading } = useAuth();
+  const { user, profile, isLoading: authLoading, isProfileLoaded } = useAuth();
   const [signups, setSignups] = useState<SignupWithQuest[]>([]);
   const [availableRewards, setAvailableRewards] = useState<RewardWithSponsor[]>([]);
   const [claimedRewardIds, setClaimedRewardIds] = useState<Set<string>>(new Set());
@@ -57,11 +57,12 @@ export default function MyQuests() {
     reward: RewardWithSponsor | null;
   }>({ open: false, reward: null });
 
+  // Only show profile modal after profile fetch completes AND there's no profile
   useEffect(() => {
-    if (user && !profile && !authLoading) {
+    if (user && !profile && !authLoading && isProfileLoaded) {
       setShowProfileModal(true);
     }
-  }, [user, profile, authLoading]);
+  }, [user, profile, authLoading, isProfileLoaded]);
 
   const fetchSignups = async () => {
     if (!user) return;

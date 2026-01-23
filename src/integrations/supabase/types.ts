@@ -581,6 +581,57 @@ export type Database = {
           },
         ]
       }
+      organizations: {
+        Row: {
+          contact_email: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          is_verified: boolean
+          logo_url: string | null
+          name: string
+          primary_color: string | null
+          school_affiliation: string | null
+          slug: string
+          type: Database["public"]["Enums"]["organization_type"]
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          contact_email?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_verified?: boolean
+          logo_url?: string | null
+          name: string
+          primary_color?: string | null
+          school_affiliation?: string | null
+          slug: string
+          type?: Database["public"]["Enums"]["organization_type"]
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          contact_email?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_verified?: boolean
+          logo_url?: string | null
+          name?: string
+          primary_color?: string | null
+          school_affiliation?: string | null
+          slug?: string
+          type?: Database["public"]["Enums"]["organization_type"]
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
       partner_applications: {
         Row: {
           business_name: string
@@ -613,6 +664,42 @@ export type Database = {
           status?: string | null
         }
         Relationships: []
+      }
+      profile_organizations: {
+        Row: {
+          joined_at: string
+          org_id: string
+          profile_id: string
+          role: Database["public"]["Enums"]["org_member_role"]
+        }
+        Insert: {
+          joined_at?: string
+          org_id: string
+          profile_id: string
+          role?: Database["public"]["Enums"]["org_member_role"]
+        }
+        Update: {
+          joined_at?: string
+          org_id?: string
+          profile_id?: string
+          role?: Database["public"]["Enums"]["org_member_role"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_organizations_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_organizations_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -757,6 +844,7 @@ export type Database = {
           min_level: number | null
           min_tree_xp: number | null
           objectives: string | null
+          org_id: string | null
           progression_tree: string | null
           published_at: string | null
           required_achievement_id: string | null
@@ -775,6 +863,7 @@ export type Database = {
           theme_color: string | null
           title: string
           updated_at: string
+          visibility: Database["public"]["Enums"]["quest_visibility"]
           whatsapp_invite_link: string | null
         }
         Insert: {
@@ -798,6 +887,7 @@ export type Database = {
           min_level?: number | null
           min_tree_xp?: number | null
           objectives?: string | null
+          org_id?: string | null
           progression_tree?: string | null
           published_at?: string | null
           required_achievement_id?: string | null
@@ -816,6 +906,7 @@ export type Database = {
           theme_color?: string | null
           title: string
           updated_at?: string
+          visibility?: Database["public"]["Enums"]["quest_visibility"]
           whatsapp_invite_link?: string | null
         }
         Update: {
@@ -839,6 +930,7 @@ export type Database = {
           min_level?: number | null
           min_tree_xp?: number | null
           objectives?: string | null
+          org_id?: string | null
           progression_tree?: string | null
           published_at?: string | null
           required_achievement_id?: string | null
@@ -857,6 +949,7 @@ export type Database = {
           theme_color?: string | null
           title?: string
           updated_at?: string
+          visibility?: Database["public"]["Enums"]["quest_visibility"]
           whatsapp_invite_link?: string | null
         }
         Relationships: [
@@ -865,6 +958,13 @@ export type Database = {
             columns: ["creator_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quests_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
           {
@@ -1931,7 +2031,17 @@ export type Database = {
         | "sponsorship_proposal_declined"
         | "sponsored_quest_approved"
         | "sponsor_quest_completed"
+      org_member_role: "member" | "admin" | "creator"
+      organization_type:
+        | "university"
+        | "fraternity"
+        | "sorority"
+        | "club"
+        | "company"
+        | "nonprofit"
+        | "other"
       quest_status: "draft" | "open" | "closed" | "completed" | "cancelled"
+      quest_visibility: "public" | "org_only" | "invite_only"
       review_status:
         | "draft"
         | "pending_review"
@@ -2100,7 +2210,18 @@ export const Constants = {
         "sponsored_quest_approved",
         "sponsor_quest_completed",
       ],
+      org_member_role: ["member", "admin", "creator"],
+      organization_type: [
+        "university",
+        "fraternity",
+        "sorority",
+        "club",
+        "company",
+        "nonprofit",
+        "other",
+      ],
       quest_status: ["draft", "open", "closed", "completed", "cancelled"],
+      quest_visibility: ["public", "org_only", "invite_only"],
       review_status: [
         "draft",
         "pending_review",

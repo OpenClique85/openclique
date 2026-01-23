@@ -21,8 +21,10 @@ import {
   TextQuestion,
   SectionHeader,
 } from '@/components/profile/QuestionSection';
+import { SchoolSelect } from '@/components/profile/SchoolSelect';
 import {
   UserPreferences,
+  SchoolInfo,
   GroupSize,
   GroupTendency,
   PostEventEnergy,
@@ -81,6 +83,11 @@ export function ProfileModal({ open, onComplete }: ProfileModalProps) {
   // Demographics (optional)
   const [ageRange, setAgeRange] = useState<AgeRange | undefined>();
   const [area, setArea] = useState<AustinArea | undefined>();
+  
+  // School/University (optional)
+  const [isStudent, setIsStudent] = useState<boolean | undefined>();
+  const [school, setSchool] = useState<SchoolInfo | undefined>();
+  const [showSchoolPublicly, setShowSchoolPublicly] = useState(true);
 
   // Extended preferences
   const [groupSize, setGroupSize] = useState<GroupSize[]>([]);
@@ -117,11 +124,13 @@ export function ProfileModal({ open, onComplete }: ProfileModalProps) {
       interest_tags: interests,
     };
 
-    // Demographics
-    if (ageRange || area) {
+    // Demographics (including school)
+    if (ageRange || area || school) {
       prefs.demographics = {
         ...(ageRange && { age_range: ageRange }),
         ...(area && { area }),
+        ...(school && { school }),
+        show_school_publicly: showSchoolPublicly,
       };
     }
 
@@ -318,6 +327,16 @@ export function ProfileModal({ open, onComplete }: ProfileModalProps) {
                   options={AUSTIN_AREA_OPTIONS}
                   selected={area}
                   onChange={(v) => setArea(v)}
+                />
+
+                {/* School/University Section */}
+                <SchoolSelect
+                  isStudent={isStudent}
+                  onIsStudentChange={setIsStudent}
+                  selectedSchool={school}
+                  onSchoolChange={setSchool}
+                  showPublicly={showSchoolPublicly}
+                  onShowPubliclyChange={setShowSchoolPublicly}
                 />
 
                 {/* Social Style Section */}

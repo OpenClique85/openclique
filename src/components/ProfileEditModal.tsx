@@ -26,8 +26,10 @@ import {
   TextQuestion,
   SectionHeader,
 } from '@/components/profile/QuestionSection';
+import { SchoolSelect } from '@/components/profile/SchoolSelect';
 import {
   UserPreferences,
+  SchoolInfo,
   GroupSize,
   GroupTendency,
   PostEventEnergy,
@@ -84,6 +86,11 @@ export function ProfileEditModal({ open, onClose }: ProfileEditModalProps) {
   // Demographics
   const [ageRange, setAgeRange] = useState<AgeRange | undefined>();
   const [area, setArea] = useState<AustinArea | undefined>();
+  
+  // School/University
+  const [isStudent, setIsStudent] = useState<boolean | undefined>();
+  const [school, setSchool] = useState<SchoolInfo | undefined>();
+  const [showSchoolPublicly, setShowSchoolPublicly] = useState(true);
 
   // Extended preferences
   const [groupSize, setGroupSize] = useState<GroupSize[]>([]);
@@ -112,6 +119,12 @@ export function ProfileEditModal({ open, onClose }: ProfileEditModalProps) {
         setInterests(prefs.interest_tags || []);
         setAgeRange(prefs.demographics?.age_range);
         setArea(prefs.demographics?.area);
+        
+        // School data
+        setSchool(prefs.demographics?.school);
+        setIsStudent(prefs.demographics?.school ? true : undefined);
+        setShowSchoolPublicly(prefs.demographics?.show_school_publicly !== false);
+        
         setGroupSize(prefs.social_style?.group_size || []);
         setGroupTendency(prefs.social_style?.group_tendency || []);
         setPostEventEnergy(prefs.social_style?.post_event_energy);
@@ -144,10 +157,13 @@ export function ProfileEditModal({ open, onClose }: ProfileEditModalProps) {
       interest_tags: interests,
     };
 
-    if (ageRange || area) {
+    // Demographics (including school)
+    if (ageRange || area || school) {
       prefs.demographics = {
         ...(ageRange && { age_range: ageRange }),
         ...(area && { area }),
+        ...(school && { school }),
+        show_school_publicly: showSchoolPublicly,
       };
     }
 
@@ -313,6 +329,16 @@ export function ProfileEditModal({ open, onClose }: ProfileEditModalProps) {
                   options={AUSTIN_AREA_OPTIONS}
                   selected={area}
                   onChange={(v) => setArea(v)}
+                />
+
+                {/* School/University Section */}
+                <SchoolSelect
+                  isStudent={isStudent}
+                  onIsStudentChange={setIsStudent}
+                  selectedSchool={school}
+                  onSchoolChange={setSchool}
+                  showPublicly={showSchoolPublicly}
+                  onShowPubliclyChange={setShowSchoolPublicly}
                 />
 
                 <SectionHeader title="Social Style" icon="💬" />
