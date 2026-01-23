@@ -14,7 +14,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
-import { Loader2, Sparkles, Camera, Instagram, Twitter, Globe, ExternalLink, Save, Trash2 } from 'lucide-react';
+import { Loader2, Sparkles, Camera, Instagram, Twitter, Globe, ExternalLink, Save, Trash2, Handshake } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,6 +36,12 @@ interface Socials {
   website?: string;
 }
 
+const SEEKING_OPTIONS = [
+  { id: 'org_partnerships', label: 'Organization Partnerships', description: 'Available to create quests for clubs, orgs, and student groups' },
+  { id: 'sponsorships', label: 'Brand Sponsorships', description: 'Looking for sponsors to fund or partner on quests' },
+  { id: 'custom_quests', label: 'Custom Quests', description: 'Open to designing unique experiences for private groups' },
+];
+
 export default function CreatorProfile() {
   const { user, isLoading: authLoading } = useAuth();
   const queryClient = useQueryClient();
@@ -44,6 +51,7 @@ export default function CreatorProfile() {
   const [bio, setBio] = useState('');
   const [city, setCity] = useState('Austin');
   const [socials, setSocials] = useState<Socials>({});
+  const [seeking, setSeeking] = useState<string[]>([]);
   const [hasChanges, setHasChanges] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [removePhotoDialogOpen, setRemovePhotoDialogOpen] = useState(false);
@@ -70,6 +78,7 @@ export default function CreatorProfile() {
         setBio(data.bio || '');
         setCity(data.city || 'Austin');
         setSocials((data.socials as Socials) || {});
+        setSeeking(data.seeking || []);
         setHasChanges(false);
       }
       
@@ -120,12 +129,18 @@ export default function CreatorProfile() {
     setSocials(prev => ({ ...prev, [platform]: value }));
   };
 
+  const toggleSeeking = (id: string) => {
+    setHasChanges(true);
+    setSeeking(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
+  };
+
   const handleSave = () => {
     updateProfile.mutate({
       display_name: displayName,
       bio,
       city,
       socials: socials as unknown as CreatorProfile['socials'],
+      seeking,
     });
   };
 
@@ -395,6 +410,35 @@ export default function CreatorProfile() {
                     placeholder="https://yourwebsite.com"
                   />
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Marketplace Availability */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Handshake className="h-5 w-5" />
+                  Marketplace Availability
+                </CardTitle>
+                <CardDescription>Let organizations and sponsors know what you're looking for</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {SEEKING_OPTIONS.map((option) => (
+                  <label
+                    key={option.id}
+                    className="flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                  >
+                    <Checkbox
+                      checked={seeking.includes(option.id)}
+                      onCheckedChange={() => toggleSeeking(option.id)}
+                      className="mt-0.5"
+                    />
+                    <div>
+                      <p className="font-medium">{option.label}</p>
+                      <p className="text-sm text-muted-foreground">{option.description}</p>
+                    </div>
+                  </label>
+                ))}
               </CardContent>
             </Card>
 
