@@ -14,9 +14,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { Copy, Plus, Link2, Users, Shield, Sparkles, BarChart3, Download, ExternalLink } from 'lucide-react';
+import { Copy, Plus, Link2, Users, Shield, Sparkles, BarChart3, Download, ExternalLink, Palette, Building2, Store } from 'lucide-react';
 
-type InviteCodeType = 'admin' | 'tester' | 'early_access';
+type InviteCodeType = 'admin' | 'tester' | 'early_access' | 'creator' | 'organization' | 'sponsor';
 
 interface InviteCode {
   id: string;
@@ -163,6 +163,9 @@ export function InviteCodesManager() {
       case 'admin': return <Shield className="h-4 w-4" />;
       case 'tester': return <Users className="h-4 w-4" />;
       case 'early_access': return <Sparkles className="h-4 w-4" />;
+      case 'creator': return <Palette className="h-4 w-4" />;
+      case 'organization': return <Building2 className="h-4 w-4" />;
+      case 'sponsor': return <Store className="h-4 w-4" />;
     }
   };
 
@@ -171,6 +174,9 @@ export function InviteCodesManager() {
       case 'admin': return 'destructive';
       case 'tester': return 'default';
       case 'early_access': return 'secondary';
+      case 'creator': return 'outline';
+      case 'organization': return 'secondary';
+      case 'sponsor': return 'default';
     }
   };
 
@@ -252,6 +258,24 @@ export function InviteCodesManager() {
                         <div className="flex items-center gap-2">
                           <Sparkles className="h-4 w-4" />
                           Early Access - General early access
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="creator">
+                        <div className="flex items-center gap-2">
+                          <Palette className="h-4 w-4" />
+                          Creator - Quest creator access
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="organization">
+                        <div className="flex items-center gap-2">
+                          <Building2 className="h-4 w-4" />
+                          Organization - Org admin access
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="sponsor">
+                        <div className="flex items-center gap-2">
+                          <Store className="h-4 w-4" />
+                          Sponsor - Brand sponsor access
                         </div>
                       </SelectItem>
                     </SelectContent>
