@@ -22,6 +22,7 @@ import { AchievementsManager } from '@/components/admin/AchievementsManager';
 import { BadgesManager } from '@/components/admin/BadgesManager';
 import { StreaksManager } from '@/components/admin/StreaksManager';
 import { AdminSectionNav } from '@/components/admin/AdminSectionNav';
+import { LinksManager } from '@/components/admin/LinksManager';
 
 export default function Admin() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
@@ -61,6 +62,7 @@ export default function Admin() {
       case 'sponsor-preview': return <SponsorPreviewTab />;
       case 'messaging': return <MessagingCenter />;
       case 'whatsapp': return <WhatsAppManager />;
+      case 'links': return <LinksManager />;
       case 'analytics': return <Analytics />;
       case 'devtools': return <DevToolsSection />;
       case 'xp-levels': return <XPLevelsManager />;

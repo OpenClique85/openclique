@@ -4,14 +4,16 @@ import { Footer } from '@/components/Footer';
 import { CreatorPortalNav } from '@/components/creators/CreatorPortalNav';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
-import { Loader2, Sparkles, Plus, ClipboardList, Star, Users, TrendingUp } from 'lucide-react';
+import { Loader2, Sparkles, Plus, ClipboardList, Star, Users, TrendingUp, Building2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { usePendingOrgRequests } from '@/hooks/usePendingOrgRequests';
 
 export default function CreatorDashboard() {
   const { user, isLoading: authLoading } = useAuth();
-
+  const { data: pendingOrgRequests = 0 } = usePendingOrgRequests();
   // Fetch creator profile
   const { data: creatorProfile, isLoading: profileLoading } = useQuery({
     queryKey: ['creator-profile', user?.id],
@@ -115,7 +117,7 @@ export default function CreatorDashboard() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
           <Card>
             <CardHeader className="pb-2">
               <CardDescription className="flex items-center gap-2">
@@ -161,6 +163,32 @@ export default function CreatorDashboard() {
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold text-muted-foreground">{questStats?.draft || 0}</p>
+            </CardContent>
+          </Card>
+
+          {/* Org Requests Card with Badge */}
+          <Card className={pendingOrgRequests > 0 ? 'border-primary/50 bg-primary/5' : ''}>
+            <CardHeader className="pb-2">
+              <CardDescription className="flex items-center gap-2">
+                <Building2 className="h-4 w-4" />
+                Org Requests
+                {pendingOrgRequests > 0 && (
+                  <Badge className="bg-primary text-primary-foreground text-xs h-5 px-1.5">
+                    {pendingOrgRequests}
+                  </Badge>
+                )}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Link 
+                to="/creator/org-requests" 
+                className="text-3xl font-bold hover:text-primary transition-colors"
+              >
+                {pendingOrgRequests}
+              </Link>
+              {pendingOrgRequests > 0 && (
+                <p className="text-xs text-muted-foreground mt-1">needs response</p>
+              )}
             </CardContent>
           </Card>
         </div>

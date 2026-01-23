@@ -2105,6 +2105,7 @@ export type Database = {
         | "sponsor_quest_completed"
         | "org_quest_announcement"
         | "org_creator_request"
+        | "org_creator_message"
       org_member_role: "member" | "admin" | "creator"
       organization_type:
         | "university"
@@ -2285,6 +2286,7 @@ export const Constants = {
         "sponsor_quest_completed",
         "org_quest_announcement",
         "org_creator_request",
+        "org_creator_message",
       ],
       org_member_role: ["member", "admin", "creator"],
       organization_type: [
