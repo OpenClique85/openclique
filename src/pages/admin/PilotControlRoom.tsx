@@ -32,6 +32,7 @@ import { InstanceOverviewPanel } from '@/components/admin/pilot/InstanceOverview
 import { InstanceNotificationPanel } from '@/components/admin/pilot/InstanceNotificationPanel';
 import { ParticipantRoster } from '@/components/admin/pilot/ParticipantRoster';
 import { SquadManager } from '@/components/admin/pilot/SquadManager';
+import { SquadWarmUpTab } from '@/components/admin/pilot/SquadWarmUpTab';
 import { RunOfShowControls } from '@/components/admin/pilot/RunOfShowControls';
 import { ProofInbox } from '@/components/admin/pilot/ProofInbox';
 import { 
@@ -308,10 +309,11 @@ export default function PilotControlRoom() {
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:inline-grid">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="roster">Roster</TabsTrigger>
             <TabsTrigger value="squads">Squads</TabsTrigger>
+            <TabsTrigger value="warm-up">Warm-Up</TabsTrigger>
             <TabsTrigger value="run-of-show">Run of Show</TabsTrigger>
             <TabsTrigger value="proofs">Proofs</TabsTrigger>
           </TabsList>
@@ -330,6 +332,10 @@ export default function PilotControlRoom() {
               instanceTitle={instance.title}
               targetSquadSize={instance.target_squad_size || 6} 
             />
+          </TabsContent>
+
+          <TabsContent value="warm-up">
+            <SquadWarmUpTab instanceId={instance.id} />
           </TabsContent>
 
           <TabsContent value="run-of-show">
