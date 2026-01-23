@@ -13,7 +13,7 @@ const corsHeaders = {
 interface SendEmailRequest {
   to: string | string[];
   subject: string;
-  template: "quest_confirmation" | "quest_reminder" | "quest_cancelled" | "quest_approved" | "quest_needs_changes" | "quest_rejected" | "custom";
+  template: "quest_confirmation" | "quest_reminder" | "quest_cancelled" | "quest_approved" | "quest_needs_changes" | "quest_rejected" | "support_reply" | "admin_dm" | "custom";
   variables?: Record<string, string>;
   customHtml?: string;
 }
@@ -162,6 +162,57 @@ const templates: Record<string, (vars: Record<string, string>) => string> = {
       ` : ""}
       
       <p style="font-size: 14px; color: #666;">Don't be discouraged! We encourage you to create new quests that align with our community guidelines. We're here to help if you have questions.</p>
+      <p style="font-size: 14px; color: #666;">— The OpenClique Team</p>
+    </div>
+  `,
+  
+  support_reply: (vars) => `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #14b8a6; margin: 0;">📬 Support Update</h1>
+      </div>
+      <p style="font-size: 16px; color: #333;">Hey ${escapeHtml(vars.display_name || "there")}!</p>
+      <p style="font-size: 16px; color: #333;">We've responded to your support ticket: <strong>"${escapeHtml(vars.ticket_subject || "Your request")}"</strong></p>
+      
+      <div style="background: #f0fdfa; border-left: 4px solid #14b8a6; padding: 15px; margin: 20px 0;">
+        <p style="margin: 0 0 10px 0; font-weight: bold;">Our Reply:</p>
+        <p style="margin: 0; font-size: 14px; white-space: pre-wrap;">${escapeHtml(vars.message || "")}</p>
+      </div>
+      
+      ${vars.ticket_url ? `
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${escapeHtml(vars.ticket_url)}" style="background: #14b8a6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">
+            View Full Thread
+          </a>
+        </div>
+      ` : ""}
+      
+      <p style="font-size: 14px; color: #666;">If you have more questions, just reply to this ticket in the app.</p>
+      <p style="font-size: 14px; color: #666;">— The OpenClique Support Team</p>
+    </div>
+  `,
+  
+  admin_dm: (vars) => `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #8b5cf6; margin: 0;">💬 Message from OpenClique</h1>
+      </div>
+      <p style="font-size: 16px; color: #333;">Hey ${escapeHtml(vars.display_name || "there")}!</p>
+      <p style="font-size: 16px; color: #333;">You have a new message from our team:</p>
+      
+      <div style="background: #f5f3ff; border-left: 4px solid #8b5cf6; padding: 15px; margin: 20px 0;">
+        ${vars.subject ? `<p style="margin: 0 0 10px 0; font-weight: bold;">${escapeHtml(vars.subject)}</p>` : ""}
+        <p style="margin: 0; font-size: 14px; white-space: pre-wrap;">${escapeHtml(vars.message || "")}</p>
+      </div>
+      
+      ${vars.app_url ? `
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${escapeHtml(vars.app_url)}" style="background: #8b5cf6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">
+            View in App
+          </a>
+        </div>
+      ` : ""}
+      
       <p style="font-size: 14px; color: #666;">— The OpenClique Team</p>
     </div>
   `,

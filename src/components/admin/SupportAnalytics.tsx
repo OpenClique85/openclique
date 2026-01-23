@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, TrendingUp, Clock, AlertTriangle, CheckCircle, PieChart as PieChartIcon, BarChart3, MapPin } from 'lucide-react';
-import { useSupportAnalytics } from '@/hooks/useSupportAnalytics';
+import { Loader2, TrendingUp, Clock, AlertTriangle, CheckCircle, PieChart as PieChartIcon, BarChart3, MapPin, Download, MessageSquare } from 'lucide-react';
+import { useSupportAnalytics, SupportAnalytics as SupportAnalyticsData } from '@/hooks/useSupportAnalytics';
 import {
   AreaChart,
   Area,
@@ -18,13 +19,6 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
-
-const URGENCY_COLORS: Record<string, string> = {
-  low: 'hsl(var(--muted-foreground))',
-  medium: 'hsl(var(--primary))',
-  high: 'hsl(var(--warning))',
-  critical: 'hsl(var(--destructive))',
-};
 
 const STATUS_COLORS: Record<string, string> = {
   open: 'hsl(var(--primary))',
@@ -45,7 +39,110 @@ const CATEGORY_COLORS = [
 
 export function SupportAnalytics() {
   const [timeRange, setTimeRange] = useState<string>('30');
+  const [isExporting, setIsExporting] = useState(false);
   const { data: analytics, isLoading } = useSupportAnalytics(parseInt(timeRange));
+
+  const formatHours = (hours: number | null): string => {
+    if (hours === null) return '—';
+    if (hours < 1) return '<1h';
+    if (hours < 24) return `${Math.round(hours)}h`;
+    return `${Math.round(hours / 24)}d`;
+  };
+
+  const exportCSV = (analytics: SupportAnalyticsData) => {
+    setIsExporting(true);
+    
+    // Prepare CSV data
+    const rows = [
+      ['Support Analytics Report'],
+      [`Time Range: Last ${timeRange} days`],
+      [`Generated: ${new Date().toISOString()}`],
+      [],
+      ['Summary Metrics'],
+      ['Metric', 'Value'],
+      ['Total Tickets', analytics.totalTickets.toString()],
+      ['Tickets (Last 7 Days)', analytics.ticketsLast7Days.toString()],
+      ['Open Tickets', analytics.resolutionMetrics.openCount.toString()],
+      ['Resolved Tickets', analytics.resolutionMetrics.resolvedCount.toString()],
+      ['Avg Resolution Time', formatHours(analytics.resolutionMetrics.avgResolutionHours)],
+      ['Median Resolution Time', formatHours(analytics.resolutionMetrics.medianResolutionHours)],
+      ['Avg First Response Time', formatHours(analytics.resolutionMetrics.avgFirstResponseHours)],
+      ['Median First Response Time', formatHours(analytics.resolutionMetrics.medianFirstResponseHours)],
+      ['% Resolved in 24h', `${analytics.resolutionMetrics.percentResolvedIn24h.toFixed(1)}%`],
+      ['% Resolved in 48h', `${analytics.resolutionMetrics.percentResolvedIn48h.toFixed(1)}%`],
+      ['% Responded in 1h', `${analytics.resolutionMetrics.percentRespondedIn1h.toFixed(1)}%`],
+      ['% Responded in 4h', `${analytics.resolutionMetrics.percentRespondedIn4h.toFixed(1)}%`],
+      [],
+      ['Category Breakdown'],
+      ['Category', 'Tickets', 'Avg Resolution Time'],
+      ...analytics.categoryBreakdown.map(c => [c.category, c.count.toString(), formatHours(c.avgResolutionHours)]),
+      [],
+      ['Urgency Breakdown'],
+      ['Urgency', 'Total', 'Open'],
+      ...analytics.urgencyBreakdown.map(u => [u.urgency, u.count.toString(), u.openCount.toString()]),
+      [],
+      ['Status Breakdown'],
+      ['Status', 'Count'],
+      ...analytics.statusBreakdown.map(s => [s.status, s.count.toString()]),
+      [],
+      ['Friction Points (Top Pages)'],
+      ['Page', 'Tickets', 'Avg Urgency'],
+      ...analytics.frictionPoints.map(f => [f.page, f.ticketCount.toString(), f.avgUrgency.toFixed(2)]),
+      [],
+      ['Daily Trends'],
+      ['Date', 'Opened', 'Resolved'],
+      ...analytics.ticketTrends.map(t => [t.date, t.opened.toString(), t.resolved.toString()]),
+    ];
+
+    const csv = rows.map(row => row.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `support-analytics-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    setIsExporting(false);
+  };
+
+  const exportJSON = (analytics: SupportAnalyticsData) => {
+    setIsExporting(true);
+    
+    const exportData = {
+      exportedAt: new Date().toISOString(),
+      timeRangeDays: parseInt(timeRange),
+      summary: {
+        totalTickets: analytics.totalTickets,
+        ticketsLast7Days: analytics.ticketsLast7Days,
+        openTickets: analytics.resolutionMetrics.openCount,
+        resolvedTickets: analytics.resolutionMetrics.resolvedCount,
+        avgResolutionHours: analytics.resolutionMetrics.avgResolutionHours,
+        medianResolutionHours: analytics.resolutionMetrics.medianResolutionHours,
+        avgFirstResponseHours: analytics.resolutionMetrics.avgFirstResponseHours,
+        medianFirstResponseHours: analytics.resolutionMetrics.medianFirstResponseHours,
+        percentResolvedIn24h: analytics.resolutionMetrics.percentResolvedIn24h,
+        percentResolvedIn48h: analytics.resolutionMetrics.percentResolvedIn48h,
+        percentRespondedIn1h: analytics.resolutionMetrics.percentRespondedIn1h,
+        percentRespondedIn4h: analytics.resolutionMetrics.percentRespondedIn4h,
+      },
+      categoryBreakdown: analytics.categoryBreakdown,
+      urgencyBreakdown: analytics.urgencyBreakdown,
+      statusBreakdown: analytics.statusBreakdown,
+      frictionPoints: analytics.frictionPoints,
+      dailyTrends: analytics.ticketTrends,
+    };
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `support-analytics-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    setIsExporting(false);
+  };
 
   if (isLoading) {
     return (
@@ -63,37 +160,50 @@ export function SupportAnalytics() {
     );
   }
 
-  const formatHours = (hours: number | null): string => {
-    if (hours === null) return '—';
-    if (hours < 1) return '<1h';
-    if (hours < 24) return `${Math.round(hours)}h`;
-    return `${Math.round(hours / 24)}d`;
-  };
-
   return (
     <div className="space-y-6">
-      {/* Header with time range */}
-      <div className="flex items-center justify-between">
+      {/* Header with time range and export */}
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h2 className="text-lg font-semibold">Support Analytics</h2>
           <p className="text-sm text-muted-foreground">
             Track ticket trends, resolution times, and identify friction points
           </p>
         </div>
-        <Select value={timeRange} onValueChange={setTimeRange}>
-          <SelectTrigger className="w-40">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="7">Last 7 days</SelectItem>
-            <SelectItem value="14">Last 14 days</SelectItem>
-            <SelectItem value="30">Last 30 days</SelectItem>
-            <SelectItem value="90">Last 90 days</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2">
+          <Select value={timeRange} onValueChange={setTimeRange}>
+            <SelectTrigger className="w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7">Last 7 days</SelectItem>
+              <SelectItem value="14">Last 14 days</SelectItem>
+              <SelectItem value="30">Last 30 days</SelectItem>
+              <SelectItem value="90">Last 90 days</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => exportCSV(analytics)}
+            disabled={isExporting}
+          >
+            <Download className="h-4 w-4 mr-1" />
+            CSV
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => exportJSON(analytics)}
+            disabled={isExporting}
+          >
+            <Download className="h-4 w-4 mr-1" />
+            JSON
+          </Button>
+        </div>
       </div>
 
-      {/* KPI Cards */}
+      {/* KPI Cards - Row 1 */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2">
@@ -128,6 +238,23 @@ export function SupportAnalytics() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <MessageSquare className="h-4 w-4" />
+              Avg First Response
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">
+              {formatHours(analytics.resolutionMetrics.avgFirstResponseHours)}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {analytics.resolutionMetrics.percentRespondedIn1h.toFixed(0)}% in &lt;1h
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <Clock className="h-4 w-4" />
               Avg Resolution
             </CardTitle>
@@ -138,6 +265,41 @@ export function SupportAnalytics() {
             </p>
             <p className="text-xs text-muted-foreground">
               Median: {formatHours(analytics.resolutionMetrics.medianResolutionHours)}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* KPI Cards - Row 2: Response Time SLAs */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Responded &lt;1h
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold text-success">
+              {analytics.resolutionMetrics.percentRespondedIn1h.toFixed(0)}%
+            </p>
+            <p className="text-xs text-muted-foreground">
+              First response SLA
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Responded &lt;4h
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold text-primary">
+              {analytics.resolutionMetrics.percentRespondedIn4h.toFixed(0)}%
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Median: {formatHours(analytics.resolutionMetrics.medianFirstResponseHours)}
             </p>
           </CardContent>
         </Card>
@@ -154,7 +316,23 @@ export function SupportAnalytics() {
               {analytics.resolutionMetrics.percentResolvedIn24h.toFixed(0)}%
             </p>
             <p className="text-xs text-muted-foreground">
-              {analytics.resolutionMetrics.percentResolvedIn48h.toFixed(0)}% in 48h
+              Resolution SLA
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Resolved &lt;48h
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold text-primary">
+              {analytics.resolutionMetrics.percentResolvedIn48h.toFixed(0)}%
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Extended SLA
             </p>
           </CardContent>
         </Card>
