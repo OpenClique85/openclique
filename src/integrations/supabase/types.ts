@@ -1311,6 +1311,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_reward_redemptions: {
+        Args: { p_reward_id: string }
+        Returns: undefined
+      }
       is_admin: { Args: never; Returns: boolean }
       record_referral_signup: {
         Args: { p_referral_code: string; p_user_id: string }
