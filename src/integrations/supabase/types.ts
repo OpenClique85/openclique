@@ -2565,12 +2565,14 @@ export type Database = {
       system_docs: {
         Row: {
           category: string
+          content_hash: string | null
           content_markdown: string | null
           created_at: string | null
           description: string | null
           id: string
           is_published: boolean | null
           last_edited_by: string | null
+          last_exported_at: string | null
           mermaid_diagram: string | null
           slug: string
           sort_order: number | null
@@ -2581,12 +2583,14 @@ export type Database = {
         }
         Insert: {
           category: string
+          content_hash?: string | null
           content_markdown?: string | null
           created_at?: string | null
           description?: string | null
           id?: string
           is_published?: boolean | null
           last_edited_by?: string | null
+          last_exported_at?: string | null
           mermaid_diagram?: string | null
           slug: string
           sort_order?: number | null
@@ -2597,12 +2601,14 @@ export type Database = {
         }
         Update: {
           category?: string
+          content_hash?: string | null
           content_markdown?: string | null
           created_at?: string | null
           description?: string | null
           id?: string
           is_published?: boolean | null
           last_edited_by?: string | null
+          last_exported_at?: string | null
           mermaid_diagram?: string | null
           slug?: string
           sort_order?: number | null

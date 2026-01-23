@@ -7,6 +7,11 @@
  * - JSON: Structured data for programmatic use
  * - Markdown: Human-readable documentation
  * - LLM: XML-structured context for RAG/embedding
+ * 
+ * Features:
+ * - Change tracking with visual indicators
+ * - Export history tracking
+ * - Content hash-based change detection
  * =============================================================================
  */
 
@@ -20,7 +25,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 import { 
   Download, 
@@ -36,14 +41,17 @@ import {
   Eye,
   Briefcase,
   Cpu,
-  FileCode,
   FileJson,
   ClipboardList,
   Target,
-  AlertTriangle
+  AlertCircle,
+  RefreshCw,
+  History,
+  Sparkles
 } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { DocPreviewModal, type PreviewDocument } from './DocPreviewModal';
+import { useDocChangeTracking } from '@/hooks/useDocChangeTracking';
 
 type PackType = 'cto' | 'coo';
 type ExportFormat = 'json' | 'markdown' | 'llm';
@@ -56,24 +64,25 @@ interface ExportSection {
   type: 'auto' | 'manual' | 'mixed';
   enabled: boolean;
   category: string;
+  categories?: string[]; // Multiple categories for a section
 }
 
 const CTO_SECTIONS: ExportSection[] = [
-  { id: 'product', label: 'Product Overview', description: 'Mission, personas, value proposition', icon: <FileText className="h-4 w-4" />, type: 'manual', enabled: true, category: 'product' },
-  { id: 'flows', label: 'Flows & State Machines', description: 'User journeys and state transitions', icon: <FileText className="h-4 w-4" />, type: 'manual', enabled: true, category: 'flow' },
-  { id: 'rules', label: 'Business Rules', description: 'Gamification, matching, guardrails', icon: <FileText className="h-4 w-4" />, type: 'manual', enabled: true, category: 'rule' },
-  { id: 'datamodel', label: 'Data Model & Schema', description: 'Tables, relationships, ERD', icon: <Database className="h-4 w-4" />, type: 'auto', enabled: true, category: 'datamodel' },
-  { id: 'apis', label: 'API Documentation', description: 'Edge functions, RPCs', icon: <Code className="h-4 w-4" />, type: 'auto', enabled: true, category: 'api' },
-  { id: 'ux', label: 'UX Routes & Components', description: 'Route map, component inventory', icon: <BarChart3 className="h-4 w-4" />, type: 'auto', enabled: true, category: 'ux' },
-  { id: 'security', label: 'Security & Compliance', description: 'RBAC, RLS policies, PII handling', icon: <Shield className="h-4 w-4" />, type: 'mixed', enabled: true, category: 'security' },
-  { id: 'estimation', label: 'Estimation & Stories', description: 'Epics, risks, unknowns', icon: <FileText className="h-4 w-4" />, type: 'manual', enabled: true, category: 'estimation' },
+  { id: 'product', label: 'Product Overview', description: 'Mission, personas, value proposition', icon: <FileText className="h-4 w-4" />, type: 'manual', enabled: true, category: 'product', categories: ['product'] },
+  { id: 'flows', label: 'Flows & State Machines', description: 'User journeys and state transitions', icon: <FileText className="h-4 w-4" />, type: 'manual', enabled: true, category: 'flow', categories: ['flow', 'state_machine'] },
+  { id: 'rules', label: 'Business Rules', description: 'Gamification, matching, guardrails', icon: <FileText className="h-4 w-4" />, type: 'manual', enabled: true, category: 'rule', categories: ['rule', 'guardrail'] },
+  { id: 'datamodel', label: 'Data Model & Schema', description: 'Tables, relationships, ERD', icon: <Database className="h-4 w-4" />, type: 'auto', enabled: true, category: 'datamodel', categories: ['datamodel'] },
+  { id: 'apis', label: 'API Documentation', description: 'Edge functions, RPCs', icon: <Code className="h-4 w-4" />, type: 'auto', enabled: true, category: 'api', categories: ['api'] },
+  { id: 'ux', label: 'UX Routes & Components', description: 'Route map, component inventory', icon: <BarChart3 className="h-4 w-4" />, type: 'auto', enabled: true, category: 'ux', categories: ['ux'] },
+  { id: 'security', label: 'Security & Compliance', description: 'RBAC, RLS policies, PII handling', icon: <Shield className="h-4 w-4" />, type: 'mixed', enabled: true, category: 'security', categories: ['security', 'ops'] },
+  { id: 'estimation', label: 'Estimation & Stories', description: 'Epics, risks, unknowns', icon: <FileText className="h-4 w-4" />, type: 'manual', enabled: true, category: 'estimation', categories: ['estimation'] },
 ];
 
 const COO_SECTIONS: ExportSection[] = [
-  { id: 'playbooks', label: 'Operations Playbooks', description: 'Daily ops, escalation, crisis response', icon: <ClipboardList className="h-4 w-4" />, type: 'manual', enabled: true, category: 'playbook' },
-  { id: 'processes', label: 'Business Processes', description: 'Partner onboarding, workflows', icon: <Target className="h-4 w-4" />, type: 'manual', enabled: true, category: 'process' },
-  { id: 'slas', label: 'SLAs', description: 'Response times, uptime targets', icon: <Clock className="h-4 w-4" />, type: 'manual', enabled: true, category: 'sla' },
-  { id: 'metrics', label: 'Metrics & KPIs', description: 'Dashboards, reporting guidance', icon: <BarChart3 className="h-4 w-4" />, type: 'manual', enabled: true, category: 'metrics' },
+  { id: 'playbooks', label: 'Operations Playbooks', description: 'Daily ops, escalation, crisis response', icon: <ClipboardList className="h-4 w-4" />, type: 'manual', enabled: true, category: 'playbook', categories: ['playbook'] },
+  { id: 'processes', label: 'Business Processes', description: 'Partner onboarding, workflows', icon: <Target className="h-4 w-4" />, type: 'manual', enabled: true, category: 'process', categories: ['process'] },
+  { id: 'slas', label: 'SLAs', description: 'Response times, uptime targets', icon: <Clock className="h-4 w-4" />, type: 'manual', enabled: true, category: 'sla', categories: ['sla'] },
+  { id: 'metrics', label: 'Metrics & KPIs', description: 'Dashboards, reporting guidance', icon: <BarChart3 className="h-4 w-4" />, type: 'manual', enabled: true, category: 'metrics', categories: ['metrics'] },
 ];
 
 const FORMAT_OPTIONS = [
@@ -83,6 +92,7 @@ const FORMAT_OPTIONS = [
     description: 'Structured data for programmatic use',
     icon: <FileJson className="h-5 w-5" />,
     extension: '.json',
+    dbFormat: 'json' as const,
   },
   { 
     id: 'markdown' as ExportFormat, 
@@ -90,6 +100,7 @@ const FORMAT_OPTIONS = [
     description: 'Human-readable documentation',
     icon: <FileText className="h-5 w-5" />,
     extension: '.md',
+    dbFormat: 'markdown' as const,
   },
   { 
     id: 'llm' as ExportFormat, 
@@ -97,8 +108,48 @@ const FORMAT_OPTIONS = [
     description: 'XML-structured for RAG/embedding',
     icon: <Cpu className="h-5 w-5" />,
     extension: '.xml',
+    dbFormat: 'llm_xml' as const,
   },
 ];
+
+// Change indicator component
+function ChangeIndicator({ changed, total }: { changed: number; total: number }) {
+  if (total === 0) return null;
+  
+  if (changed === 0) {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200 dark:bg-green-950/30 dark:text-green-400 dark:border-green-800">
+              <CheckCircle2 className="h-3 w-3 mr-1" />
+              Up to date
+            </Badge>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>All {total} document{total !== 1 ? 's' : ''} synced with last export</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Badge variant="outline" className="text-xs bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800">
+            <Sparkles className="h-3 w-3 mr-1" />
+            {changed} changed
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{changed} of {total} document{total !== 1 ? 's' : ''} modified since last export</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
 
 export function DocsExportPanel() {
   const [packType, setPackType] = useState<PackType>('cto');
@@ -114,6 +165,16 @@ export function DocsExportPanel() {
 
   const currentSections = packType === 'cto' ? ctoSections : cooSections;
   const setCurrentSections = packType === 'cto' ? setCtoSections : setCooSections;
+
+  // Use change tracking hook
+  const { 
+    changeStats, 
+    exportHistory, 
+    getChangesForCategories, 
+    markExported,
+    isLoading: isLoadingChanges,
+    refetchDocs,
+  } = useDocChangeTracking();
 
   // Fetch all system docs for preview
   const { data: allDocs } = useQuery({
@@ -147,21 +208,6 @@ export function DocsExportPanel() {
         counts[d.category] = (counts[d.category] || 0) + 1;
       });
       return counts;
-    },
-  });
-
-  // Fetch last export info
-  const { data: lastExport } = useQuery({
-    queryKey: ['last-handoff-export'],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('system_docs')
-        .select('updated_at')
-        .order('updated_at', { ascending: false })
-        .limit(1)
-        .single();
-      
-      return data?.updated_at ? new Date(data.updated_at) : null;
     },
   });
 
@@ -239,10 +285,11 @@ export function DocsExportPanel() {
         'Generating diagrams...',
         'Formatting output...',
         'Assembling bundle...',
+        'Recording export...',
       ];
 
-      for (let i = 0; i < steps.length; i++) {
-        await new Promise(resolve => setTimeout(resolve, 250));
+      for (let i = 0; i < steps.length - 1; i++) {
+        await new Promise(resolve => setTimeout(resolve, 200));
         setExportProgress(((i + 1) / steps.length) * 100);
       }
 
@@ -256,8 +303,27 @@ export function DocsExportPanel() {
 
       if (error) throw error;
 
-      // Determine content type and extension
+      // Mark documents as exported and record in history
+      const includedCategories = currentSections
+        .filter(s => s.enabled)
+        .flatMap(s => s.categories || [s.category]);
+      
       const formatConfig = FORMAT_OPTIONS.find(f => f.id === exportFormat)!;
+      
+      try {
+        await markExported.mutateAsync({
+          packType: packType === 'cto' ? 'cto' : 'coo',
+          exportFormat: formatConfig.dbFormat,
+          categories: includedCategories,
+        });
+      } catch (trackingError) {
+        console.warn('Failed to record export in history:', trackingError);
+        // Continue with download even if tracking fails
+      }
+
+      setExportProgress(100);
+
+      // Determine content type and extension
       let blob: Blob;
       let filename: string;
 
@@ -299,12 +365,55 @@ export function DocsExportPanel() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-display font-bold text-foreground">Export Center</h2>
-        <p className="text-muted-foreground mt-1">
-          Generate documentation bundles for CTO handoffs or COO operations.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-display font-bold text-foreground">Export Center</h2>
+          <p className="text-muted-foreground mt-1">
+            Generate documentation bundles for CTO handoffs or COO operations.
+          </p>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => refetchDocs()}
+          disabled={isLoadingChanges}
+        >
+          <RefreshCw className={`h-4 w-4 mr-2 ${isLoadingChanges ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
       </div>
+
+      {/* Change Summary Banner */}
+      {changeStats && changeStats.changedDocs > 0 && (
+        <Card className="border-amber-200 bg-amber-50/50 dark:bg-amber-950/20 dark:border-amber-800">
+          <CardContent className="pt-4 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-full bg-amber-100 dark:bg-amber-900/50">
+                <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-amber-800 dark:text-amber-200">
+                  {changeStats.changedDocs} document{changeStats.changedDocs !== 1 ? 's' : ''} modified since last export
+                </p>
+                <p className="text-sm text-amber-700 dark:text-amber-300">
+                  {changeStats.neverExported > 0 && (
+                    <span>{changeStats.neverExported} never exported. </span>
+                  )}
+                  {changeStats.lastExportDate ? (
+                    <span>Last export: {formatDistanceToNow(changeStats.lastExportDate, { addSuffix: true })}</span>
+                  ) : (
+                    <span>No exports recorded yet.</span>
+                  )}
+                </p>
+              </div>
+              <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/50 dark:text-amber-200 dark:border-amber-700">
+                <Sparkles className="h-3 w-3 mr-1" />
+                {changeStats.changedDocs} pending
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Pack Type Selection */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -408,53 +517,62 @@ export function DocsExportPanel() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          {currentSections.map((section) => (
-            <div 
-              key={section.id}
-              className="flex items-start gap-4 p-3 rounded-lg border hover:bg-muted/50 transition-colors"
-            >
-              <Checkbox
-                id={section.id}
-                checked={section.enabled}
-                onCheckedChange={() => toggleSection(section.id)}
-              />
-              <div className="flex-1 space-y-1">
-                <div className="flex items-center gap-2">
-                  <Label htmlFor={section.id} className="font-medium cursor-pointer">
-                    {section.label}
-                  </Label>
-                  <Badge 
-                    variant={section.type === 'auto' ? 'secondary' : section.type === 'manual' ? 'outline' : 'default'}
-                    className="text-xs"
-                  >
-                    {section.type === 'auto' && '📊 Auto'}
-                    {section.type === 'manual' && '✍️ Manual'}
-                    {section.type === 'mixed' && '🔄 Mixed'}
-                  </Badge>
-                  {docCounts && docCounts[section.category] && (
-                    <Badge variant="secondary" className="text-xs">
-                      {docCounts[section.category]} doc{docCounts[section.category] !== 1 ? 's' : ''}
+          {currentSections.map((section) => {
+            const sectionCategories = section.categories || [section.category];
+            const changes = getChangesForCategories(sectionCategories);
+            
+            return (
+              <div 
+                key={section.id}
+                className={`flex items-start gap-4 p-3 rounded-lg border hover:bg-muted/50 transition-colors ${
+                  changes.changed > 0 ? 'border-amber-200 dark:border-amber-800' : ''
+                }`}
+              >
+                <Checkbox
+                  id={section.id}
+                  checked={section.enabled}
+                  onCheckedChange={() => toggleSection(section.id)}
+                />
+                <div className="flex-1 space-y-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Label htmlFor={section.id} className="font-medium cursor-pointer">
+                      {section.label}
+                    </Label>
+                    <Badge 
+                      variant={section.type === 'auto' ? 'secondary' : section.type === 'manual' ? 'outline' : 'default'}
+                      className="text-xs"
+                    >
+                      {section.type === 'auto' && '📊 Auto'}
+                      {section.type === 'manual' && '✍️ Manual'}
+                      {section.type === 'mixed' && '🔄 Mixed'}
                     </Badge>
-                  )}
+                    {changes.total > 0 && (
+                      <Badge variant="secondary" className="text-xs">
+                        {changes.total} doc{changes.total !== 1 ? 's' : ''}
+                      </Badge>
+                    )}
+                    {/* Change indicator */}
+                    <ChangeIndicator changed={changes.changed} total={changes.total} />
+                  </div>
+                  <p className="text-sm text-muted-foreground">{section.description}</p>
                 </div>
-                <p className="text-sm text-muted-foreground">{section.description}</p>
+                <div className="flex items-center gap-2">
+                  {section.type !== 'auto' && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => handlePreviewSection(section)}
+                      title="Preview section"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  )}
+                  {section.icon}
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                {section.type !== 'auto' && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => handlePreviewSection(section)}
-                    title="Preview section"
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                )}
-                {section.icon}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </CardContent>
       </Card>
 
@@ -530,6 +648,58 @@ export function DocsExportPanel() {
         </Card>
       )}
 
+      {/* Export History */}
+      {exportHistory && exportHistory.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <History className="h-4 w-4" />
+              Recent Exports
+            </CardTitle>
+            <CardDescription>Track your documentation exports</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {exportHistory.slice(0, 5).map((entry) => (
+                <div 
+                  key={entry.id}
+                  className="flex items-center justify-between p-3 rounded-lg bg-muted/30 text-sm"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${
+                      entry.pack_type === 'cto' 
+                        ? 'bg-blue-100 dark:bg-blue-900/30' 
+                        : 'bg-green-100 dark:bg-green-900/30'
+                    }`}>
+                      {entry.pack_type === 'cto' 
+                        ? <Briefcase className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        : <ClipboardList className="h-4 w-4 text-green-600 dark:text-green-400" />
+                      }
+                    </div>
+                    <div>
+                      <p className="font-medium">
+                        {entry.pack_type === 'cto' ? 'CTO Pack' : entry.pack_type === 'coo' ? 'COO Playbook' : 'Full Export'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {entry.document_count} docs • {entry.export_format.replace('_', ' ').toUpperCase()}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-muted-foreground">
+                      {format(new Date(entry.exported_at), 'MMM d, h:mm a')}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatDistanceToNow(new Date(entry.exported_at), { addSuffix: true })}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Stats Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
@@ -545,20 +715,20 @@ export function DocsExportPanel() {
         <Card>
           <CardContent className="pt-4">
             <div className="flex items-center gap-2">
-              <Briefcase className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">CTO Docs</span>
+              <Sparkles className="h-4 w-4 text-amber-500" />
+              <span className="text-sm text-muted-foreground">Changed</span>
             </div>
-            <p className="text-2xl font-bold mt-1">{ctoDocs}</p>
+            <p className="text-2xl font-bold mt-1">{changeStats?.changedDocs || 0}</p>
           </CardContent>
         </Card>
         
         <Card>
           <CardContent className="pt-4">
             <div className="flex items-center gap-2">
-              <ClipboardList className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">COO Docs</span>
+              <CheckCircle2 className="h-4 w-4 text-green-500" />
+              <span className="text-sm text-muted-foreground">Synced</span>
             </div>
-            <p className="text-2xl font-bold mt-1">{cooDocs}</p>
+            <p className="text-2xl font-bold mt-1">{changeStats?.unchangedDocs || 0}</p>
           </CardContent>
         </Card>
         
@@ -566,10 +736,12 @@ export function DocsExportPanel() {
           <CardContent className="pt-4">
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Last Updated</span>
+              <span className="text-sm text-muted-foreground">Last Export</span>
             </div>
             <p className="text-lg font-semibold mt-1">
-              {lastExport ? format(lastExport, 'MMM d') : 'Never'}
+              {changeStats?.lastExportDate 
+                ? format(changeStats.lastExportDate, 'MMM d') 
+                : 'Never'}
             </p>
           </CardContent>
         </Card>
