@@ -140,8 +140,22 @@ export function InviteCodesManager() {
     },
   });
 
-  const copyToClipboard = (code: string) => {
-    const url = `${window.location.origin}/auth?invite=${code}`;
+  const getInviteUrl = (code: string, type: InviteCodeType) => {
+    const origin = window.location.origin;
+    switch (type) {
+      case 'creator':
+        return `${origin}/creators/onboard?token=${code}`;
+      case 'sponsor':
+        return `${origin}/sponsors/onboard?token=${code}`;
+      case 'organization':
+        return `${origin}/auth?invite=${code}&redirect=/org-portal`;
+      default:
+        return `${origin}/auth?invite=${code}`;
+    }
+  };
+
+  const copyToClipboard = (code: string, type: InviteCodeType) => {
+    const url = getInviteUrl(code, type);
     navigator.clipboard.writeText(url);
     toast.success('Invite link copied to clipboard');
   };
@@ -399,7 +413,7 @@ export function InviteCodesManager() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => copyToClipboard(code.code)}
+                              onClick={() => copyToClipboard(code.code, code.type)}
                               title="Copy invite link"
                             >
                               <Link2 className="h-4 w-4" />
