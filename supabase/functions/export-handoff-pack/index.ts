@@ -21,6 +21,7 @@ interface HandoffRequest {
   sections?: string[];
   packType?: 'cto' | 'coo';
   format?: 'json' | 'markdown' | 'llm';
+  saveToStorage?: boolean; // If true, saves to Cloud storage and returns URL
 }
 
 interface SystemDoc {
@@ -582,7 +583,8 @@ Deno.serve(async (req) => {
     const { 
       sections = ['product', 'flows', 'rules', 'datamodel', 'apis', 'ux', 'security', 'estimation'],
       packType = 'cto',
-      format = 'json'
+      format = 'json',
+      saveToStorage = false,
     } = await req.json() as HandoffRequest;
 
     console.log(`Generating ${packType} handoff pack in ${format} format for sections:`, sections);
@@ -844,31 +846,143 @@ All tables have RLS enabled with policies enforcing:
     // FORMAT OUTPUT
     // ==========================================================================
 
+    let content: string;
+    let contentType: string;
+    let extension: string;
+    let dbFormat: string;
+
     if (format === 'llm') {
-      const xml = generateLLMContext(pack);
-      return new Response(xml, {
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/xml',
-          'Content-Disposition': `attachment; filename="openclique-${packType}-context.xml"`,
-        },
+      content = generateLLMContext(pack);
+      contentType = 'application/xml';
+      extension = 'xml';
+      dbFormat = 'llm_xml';
+    } else if (format === 'markdown') {
+      content = generateMarkdownBundle(pack);
+      contentType = 'text/markdown';
+      extension = 'md';
+      dbFormat = 'markdown';
+    } else {
+      content = JSON.stringify(pack, null, 2);
+      contentType = 'application/json';
+      extension = 'json';
+      dbFormat = 'json';
+    }
+
+    const contentBytes = new TextEncoder().encode(content).length;
+
+    // ==========================================================================
+    // SAVE TO STORAGE (if requested)
+    // ==========================================================================
+
+    if (saveToStorage) {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const filePath = `exports/${packType}/${timestamp}.${extension}`;
+      
+      // Upload to storage
+      const { error: uploadError } = await supabase.storage
+        .from('doc-exports')
+        .upload(filePath, content, {
+          contentType,
+          upsert: false,
+        });
+
+      if (uploadError) {
+        console.error('Storage upload error:', uploadError);
+        throw new Error(`Failed to save export to storage: ${uploadError.message}`);
+      }
+
+      // Create signed URL (valid for 7 days)
+      const expiresIn = 60 * 60 * 24 * 7; // 7 days in seconds
+      const { data: signedData, error: signedError } = await supabase.storage
+        .from('doc-exports')
+        .createSignedUrl(filePath, expiresIn);
+
+      if (signedError) {
+        console.error('Signed URL error:', signedError);
+      }
+
+      const expiresAt = new Date(Date.now() + expiresIn * 1000).toISOString();
+      const fileUrl = signedData?.signedUrl || null;
+
+      // Get user ID from auth header
+      const authHeader = req.headers.get('Authorization');
+      let userId: string | null = null;
+      
+      if (authHeader) {
+        const { data: { user } } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
+        userId = user?.id || null;
+      }
+
+      // Record export in history
+      if (userId) {
+        const { error: historyError } = await supabase
+          .from('doc_export_history')
+          .insert({
+            exported_by: userId,
+            pack_type: packType,
+            export_format: dbFormat,
+            included_categories: sections,
+            document_count: pack.metadata.sections_included.length,
+            total_size_bytes: contentBytes,
+            file_path: filePath,
+            file_url: fileUrl,
+            expires_at: expiresAt,
+          });
+
+        if (historyError) {
+          console.error('History record error:', historyError);
+        }
+
+        // Update last_exported_at for all docs in the export
+        const categoryMap: Record<string, string[]> = {
+          'product': ['product'],
+          'flows': ['flow', 'state_machine'],
+          'rules': ['rule', 'guardrail'],
+          'security': ['security', 'ops'],
+          'estimation': ['estimation'],
+          'playbooks': ['playbook'],
+          'processes': ['process'],
+          'slas': ['sla'],
+          'metrics': ['metrics'],
+        };
+        
+        const categoriesToUpdate = sections.flatMap(s => categoryMap[s] || [s]);
+        
+        const { error: updateError } = await supabase
+          .from('system_docs')
+          .update({ last_exported_at: new Date().toISOString() })
+          .in('category', categoriesToUpdate)
+          .eq('is_published', true);
+
+        if (updateError) {
+          console.error('Doc update error:', updateError);
+        }
+      }
+
+      // Return JSON response with download URL
+      return new Response(JSON.stringify({
+        success: true,
+        file_path: filePath,
+        file_url: fileUrl,
+        expires_at: expiresAt,
+        size_bytes: contentBytes,
+        pack_type: packType,
+        format: dbFormat,
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    if (format === 'markdown') {
-      const md = generateMarkdownBundle(pack);
-      return new Response(md, {
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'text/markdown',
-          'Content-Disposition': `attachment; filename="openclique-${packType}-handoff.md"`,
-        },
-      });
-    }
+    // ==========================================================================
+    // DIRECT DOWNLOAD (no storage)
+    // ==========================================================================
 
-    // Default: JSON
-    return new Response(JSON.stringify(pack, null, 2), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    return new Response(content, {
+      headers: { 
+        ...corsHeaders, 
+        'Content-Type': contentType,
+        'Content-Disposition': `attachment; filename="openclique-${packType}-handoff.${extension}"`,
+      },
     });
 
   } catch (error) {

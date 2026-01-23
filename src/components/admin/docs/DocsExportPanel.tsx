@@ -26,6 +26,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { 
   Download, 
@@ -47,7 +48,10 @@ import {
   AlertCircle,
   RefreshCw,
   History,
-  Sparkles
+  Sparkles,
+  Cloud,
+  CloudOff,
+  ExternalLink
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { DocPreviewModal, type PreviewDocument } from './DocPreviewModal';
@@ -159,6 +163,8 @@ export function DocsExportPanel() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewDocs, setPreviewDocs] = useState<PreviewDocument[]>([]);
   const [previewTitle, setPreviewTitle] = useState('');
+  const [saveToCloud, setSaveToCloud] = useState(true); // Default to saving to cloud
+  const [autoRefresh, setAutoRefresh] = useState(false);
   
   const [ctoSections, setCtoSections] = useState<ExportSection[]>(CTO_SECTIONS);
   const [cooSections, setCooSections] = useState<ExportSection[]>(COO_SECTIONS);
@@ -166,7 +172,7 @@ export function DocsExportPanel() {
   const currentSections = packType === 'cto' ? ctoSections : cooSections;
   const setCurrentSections = packType === 'cto' ? setCtoSections : setCooSections;
 
-  // Use change tracking hook
+  // Use change tracking hook with optional auto-refresh (30 seconds)
   const { 
     changeStats, 
     exportHistory, 
@@ -174,7 +180,9 @@ export function DocsExportPanel() {
     markExported,
     isLoading: isLoadingChanges,
     refetchDocs,
-  } = useDocChangeTracking();
+    refetchHistory,
+    refreshExportUrl,
+  } = useDocChangeTracking(autoRefresh ? 30000 : undefined);
 
   // Fetch all system docs for preview
   const { data: allDocs } = useQuery({
@@ -279,14 +287,9 @@ export function DocsExportPanel() {
     setExportProgress(0);
 
     try {
-      const steps = [
-        'Fetching documentation...',
-        'Processing sections...',
-        'Generating diagrams...',
-        'Formatting output...',
-        'Assembling bundle...',
-        'Recording export...',
-      ];
+      const steps = saveToCloud 
+        ? ['Fetching documentation...', 'Processing sections...', 'Generating output...', 'Uploading to Cloud...', 'Recording export...']
+        : ['Fetching documentation...', 'Processing sections...', 'Generating output...', 'Preparing download...'];
 
       for (let i = 0; i < steps.length - 1; i++) {
         await new Promise(resolve => setTimeout(resolve, 200));
@@ -298,56 +301,67 @@ export function DocsExportPanel() {
           sections: currentSections.filter(s => s.enabled).map(s => s.id),
           packType,
           format: exportFormat,
+          saveToStorage: saveToCloud,
         },
       });
 
       if (error) throw error;
 
-      // Mark documents as exported and record in history
-      const includedCategories = currentSections
-        .filter(s => s.enabled)
-        .flatMap(s => s.categories || [s.category]);
-      
-      const formatConfig = FORMAT_OPTIONS.find(f => f.id === exportFormat)!;
-      
-      try {
-        await markExported.mutateAsync({
-          packType: packType === 'cto' ? 'cto' : 'coo',
-          exportFormat: formatConfig.dbFormat,
-          categories: includedCategories,
-        });
-      } catch (trackingError) {
-        console.warn('Failed to record export in history:', trackingError);
-        // Continue with download even if tracking fails
-      }
-
       setExportProgress(100);
 
-      // Determine content type and extension
-      let blob: Blob;
-      let filename: string;
+      const formatConfig = FORMAT_OPTIONS.find(f => f.id === exportFormat)!;
 
-      if (exportFormat === 'json') {
-        blob = new Blob([typeof data === 'string' ? data : JSON.stringify(data, null, 2)], { type: 'application/json' });
-        filename = `openclique-${packType}-handoff-${format(new Date(), 'yyyy-MM-dd')}.json`;
-      } else if (exportFormat === 'markdown') {
-        blob = new Blob([data], { type: 'text/markdown' });
-        filename = `openclique-${packType}-handoff-${format(new Date(), 'yyyy-MM-dd')}.md`;
+      if (saveToCloud) {
+        // Cloud storage mode - edge function handles everything
+        toast.success(
+          `${packType === 'cto' ? 'CTO Handoff Pack' : 'COO Playbook'} saved to Cloud!`,
+          { description: 'Download link available in export history.' }
+        );
+        // Refresh history to show new export
+        refetchHistory();
+        refetchDocs();
       } else {
-        blob = new Blob([data], { type: 'application/xml' });
-        filename = `openclique-${packType}-context-${format(new Date(), 'yyyy-MM-dd')}.xml`;
+        // Direct download mode
+        const includedCategories = currentSections
+          .filter(s => s.enabled)
+          .flatMap(s => s.categories || [s.category]);
+        
+        try {
+          await markExported.mutateAsync({
+            packType: packType === 'cto' ? 'cto' : 'coo',
+            exportFormat: formatConfig.dbFormat,
+            categories: includedCategories,
+          });
+        } catch (trackingError) {
+          console.warn('Failed to record export in history:', trackingError);
+        }
+
+        // Determine content type and extension
+        let blob: Blob;
+        let filename: string;
+
+        if (exportFormat === 'json') {
+          blob = new Blob([typeof data === 'string' ? data : JSON.stringify(data, null, 2)], { type: 'application/json' });
+          filename = `openclique-${packType}-handoff-${format(new Date(), 'yyyy-MM-dd')}.json`;
+        } else if (exportFormat === 'markdown') {
+          blob = new Blob([data], { type: 'text/markdown' });
+          filename = `openclique-${packType}-handoff-${format(new Date(), 'yyyy-MM-dd')}.md`;
+        } else {
+          blob = new Blob([data], { type: 'application/xml' });
+          filename = `openclique-${packType}-context-${format(new Date(), 'yyyy-MM-dd')}.xml`;
+        }
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        toast.success(`${packType === 'cto' ? 'CTO Handoff Pack' : 'COO Playbook'} exported as ${formatConfig.label}!`);
       }
-
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      toast.success(`${packType === 'cto' ? 'CTO Handoff Pack' : 'COO Playbook'} exported as ${formatConfig.label}!`);
     } catch (error) {
       console.error('Export failed:', error);
       toast.error('Export failed. Check console for details.');
@@ -372,15 +386,38 @@ export function DocsExportPanel() {
             Generate documentation bundles for CTO handoffs or COO operations.
           </p>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => refetchDocs()}
-          disabled={isLoadingChanges}
-        >
-          <RefreshCw className={`h-4 w-4 mr-2 ${isLoadingChanges ? 'animate-spin' : ''}`} />
-          Refresh
-        </Button>
+        <div className="flex items-center gap-3">
+          {/* Auto-refresh toggle */}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="auto-refresh"
+                    checked={autoRefresh}
+                    onCheckedChange={setAutoRefresh}
+                  />
+                  <Label htmlFor="auto-refresh" className="text-sm cursor-pointer">
+                    Auto-refresh
+                  </Label>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Automatically check for changes every 30 seconds</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => { refetchDocs(); refetchHistory(); }}
+            disabled={isLoadingChanges}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isLoadingChanges ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       {/* Change Summary Banner */}
@@ -592,40 +629,70 @@ export function DocsExportPanel() {
       )}
 
       {/* Export Actions */}
-      <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/30">
-        <div>
-          <p className="font-medium">Ready to export</p>
-          <p className="text-sm text-muted-foreground">
-            {currentSections.filter(s => s.enabled).length} sections as {FORMAT_OPTIONS.find(f => f.id === exportFormat)?.label}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button 
-            variant="outline"
-            onClick={handlePreviewAll}
-            disabled={isExporting}
-          >
-            <Eye className="h-4 w-4 mr-2" />
-            Preview
-          </Button>
-          <Button 
-            onClick={handleExport}
-            disabled={isExporting || currentSections.filter(s => s.enabled).length === 0}
-          >
-            {isExporting ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Exporting...
-              </>
-            ) : (
-              <>
-                <Download className="h-4 w-4 mr-2" />
-                Download {FORMAT_OPTIONS.find(f => f.id === exportFormat)?.extension}
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-2">
+                <p className="font-medium">Ready to export</p>
+                {/* Cloud storage toggle */}
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-muted">
+                        <Switch
+                          id="save-to-cloud"
+                          checked={saveToCloud}
+                          onCheckedChange={setSaveToCloud}
+                        />
+                        <Label htmlFor="save-to-cloud" className="text-xs cursor-pointer flex items-center gap-1">
+                          {saveToCloud ? <Cloud className="h-3 w-3" /> : <CloudOff className="h-3 w-3" />}
+                          {saveToCloud ? 'Save to Cloud' : 'Direct Download'}
+                        </Label>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{saveToCloud 
+                        ? 'Export will be saved to Cloud storage with shareable download link' 
+                        : 'File will be downloaded directly to your device'}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {currentSections.filter(s => s.enabled).length} sections as {FORMAT_OPTIONS.find(f => f.id === exportFormat)?.label}
+                {saveToCloud && ' • Link valid for 7 days'}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline"
+                onClick={handlePreviewAll}
+                disabled={isExporting}
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                Preview
+              </Button>
+              <Button 
+                onClick={handleExport}
+                disabled={isExporting || currentSections.filter(s => s.enabled).length === 0}
+              >
+                {isExporting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    {saveToCloud ? 'Uploading...' : 'Exporting...'}
+                  </>
+                ) : (
+                  <>
+                    {saveToCloud ? <Cloud className="h-4 w-4 mr-2" /> : <Download className="h-4 w-4 mr-2" />}
+                    {saveToCloud ? 'Export to Cloud' : `Download ${FORMAT_OPTIONS.find(f => f.id === exportFormat)?.extension}`}
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* LLM Context Info */}
       {exportFormat === 'llm' && (
@@ -656,45 +723,111 @@ export function DocsExportPanel() {
               <History className="h-4 w-4" />
               Recent Exports
             </CardTitle>
-            <CardDescription>Track your documentation exports</CardDescription>
+            <CardDescription>Track your documentation exports with download links</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {exportHistory.slice(0, 5).map((entry) => (
-                <div 
-                  key={entry.id}
-                  className="flex items-center justify-between p-3 rounded-lg bg-muted/30 text-sm"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${
-                      entry.pack_type === 'cto' 
-                        ? 'bg-blue-100 dark:bg-blue-900/30' 
-                        : 'bg-green-100 dark:bg-green-900/30'
-                    }`}>
-                      {entry.pack_type === 'cto' 
-                        ? <Briefcase className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                        : <ClipboardList className="h-4 w-4 text-green-600 dark:text-green-400" />
-                      }
+              {exportHistory.slice(0, 10).map((entry) => {
+                const isExpired = entry.expires_at && new Date(entry.expires_at) < new Date();
+                const hasDownloadLink = entry.file_url && !isExpired;
+                
+                return (
+                  <div 
+                    key={entry.id}
+                    className="flex items-center justify-between p-3 rounded-lg bg-muted/30 text-sm"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-lg ${
+                        entry.pack_type === 'cto' 
+                          ? 'bg-blue-100 dark:bg-blue-900/30' 
+                          : 'bg-green-100 dark:bg-green-900/30'
+                      }`}>
+                        {entry.pack_type === 'cto' 
+                          ? <Briefcase className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                          : <ClipboardList className="h-4 w-4 text-green-600 dark:text-green-400" />
+                        }
+                      </div>
+                      <div>
+                        <p className="font-medium flex items-center gap-2">
+                          {entry.pack_type === 'cto' ? 'CTO Pack' : entry.pack_type === 'coo' ? 'COO Playbook' : 'Full Export'}
+                          {entry.file_path && (
+                            <Badge variant="outline" className="text-xs">
+                              <Cloud className="h-3 w-3 mr-1" />
+                              Cloud
+                            </Badge>
+                          )}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {entry.document_count} docs • {entry.export_format.replace('_', ' ').toUpperCase()}
+                          {entry.total_size_bytes && ` • ${(entry.total_size_bytes / 1024).toFixed(1)}KB`}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium">
-                        {entry.pack_type === 'cto' ? 'CTO Pack' : entry.pack_type === 'coo' ? 'COO Playbook' : 'Full Export'}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {entry.document_count} docs • {entry.export_format.replace('_', ' ').toUpperCase()}
-                      </p>
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                        <p className="text-muted-foreground">
+                          {format(new Date(entry.exported_at), 'MMM d, h:mm a')}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {isExpired ? (
+                            <span className="text-destructive">Expired</span>
+                          ) : entry.expires_at ? (
+                            <span>Expires {formatDistanceToNow(new Date(entry.expires_at), { addSuffix: true })}</span>
+                          ) : (
+                            formatDistanceToNow(new Date(entry.exported_at), { addSuffix: true })
+                          )}
+                        </p>
+                      </div>
+                      {hasDownloadLink && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => window.open(entry.file_url!, '_blank')}
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Download export</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
+                      {isExpired && entry.file_path && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={async () => {
+                                  const newUrl = await refreshExportUrl(entry.id, entry.file_path!);
+                                  if (newUrl) {
+                                    window.open(newUrl, '_blank');
+                                    refetchHistory();
+                                  } else {
+                                    toast.error('Failed to refresh download link');
+                                  }
+                                }}
+                              >
+                                <RefreshCw className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Refresh download link</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-muted-foreground">
-                      {format(new Date(entry.exported_at), 'MMM d, h:mm a')}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {formatDistanceToNow(new Date(entry.exported_at), { addSuffix: true })}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </CardContent>
         </Card>
