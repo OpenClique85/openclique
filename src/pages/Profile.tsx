@@ -1,6 +1,6 @@
 /**
  * =============================================================================
- * PROFILE PAGE - User profile, preferences, and quest history
+ * PROFILE PAGE - User profile, preferences, gamification, and quest history
  * =============================================================================
  */
 
@@ -11,11 +11,13 @@ import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
-import { Loader2, Settings, Calendar, Users, Star, MapPin, ChevronRight } from 'lucide-react';
+import { Loader2, Settings, Calendar, ChevronRight, User, Gamepad2 } from 'lucide-react';
 import { ProfileEditModal } from '@/components/ProfileEditModal';
+import { ProfileGamificationSection } from '@/components/profile/ProfileGamificationSection';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Quest = Tables<'quests'>;
@@ -31,6 +33,7 @@ export default function Profile() {
   const [signups, setSignups] = useState<SignupWithQuest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -85,7 +88,7 @@ export default function Profile() {
       <Navbar />
       
       <main className="flex-1 container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto space-y-8">
+        <div className="max-w-4xl mx-auto space-y-6">
           {/* Profile Header */}
           <Card>
             <CardContent className="pt-6">
@@ -130,82 +133,104 @@ export default function Profile() {
             </CardContent>
           </Card>
 
-          {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card>
-              <CardContent className="pt-6 text-center">
-                <div className="text-3xl font-bold text-primary">{completedQuests.length}</div>
-                <p className="text-sm text-muted-foreground">Quests Completed</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6 text-center">
-                <div className="text-3xl font-bold text-primary">{upcomingQuests.length}</div>
-                <p className="text-sm text-muted-foreground">Upcoming</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6 text-center">
-                <div className="text-3xl font-bold text-primary">
-                  {new Set(completedQuests.map(s => s.quest.progression_tree)).size}
-                </div>
-                <p className="text-sm text-muted-foreground">Paths Explored</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6 text-center">
-                <div className="text-3xl font-bold text-primary">0</div>
-                <p className="text-sm text-muted-foreground">Squad Members</p>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Tabbed Content */}
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="overview" className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                Overview
+              </TabsTrigger>
+              <TabsTrigger value="progress" className="flex items-center gap-2">
+                <Gamepad2 className="h-4 w-4" />
+                Progress
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Quest History */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                Quest History
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {signups.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground mb-4">You haven't joined any quests yet</p>
-                  <Button onClick={() => navigate('/quests')}>Find Your First Quest</Button>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {signups.slice(0, 10).map((signup) => {
-                    const isPast = signup.quest.start_datetime && new Date(signup.quest.start_datetime) < new Date();
-                    return (
-                      <div
-                        key={signup.id}
-                        className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer"
-                        onClick={() => navigate(`/quests/${signup.quest.slug}`)}
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="text-2xl">{signup.quest.icon}</span>
-                          <div>
-                            <p className="font-medium text-foreground">{signup.quest.title}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {signup.quest.start_datetime ? format(new Date(signup.quest.start_datetime), 'MMM d, yyyy') : 'Date TBD'}
-                            </p>
+            {/* Overview Tab */}
+            <TabsContent value="overview" className="space-y-6 mt-6">
+              {/* Stats */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Card>
+                  <CardContent className="pt-6 text-center">
+                    <div className="text-3xl font-bold text-primary">{completedQuests.length}</div>
+                    <p className="text-sm text-muted-foreground">Quests Completed</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-6 text-center">
+                    <div className="text-3xl font-bold text-primary">{upcomingQuests.length}</div>
+                    <p className="text-sm text-muted-foreground">Upcoming</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-6 text-center">
+                    <div className="text-3xl font-bold text-primary">
+                      {new Set(completedQuests.map(s => s.quest.progression_tree)).size}
+                    </div>
+                    <p className="text-sm text-muted-foreground">Paths Explored</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-6 text-center">
+                    <div className="text-3xl font-bold text-primary">0</div>
+                    <p className="text-sm text-muted-foreground">Squad Members</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Quest History */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Calendar className="h-5 w-5" />
+                    Quest History
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {signups.length === 0 ? (
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground mb-4">You haven't joined any quests yet</p>
+                      <Button onClick={() => navigate('/quests')}>Find Your First Quest</Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {signups.slice(0, 10).map((signup) => {
+                        const isPast = signup.quest.start_datetime && new Date(signup.quest.start_datetime) < new Date();
+                        return (
+                          <div
+                            key={signup.id}
+                            className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer"
+                            onClick={() => navigate(`/quests/${signup.quest.slug}`)}
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className="text-2xl">{signup.quest.icon}</span>
+                              <div>
+                                <p className="font-medium text-foreground">{signup.quest.title}</p>
+                                <p className="text-sm text-muted-foreground">
+                                  {signup.quest.start_datetime ? format(new Date(signup.quest.start_datetime), 'MMM d, yyyy') : 'Date TBD'}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant={isPast ? 'secondary' : 'default'}>
+                                {isPast ? (signup.status === 'completed' ? 'Completed' : 'Past') : 'Upcoming'}
+                              </Badge>
+                              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant={isPast ? 'secondary' : 'default'}>
-                            {isPast ? (signup.status === 'completed' ? 'Completed' : 'Past') : 'Upcoming'}
-                          </Badge>
-                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                        );
+                      })}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Progress Tab (Gamification) */}
+            <TabsContent value="progress" className="mt-6">
+              <ProfileGamificationSection />
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
 
