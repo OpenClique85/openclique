@@ -145,10 +145,14 @@ Deno.serve(async (req) => {
     // DATA MODEL (Auto-generated from schema)
     // ==========================================================================
     if (sections.includes('datamodel')) {
-      // Get table info
-      const { data: tables } = await supabase.rpc('get_table_info').catch(() => ({ data: null }));
-      
-      // Get RLS policies - using a direct query approach
+      // Get table info - this RPC may not exist, so we provide fallback data
+      let tables = null;
+      try {
+        const result = await supabase.rpc('get_table_info');
+        tables = result.data;
+      } catch {
+        // RPC doesn't exist, use static fallback
+      }
       const { data: policies } = await supabase
         .from('profiles') // dummy query to check connectivity
         .select('id')
@@ -328,9 +332,10 @@ All tables have RLS enabled with policies enforcing:
     });
 
   } catch (error) {
-    console.error('Export error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Export error:', errorMessage);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: errorMessage }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
