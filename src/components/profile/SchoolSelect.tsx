@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -15,7 +16,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { AUSTIN_SCHOOLS, SchoolInfo, VerificationTier } from '@/types/profile';
-import { GraduationCap, Star, Eye, EyeOff } from 'lucide-react';
+import { GraduationCap, Star, Eye, EyeOff, Mail } from 'lucide-react';
+import { SchoolVerificationModal } from './SchoolVerificationModal';
 
 interface SchoolSelectProps {
   isStudent: boolean | undefined;
@@ -24,6 +26,7 @@ interface SchoolSelectProps {
   onSchoolChange: (school: SchoolInfo | undefined) => void;
   showPublicly: boolean;
   onShowPubliclyChange: (show: boolean) => void;
+  onVerificationComplete?: () => void;
 }
 
 export function SchoolSelect({
@@ -33,7 +36,9 @@ export function SchoolSelect({
   onSchoolChange,
   showPublicly,
   onShowPubliclyChange,
+  onVerificationComplete,
 }: SchoolSelectProps) {
+  const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
   
   const handleStudentToggle = (value: string) => {
     if (value === 'yes') {
@@ -56,6 +61,13 @@ export function SchoolSelect({
         verification_tier: 'self_reported' as VerificationTier,
       };
       onSchoolChange(schoolInfo);
+    }
+  };
+
+  const handleVerified = () => {
+    // Refresh the school info to show verified status
+    if (onVerificationComplete) {
+      onVerificationComplete();
     }
   };
 
@@ -128,11 +140,21 @@ export function SchoolSelect({
                 UT Austin students get a special burnt orange profile and the 🤘 badge.
               </p>
               {selectedSchool?.verification_tier === 'self_reported' && (
-                <div className="flex items-center gap-2 mt-2">
-                  <Badge variant="outline" className="text-xs">
+                <div className="flex flex-col gap-2 mt-2">
+                  <Badge variant="outline" className="text-xs w-fit">
                     <Star className="h-3 w-3 mr-1" />
                     Verify your @utexas.edu email for the star badge!
                   </Badge>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="w-fit text-xs border-[#BF5700] text-[#BF5700] hover:bg-[#BF5700] hover:text-white"
+                    onClick={() => setIsVerificationModalOpen(true)}
+                  >
+                    <Mail className="h-3 w-3 mr-1" />
+                    Verify Email
+                  </Button>
                 </div>
               )}
               {selectedSchool?.verification_tier === 'email_verified' && (
@@ -144,6 +166,17 @@ export function SchoolSelect({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Verification Modal */}
+      {isUTAustin && selectedSchoolData?.domain && (
+        <SchoolVerificationModal
+          isOpen={isVerificationModalOpen}
+          onClose={() => setIsVerificationModalOpen(false)}
+          schoolId="ut_austin"
+          schoolDomain={selectedSchoolData.domain}
+          onVerified={handleVerified}
+        />
       )}
 
       {/* Other school badge preview */}
