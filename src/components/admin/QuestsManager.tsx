@@ -37,8 +37,10 @@ import {
   Share2,
   ExternalLink,
   Bell,
-  Send
+  Send,
+  CalendarPlus
 } from 'lucide-react';
+import { ScheduleInstanceDialog } from './ScheduleInstanceDialog';
 import { format, differenceInDays, differenceInWeeks } from 'date-fns';
 import type { Tables, Enums } from '@/integrations/supabase/types';
 
@@ -154,6 +156,10 @@ export function QuestsManager() {
   const [notifyMessage, setNotifyMessage] = useState('');
   const [isSendingNotifications, setIsSendingNotifications] = useState(false);
   const [matchingUsersCount, setMatchingUsersCount] = useState<number | null>(null);
+  
+  // Schedule instance modal state
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [scheduleQuest, setScheduleQuest] = useState<Quest | null>(null);
 
   const fetchQuests = async () => {
     setIsLoading(true);
@@ -561,6 +567,17 @@ export function QuestsManager() {
                       title="Notify matching users"
                     >
                       <Bell className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => {
+                        setScheduleQuest(quest);
+                        setShowScheduleModal(true);
+                      }}
+                      title="Schedule instance"
+                    >
+                      <CalendarPlus className="h-4 w-4" />
                     </Button>
                     <Button variant="ghost" size="icon" onClick={() => handleOpenModal(quest)}>
                       <Pencil className="h-4 w-4" />
@@ -1140,6 +1157,13 @@ export function QuestsManager() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
+      {/* Schedule Instance Dialog */}
+      <ScheduleInstanceDialog
+        quest={scheduleQuest}
+        open={showScheduleModal}
+        onOpenChange={setShowScheduleModal}
+      />
     </div>
   );
 }
