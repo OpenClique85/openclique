@@ -33,6 +33,7 @@ import { FlowDebugger } from '@/components/admin/ops/FlowDebugger';
 import { ManualOverrides } from '@/components/admin/ops/ManualOverrides';
 import { FeatureFlagsManager } from '@/components/admin/ops/FeatureFlagsManager';
 import { SecurityTools } from '@/components/admin/ops/SecurityTools';
+import { NotificationConsole } from '@/components/admin/notifications';
 
 export default function Admin() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
@@ -77,6 +78,7 @@ export default function Admin() {
       case 'messaging': return <MessagingCenter />;
       case 'whatsapp': return <WhatsAppManager />;
       case 'links': return <LinksManager />;
+      case 'notification-console': return <NotificationConsole />;
       case 'analytics': return <Analytics />;
       case 'xp-levels': return <XPLevelsManager />;
       case 'achievements': return <AchievementsManager />;

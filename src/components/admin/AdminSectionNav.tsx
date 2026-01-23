@@ -61,6 +61,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
     icon: <MessageSquare className="h-4 w-4" />,
     tabs: [
       { id: 'messaging', label: 'Messaging' },
+      { id: 'notification-console', label: 'Notification Console' },
       { id: 'whatsapp', label: 'WhatsApp' },
       { id: 'links', label: 'Signup Links' },
     ],
