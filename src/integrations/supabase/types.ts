@@ -238,6 +238,33 @@ export type Database = {
         }
         Relationships: []
       }
+      auth_rate_monitor: {
+        Row: {
+          created_at: string | null
+          event_type: string
+          id: string
+          identifier: string
+          identifier_type: string
+          metadata: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_type: string
+          id?: string
+          identifier: string
+          identifier_type: string
+          metadata?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          event_type?: string
+          id?: string
+          identifier?: string
+          identifier_type?: string
+          metadata?: Json | null
+        }
+        Relationships: []
+      }
       badge_templates: {
         Row: {
           category: string | null
@@ -1279,6 +1306,45 @@ export type Database = {
           id?: string
           message?: string | null
           status?: string | null
+        }
+        Relationships: []
+      }
+      pii_access_log: {
+        Row: {
+          access_type: string
+          accessed_fields: string[] | null
+          admin_user_id: string
+          created_at: string | null
+          id: string
+          ip_address: string | null
+          reason: string | null
+          target_table: string | null
+          target_user_id: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          access_type: string
+          accessed_fields?: string[] | null
+          admin_user_id: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          reason?: string | null
+          target_table?: string | null
+          target_user_id?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          access_type?: string
+          accessed_fields?: string[] | null
+          admin_user_id?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          reason?: string | null
+          target_table?: string | null
+          target_user_id?: string | null
+          user_agent?: string | null
         }
         Relationships: []
       }
@@ -2977,6 +3043,16 @@ export type Database = {
         Returns: undefined
       }
       is_admin: { Args: never; Returns: boolean }
+      log_pii_access: {
+        Args: {
+          p_access_type: string
+          p_accessed_fields?: string[]
+          p_reason?: string
+          p_target_table?: string
+          p_target_user_id?: string
+        }
+        Returns: string
+      }
       record_referral_signup: {
         Args: { p_referral_code: string; p_user_id: string }
         Returns: undefined

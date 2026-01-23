@@ -32,6 +32,7 @@ import { EventTimeline } from '@/components/admin/ops/EventTimeline';
 import { FlowDebugger } from '@/components/admin/ops/FlowDebugger';
 import { ManualOverrides } from '@/components/admin/ops/ManualOverrides';
 import { FeatureFlagsManager } from '@/components/admin/ops/FeatureFlagsManager';
+import { SecurityTools } from '@/components/admin/ops/SecurityTools';
 
 export default function Admin() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
@@ -87,6 +88,7 @@ export default function Admin() {
       case 'flow-debugger': return <FlowDebugger />;
       case 'manual-overrides': return <ManualOverrides />;
       case 'feature-flags': return <FeatureFlagsManager />;
+      case 'security-tools': return <SecurityTools />;
       case 'devtools': return <DevToolsSection />;
       default: return <QuestsManager />;
     }
