@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { FeedbackMediaUpload } from './FeedbackMediaUpload';
 
 interface XPBreakdown {
   source: string;
@@ -30,6 +32,7 @@ interface FeedbackCompleteProps {
 }
 
 export function FeedbackComplete({ totalXPEarned, xpBreakdown, questTitle, questId }: FeedbackCompleteProps) {
+  const { user } = useAuth();
   const [suggestedQuests, setSuggestedQuests] = useState<SuggestedQuest[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
 
@@ -143,6 +146,18 @@ export function FeedbackComplete({ totalXPEarned, xpBreakdown, questTitle, quest
           </div>
         )}
       </div>
+
+      {/* Media Upload Section */}
+      {user && (
+        <div className="max-w-sm mx-auto">
+          <Card className="p-4">
+            <FeedbackMediaUpload
+              questId={questId}
+              userId={user.id}
+            />
+          </Card>
+        </div>
+      )}
 
       {/* Suggested Next Quests */}
       {isLoadingSuggestions ? (

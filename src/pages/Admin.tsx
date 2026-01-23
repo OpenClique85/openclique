@@ -41,6 +41,7 @@ import { SquadsDirectory } from '@/components/admin/SquadsDirectory';
 import { SquadComparisonView } from '@/components/admin/SquadComparisonView';
 import { SquadHealthDashboard } from '@/components/admin/SquadHealthDashboard';
 import { SquadArchivalManager } from '@/components/admin/SquadArchivalManager';
+import { UGCManager } from '@/components/admin/UGCManager';
 export default function Admin() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState('pilot-instances');
@@ -90,9 +91,11 @@ export default function Admin() {
       // Partners
       case 'creators': return <CreatorsManager />;
       case 'sponsors': return <SponsorsManager />;
-      case 'testimonials': return <TestimonialsManager />;
       case 'creator-preview': return <CreatorPreviewTab />;
       case 'sponsor-preview': return <SponsorPreviewTab />;
+      // Content
+      case 'ugc-manager': return <UGCManager />;
+      case 'testimonials': return <TestimonialsManager />;
       // Communications
       case 'messaging': return <MessagingCenter />;
       case 'whatsapp': return <WhatsAppManager />;

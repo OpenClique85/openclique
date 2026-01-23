@@ -3227,6 +3227,78 @@ export type Database = {
           },
         ]
       }
+      ugc_submissions: {
+        Row: {
+          caption: string | null
+          consent_marketing: boolean
+          consent_social_media: boolean
+          created_at: string
+          file_type: string
+          file_url: string
+          id: string
+          instance_id: string | null
+          quest_id: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_notes: string | null
+          status: string
+          thumbnail_url: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          caption?: string | null
+          consent_marketing?: boolean
+          consent_social_media?: boolean
+          created_at?: string
+          file_type: string
+          file_url: string
+          id?: string
+          instance_id?: string | null
+          quest_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          thumbnail_url?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          caption?: string | null
+          consent_marketing?: boolean
+          consent_social_media?: boolean
+          created_at?: string
+          file_type?: string
+          file_url?: string
+          id?: string
+          instance_id?: string | null
+          quest_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          thumbnail_url?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ugc_submissions_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "quest_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ugc_submissions_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_achievements: {
         Row: {
           achievement_id: string
