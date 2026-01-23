@@ -1616,6 +1616,8 @@ export type Database = {
       }
       quest_instances: {
         Row: {
+          archived_at: string | null
+          briefing_html: string | null
           capacity: number
           check_in_closes_at: string | null
           check_in_opens_at: string | null
@@ -1634,6 +1636,7 @@ export type Database = {
           operator_notes: string | null
           progression_tree: string | null
           quest_card_token: string
+          quest_id: string | null
           required_proof_types: string[] | null
           safety_notes: string | null
           scheduled_date: string
@@ -1641,14 +1644,16 @@ export type Database = {
           start_time: string
           status: Database["public"]["Enums"]["instance_status"]
           target_squad_size: number | null
-          template_id: string | null
           timezone: string | null
           title: string
           updated_at: string
           what_to_bring: string | null
+          whatsapp_invite_link: string | null
           xp_rules: Json | null
         }
         Insert: {
+          archived_at?: string | null
+          briefing_html?: string | null
           capacity?: number
           check_in_closes_at?: string | null
           check_in_opens_at?: string | null
@@ -1667,6 +1672,7 @@ export type Database = {
           operator_notes?: string | null
           progression_tree?: string | null
           quest_card_token?: string
+          quest_id?: string | null
           required_proof_types?: string[] | null
           safety_notes?: string | null
           scheduled_date: string
@@ -1674,14 +1680,16 @@ export type Database = {
           start_time: string
           status?: Database["public"]["Enums"]["instance_status"]
           target_squad_size?: number | null
-          template_id?: string | null
           timezone?: string | null
           title: string
           updated_at?: string
           what_to_bring?: string | null
+          whatsapp_invite_link?: string | null
           xp_rules?: Json | null
         }
         Update: {
+          archived_at?: string | null
+          briefing_html?: string | null
           capacity?: number
           check_in_closes_at?: string | null
           check_in_opens_at?: string | null
@@ -1700,6 +1708,7 @@ export type Database = {
           operator_notes?: string | null
           progression_tree?: string | null
           quest_card_token?: string
+          quest_id?: string | null
           required_proof_types?: string[] | null
           safety_notes?: string | null
           scheduled_date?: string
@@ -1707,19 +1716,19 @@ export type Database = {
           start_time?: string
           status?: Database["public"]["Enums"]["instance_status"]
           target_squad_size?: number | null
-          template_id?: string | null
           timezone?: string | null
           title?: string
           updated_at?: string
           what_to_bring?: string | null
+          whatsapp_invite_link?: string | null
           xp_rules?: Json | null
         }
         Relationships: [
           {
-            foreignKeyName: "quest_instances_template_id_fkey"
-            columns: ["template_id"]
+            foreignKeyName: "quest_instances_quest_id_fkey"
+            columns: ["quest_id"]
             isOneToOne: false
-            referencedRelation: "quest_templates"
+            referencedRelation: "quests"
             referencedColumns: ["id"]
           },
         ]
@@ -1843,84 +1852,10 @@ export type Database = {
           },
         ]
       }
-      quest_templates: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          default_capacity: number | null
-          default_duration_minutes: number | null
-          default_squad_size: number | null
-          description: string | null
-          icon: string | null
-          id: string
-          is_active: boolean | null
-          objectives: Json | null
-          progression_tree: string | null
-          required_proof_types: string[] | null
-          safety_notes: string | null
-          short_description: string | null
-          slug: string
-          tags: string[] | null
-          theme_color: string | null
-          timeline_prompts: Json | null
-          title: string
-          updated_at: string
-          what_to_bring: string | null
-          xp_rules: Json | null
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          default_capacity?: number | null
-          default_duration_minutes?: number | null
-          default_squad_size?: number | null
-          description?: string | null
-          icon?: string | null
-          id?: string
-          is_active?: boolean | null
-          objectives?: Json | null
-          progression_tree?: string | null
-          required_proof_types?: string[] | null
-          safety_notes?: string | null
-          short_description?: string | null
-          slug: string
-          tags?: string[] | null
-          theme_color?: string | null
-          timeline_prompts?: Json | null
-          title: string
-          updated_at?: string
-          what_to_bring?: string | null
-          xp_rules?: Json | null
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          default_capacity?: number | null
-          default_duration_minutes?: number | null
-          default_squad_size?: number | null
-          description?: string | null
-          icon?: string | null
-          id?: string
-          is_active?: boolean | null
-          objectives?: Json | null
-          progression_tree?: string | null
-          required_proof_types?: string[] | null
-          safety_notes?: string | null
-          short_description?: string | null
-          slug?: string
-          tags?: string[] | null
-          theme_color?: string | null
-          timeline_prompts?: Json | null
-          title?: string
-          updated_at?: string
-          what_to_bring?: string | null
-          xp_rules?: Json | null
-        }
-        Relationships: []
-      }
       quests: {
         Row: {
           admin_notes: string | null
+          age_restriction: string | null
           base_xp: number | null
           briefing_html: string | null
           capacity_total: number | null
@@ -1930,10 +1865,20 @@ export type Database = {
           creator_name: string | null
           creator_social_url: string | null
           creator_type: string | null
+          default_capacity: number | null
+          default_duration_minutes: number | null
+          default_squad_size: number | null
+          dress_code: string | null
+          duration_notes: string | null
+          emergency_contact: string | null
           end_datetime: string | null
+          full_description: string | null
+          highlights: Json | null
           icon: string | null
           id: string
           image_url: string | null
+          is_active: boolean | null
+          is_repeatable: boolean | null
           is_sponsored: boolean | null
           meeting_address: string | null
           meeting_location_name: string | null
@@ -1941,9 +1886,11 @@ export type Database = {
           min_tree_xp: number | null
           objectives: string | null
           org_id: string | null
+          physical_requirements: string | null
           progression_tree: string | null
           published_at: string | null
           required_achievement_id: string | null
+          required_proof_types: string[] | null
           review_status: Database["public"]["Enums"]["review_status"] | null
           revision_count: number | null
           rewards: string | null
@@ -1958,13 +1905,17 @@ export type Database = {
           tags: string[] | null
           theme: string | null
           theme_color: string | null
+          timeline_prompts: Json | null
           title: string
           updated_at: string
           visibility: Database["public"]["Enums"]["quest_visibility"]
+          what_to_bring: string | null
           whatsapp_invite_link: string | null
+          xp_rules: Json | null
         }
         Insert: {
           admin_notes?: string | null
+          age_restriction?: string | null
           base_xp?: number | null
           briefing_html?: string | null
           capacity_total?: number | null
@@ -1974,10 +1925,20 @@ export type Database = {
           creator_name?: string | null
           creator_social_url?: string | null
           creator_type?: string | null
+          default_capacity?: number | null
+          default_duration_minutes?: number | null
+          default_squad_size?: number | null
+          dress_code?: string | null
+          duration_notes?: string | null
+          emergency_contact?: string | null
           end_datetime?: string | null
+          full_description?: string | null
+          highlights?: Json | null
           icon?: string | null
           id?: string
           image_url?: string | null
+          is_active?: boolean | null
+          is_repeatable?: boolean | null
           is_sponsored?: boolean | null
           meeting_address?: string | null
           meeting_location_name?: string | null
@@ -1985,9 +1946,11 @@ export type Database = {
           min_tree_xp?: number | null
           objectives?: string | null
           org_id?: string | null
+          physical_requirements?: string | null
           progression_tree?: string | null
           published_at?: string | null
           required_achievement_id?: string | null
+          required_proof_types?: string[] | null
           review_status?: Database["public"]["Enums"]["review_status"] | null
           revision_count?: number | null
           rewards?: string | null
@@ -2002,13 +1965,17 @@ export type Database = {
           tags?: string[] | null
           theme?: string | null
           theme_color?: string | null
+          timeline_prompts?: Json | null
           title: string
           updated_at?: string
           visibility?: Database["public"]["Enums"]["quest_visibility"]
+          what_to_bring?: string | null
           whatsapp_invite_link?: string | null
+          xp_rules?: Json | null
         }
         Update: {
           admin_notes?: string | null
+          age_restriction?: string | null
           base_xp?: number | null
           briefing_html?: string | null
           capacity_total?: number | null
@@ -2018,10 +1985,20 @@ export type Database = {
           creator_name?: string | null
           creator_social_url?: string | null
           creator_type?: string | null
+          default_capacity?: number | null
+          default_duration_minutes?: number | null
+          default_squad_size?: number | null
+          dress_code?: string | null
+          duration_notes?: string | null
+          emergency_contact?: string | null
           end_datetime?: string | null
+          full_description?: string | null
+          highlights?: Json | null
           icon?: string | null
           id?: string
           image_url?: string | null
+          is_active?: boolean | null
+          is_repeatable?: boolean | null
           is_sponsored?: boolean | null
           meeting_address?: string | null
           meeting_location_name?: string | null
@@ -2029,9 +2006,11 @@ export type Database = {
           min_tree_xp?: number | null
           objectives?: string | null
           org_id?: string | null
+          physical_requirements?: string | null
           progression_tree?: string | null
           published_at?: string | null
           required_achievement_id?: string | null
+          required_proof_types?: string[] | null
           review_status?: Database["public"]["Enums"]["review_status"] | null
           revision_count?: number | null
           rewards?: string | null
@@ -2046,10 +2025,13 @@ export type Database = {
           tags?: string[] | null
           theme?: string | null
           theme_color?: string | null
+          timeline_prompts?: Json | null
           title?: string
           updated_at?: string
           visibility?: Database["public"]["Enums"]["quest_visibility"]
+          what_to_bring?: string | null
           whatsapp_invite_link?: string | null
+          xp_rules?: Json | null
         }
         Relationships: [
           {
@@ -3459,6 +3441,7 @@ export type Database = {
       }
     }
     Functions: {
+      auto_archive_instances: { Args: never; Returns: number }
       award_quest_xp: {
         Args: { p_quest_id: string; p_user_id: string }
         Returns: number
@@ -3492,6 +3475,17 @@ export type Database = {
           streak_name: string
         }[]
       }
+      create_instance_from_quest: {
+        Args: {
+          p_end_time?: string
+          p_meeting_point_address?: string
+          p_meeting_point_name?: string
+          p_quest_id: string
+          p_scheduled_date: string
+          p_start_time: string
+        }
+        Returns: string
+      }
       create_instance_from_template: {
         Args: {
           p_meeting_point_address?: string
@@ -3501,6 +3495,31 @@ export type Database = {
           p_template_id: string
         }
         Returns: string
+      }
+      get_or_create_instance: {
+        Args: { p_quest_id: string }
+        Returns: {
+          instance_id: string
+          instances_available: number
+          needs_picker: boolean
+        }[]
+      }
+      get_upcoming_instances: {
+        Args: { p_quest_id: string }
+        Returns: {
+          capacity: number
+          current_signup_count: number
+          end_time: string
+          id: string
+          instance_slug: string
+          meeting_point_address: string
+          meeting_point_name: string
+          scheduled_date: string
+          spots_remaining: number
+          start_time: string
+          status: Database["public"]["Enums"]["instance_status"]
+          title: string
+        }[]
       }
       get_user_level: {
         Args: { p_user_id: string }

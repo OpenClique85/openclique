@@ -47,12 +47,13 @@ interface QuestInstance {
   created_at: string;
 }
 
-interface QuestTemplate {
+interface QuestForPicker {
   id: string;
   slug: string;
   title: string;
   icon: string;
-  default_capacity: number;
+  default_capacity: number | null;
+  is_repeatable: boolean;
 }
 
 const STATUS_COLORS: Record<InstanceStatus, string> = {
@@ -92,29 +93,30 @@ export function PilotInstancesManager() {
     },
   });
 
-  // Fetch templates
-  const { data: templates } = useQuery({
-    queryKey: ['quest-templates'],
+  // Fetch quests (as templates)
+  const { data: quests } = useQuery({
+    queryKey: ['quests-for-instance-picker'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('quest_templates')
-        .select('id, slug, title, icon, default_capacity')
+        .from('quests')
+        .select('id, slug, title, icon, default_capacity, is_repeatable')
         .eq('is_active', true)
+        .eq('review_status', 'approved')
         .order('title');
       if (error) throw error;
-      return data as QuestTemplate[];
+      return data as QuestForPicker[];
     },
   });
 
-  // Create instance from template
+  // Create instance from quest
   const createInstanceMutation = useMutation({
     mutationFn: async () => {
       if (!selectedTemplate || !formData.scheduled_date || !formData.start_time) {
         throw new Error('Please fill in all required fields');
       }
 
-      const { data, error } = await supabase.rpc('create_instance_from_template', {
-        p_template_id: selectedTemplate,
+      const { data, error } = await supabase.rpc('create_instance_from_quest', {
+        p_quest_id: selectedTemplate,
         p_scheduled_date: formData.scheduled_date,
         p_start_time: formData.start_time,
         p_meeting_point_name: formData.meeting_point_name || null,
@@ -168,8 +170,8 @@ export function PilotInstancesManager() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold">Pilot Instances</h2>
-          <p className="text-sm text-muted-foreground">Manage active quest runs</p>
+          <h2 className="text-xl font-semibold">Quest Instances</h2>
+          <p className="text-sm text-muted-foreground">Active and upcoming quest runs</p>
         </div>
         <Button onClick={() => setIsCreateOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
@@ -281,29 +283,30 @@ export function PilotInstancesManager() {
           <DialogHeader>
             <DialogTitle>Create Quest Instance</DialogTitle>
             <DialogDescription>
-              Create a new pilot run from a quest template.
+              Schedule a new run of a quest.
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4 py-4">
-            {/* Template Selection */}
+            {/* Quest Selection */}
             <div className="space-y-2">
-              <Label>Quest Template</Label>
+              <Label>Quest</Label>
               <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a template..." />
+                  <SelectValue placeholder="Select a quest..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {templates?.map((t) => (
-                    <SelectItem key={t.id} value={t.id}>
-                      {t.icon} {t.title}
+                  {quests?.map((q) => (
+                    <SelectItem key={q.id} value={q.id}>
+                      {q.icon} {q.title}
+                      {q.is_repeatable && <span className="ml-2 text-xs text-muted-foreground">(Repeatable)</span>}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              {templates?.length === 0 && (
+              {quests?.length === 0 && (
                 <p className="text-xs text-muted-foreground">
-                  No templates available. Create a template first.
+                  No approved quests available.
                 </p>
               )}
             </div>
