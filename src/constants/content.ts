@@ -215,9 +215,10 @@ export const WHO_ITS_FOR = {
 // =============================================================================
 
 export const HERO = {
-  headline: "Build the village you've been missing",
-  headlineAccent: "One Quest at a time.",
-  subheadline: "Join a small squad. Complete a curated adventure. Make real friends.",
+  tagline: "Match. Meet. Return.",
+  headline: "You've got a squad waiting.",
+  headlineAccent: "You just haven't met them yet.",
+  subheadline: "We plan the adventure. You bring yourself—plus whoever you want.",
   primaryCta: "Find Your Quest",
   secondaryCta: "Partner With Us",
   tertiaryCta: "Work With Us",
