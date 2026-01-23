@@ -18,25 +18,36 @@ interface SendEmailRequest {
   customHtml?: string;
 }
 
-// Email templates
+// HTML escape function to prevent XSS in email templates
+function escapeHtml(unsafe: string): string {
+  if (typeof unsafe !== 'string') return String(unsafe ?? '');
+  return unsafe
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+// Email templates with escaped variables
 const templates: Record<string, (vars: Record<string, string>) => string> = {
   quest_confirmation: (vars) => `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="text-align: center; margin-bottom: 30px;">
         <h1 style="color: #14b8a6; margin: 0;">🎉 You're In!</h1>
       </div>
-      <p style="font-size: 16px; color: #333;">Hey ${vars.display_name || "Adventurer"}!</p>
-      <p style="font-size: 16px; color: #333;">Great news — you've been confirmed for <strong>${vars.quest_name || "your quest"}</strong>!</p>
+      <p style="font-size: 16px; color: #333;">Hey ${escapeHtml(vars.display_name || "Adventurer")}!</p>
+      <p style="font-size: 16px; color: #333;">Great news — you've been confirmed for <strong>${escapeHtml(vars.quest_name || "your quest")}</strong>!</p>
       
       <div style="background: #f0fdfa; border-left: 4px solid #14b8a6; padding: 15px; margin: 20px 0;">
-        <p style="margin: 0 0 10px 0;"><strong>📅 When:</strong> ${vars.quest_date || "TBD"}</p>
-        <p style="margin: 0 0 10px 0;"><strong>📍 Where:</strong> ${vars.quest_location || "TBD"}</p>
-        <p style="margin: 0;"><strong>👥 Squad Size:</strong> ${vars.squad_size || "3-6"} people</p>
+        <p style="margin: 0 0 10px 0;"><strong>📅 When:</strong> ${escapeHtml(vars.quest_date || "TBD")}</p>
+        <p style="margin: 0 0 10px 0;"><strong>📍 Where:</strong> ${escapeHtml(vars.quest_location || "TBD")}</p>
+        <p style="margin: 0;"><strong>👥 Squad Size:</strong> ${escapeHtml(vars.squad_size || "3-6")} people</p>
       </div>
       
       ${vars.whatsapp_link ? `
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${vars.whatsapp_link}" style="background: #25D366; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">
+          <a href="${escapeHtml(vars.whatsapp_link)}" style="background: #25D366; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">
             💬 Join Your Squad's WhatsApp
           </a>
         </div>
@@ -52,12 +63,12 @@ const templates: Record<string, (vars: Record<string, string>) => string> = {
       <div style="text-align: center; margin-bottom: 30px;">
         <h1 style="color: #f59e0b; margin: 0;">⏰ Quest Reminder!</h1>
       </div>
-      <p style="font-size: 16px; color: #333;">Hey ${vars.display_name || "Adventurer"}!</p>
-      <p style="font-size: 16px; color: #333;">Just a friendly reminder that <strong>${vars.quest_name || "your quest"}</strong> is coming up ${vars.time_until || "soon"}!</p>
+      <p style="font-size: 16px; color: #333;">Hey ${escapeHtml(vars.display_name || "Adventurer")}!</p>
+      <p style="font-size: 16px; color: #333;">Just a friendly reminder that <strong>${escapeHtml(vars.quest_name || "your quest")}</strong> is coming up ${escapeHtml(vars.time_until || "soon")}!</p>
       
       <div style="background: #fffbeb; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
-        <p style="margin: 0 0 10px 0;"><strong>📅 When:</strong> ${vars.quest_date || "TBD"}</p>
-        <p style="margin: 0 0 10px 0;"><strong>📍 Where:</strong> ${vars.quest_location || "TBD"}</p>
+        <p style="margin: 0 0 10px 0;"><strong>📅 When:</strong> ${escapeHtml(vars.quest_date || "TBD")}</p>
+        <p style="margin: 0 0 10px 0;"><strong>📍 Where:</strong> ${escapeHtml(vars.quest_location || "TBD")}</p>
       </div>
       
       <p style="font-size: 14px; color: #666;">Can't make it? Please let us know ASAP so we can fill your spot.</p>
@@ -70,10 +81,10 @@ const templates: Record<string, (vars: Record<string, string>) => string> = {
       <div style="text-align: center; margin-bottom: 30px;">
         <h1 style="color: #ef4444; margin: 0;">Quest Update</h1>
       </div>
-      <p style="font-size: 16px; color: #333;">Hey ${vars.display_name || "Adventurer"},</p>
-      <p style="font-size: 16px; color: #333;">We're sorry to let you know that <strong>${vars.quest_name || "your quest"}</strong> has been cancelled.</p>
+      <p style="font-size: 16px; color: #333;">Hey ${escapeHtml(vars.display_name || "Adventurer")},</p>
+      <p style="font-size: 16px; color: #333;">We're sorry to let you know that <strong>${escapeHtml(vars.quest_name || "your quest")}</strong> has been cancelled.</p>
       
-      ${vars.reason ? `<p style="font-size: 14px; color: #666;"><strong>Reason:</strong> ${vars.reason}</p>` : ""}
+      ${vars.reason ? `<p style="font-size: 14px; color: #666;"><strong>Reason:</strong> ${escapeHtml(vars.reason)}</p>` : ""}
       
       <p style="font-size: 14px; color: #666;">We know this is disappointing. Keep an eye out for new quests — there's always another adventure around the corner!</p>
       <p style="font-size: 14px; color: #666;">— The OpenClique Team</p>
@@ -85,8 +96,8 @@ const templates: Record<string, (vars: Record<string, string>) => string> = {
       <div style="text-align: center; margin-bottom: 30px;">
         <h1 style="color: #10b981; margin: 0;">🎉 Your Quest is Approved!</h1>
       </div>
-      <p style="font-size: 16px; color: #333;">Hey ${vars.creator_name || "Creator"}!</p>
-      <p style="font-size: 16px; color: #333;">Great news — your quest <strong>"${vars.quest_title || "your quest"}"</strong> has been approved!</p>
+      <p style="font-size: 16px; color: #333;">Hey ${escapeHtml(vars.creator_name || "Creator")}!</p>
+      <p style="font-size: 16px; color: #333;">Great news — your quest <strong>"${escapeHtml(vars.quest_title || "your quest")}"</strong> has been approved!</p>
       
       <div style="background: #ecfdf5; border-left: 4px solid #10b981; padding: 15px; margin: 20px 0;">
         <p style="margin: 0; font-size: 16px;">
@@ -98,7 +109,7 @@ const templates: Record<string, (vars: Record<string, string>) => string> = {
       
       ${vars.quest_url ? `
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${vars.quest_url}" style="background: #14b8a6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">
+          <a href="${escapeHtml(vars.quest_url)}" style="background: #14b8a6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">
             View Your Quest
           </a>
         </div>
@@ -114,17 +125,17 @@ const templates: Record<string, (vars: Record<string, string>) => string> = {
       <div style="text-align: center; margin-bottom: 30px;">
         <h1 style="color: #f59e0b; margin: 0;">📝 Quest Feedback</h1>
       </div>
-      <p style="font-size: 16px; color: #333;">Hey ${vars.creator_name || "Creator"},</p>
-      <p style="font-size: 16px; color: #333;">We've reviewed your quest <strong>"${vars.quest_title || "your quest"}"</strong> and have some feedback to help make it even better.</p>
+      <p style="font-size: 16px; color: #333;">Hey ${escapeHtml(vars.creator_name || "Creator")},</p>
+      <p style="font-size: 16px; color: #333;">We've reviewed your quest <strong>"${escapeHtml(vars.quest_title || "your quest")}"</strong> and have some feedback to help make it even better.</p>
       
       <div style="background: #fffbeb; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
         <p style="margin: 0 0 10px 0; font-weight: bold;">Reviewer Feedback:</p>
-        <p style="margin: 0; font-size: 14px;">${vars.admin_notes || "Please check the Creator Portal for details."}</p>
+        <p style="margin: 0; font-size: 14px;">${escapeHtml(vars.admin_notes || "Please check the Creator Portal for details.")}</p>
       </div>
       
       ${vars.edit_url ? `
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${vars.edit_url}" style="background: #f59e0b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">
+          <a href="${escapeHtml(vars.edit_url)}" style="background: #f59e0b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">
             Edit Your Quest
           </a>
         </div>
@@ -140,13 +151,13 @@ const templates: Record<string, (vars: Record<string, string>) => string> = {
       <div style="text-align: center; margin-bottom: 30px;">
         <h1 style="color: #6b7280; margin: 0;">Quest Update</h1>
       </div>
-      <p style="font-size: 16px; color: #333;">Hey ${vars.creator_name || "Creator"},</p>
-      <p style="font-size: 16px; color: #333;">We've reviewed your quest <strong>"${vars.quest_title || "your quest"}"</strong> and unfortunately, it wasn't approved at this time.</p>
+      <p style="font-size: 16px; color: #333;">Hey ${escapeHtml(vars.creator_name || "Creator")},</p>
+      <p style="font-size: 16px; color: #333;">We've reviewed your quest <strong>"${escapeHtml(vars.quest_title || "your quest")}"</strong> and unfortunately, it wasn't approved at this time.</p>
       
       ${vars.admin_notes ? `
         <div style="background: #f3f4f6; border-left: 4px solid #6b7280; padding: 15px; margin: 20px 0;">
           <p style="margin: 0 0 10px 0; font-weight: bold;">Feedback:</p>
-          <p style="margin: 0; font-size: 14px;">${vars.admin_notes}</p>
+          <p style="margin: 0; font-size: 14px;">${escapeHtml(vars.admin_notes)}</p>
         </div>
       ` : ""}
       
@@ -173,29 +184,31 @@ const handler = async (req: Request): Promise<Response> => {
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    // Verify the token and check admin role
-    const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const supabaseAnon = Deno.env.get("SUPABASE_ANON_KEY")!;
     
-    if (authError || !user) {
-      throw new Error("Invalid token");
-    }
-
-    // Check if user is admin
-    const { data: isAdmin } = await supabase.rpc("is_admin");
-    if (!isAdmin) {
+    // Create client with user's token to check admin status
+    const token = authHeader.replace("Bearer ", "");
+    const supabaseClient = createClient(supabaseUrl, supabaseAnon, {
+      auth: { persistSession: false },
+      global: { headers: { Authorization: `Bearer ${token}` } }
+    });
+    
+    // Verify user is admin
+    const { data: isAdmin, error: adminError } = await supabaseClient.rpc("is_admin");
+    if (adminError || !isAdmin) {
       throw new Error("Unauthorized: Admin access required");
     }
+
+    // Use service role for operations
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
     const { to, subject, template, variables = {}, customHtml }: SendEmailRequest = await req.json();
 
     // Get the HTML content
     let html: string;
     if (template === "custom" && customHtml) {
-      // Replace variables in custom HTML
-      html = customHtml.replace(/\{\{(\w+)\}\}/g, (_, key) => variables[key] || "");
+      // Replace variables in custom HTML - escape the replacement values
+      html = customHtml.replace(/\{\{(\w+)\}\}/g, (_, key) => escapeHtml(variables[key] || ""));
     } else if (templates[template]) {
       html = templates[template](variables);
     } else {
@@ -209,16 +222,19 @@ const handler = async (req: Request): Promise<Response> => {
     const emailResponse = await resend.emails.send({
       from: "OpenClique <noreply@openclique.lovable.app>",
       to: toArray,
-      subject,
+      subject: escapeHtml(subject), // Escape subject as well
       html,
     });
 
     console.log("Email sent successfully:", emailResponse);
 
+    // Get current user for logging
+    const { data: { user } } = await supabaseClient.auth.getUser();
+
     // Log the communication
     for (const recipient of toArray) {
       await supabase.from("comms_log").insert({
-        user_id: user.id, // Admin who sent it
+        user_id: user?.id, // Admin who sent it
         type: "email",
         subject,
         body: html,

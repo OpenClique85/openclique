@@ -14,6 +14,17 @@ interface NotifyUsersRequest {
   referrer_user_id?: string; // For referral notifications
 }
 
+// HTML escape function to prevent XSS in email templates
+function escapeHtml(unsafe: string): string {
+  if (typeof unsafe !== 'string') return String(unsafe ?? '');
+  return unsafe
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 async function sendEmail(to: string, subject: string, html: string, resendApiKey: string) {
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -176,65 +187,70 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    // Generate notification content based on type
+    // Generate notification content based on type - escape all user-provided data
     let notificationTitle: string;
     let notificationBody: string;
     let emailSubject: string;
     let emailHtml: string;
 
     const baseUrl = "https://openclique.lovable.app";
-    const questUrl = `${baseUrl}/quests/${quest.slug}`;
+    const questUrl = `${baseUrl}/quests/${escapeHtml(quest.slug || '')}`;
+    const escapedQuestTitle = escapeHtml(quest.title || 'Unknown Quest');
+    const escapedQuestIcon = escapeHtml(quest.icon || '🎯');
+    const escapedQuestTheme = escapeHtml(quest.theme || 'adventure');
+    const escapedReferrerName = escapeHtml(referrerName);
+    const escapedCustomMessage = custom_message ? escapeHtml(custom_message) : '';
 
     switch (type) {
       case 'quest_recommendation':
-        notificationTitle = `${quest.icon} Quest recommended for you!`;
-        notificationBody = custom_message || `We think you'd love "${quest.title}" based on your interests.`;
-        emailSubject = `🎯 ${quest.title} - Recommended Quest`;
+        notificationTitle = `${escapedQuestIcon} Quest recommended for you!`;
+        notificationBody = escapedCustomMessage || `We think you'd love "${escapedQuestTitle}" based on your interests.`;
+        emailSubject = `🎯 ${escapedQuestTitle} - Recommended Quest`;
         emailHtml = `
           <h1>We found a quest for you!</h1>
           <p>Based on your interests, we think you'd love:</p>
-          <h2>${quest.icon} ${quest.title}</h2>
-          <p>${custom_message || `This ${quest.theme || 'adventure'} quest is right up your alley!`}</p>
+          <h2>${escapedQuestIcon} ${escapedQuestTitle}</h2>
+          <p>${escapedCustomMessage || `This ${escapedQuestTheme} quest is right up your alley!`}</p>
           <p><a href="${questUrl}" style="color: #7c3aed; font-weight: bold;">View Quest Details →</a></p>
           <p style="color: #6b7280; font-size: 12px;">You're receiving this because you're part of OpenClique. Manage your preferences in your profile.</p>
         `;
         break;
       
       case 'quest_shared':
-        notificationTitle = `${referrerName} shared a quest with you!`;
-        notificationBody = `Check out "${quest.title}" - your friend thinks you'd enjoy it.`;
-        emailSubject = `👥 ${referrerName} invited you to a quest!`;
+        notificationTitle = `${escapedReferrerName} shared a quest with you!`;
+        notificationBody = `Check out "${escapedQuestTitle}" - your friend thinks you'd enjoy it.`;
+        emailSubject = `👥 ${escapedReferrerName} invited you to a quest!`;
         emailHtml = `
-          <h1>${referrerName} wants you to join!</h1>
+          <h1>${escapedReferrerName} wants you to join!</h1>
           <p>Your friend thinks you'd love this quest:</p>
-          <h2>${quest.icon} ${quest.title}</h2>
+          <h2>${escapedQuestIcon} ${escapedQuestTitle}</h2>
           <p><a href="${questUrl}" style="color: #7c3aed; font-weight: bold;">Join the Quest →</a></p>
           <p style="color: #6b7280; font-size: 12px;">This invitation was sent via OpenClique.</p>
         `;
         break;
       
       case 'referral_accepted':
-        notificationTitle = `🎉 Your friend joined ${quest.title}!`;
+        notificationTitle = `🎉 Your friend joined ${escapedQuestTitle}!`;
         notificationBody = `Great news! Someone you invited signed up for the quest.`;
         emailSubject = `🎉 Your friend joined your quest!`;
         emailHtml = `
           <h1>Great news!</h1>
           <p>Someone you invited just joined:</p>
-          <h2>${quest.icon} ${quest.title}</h2>
+          <h2>${escapedQuestIcon} ${escapedQuestTitle}</h2>
           <p>Thanks for spreading the word! The more the merrier.</p>
           <p><a href="${questUrl}" style="color: #7c3aed; font-weight: bold;">View Quest →</a></p>
         `;
         break;
       
       case 'signup_confirmed':
-        notificationTitle = `✅ You're confirmed for ${quest.title}!`;
-        notificationBody = custom_message || `Great news! Your spot is confirmed. Check your email for details.`;
-        emailSubject = `✅ You're in! ${quest.title}`;
+        notificationTitle = `✅ You're confirmed for ${escapedQuestTitle}!`;
+        notificationBody = escapedCustomMessage || `Great news! Your spot is confirmed. Check your email for details.`;
+        emailSubject = `✅ You're in! ${escapedQuestTitle}`;
         emailHtml = `
           <h1>You're confirmed!</h1>
           <p>Great news - your spot for this quest is officially confirmed:</p>
-          <h2>${quest.icon} ${quest.title}</h2>
-          ${custom_message ? `<p>${custom_message}</p>` : ''}
+          <h2>${escapedQuestIcon} ${escapedQuestTitle}</h2>
+          ${escapedCustomMessage ? `<p>${escapedCustomMessage}</p>` : ''}
           <p><a href="${questUrl}" style="color: #7c3aed; font-weight: bold;">View Quest Details →</a></p>
           <p style="color: #6b7280; font-size: 12px;">We'll send you more details as the event approaches. Get ready for an adventure!</p>
         `;

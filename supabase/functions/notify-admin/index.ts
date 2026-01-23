@@ -15,6 +15,17 @@ interface NotifyAdminRequest {
   data: Record<string, any>;
 }
 
+// HTML escape function to prevent XSS in email templates
+function escapeHtml(unsafe: string): string {
+  if (typeof unsafe !== 'string') return String(unsafe ?? '');
+  return unsafe
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
@@ -22,8 +33,38 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Verify authentication
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      console.error("No authorization header provided");
+      return new Response(
+        JSON.stringify({ success: false, error: "Unauthorized" }),
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabaseAnon = Deno.env.get("SUPABASE_ANON_KEY")!;
+    
+    // Create client with user's token to check admin status
+    const token = authHeader.replace("Bearer ", "");
+    const supabaseClient = createClient(supabaseUrl, supabaseAnon, {
+      auth: { persistSession: false },
+      global: { headers: { Authorization: `Bearer ${token}` } }
+    });
+    
+    // Verify user is admin
+    const { data: isAdminData, error: adminError } = await supabaseClient.rpc("is_admin");
+    if (adminError || !isAdminData) {
+      console.error("Admin check failed:", adminError);
+      return new Response(
+        JSON.stringify({ success: false, error: "Admin access required" }),
+        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Use service role for admin operations
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const { type, data }: NotifyAdminRequest = await req.json();
@@ -66,20 +107,20 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Build notification content based on type
+    // Build notification content based on type - escape all user-provided data
     let subject: string;
     let html: string;
 
     switch (type) {
       case "new_signup":
-        subject = `🆕 New Quest Signup: ${data.quest_name || "Unknown Quest"}`;
+        subject = `🆕 New Quest Signup: ${escapeHtml(data.quest_name || "Unknown Quest")}`;
         html = `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <h2 style="color: #14b8a6;">New Quest Signup!</h2>
             <div style="background: #f0fdfa; padding: 15px; border-radius: 8px; margin: 15px 0;">
-              <p><strong>User:</strong> ${data.user_email || "Unknown"}</p>
-              <p><strong>Quest:</strong> ${data.quest_name || "Unknown"}</p>
-              <p><strong>Current Signups:</strong> ${data.current_count || 0}/${data.capacity || "?"}</p>
+              <p><strong>User:</strong> ${escapeHtml(data.user_email || "Unknown")}</p>
+              <p><strong>Quest:</strong> ${escapeHtml(data.quest_name || "Unknown")}</p>
+              <p><strong>Current Signups:</strong> ${escapeHtml(String(data.current_count || 0))}/${escapeHtml(String(data.capacity || "?"))}</p>
             </div>
             <p style="color: #666; font-size: 14px;">Check the admin dashboard for more details.</p>
           </div>
@@ -87,14 +128,14 @@ const handler = async (req: Request): Promise<Response> => {
         break;
 
       case "quest_full":
-        subject = `🎉 Quest Full: ${data.quest_name || "Unknown Quest"}`;
+        subject = `🎉 Quest Full: ${escapeHtml(data.quest_name || "Unknown Quest")}`;
         html = `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <h2 style="color: #22c55e;">Quest is Full!</h2>
             <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; margin: 15px 0;">
-              <p><strong>Quest:</strong> ${data.quest_name || "Unknown"}</p>
-              <p><strong>Confirmed:</strong> ${data.confirmed_count || 0} participants</p>
-              <p><strong>Standby:</strong> ${data.standby_count || 0} participants</p>
+              <p><strong>Quest:</strong> ${escapeHtml(data.quest_name || "Unknown")}</p>
+              <p><strong>Confirmed:</strong> ${escapeHtml(String(data.confirmed_count || 0))} participants</p>
+              <p><strong>Standby:</strong> ${escapeHtml(String(data.standby_count || 0))} participants</p>
             </div>
             <p style="color: #666; font-size: 14px;">Time to finalize the squad!</p>
           </div>
@@ -102,15 +143,15 @@ const handler = async (req: Request): Promise<Response> => {
         break;
 
       case "cancellation":
-        subject = `⚠️ Quest Cancellation: ${data.quest_name || "Unknown Quest"}`;
+        subject = `⚠️ Quest Cancellation: ${escapeHtml(data.quest_name || "Unknown Quest")}`;
         html = `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <h2 style="color: #f59e0b;">Someone Dropped Out</h2>
             <div style="background: #fffbeb; padding: 15px; border-radius: 8px; margin: 15px 0;">
-              <p><strong>User:</strong> ${data.user_email || "Unknown"}</p>
-              <p><strong>Quest:</strong> ${data.quest_name || "Unknown"}</p>
-              <p><strong>Reason:</strong> ${data.reason || "No reason provided"}</p>
-              <p><strong>Remaining:</strong> ${data.remaining_count || 0}/${data.capacity || "?"}</p>
+              <p><strong>User:</strong> ${escapeHtml(data.user_email || "Unknown")}</p>
+              <p><strong>Quest:</strong> ${escapeHtml(data.quest_name || "Unknown")}</p>
+              <p><strong>Reason:</strong> ${escapeHtml(data.reason || "No reason provided")}</p>
+              <p><strong>Remaining:</strong> ${escapeHtml(String(data.remaining_count || 0))}/${escapeHtml(String(data.capacity || "?"))}</p>
             </div>
             <p style="color: #666; font-size: 14px;">Consider promoting someone from the standby list.</p>
           </div>
@@ -118,31 +159,31 @@ const handler = async (req: Request): Promise<Response> => {
         break;
 
       case "feedback":
-        subject = `📝 New Feedback: ${data.quest_name || "Quest Feedback"}`;
+        subject = `📝 New Feedback: ${escapeHtml(data.quest_name || "Quest Feedback")}`;
         html = `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <h2 style="color: #8b5cf6;">New Feedback Received</h2>
             <div style="background: #f5f3ff; padding: 15px; border-radius: 8px; margin: 15px 0;">
-              <p><strong>Quest:</strong> ${data.quest_name || "Unknown"}</p>
-              <p><strong>Rating:</strong> ${"⭐".repeat(data.rating || 0)} (${data.rating}/5)</p>
-              <p><strong>Belonging Delta:</strong> ${data.belonging_before || "?"} → ${data.belonging_after || "?"}</p>
-              ${data.comments ? `<p><strong>Comments:</strong> ${data.comments}</p>` : ""}
+              <p><strong>Quest:</strong> ${escapeHtml(data.quest_name || "Unknown")}</p>
+              <p><strong>Rating:</strong> ${"⭐".repeat(Math.min(Math.max(Number(data.rating) || 0, 0), 5))} (${escapeHtml(String(data.rating))}/5)</p>
+              <p><strong>Belonging Delta:</strong> ${escapeHtml(String(data.belonging_before || "?"))} → ${escapeHtml(String(data.belonging_after || "?"))}</p>
+              ${data.comments ? `<p><strong>Comments:</strong> ${escapeHtml(data.comments)}</p>` : ""}
             </div>
           </div>
         `;
         break;
 
       case "proposal_pending":
-        subject = `🤝 Sponsorship Proposal Needs Review: ${data.sponsor_name || "Unknown Sponsor"}`;
+        subject = `🤝 Sponsorship Proposal Needs Review: ${escapeHtml(data.sponsor_name || "Unknown Sponsor")}`;
         html = `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <h2 style="color: #f59e0b;">Sponsorship Proposal Pending Admin Review</h2>
             <div style="background: #fffbeb; padding: 15px; border-radius: 8px; margin: 15px 0;">
-              <p><strong>Sponsor:</strong> ${data.sponsor_name || "Unknown"}</p>
-              <p><strong>Creator:</strong> ${data.creator_name || "Unknown"}</p>
-              ${data.quest_title ? `<p><strong>Quest:</strong> ${data.quest_title}</p>` : ""}
+              <p><strong>Sponsor:</strong> ${escapeHtml(data.sponsor_name || "Unknown")}</p>
+              <p><strong>Creator:</strong> ${escapeHtml(data.creator_name || "Unknown")}</p>
+              ${data.quest_title ? `<p><strong>Quest:</strong> ${escapeHtml(data.quest_title)}</p>` : ""}
               <p><strong>Proposal Type:</strong> ${data.proposal_type === "sponsor_quest" ? "Sponsor Existing Quest" : "Request Custom Quest"}</p>
-              ${data.budget ? `<p><strong>Budget/Offering:</strong> ${data.budget}</p>` : ""}
+              ${data.budget ? `<p><strong>Budget/Offering:</strong> ${escapeHtml(data.budget)}</p>` : ""}
             </div>
             <p style="color: #666; font-size: 14px;">
               The creator has accepted this proposal. Please review and approve or reject in the admin console.
@@ -158,8 +199,9 @@ const handler = async (req: Request): Promise<Response> => {
         break;
 
       case "custom":
-        subject = data.subject || "Admin Notification";
-        html = data.html || `<p>${data.message || "No content"}</p>`;
+        subject = escapeHtml(data.subject || "Admin Notification");
+        // Custom HTML should be sanitized by caller, but we escape the message fallback
+        html = data.html || `<p>${escapeHtml(data.message || "No content")}</p>`;
         break;
 
       default:

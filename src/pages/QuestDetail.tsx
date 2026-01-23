@@ -3,6 +3,8 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useUserLevel } from '@/hooks/useUserLevel';
+import { useUserTreeXP } from '@/hooks/useUserTreeXP';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import ShareQuestButton from '@/components/ShareQuestButton';
@@ -10,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Calendar, 
   MapPin, 
@@ -18,7 +21,9 @@ import {
   Award,
   DollarSign,
   ArrowLeft,
-  Loader2
+  Loader2,
+  Lock,
+  AlertTriangle
 } from 'lucide-react';
 import { format, differenceInDays, differenceInWeeks } from 'date-fns';
 import type { Tables } from '@/integrations/supabase/types';
@@ -46,13 +51,25 @@ export default function QuestDetail() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { level } = useUserLevel();
+  const { treeXP } = useUserTreeXP();
   
   const [quest, setQuest] = useState<Quest | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isJoining, setIsJoining] = useState(false);
   const [userSignup, setUserSignup] = useState<{ status: string } | null>(null);
+  const [signupCount, setSignupCount] = useState(0);
   
   const referralCode = searchParams.get('ref');
+
+  // Check if user meets level/XP requirements
+  const meetsLevelRequirement = !quest?.min_level || level >= quest.min_level;
+  const meetsTreeXPRequirement = !quest?.min_tree_xp || !quest?.progression_tree || 
+    (treeXP[quest.progression_tree] ?? 0) >= quest.min_tree_xp;
+  const meetsRequirements = meetsLevelRequirement && meetsTreeXPRequirement;
+  
+  // Check capacity
+  const isAtCapacity = quest?.capacity_total ? signupCount >= quest.capacity_total : false;
 
   useEffect(() => {
     const fetchQuest = async () => {
@@ -71,6 +88,15 @@ export default function QuestDetail() {
       }
       
       setQuest(data);
+      
+      // Fetch signup count (pending + confirmed)
+      const { count } = await supabase
+        .from('quest_signups')
+        .select('*', { count: 'exact', head: true })
+        .eq('quest_id', data.id)
+        .in('status', ['pending', 'confirmed']);
+      
+      setSignupCount(count ?? 0);
       setIsLoading(false);
       
       // Track referral click using database function (cast to any for new RPC)
@@ -102,6 +128,18 @@ export default function QuestDetail() {
       return;
     }
     
+    // Check requirements
+    if (!meetsRequirements) {
+      toast({
+        variant: 'destructive',
+        title: 'Requirements not met',
+        description: !meetsLevelRequirement 
+          ? `You need to be level ${quest.min_level} to join this quest.`
+          : `You need ${quest.min_tree_xp} XP in the ${quest.progression_tree} path.`,
+      });
+      return;
+    }
+    
     setIsJoining(true);
     
     try {
@@ -122,14 +160,27 @@ export default function QuestDetail() {
         return;
       }
       
+      // Determine signup status based on capacity
+      const status = isAtCapacity ? 'standby' : 'pending';
+      
       // Create signup
       const { error } = await supabase.from('quest_signups').insert({
         user_id: user.id,
         quest_id: quest.id,
-        status: 'pending',
+        status,
       });
       
-      if (error) throw error;
+      if (error) {
+        // Handle unique constraint violation gracefully
+        if (error.code === '23505') {
+          toast({
+            title: "Already signed up!",
+            description: "You've already joined this quest.",
+          });
+          return;
+        }
+        throw error;
+      }
       
       // Record referral signup if applicable (cast to any for new RPC)
       if (referralCode) {
@@ -140,11 +191,13 @@ export default function QuestDetail() {
       }
       
       toast({
-        title: "Quest joined!",
-        description: "You've been added to the waitlist. We'll notify you when you're confirmed.",
+        title: isAtCapacity ? "Added to waitlist!" : "Quest joined!",
+        description: isAtCapacity 
+          ? "You've been added to the standby list. We'll notify you if a spot opens up."
+          : "You've been added to the waitlist. We'll notify you when you're confirmed.",
       });
       
-      setUserSignup({ status: 'pending' });
+      setUserSignup({ status });
       navigate('/my-quests');
     } catch (error: any) {
       console.error('Error joining quest:', error);
@@ -193,6 +246,10 @@ export default function QuestDetail() {
 
   const statusConfig = STATUS_CONFIG[quest.status || 'draft'];
   const themeColor = THEME_COLORS[quest.theme_color as keyof typeof THEME_COLORS] || THEME_COLORS.pink;
+
+  // Determine CTA state
+  const canJoin = statusConfig.canJoin && meetsRequirements;
+  const spotsRemaining = quest.capacity_total ? quest.capacity_total - signupCount : null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -245,6 +302,32 @@ export default function QuestDetail() {
           </div>
         </div>
         
+        {/* Requirements Alert */}
+        {user && !meetsRequirements && (
+          <Alert className="mb-6 border-amber-200 bg-amber-50 dark:bg-amber-950/20">
+            <Lock className="h-4 w-4 text-amber-600" />
+            <AlertDescription className="text-amber-800 dark:text-amber-200">
+              <strong>Requirements not met:</strong>
+              {!meetsLevelRequirement && (
+                <span className="block">• You need to be level {quest.min_level} (currently level {level})</span>
+              )}
+              {!meetsTreeXPRequirement && (
+                <span className="block">• You need {quest.min_tree_xp} XP in the {quest.progression_tree} path (currently {treeXP[quest.progression_tree!] ?? 0} XP)</span>
+              )}
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {/* Capacity Warning */}
+        {isAtCapacity && statusConfig.canJoin && (
+          <Alert className="mb-6 border-blue-200 bg-blue-50 dark:bg-blue-950/20">
+            <AlertTriangle className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-800 dark:text-blue-200">
+              This quest is at capacity. You can still join the standby list and we'll notify you if a spot opens up.
+            </AlertDescription>
+          </Alert>
+        )}
+        
         {/* Metadata cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {quest.start_datetime && (
@@ -287,8 +370,15 @@ export default function QuestDetail() {
             <CardContent className="p-4 flex items-center gap-3">
               <Users className="h-5 w-5 text-primary" />
               <div>
-                <p className="text-xs text-muted-foreground">Squad Size</p>
-                <p className="font-medium">{quest.capacity_total} people</p>
+                <p className="text-xs text-muted-foreground">Capacity</p>
+                <p className="font-medium">
+                  {signupCount}/{quest.capacity_total} 
+                  {spotsRemaining !== null && spotsRemaining > 0 && (
+                    <span className="text-muted-foreground text-xs ml-1">
+                      ({spotsRemaining} left)
+                    </span>
+                  )}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -347,9 +437,18 @@ export default function QuestDetail() {
                 <p className="text-sm text-muted-foreground">
                   You're <span className="font-medium text-foreground">{userSignup.status}</span> for this quest
                 </p>
+              ) : !meetsRequirements && user ? (
+                <p className="text-sm text-muted-foreground">
+                  <Lock className="inline h-3 w-3 mr-1" />
+                  Complete more quests to unlock this one
+                </p>
+              ) : isAtCapacity && statusConfig.canJoin ? (
+                <p className="text-sm text-muted-foreground">
+                  Quest is full — join the standby list
+                </p>
               ) : statusConfig.canJoin ? (
                 <p className="text-sm text-muted-foreground">
-                  Ready to join? Spots are limited!
+                  Ready to join? {spotsRemaining !== null && `${spotsRemaining} spots left!`}
                 </p>
               ) : (
                 <p className="text-sm text-muted-foreground">
@@ -366,16 +465,27 @@ export default function QuestDetail() {
                     View My Quests
                   </Button>
                 </>
-              ) : statusConfig.canJoin ? (
+              ) : canJoin ? (
                 <Button size="lg" onClick={handleJoin} disabled={isJoining}>
                   {isJoining ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Joining...
                     </>
+                  ) : isAtCapacity ? (
+                    'Join Standby List'
                   ) : (
                     'Join This Quest'
                   )}
+                </Button>
+              ) : !meetsRequirements && user ? (
+                <Button size="lg" disabled variant="secondary">
+                  <Lock className="mr-2 h-4 w-4" />
+                  Locked
+                </Button>
+              ) : !user && statusConfig.canJoin ? (
+                <Button size="lg" onClick={handleJoin}>
+                  Sign In to Join
                 </Button>
               ) : (
                 <Button size="lg" disabled>
