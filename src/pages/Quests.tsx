@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import QuestCard from '@/components/QuestCard';
@@ -6,10 +7,12 @@ import QuestRow from '@/components/QuestRow';
 import QuestModal from '@/components/QuestModal';
 import QuestFilterBar, { type QuestFilters } from '@/components/QuestFilterBar';
 import { CTASection } from '@/components/CTASection';
+import { UserWeekCalendarView } from '@/components/quests';
 import { useQuests, type Quest } from '@/hooks/useQuests';
 import { useCreatorSlugs } from '@/hooks/useCreatorSlugs';
-import { Loader2, Inbox } from 'lucide-react';
+import { Loader2, Inbox, CalendarDays, LayoutGrid } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Toggle } from '@/components/ui/toggle';
 
 import buggsFace from '@/assets/buggs-face.png';
 import foodTruckScene from '@/assets/austin/food-truck-scene.jpg';
@@ -21,10 +24,12 @@ const CATEGORY_CONFIG = {
 } as const;
 
 const Quests = () => {
+  const navigate = useNavigate();
   const { data: quests = [], isLoading, error } = useQuests();
   
   const [selectedQuest, setSelectedQuest] = useState<Quest | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
   
   const [filters, setFilters] = useState<QuestFilters>({
     search: '',
@@ -39,6 +44,10 @@ const Quests = () => {
   const handleQuestClick = (quest: Quest) => {
     setSelectedQuest(quest);
     setModalOpen(true);
+  };
+
+  const handleCalendarQuestClick = (questSlug: string) => {
+    navigate(`/quests/${questSlug}`);
   };
 
   // Apply filters and sorting
@@ -221,13 +230,46 @@ const Quests = () => {
           </div>
         </section>
 
-        {/* Filter Controls */}
+        {/* Filter Controls + View Toggle */}
         <section className="px-4 pb-6">
-          <div className="max-w-6xl mx-auto">
-            <QuestFilterBar 
-              filters={filters}
-              onFilterChange={setFilters}
-            />
+          <div className="max-w-6xl mx-auto space-y-4">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex-1">
+                <QuestFilterBar 
+                  filters={filters}
+                  onFilterChange={setFilters}
+                />
+              </div>
+              
+              {/* Calendar View Toggle */}
+              <div className="flex items-center gap-1 border rounded-lg p-1 bg-muted/30">
+                <Toggle
+                  pressed={!showCalendar}
+                  onPressedChange={() => setShowCalendar(false)}
+                  size="sm"
+                  aria-label="Grid view"
+                  className="data-[state=on]:bg-background data-[state=on]:shadow-sm"
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </Toggle>
+                <Toggle
+                  pressed={showCalendar}
+                  onPressedChange={() => setShowCalendar(true)}
+                  size="sm"
+                  aria-label="Calendar view"
+                  className="data-[state=on]:bg-background data-[state=on]:shadow-sm"
+                >
+                  <CalendarDays className="h-4 w-4" />
+                </Toggle>
+              </div>
+            </div>
+            
+            {/* Calendar View */}
+            {showCalendar && (
+              <div className="pt-2">
+                <UserWeekCalendarView onQuestClick={handleCalendarQuestClick} />
+              </div>
+            )}
           </div>
         </section>
 
