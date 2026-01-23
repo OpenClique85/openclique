@@ -58,6 +58,7 @@ const STATUS_COLORS: Record<InstanceStatus, string> = {
   completed: 'border-l-purple-500 bg-purple-50 dark:bg-purple-900/20',
   cancelled: 'border-l-destructive bg-destructive/10',
   archived: 'border-l-muted-foreground bg-muted/30',
+  paused: 'border-l-orange-500 bg-orange-50 dark:bg-orange-900/20',
 };
 
 const STATUS_BADGE_COLORS: Record<InstanceStatus, string> = {
@@ -68,6 +69,7 @@ const STATUS_BADGE_COLORS: Record<InstanceStatus, string> = {
   completed: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
   cancelled: 'bg-destructive/20 text-destructive',
   archived: 'bg-muted text-muted-foreground',
+  paused: 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300',
 };
 
 export function WeekCalendarView() {

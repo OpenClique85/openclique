@@ -57,6 +57,7 @@ const STATUS_COLORS: Record<InstanceStatus, string> = {
   completed: 'bg-purple-500/20 border-purple-500',
   cancelled: 'bg-destructive/20 border-destructive',
   archived: 'bg-muted border-muted-foreground/30',
+  paused: 'bg-orange-500/20 border-orange-500',
 };
 
 const STATUS_DOT_COLORS: Record<InstanceStatus, string> = {
@@ -67,6 +68,7 @@ const STATUS_DOT_COLORS: Record<InstanceStatus, string> = {
   completed: 'bg-purple-500',
   cancelled: 'bg-destructive',
   archived: 'bg-muted-foreground',
+  paused: 'bg-orange-500',
 };
 
 export function InstanceCalendarView() {

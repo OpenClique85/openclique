@@ -1634,6 +1634,9 @@ export type Database = {
           meeting_point_name: string | null
           objectives: Json | null
           operator_notes: string | null
+          paused_at: string | null
+          paused_reason: string | null
+          previous_status: Database["public"]["Enums"]["instance_status"] | null
           progression_tree: string | null
           quest_card_token: string
           quest_id: string | null
@@ -1670,6 +1673,11 @@ export type Database = {
           meeting_point_name?: string | null
           objectives?: Json | null
           operator_notes?: string | null
+          paused_at?: string | null
+          paused_reason?: string | null
+          previous_status?:
+            | Database["public"]["Enums"]["instance_status"]
+            | null
           progression_tree?: string | null
           quest_card_token?: string
           quest_id?: string | null
@@ -1706,6 +1714,11 @@ export type Database = {
           meeting_point_name?: string | null
           objectives?: Json | null
           operator_notes?: string | null
+          paused_at?: string | null
+          paused_reason?: string | null
+          previous_status?:
+            | Database["public"]["Enums"]["instance_status"]
+            | null
           progression_tree?: string | null
           quest_card_token?: string
           quest_id?: string | null
@@ -1816,8 +1829,10 @@ export type Database = {
           compatibility_score: number | null
           confirmed_at: string | null
           created_at: string
+          formation_reason: Json | null
           id: string
           quest_id: string
+          referral_bonds: number | null
           squad_name: string
           status: Database["public"]["Enums"]["squad_status"]
           whatsapp_link: string | null
@@ -1826,8 +1841,10 @@ export type Database = {
           compatibility_score?: number | null
           confirmed_at?: string | null
           created_at?: string
+          formation_reason?: Json | null
           id?: string
           quest_id: string
+          referral_bonds?: number | null
           squad_name?: string
           status?: Database["public"]["Enums"]["squad_status"]
           whatsapp_link?: string | null
@@ -1836,8 +1853,10 @@ export type Database = {
           compatibility_score?: number | null
           confirmed_at?: string | null
           created_at?: string
+          formation_reason?: Json | null
           id?: string
           quest_id?: string
+          referral_bonds?: number | null
           squad_name?: string
           status?: Database["public"]["Enums"]["squad_status"]
           whatsapp_link?: string | null
@@ -3627,6 +3646,7 @@ export type Database = {
         | "completed"
         | "cancelled"
         | "archived"
+        | "paused"
       message_sender_role: "user" | "admin" | "system"
       notification_type:
         | "quest_recommendation"
@@ -3886,6 +3906,7 @@ export const Constants = {
         "completed",
         "cancelled",
         "archived",
+        "paused",
       ],
       message_sender_role: ["user", "admin", "system"],
       notification_type: [
