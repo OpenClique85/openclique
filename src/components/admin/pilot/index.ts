@@ -15,3 +15,6 @@ export { PilotInstancesManager } from './PilotInstancesManager';
 export { BulkStatusUpdateDialog } from './BulkStatusUpdateDialog';
 export { InstanceCalendarView } from './InstanceCalendarView';
 export { WeekCalendarView } from './WeekCalendarView';
+export { InstanceAttentionFlag, calculateAttentionFlag } from './InstanceAttentionFlag';
+export { InstanceStatusBadge, getStatusShortLabel } from './InstanceStatusBadge';
+export { InstanceSummaryStats } from './InstanceSummaryStats';
