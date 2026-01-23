@@ -50,3 +50,6 @@ verify_jwt = false
 
 [functions.export-handoff-pack]
 verify_jwt = false
+
+[functions.auto-archive-instances]
+verify_jwt = false
