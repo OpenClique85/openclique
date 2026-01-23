@@ -2217,12 +2217,14 @@ export type Database = {
           created_at: string
           description: string
           first_response_at: string | null
+          first_response_sla_breached_at: string | null
           id: string
           internal_notes: string | null
           metadata: Json | null
           related_quest_id: string | null
           related_squad_id: string | null
           related_user_id: string | null
+          resolution_sla_breached_at: string | null
           resolved_at: string | null
           status: Database["public"]["Enums"]["ticket_status"]
           submitted_from_page: string | null
@@ -2236,12 +2238,14 @@ export type Database = {
           created_at?: string
           description: string
           first_response_at?: string | null
+          first_response_sla_breached_at?: string | null
           id?: string
           internal_notes?: string | null
           metadata?: Json | null
           related_quest_id?: string | null
           related_squad_id?: string | null
           related_user_id?: string | null
+          resolution_sla_breached_at?: string | null
           resolved_at?: string | null
           status?: Database["public"]["Enums"]["ticket_status"]
           submitted_from_page?: string | null
@@ -2255,12 +2259,14 @@ export type Database = {
           created_at?: string
           description?: string
           first_response_at?: string | null
+          first_response_sla_breached_at?: string | null
           id?: string
           internal_notes?: string | null
           metadata?: Json | null
           related_quest_id?: string | null
           related_squad_id?: string | null
           related_user_id?: string | null
+          resolution_sla_breached_at?: string | null
           resolved_at?: string | null
           status?: Database["public"]["Enums"]["ticket_status"]
           submitted_from_page?: string | null
@@ -2363,6 +2369,41 @@ export type Database = {
             foreignKeyName: "ticket_messages_ticket_id_fkey"
             columns: ["ticket_id"]
             isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ticket_satisfaction: {
+        Row: {
+          created_at: string
+          feedback: string | null
+          id: string
+          rating: number
+          ticket_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          rating: number
+          ticket_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          rating?: number
+          ticket_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_satisfaction_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: true
             referencedRelation: "support_tickets"
             referencedColumns: ["id"]
           },
