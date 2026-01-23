@@ -27,6 +27,7 @@ export interface Quest {
   isSponsored?: boolean;
   sponsorId?: string;
   sponsorName?: string;
+  isRepeatable?: boolean;
   metadata: {
     date: string;
     cost: string;
@@ -130,6 +131,7 @@ export const transformQuest = (dbQuest: DbQuest & { sponsor_profiles?: { name: s
     isSponsored: dbQuest.is_sponsored || false,
     sponsorId: dbQuest.sponsor_id || undefined,
     sponsorName: dbQuest.sponsor_profiles?.name || undefined,
+    isRepeatable: dbQuest.is_repeatable || false,
     metadata: {
       date: formatDateRange(dbQuest.start_datetime, dbQuest.end_datetime),
       cost: dbQuest.cost_description || 'Free',

@@ -15,6 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Quest } from '@/hooks/useQuests';
 import { useQuestRating } from '@/hooks/useQuestRatings';
 import { useCreatorSlug } from '@/hooks/useCreatorSlugs';
+import { InstancePicker, QuestInstance } from '@/components/quests';
 import QuestProgressionSection from './progression/QuestProgressionSection';
 import { MapPin, Calendar, DollarSign, Users, Gift, Star, ChevronRight } from 'lucide-react';
 
@@ -51,6 +52,10 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
   const navigate = useNavigate();
   const [isJoining, setIsJoining] = useState(false);
   
+  // Instance picker state
+  const [showInstancePicker, setShowInstancePicker] = useState(false);
+  const [upcomingInstances, setUpcomingInstances] = useState<QuestInstance[]>([]);
+  
   // Fetch rating for this quest
   const { rating, reviewCount } = useQuestRating(quest?.id);
   
@@ -65,7 +70,7 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
   const statusStyles = statusColorStyles[statusConfig.color];
   const ctaStyles = ctaColorStyles[statusConfig.color];
 
-  const handleCTAClick = async () => {
+  const handleCTAClick = async (instanceIdOverride?: string) => {
     if (statusConfig.ctaDisabled) return;
 
     // If not logged in, redirect to auth
@@ -73,6 +78,27 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
       onOpenChange(false);
       navigate('/auth', { state: { from: `/quests`, questId: quest.id } });
       return;
+    }
+
+    // Check if quest is repeatable and needs instance picker
+    if (quest.isRepeatable && !instanceIdOverride) {
+      // Fetch upcoming instances via RPC
+      const { data: instanceResult } = await supabase.rpc('get_or_create_instance', {
+        p_quest_id: quest.id
+      }) as { data: { instance_id: string | null; needs_picker: boolean; instance_count: number }[] | null };
+      
+      if (instanceResult && instanceResult[0]?.needs_picker) {
+        // Fetch the full list of instances for the picker
+        const { data: instances } = await supabase.rpc('get_upcoming_instances', {
+          p_quest_id: quest.id
+        }) as { data: QuestInstance[] | null };
+        
+        if (instances && instances.length > 1) {
+          setUpcomingInstances(instances);
+          setShowInstancePicker(true);
+          return;
+        }
+      }
     }
 
     // Join the quest
@@ -96,11 +122,12 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
         return;
       }
 
-      // Create signup
+      // Create signup with instance_id if available
       const { error } = await supabase.from('quest_signups').insert({
         user_id: user.id,
         quest_id: quest.id,
         status: 'pending',
+        instance_id: instanceIdOverride || null,
       });
 
       if (error) throw error;
@@ -109,6 +136,7 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
         title: "Quest joined!",
         description: "You've been added to the waitlist. We'll notify you when you're confirmed.",
       });
+      setShowInstancePicker(false);
       onOpenChange(false);
       navigate('/my-quests');
     } catch (error: any) {
@@ -121,6 +149,11 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
     } finally {
       setIsJoining(false);
     }
+  };
+
+  // Handle instance selection from picker
+  const handleInstanceSelect = (instanceId: string) => {
+    handleCTAClick(instanceId);
   };
 
   return (
@@ -297,7 +330,7 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
               <Button
                 size="lg"
                 className={`w-full ${ctaStyles}`}
-                onClick={handleCTAClick}
+                onClick={() => handleCTAClick()}
                 disabled={statusConfig.ctaDisabled || isJoining}
               >
                 {isJoining ? 'Joining...' : user ? statusConfig.ctaText : 'Sign in to Join'}
@@ -316,6 +349,16 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
           </div>
         </ScrollArea>
       </DialogContent>
+      
+      {/* Instance Picker Modal */}
+      <InstancePicker
+        open={showInstancePicker}
+        onOpenChange={setShowInstancePicker}
+        instances={upcomingInstances}
+        questTitle={quest.title}
+        onSelectInstance={handleInstanceSelect}
+        isLoading={isJoining}
+      />
     </Dialog>
   );
 };
