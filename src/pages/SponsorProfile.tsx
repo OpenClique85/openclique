@@ -43,6 +43,12 @@ const BUDGET_RANGES = ['Under $500', '$500-$1,000', '$1,000-$5,000', '$5,000-$10
 const AGE_RANGES = ['21-25', '26-30', '31-40', '41-50', '51+'];
 const INTERESTS = ['music', 'food', 'fitness', 'arts', 'civic', 'wellness', 'social', 'outdoors', 'tech', 'sustainability'];
 
+const SEEKING_OPTIONS = [
+  { id: 'creator_partnerships', label: 'Creator Partnerships', description: 'Looking to sponsor quest creators' },
+  { id: 'org_partnerships', label: 'Organization Partnerships', description: 'Want to sponsor clubs, groups, or student orgs' },
+  { id: 'event_hosting', label: 'Event Hosting', description: 'Have a venue available for quests' },
+];
+
 interface TargetAudience {
   age_ranges?: string[];
   interests?: string[];
@@ -64,6 +70,7 @@ export default function SponsorProfile() {
   const [budgetRange, setBudgetRange] = useState('');
   const [preferredQuestTypes, setPreferredQuestTypes] = useState<string[]>([]);
   const [targetAudience, setTargetAudience] = useState<TargetAudience>({});
+  const [seeking, setSeeking] = useState<string[]>([]);
   
   const [hasChanges, setHasChanges] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -93,6 +100,7 @@ export default function SponsorProfile() {
         setBudgetRange(data.budget_range || '');
         setPreferredQuestTypes(data.preferred_quest_types || []);
         setTargetAudience((data.target_audience as TargetAudience) || {});
+        setSeeking(data.seeking || []);
         setHasChanges(false);
       }
       
@@ -135,6 +143,7 @@ export default function SponsorProfile() {
       budget_range: budgetRange || null,
       preferred_quest_types: preferredQuestTypes,
       target_audience: targetAudience,
+      seeking,
     });
   };
 
@@ -212,6 +221,11 @@ export default function SponsorProfile() {
         ? prev.interests.filter(i => i !== interest)
         : [...(prev.interests || []), interest]
     }));
+  };
+
+  const toggleSeeking = (id: string) => {
+    setHasChanges(true);
+    setSeeking(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
   };
 
   if (authLoading || profileLoading) {

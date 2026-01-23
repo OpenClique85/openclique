@@ -97,6 +97,7 @@ export default function OrgPortal() {
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedCreator, setSelectedCreator] = useState<CreatorProfile | null>(null);
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+  const [sponsorModalOpen, setSponsorModalOpen] = useState(false);
 
   const fetchOrg = async () => {
     if (!slug) return;
@@ -509,6 +510,15 @@ export default function OrgPortal() {
                             <Send className="h-4 w-4 mr-2" />
                             Invite Members
                           </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="w-full justify-start"
+                            onClick={() => setSponsorModalOpen(true)}
+                          >
+                            <Building2 className="h-4 w-4 mr-2" />
+                            Petition Sponsor
+                          </Button>
                         </CardContent>
                       </Card>
                     )}
@@ -809,6 +819,16 @@ export default function OrgPortal() {
           creator={selectedCreator}
           org={{ id: org.id, name: org.name }}
           memberCount={members.length}
+        />
+      )}
+
+      {/* Petition Sponsor Modal */}
+      {org && (
+        <OrgSponsorRequestModal
+          isOpen={sponsorModalOpen}
+          onClose={() => setSponsorModalOpen(false)}
+          orgId={org.id}
+          orgName={org.name}
         />
       )}
     </div>
