@@ -280,8 +280,8 @@ function ApplicationsTab() {
                               <Loader2 className="h-4 w-4 animate-spin" />
                             ) : (
                               <>
-                                <Send className="h-4 w-4 mr-1" />
-                                Invite
+                                <Check className="h-4 w-4 mr-1" />
+                                Approve
                               </>
                             )}
                           </Button>

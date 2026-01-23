@@ -45,15 +45,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return data;
   };
 
-  const checkAdminStatus = async (userId: string) => {
+  const checkAdminStatus = async (userId: string): Promise<boolean> => {
     const { data } = await supabase.rpc('has_role', {
       _user_id: userId,
       _role: 'admin'
     });
-    setIsAdmin(data === true);
+    const isAdminResult = data === true;
+    setIsAdmin(isAdminResult);
+    return isAdminResult;
   };
 
-  const checkCreatorStatus = async (userId: string) => {
+  const checkCreatorStatus = async (userId: string, userIsAdmin: boolean) => {
+    // Admins automatically have creator privileges
+    if (userIsAdmin) {
+      setIsCreator(true);
+      return;
+    }
     const { data } = await supabase.rpc('has_role', {
       _user_id: userId,
       _role: 'quest_creator'
@@ -79,10 +86,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Defer Supabase calls with setTimeout to prevent deadlock
         if (session?.user) {
           setIsProfileLoaded(false); // Reset before fetching
-          setTimeout(() => {
+          setTimeout(async () => {
             fetchProfile(session.user.id);
-            checkAdminStatus(session.user.id);
-            checkCreatorStatus(session.user.id);
+            const userIsAdmin = await checkAdminStatus(session.user.id);
+            checkCreatorStatus(session.user.id, userIsAdmin);
             checkSponsorStatus(session.user.id);
           }, 0);
         } else {
@@ -105,8 +112,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         fetchProfile(session.user.id).then(() => {
           setIsLoading(false);
         });
-        checkAdminStatus(session.user.id);
-        checkCreatorStatus(session.user.id);
+        checkAdminStatus(session.user.id).then(userIsAdmin => {
+          checkCreatorStatus(session.user.id, userIsAdmin);
+        });
         checkSponsorStatus(session.user.id);
       } else {
         setIsProfileLoaded(true);
