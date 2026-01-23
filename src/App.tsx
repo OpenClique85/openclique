@@ -57,7 +57,7 @@ import Auth from "./pages/Auth";
 import MyQuests from "./pages/MyQuests";
 import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
-import Feedback from "./pages/Feedback";
+import FeedbackFlow from "./pages/FeedbackFlow";
 import Notifications from "./pages/Notifications";
 import CreatorOnboarding from "./pages/CreatorOnboarding";
 import CreatorDashboard from "./pages/CreatorDashboard";
@@ -110,7 +110,7 @@ const App = () => (
             <Route path="/squads/:squadId" element={<ProtectedRoute><SquadDetail /></ProtectedRoute>} />
             <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute requireAdmin><Admin /></ProtectedRoute>} />
-            <Route path="/feedback/:questId" element={<ProtectedRoute><Feedback /></ProtectedRoute>} />
+            <Route path="/feedback/:questId" element={<ProtectedRoute><FeedbackFlow /></ProtectedRoute>} />
             
             {/* SIGNUP/FUNNEL PAGES */}
             <Route path="/pilot" element={<Pilot />} />

@@ -55,6 +55,7 @@ import {
 import { NAV_LINKS, BRAND } from "@/constants/content";
 import { useAuth } from "@/hooks/useAuth";
 import { NotificationBell } from "@/components/NotificationBell";
+import { XPBadge } from "@/components/XPBadge";
 import logo from "@/assets/logo.png";
 
 export function Navbar() {
@@ -139,8 +140,13 @@ export function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Notification Bell */}
-            {user && <NotificationBell />}
+            {/* XP Badge & Notification Bell */}
+            {user && (
+              <>
+                <XPBadge />
+                <NotificationBell />
+              </>
+            )}
 
             {/* Auth Section */}
             {user ? (

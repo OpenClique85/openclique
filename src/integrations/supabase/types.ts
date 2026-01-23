@@ -189,12 +189,16 @@ export type Database = {
         Row: {
           belonging_delta: number | null
           best_part: string | null
+          consent_type: string | null
+          feelings: string[] | null
           friction_point: string | null
           id: string
+          interview_opt_in: boolean | null
           is_testimonial_approved: boolean | null
           private_notes: string | null
           quest_id: string
           rating_1_5: number | null
+          recommendation_text: string | null
           submitted_at: string
           testimonial_text: string | null
           user_id: string
@@ -203,12 +207,16 @@ export type Database = {
         Insert: {
           belonging_delta?: number | null
           best_part?: string | null
+          consent_type?: string | null
+          feelings?: string[] | null
           friction_point?: string | null
           id?: string
+          interview_opt_in?: boolean | null
           is_testimonial_approved?: boolean | null
           private_notes?: string | null
           quest_id: string
           rating_1_5?: number | null
+          recommendation_text?: string | null
           submitted_at?: string
           testimonial_text?: string | null
           user_id: string
@@ -217,12 +225,16 @@ export type Database = {
         Update: {
           belonging_delta?: number | null
           best_part?: string | null
+          consent_type?: string | null
+          feelings?: string[] | null
           friction_point?: string | null
           id?: string
+          interview_opt_in?: boolean | null
           is_testimonial_approved?: boolean | null
           private_notes?: string | null
           quest_id?: string
           rating_1_5?: number | null
+          recommendation_text?: string | null
           submitted_at?: string
           testimonial_text?: string | null
           user_id?: string
@@ -231,6 +243,147 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "feedback_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_pricing: {
+        Row: {
+          created_at: string
+          expensive_price: string | null
+          fair_price: string | null
+          feedback_id: string
+          id: string
+          pricing_model_preference: string | null
+          too_cheap_price: string | null
+          too_expensive_price: string | null
+          value_drivers: string[] | null
+        }
+        Insert: {
+          created_at?: string
+          expensive_price?: string | null
+          fair_price?: string | null
+          feedback_id: string
+          id?: string
+          pricing_model_preference?: string | null
+          too_cheap_price?: string | null
+          too_expensive_price?: string | null
+          value_drivers?: string[] | null
+        }
+        Update: {
+          created_at?: string
+          expensive_price?: string | null
+          fair_price?: string | null
+          feedback_id?: string
+          id?: string
+          pricing_model_preference?: string | null
+          too_cheap_price?: string | null
+          too_expensive_price?: string | null
+          value_drivers?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_pricing_feedback_id_fkey"
+            columns: ["feedback_id"]
+            isOneToOne: false
+            referencedRelation: "feedback"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_quest_design: {
+        Row: {
+          comfort_score: number | null
+          confusion_notes: string | null
+          created_at: string
+          feedback_id: string
+          group_fit: string | null
+          id: string
+          length_rating: string | null
+          reconnect_intent: string | null
+          worked_poorly: string[] | null
+          worked_well: string[] | null
+        }
+        Insert: {
+          comfort_score?: number | null
+          confusion_notes?: string | null
+          created_at?: string
+          feedback_id: string
+          group_fit?: string | null
+          id?: string
+          length_rating?: string | null
+          reconnect_intent?: string | null
+          worked_poorly?: string[] | null
+          worked_well?: string[] | null
+        }
+        Update: {
+          comfort_score?: number | null
+          confusion_notes?: string | null
+          created_at?: string
+          feedback_id?: string
+          group_fit?: string | null
+          id?: string
+          length_rating?: string | null
+          reconnect_intent?: string | null
+          worked_poorly?: string[] | null
+          worked_well?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_quest_design_feedback_id_fkey"
+            columns: ["feedback_id"]
+            isOneToOne: false
+            referencedRelation: "feedback"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_requests: {
+        Row: {
+          admin_message: string | null
+          completed_at: string | null
+          created_at: string
+          id: string
+          quest_id: string
+          status: string
+          user_id: string
+          xp_basic: number
+          xp_extended: number
+          xp_pricing: number
+          xp_testimonial: number
+        }
+        Insert: {
+          admin_message?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          quest_id: string
+          status?: string
+          user_id: string
+          xp_basic?: number
+          xp_extended?: number
+          xp_pricing?: number
+          xp_testimonial?: number
+        }
+        Update: {
+          admin_message?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          quest_id?: string
+          status?: string
+          user_id?: string
+          xp_basic?: number
+          xp_extended?: number
+          xp_pricing?: number
+          xp_testimonial?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_requests_quest_id_fkey"
             columns: ["quest_id"]
             isOneToOne: false
             referencedRelation: "quests"
@@ -317,6 +470,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          city: string | null
           consent_given_at: string | null
           created_at: string
           display_name: string
@@ -326,6 +480,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          city?: string | null
           consent_given_at?: string | null
           created_at?: string
           display_name: string
@@ -335,6 +490,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          city?: string | null
           consent_given_at?: string | null
           created_at?: string
           display_name?: string
@@ -1195,6 +1351,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_xp: {
+        Row: {
+          created_at: string
+          id: string
+          total_xp: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          total_xp?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          total_xp?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       venue_offerings: {
         Row: {
           address: string | null
@@ -1284,6 +1464,33 @@ export type Database = {
         }
         Relationships: []
       }
+      xp_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          source: string
+          source_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          source: string
+          source_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          source?: string
+          source_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       quest_ratings: {
@@ -1304,6 +1511,15 @@ export type Database = {
       }
     }
     Functions: {
+      award_xp: {
+        Args: {
+          p_amount: number
+          p_source: string
+          p_source_id?: string
+          p_user_id: string
+        }
+        Returns: number
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
