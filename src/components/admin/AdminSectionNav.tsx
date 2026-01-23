@@ -7,7 +7,8 @@
 import { cn } from '@/lib/utils';
 import { 
   Map, Users, MessageSquare, BarChart3, Gamepad2,
-  ChevronDown, ChevronRight, Link2, Wrench, FileText
+  ChevronDown, ChevronRight, Link2, Wrench, FileText,
+  Shield, AlertTriangle
 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,16 @@ export interface AdminSection {
 }
 
 export const ADMIN_SECTIONS: AdminSection[] = [
+  {
+    id: 'control-room',
+    label: 'Control Room',
+    icon: <Shield className="h-4 w-4" />,
+    tabs: [
+      { id: 'approval-inbox', label: 'Approval Inbox' },
+      { id: 'ops-alerts', label: 'Ops Alerts' },
+      { id: 'audit-log', label: 'Audit Log' },
+    ],
+  },
   {
     id: 'quest-ops',
     label: 'Quest Ops',

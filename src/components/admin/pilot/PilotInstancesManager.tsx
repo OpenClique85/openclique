@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { BulkStatusUpdateDialog } from './BulkStatusUpdateDialog';
 import { InstanceCalendarView } from './InstanceCalendarView';
+import { WeekCalendarView } from './WeekCalendarView';
 import type { Tables, Enums } from '@/integrations/supabase/types';
 
 type InstanceStatus = Enums<'instance_status'>;
@@ -75,7 +76,7 @@ export function PilotInstancesManager() {
   const queryClient = useQueryClient();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isBulkUpdateOpen, setIsBulkUpdateOpen] = useState(false);
-  const [activeView, setActiveView] = useState<'list' | 'calendar'>('list');
+  const [activeView, setActiveView] = useState<'list' | 'calendar' | 'week'>('list');
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
   const [formData, setFormData] = useState({
     scheduled_date: '',
@@ -197,9 +198,13 @@ export function PilotInstancesManager() {
             <List className="h-4 w-4" />
             List
           </TabsTrigger>
+          <TabsTrigger value="week" className="flex items-center gap-1">
+            <Calendar className="h-4 w-4" />
+            Week
+          </TabsTrigger>
           <TabsTrigger value="calendar" className="flex items-center gap-1">
             <CalendarDays className="h-4 w-4" />
-            Calendar
+            Month
           </TabsTrigger>
         </TabsList>
 
@@ -301,6 +306,10 @@ export function PilotInstancesManager() {
               </CardContent>
             </Card>
           )}
+        </TabsContent>
+
+        <TabsContent value="week" className="mt-4">
+          <WeekCalendarView />
         </TabsContent>
 
         <TabsContent value="calendar" className="mt-4">
