@@ -9,6 +9,7 @@ import { CancelModal } from '@/components/CancelModal';
 import { MySquadsSection } from '@/components/squads/MySquadsSection';
 import { RewardClaimCard, RewardClaimModal } from '@/components/rewards';
 import { QuestJourneyTimeline } from '@/components/quests';
+import { ContinueYourJourney } from '@/components/progression/ContinueYourJourney';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -316,6 +317,9 @@ export default function MyQuests() {
             </div>
           </section>
         )}
+        
+        {/* Continue Your Journey - Progression Trees */}
+        {user && <ContinueYourJourney userId={user.id} />}
         
         {/* My Squads Section */}
         {user && <MySquadsSection userId={user.id} />}
