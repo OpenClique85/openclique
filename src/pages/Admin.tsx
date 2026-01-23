@@ -37,6 +37,7 @@ import { NotificationConsole } from '@/components/admin/notifications';
 import { DocsManager, DocsExportPanel, DocsPlaybookManager } from '@/components/admin/docs';
 import { PilotInstancesManager } from '@/components/admin/pilot';
 import { ApprovalInbox, OpsAlerts, AuditLogViewer } from '@/components/admin/control-room';
+import { SquadsDirectory } from '@/components/admin/SquadsDirectory';
 
 export default function Admin() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
@@ -74,6 +75,7 @@ export default function Admin() {
       // Operations
       case 'quests': return <QuestsManager />;
       case 'squads': return <PersistentSquadsManager />;
+      case 'squads-directory': return <SquadsDirectory />;
       case 'orgs': return <OrgsManager />;
       // Support
       case 'support-inbox': return <SupportDashboard />;

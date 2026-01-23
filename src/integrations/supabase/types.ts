@@ -1831,6 +1831,8 @@ export type Database = {
           created_at: string
           formation_reason: Json | null
           id: string
+          locked_at: string | null
+          locked_by: string | null
           quest_id: string
           referral_bonds: number | null
           squad_name: string
@@ -1843,6 +1845,8 @@ export type Database = {
           created_at?: string
           formation_reason?: Json | null
           id?: string
+          locked_at?: string | null
+          locked_by?: string | null
           quest_id: string
           referral_bonds?: number | null
           squad_name?: string
@@ -1855,6 +1859,8 @@ export type Database = {
           created_at?: string
           formation_reason?: Json | null
           id?: string
+          locked_at?: string | null
+          locked_by?: string | null
           quest_id?: string
           referral_bonds?: number | null
           squad_name?: string

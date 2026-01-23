@@ -47,6 +47,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
     tabs: [
       { id: 'quests', label: 'Quest Templates' },
       { id: 'orgs', label: 'Organizations' },
+      { id: 'squads-directory', label: 'Squad Directory' },
     ],
   },
   {
