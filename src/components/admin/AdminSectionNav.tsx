@@ -7,7 +7,7 @@
 import { cn } from '@/lib/utils';
 import { 
   Map, Users, MessageSquare, BarChart3, Gamepad2,
-  ChevronDown, ChevronRight, Link2, Wrench
+  ChevronDown, ChevronRight, Link2, Wrench, FileText
 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -97,6 +97,15 @@ export const ADMIN_SECTIONS: AdminSection[] = [
       { id: 'feature-flags', label: 'Feature Flags' },
       { id: 'security-tools', label: 'Security Tools' },
       { id: 'devtools', label: 'Dev Tools' },
+    ],
+  },
+  {
+    id: 'documentation',
+    label: 'Documentation',
+    icon: <FileText className="h-4 w-4" />,
+    tabs: [
+      { id: 'docs-manager', label: 'System Docs' },
+      { id: 'docs-export', label: 'Export Handoff Pack' },
     ],
   },
 ];

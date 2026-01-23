@@ -35,3 +35,18 @@ verify_jwt = false
 
 [functions.check-sla-breaches]
 verify_jwt = false
+
+[functions.seed-happy-path]
+verify_jwt = false
+
+[functions.seed-full-cycle]
+verify_jwt = false
+
+[functions.seed-stuck-states]
+verify_jwt = false
+
+[functions.cleanup-test-data]
+verify_jwt = false
+
+[functions.export-handoff-pack]
+verify_jwt = false
