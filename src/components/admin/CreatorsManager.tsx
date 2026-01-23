@@ -67,6 +67,7 @@ function ApplicationsTab() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [sendingInvite, setSendingInvite] = useState<string | null>(null);
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedApp, setSelectedApp] = useState<CreatorApplication | null>(null);
   const [rejectReason, setRejectReason] = useState('');
 
@@ -240,7 +241,14 @@ function ApplicationsTab() {
               {applications.map((app) => {
                 const socials = parseSocialLinks(app.social_links);
                 return (
-                  <TableRow key={app.id}>
+                  <TableRow 
+                    key={app.id} 
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => {
+                      setSelectedApp(app);
+                      setDetailModalOpen(true);
+                    }}
+                  >
                     <TableCell className="font-medium">{app.name}</TableCell>
                     <TableCell>{app.email}</TableCell>
                     <TableCell>
@@ -256,6 +264,7 @@ function ApplicationsTab() {
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-primary hover:underline text-xs flex items-center gap-1"
+                              onClick={(e) => e.stopPropagation()}
                             >
                               {platform}
                               <ExternalLink className="h-3 w-3" />
@@ -270,7 +279,7 @@ function ApplicationsTab() {
                     </TableCell>
                     <TableCell className="text-right">
                       {app.status === 'pending' && (
-                        <div className="flex gap-2 justify-end">
+                        <div className="flex gap-2 justify-end" onClick={(e) => e.stopPropagation()}>
                           <Button
                             size="sm"
                             onClick={() => handleApproveAndInvite(app)}
@@ -287,13 +296,14 @@ function ApplicationsTab() {
                           </Button>
                           <Button
                             size="sm"
-                            variant="outline"
+                            variant="destructive"
                             onClick={() => {
                               setSelectedApp(app);
                               setRejectModalOpen(true);
                             }}
                           >
-                            <X className="h-4 w-4" />
+                            <X className="h-4 w-4 mr-1" />
+                            Decline
                           </Button>
                         </div>
                       )}
@@ -306,18 +316,128 @@ function ApplicationsTab() {
         </Card>
       )}
 
+      {/* Application Detail Modal */}
+      <Dialog open={detailModalOpen} onOpenChange={setDetailModalOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Application Details</DialogTitle>
+            <DialogDescription>
+              Review the full application from {selectedApp?.name}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedApp && (
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Name</p>
+                  <p className="font-medium">{selectedApp.name}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Email</p>
+                  <p className="font-medium">{selectedApp.email}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Creator Type</p>
+                  <Badge variant="outline">{selectedApp.creator_type || 'Not specified'}</Badge>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Status</p>
+                  {getStatusBadge(selectedApp.status)}
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Submitted</p>
+                  <p className="font-medium">
+                    {selectedApp.created_at ? format(new Date(selectedApp.created_at), 'MMM d, yyyy h:mm a') : '-'}
+                  </p>
+                </div>
+              </div>
+              
+              {/* Social Links */}
+              {selectedApp.social_links && Object.keys(parseSocialLinks(selectedApp.social_links)).length > 0 && (
+                <div>
+                  <p className="text-sm text-muted-foreground mb-2">Social Links</p>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(parseSocialLinks(selectedApp.social_links)).map(([platform, url]) => (
+                      url && (
+                        <a
+                          key={platform}
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-sm text-primary hover:underline bg-primary/10 px-2 py-1 rounded"
+                        >
+                          {platform}
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      )
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Message */}
+              {selectedApp.message && (
+                <div>
+                  <p className="text-sm text-muted-foreground mb-2">Message / About Their Community</p>
+                  <p className="text-sm bg-muted/50 p-3 rounded-lg whitespace-pre-wrap">{selectedApp.message}</p>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            {selectedApp?.status === 'pending' && (
+              <div className="flex gap-2 w-full">
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    setDetailModalOpen(false);
+                    setRejectModalOpen(true);
+                  }}
+                  className="flex-1"
+                >
+                  <X className="h-4 w-4 mr-1" />
+                  Decline
+                </Button>
+                <Button
+                  onClick={() => {
+                    setDetailModalOpen(false);
+                    if (selectedApp) handleApproveAndInvite(selectedApp);
+                  }}
+                  disabled={sendingInvite === selectedApp?.id}
+                  className="flex-1"
+                >
+                  {sendingInvite === selectedApp?.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <>
+                      <Check className="h-4 w-4 mr-1" />
+                      Approve
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+            {selectedApp?.status !== 'pending' && (
+              <Button variant="outline" onClick={() => setDetailModalOpen(false)}>
+                Close
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Reject Confirmation Modal */}
       <Dialog open={rejectModalOpen} onOpenChange={setRejectModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Reject Application</DialogTitle>
+            <DialogTitle>Decline Application</DialogTitle>
             <DialogDescription>
-              Are you sure you want to reject {selectedApp?.name}'s application?
+              Are you sure you want to decline {selectedApp?.name}'s application?
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
             <Textarea
-              placeholder="Optional: Reason for rejection (internal note)"
+              placeholder="Optional: Reason for declining (internal note)"
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
             />
@@ -327,7 +447,7 @@ function ApplicationsTab() {
               Cancel
             </Button>
             <Button variant="destructive" onClick={handleReject}>
-              Reject Application
+              Decline Application
             </Button>
           </DialogFooter>
         </DialogContent>
