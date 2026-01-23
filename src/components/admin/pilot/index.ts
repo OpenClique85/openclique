@@ -9,6 +9,7 @@ export { InstanceNotificationPanel } from './InstanceNotificationPanel';
 export { ParticipantRoster } from './ParticipantRoster';
 export { SquadManager } from './SquadManager';
 export { SquadDetailModal } from './SquadDetailModal';
+export { SquadSwapModal } from './SquadSwapModal';
 export { RunOfShowControls } from './RunOfShowControls';
 export { ProofInbox } from './ProofInbox';
 export { PilotInstancesManager } from './PilotInstancesManager';

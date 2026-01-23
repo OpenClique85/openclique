@@ -2,14 +2,16 @@
  * Squad Manager
  * 
  * Generate squads, assign WhatsApp links, and manage squad composition.
- * Includes broadcast messaging and drag-and-drop manual squad formation.
+ * Includes broadcast messaging, drag-and-drop manual squad formation,
+ * squad locking, and member swap functionality.
  */
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { useAuth } from '@/hooks/useAuth';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -17,7 +19,7 @@ import { Label } from '@/components/ui/label';
 import { 
   Users, Wand2, Lock, Copy, MessageSquare, 
   Loader2, AlertCircle, CheckCircle, Link2,
-  Megaphone, MousePointerClick
+  Megaphone, MousePointerClick, ArrowLeftRight, Unlock
 } from 'lucide-react';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
@@ -25,11 +27,13 @@ import {
 import { auditLog } from '@/lib/auditLog';
 import { InstanceBroadcastModal } from './InstanceBroadcastModal';
 import { DragDropSquadBuilder } from './DragDropSquadBuilder';
+import { SquadSwapModal } from './SquadSwapModal';
 
 interface SquadWithMembers {
   id: string;
   name: string;
   whatsapp_invite_link: string | null;
+  locked_at: string | null;
   members: {
     id: string;
     user_id: string;
@@ -48,12 +52,15 @@ interface SquadManagerProps {
 
 export function SquadManager({ instanceId, instanceTitle = 'Quest', targetSquadSize }: SquadManagerProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [isGenerating, setIsGenerating] = useState(false);
   const [editingSquad, setEditingSquad] = useState<string | null>(null);
   const [whatsappLink, setWhatsappLink] = useState('');
   const [isBroadcastOpen, setIsBroadcastOpen] = useState(false);
   const [isDragDropOpen, setIsDragDropOpen] = useState(false);
+  const [isSwapOpen, setIsSwapOpen] = useState(false);
+  const [isLockingAll, setIsLockingAll] = useState(false);
 
   // Fetch squads with members
   const { data: squads, isLoading } = useQuery({
@@ -62,7 +69,7 @@ export function SquadManager({ instanceId, instanceTitle = 'Quest', targetSquadS
       // First get squads - use existing quest_squads columns
       const { data: squadData, error: squadError } = await supabase
         .from('quest_squads')
-        .select('id, squad_name, whatsapp_link')
+        .select('id, squad_name, whatsapp_link, locked_at')
         .eq('quest_id', instanceId)
         .order('squad_name');
       
@@ -83,6 +90,7 @@ export function SquadManager({ instanceId, instanceTitle = 'Quest', targetSquadS
             id: squad.id,
             name: squad.squad_name || `Squad ${squad.id.slice(0, 4)}`,
             whatsapp_invite_link: squad.whatsapp_link,
+            locked_at: squad.locked_at,
             members: (members || []).map((m: any) => ({
               id: m.id,
               user_id: m.user_id,
@@ -225,6 +233,63 @@ export function SquadManager({ instanceId, instanceTitle = 'Quest', targetSquadS
     toast({ title: `${label} copied!` });
   };
 
+  // Lock/unlock individual squad
+  const toggleSquadLock = async (squadId: string, isCurrentlyLocked: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('quest_squads')
+        .update(isCurrentlyLocked 
+          ? { locked_at: null, locked_by: null }
+          : { locked_at: new Date().toISOString(), locked_by: user?.id }
+        )
+        .eq('id', squadId);
+      
+      if (error) throw error;
+      
+      await auditLog({
+        action: isCurrentlyLocked ? 'squad_unlocked' : 'squad_locked',
+        targetTable: 'quest_squads',
+        targetId: squadId,
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ['instance-squads-detail', instanceId] });
+      toast({ title: isCurrentlyLocked ? 'Squad unlocked' : 'Squad locked' });
+    } catch (err: any) {
+      toast({ title: 'Failed to update lock', description: err.message, variant: 'destructive' });
+    }
+  };
+
+  // Lock all squads
+  const handleLockAllSquads = async () => {
+    if (!squads?.length) return;
+    
+    setIsLockingAll(true);
+    try {
+      const unlockedSquads = squads.filter(s => !s.locked_at);
+      
+      for (const squad of unlockedSquads) {
+        await supabase
+          .from('quest_squads')
+          .update({ locked_at: new Date().toISOString(), locked_by: user?.id })
+          .eq('id', squad.id);
+      }
+      
+      await auditLog({
+        action: 'squads_bulk_locked',
+        targetTable: 'quest_squads',
+        targetId: instanceId,
+        newValues: { locked_count: unlockedSquads.length },
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ['instance-squads-detail', instanceId] });
+      toast({ title: `Locked ${unlockedSquads.length} squad(s)` });
+    } catch (err: any) {
+      toast({ title: 'Failed to lock squads', description: err.message, variant: 'destructive' });
+    } finally {
+      setIsLockingAll(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
@@ -264,6 +329,16 @@ export function SquadManager({ instanceId, instanceTitle = 'Quest', targetSquadS
                 Manual Assign
               </Button>
               
+              {/* Swap Members Button */}
+              <Button 
+                variant="outline"
+                onClick={() => setIsSwapOpen(true)}
+                disabled={!squads?.length || squads.length < 2}
+              >
+                <ArrowLeftRight className="h-4 w-4 mr-2" />
+                Swap Members
+              </Button>
+              
               {/* Auto Generate */}
               <Button 
                 onClick={handleGenerateSquads}
@@ -276,8 +351,16 @@ export function SquadManager({ instanceId, instanceTitle = 'Quest', targetSquadS
                 )}
                 Generate Squads
               </Button>
-              <Button variant="outline">
-                <Lock className="h-4 w-4 mr-2" />
+              <Button 
+                variant="outline"
+                onClick={handleLockAllSquads}
+                disabled={isLockingAll || !squads?.some(s => !s.locked_at)}
+              >
+                {isLockingAll ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Lock className="h-4 w-4 mr-2" />
+                )}
                 Lock All Squads
               </Button>
             </div>
@@ -287,7 +370,7 @@ export function SquadManager({ instanceId, instanceTitle = 'Quest', targetSquadS
 
       {/* Unassigned */}
       {unassigned && unassigned.length > 0 && (
-        <Card className="border-amber-200 bg-amber-50/50">
+        <Card className="border-amber-200 bg-amber-50/50 dark:bg-amber-950/20 dark:border-amber-800">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
               <AlertCircle className="h-4 w-4 text-amber-600" />
@@ -310,11 +393,30 @@ export function SquadManager({ instanceId, instanceTitle = 'Quest', targetSquadS
       {squads && squads.length > 0 ? (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {squads.map((squad) => (
-            <Card key={squad.id}>
+            <Card key={squad.id} className={squad.locked_at ? "border-muted bg-muted/30" : ""}>
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-base">{squad.name}</CardTitle>
-                  <Badge variant="secondary">{squad.members.length} members</Badge>
+                  <div className="flex items-center gap-2">
+                    <CardTitle className="text-base">{squad.name}</CardTitle>
+                    {squad.locked_at && (
+                      <Lock className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary">{squad.members.length} members</Badge>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={() => toggleSquadLock(squad.id, !!squad.locked_at)}
+                    >
+                      {squad.locked_at ? (
+                        <Unlock className="h-4 w-4" />
+                      ) : (
+                        <Lock className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -434,6 +536,14 @@ export function SquadManager({ instanceId, instanceTitle = 'Quest', targetSquadS
         instanceId={instanceId}
         instanceTitle={instanceTitle}
         targetSquadSize={targetSquadSize}
+      />
+
+      {/* Squad Swap Modal */}
+      <SquadSwapModal
+        open={isSwapOpen}
+        onOpenChange={setIsSwapOpen}
+        instanceId={instanceId}
+        instanceTitle={instanceTitle}
       />
     </div>
   );
