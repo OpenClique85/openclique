@@ -38,6 +38,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
     icon: <MessageSquare className="h-4 w-4" />,
     tabs: [
       { id: 'support-inbox', label: 'Ticket Inbox' },
+      { id: 'support-dm', label: 'Direct Messages' },
       { id: 'support-categories', label: 'Issue Categories' },
     ],
   },
