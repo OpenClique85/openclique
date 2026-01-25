@@ -15,9 +15,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
-import { Loader2, Settings, Calendar, ChevronRight, User, Gamepad2 } from 'lucide-react';
+import { Loader2, Settings, Calendar, ChevronRight, User, Gamepad2, Sparkles } from 'lucide-react';
 import { ProfileEditModal } from '@/components/ProfileEditModal';
 import { ProfileGamificationSection } from '@/components/profile/ProfileGamificationSection';
+import { YourAlgorithmDashboard } from '@/components/profile/YourAlgorithmDashboard';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Quest = Tables<'quests'>;
@@ -135,16 +136,26 @@ export default function Profile() {
 
           {/* Tabbed Content */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="overview" className="flex items-center gap-2">
                 <User className="h-4 w-4" />
                 Overview
+              </TabsTrigger>
+              <TabsTrigger value="algorithm" className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4" />
+                Your Algorithm
               </TabsTrigger>
               <TabsTrigger value="progress" className="flex items-center gap-2">
                 <Gamepad2 className="h-4 w-4" />
                 Progress
               </TabsTrigger>
             </TabsList>
+
+
+            {/* Your Algorithm Tab */}
+            <TabsContent value="algorithm" className="mt-6">
+              <YourAlgorithmDashboard />
+            </TabsContent>
 
             {/* Overview Tab */}
             <TabsContent value="overview" className="space-y-6 mt-6">

@@ -171,4 +171,18 @@
   .h-dvh {
     height: 100dvh;
   }
+
+  /* Animated gradient for hero cards */
+  @keyframes gradient-shift {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+  
+  .animate-gradient-shift {
+    animation: gradient-shift 8s ease infinite;
+  }
 }
