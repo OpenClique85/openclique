@@ -2071,6 +2071,8 @@ export type Database = {
           email: string | null
           id: string
           preferences: Json | null
+          tutorial_completed_at: string | null
+          tutorial_steps_completed: Json | null
           updated_at: string
         }
         Insert: {
@@ -2081,6 +2083,8 @@ export type Database = {
           email?: string | null
           id: string
           preferences?: Json | null
+          tutorial_completed_at?: string | null
+          tutorial_steps_completed?: Json | null
           updated_at?: string
         }
         Update: {
@@ -2091,6 +2095,8 @@ export type Database = {
           email?: string | null
           id?: string
           preferences?: Json | null
+          tutorial_completed_at?: string | null
+          tutorial_steps_completed?: Json | null
           updated_at?: string
         }
         Relationships: []
@@ -3316,6 +3322,103 @@ export type Database = {
           },
         ]
       }
+      squad_chat_messages: {
+        Row: {
+          created_at: string | null
+          hidden_at: string | null
+          hidden_by: string | null
+          hide_reason: string | null
+          id: string
+          message: string
+          sender_id: string
+          sender_type: string | null
+          squad_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
+          hide_reason?: string | null
+          id?: string
+          message: string
+          sender_id: string
+          sender_type?: string | null
+          squad_id: string
+        }
+        Update: {
+          created_at?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
+          hide_reason?: string | null
+          id?: string
+          message?: string
+          sender_id?: string
+          sender_type?: string | null
+          squad_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "squad_chat_messages_hidden_by_fkey"
+            columns: ["hidden_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "squad_chat_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "squad_chat_messages_squad_id_fkey"
+            columns: ["squad_id"]
+            isOneToOne: false
+            referencedRelation: "squads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      squad_invite_responses: {
+        Row: {
+          id: string
+          invite_id: string
+          responded_at: string | null
+          response: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          invite_id: string
+          responded_at?: string | null
+          response: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          invite_id?: string
+          responded_at?: string | null
+          response?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "squad_invite_responses_invite_id_fkey"
+            columns: ["invite_id"]
+            isOneToOne: false
+            referencedRelation: "squad_quest_invites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "squad_invite_responses_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       squad_leader_votes: {
         Row: {
           created_at: string
@@ -3408,6 +3511,8 @@ export type Database = {
           created_at: string
           expires_at: string | null
           id: string
+          proposal_message: string | null
+          proposed_at: string | null
           proposed_by: string
           quest_id: string
           squad_id: string
@@ -3417,6 +3522,8 @@ export type Database = {
           created_at?: string
           expires_at?: string | null
           id?: string
+          proposal_message?: string | null
+          proposed_at?: string | null
           proposed_by: string
           quest_id: string
           squad_id: string
@@ -3426,6 +3533,8 @@ export type Database = {
           created_at?: string
           expires_at?: string | null
           id?: string
+          proposal_message?: string | null
+          proposed_at?: string | null
           proposed_by?: string
           quest_id?: string
           squad_id?: string
