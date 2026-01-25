@@ -92,6 +92,7 @@ import CreatorBrowseListings from "./pages/CreatorBrowseListings";
 import OrgPortal from "./pages/OrgPortal";
 import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { TutorialProvider, TutorialOverlay, TutorialPrompt } from "./components/tutorial";
 
 // -----------------------------------------------------------------------------
 // SETUP: Initialize data fetching client
@@ -104,11 +105,14 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        
-        <BrowserRouter>
+      <TutorialProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <TutorialOverlay />
+          <TutorialPrompt />
+          
+          <BrowserRouter>
           <Routes>
             {/* MAIN PAGES */}
             <Route path="/" element={<Index />} />
@@ -181,6 +185,7 @@ const App = () => (
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
+      </TutorialProvider>
     </AuthProvider>
   </QueryClientProvider>
 );

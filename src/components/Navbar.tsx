@@ -95,15 +95,15 @@ export function Navbar() {
                 {link.label}
               </Link>
             ))}
-            {/* My Quests - visible when logged in */}
+            {/* Profile - visible when logged in */}
             {user && (
               <Link
-                to="/my-quests"
+                to="/profile"
                 className={`text-sm font-medium px-3 py-2 rounded-md transition-colors hover:bg-muted ${
-                  isActive('/my-quests') ? "text-primary bg-primary/5" : "text-muted-foreground"
+                  location.pathname.startsWith('/profile') ? "text-primary bg-primary/5" : "text-muted-foreground"
                 }`}
               >
-                My Quests
+                My Hub
               </Link>
             )}
           </div>
@@ -164,13 +164,13 @@ export function Navbar() {
                     {user.email}
                   </div>
                   <DropdownMenuItem asChild>
-                    <Link to="/profile" className="flex items-center gap-2 cursor-pointer">
+                    <Link to="/profile?tab=cliques" className="flex items-center gap-2 cursor-pointer">
                       <User className="h-4 w-4" />
-                      Profile
+                      My Cliques
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/my-quests" className="flex items-center gap-2 cursor-pointer">
+                    <Link to="/profile?tab=quests" className="flex items-center gap-2 cursor-pointer">
                       <ClipboardList className="h-4 w-4" />
                       My Quests
                     </Link>
@@ -253,16 +253,16 @@ export function Navbar() {
                 </Link>
               ))}
               
-              {/* My Quests for logged in users */}
+              {/* My Hub for logged in users */}
               {user && (
                 <Link
-                  to="/my-quests"
+                  to="/profile"
                   className={`text-sm font-medium px-3 py-2 rounded-md transition-colors ${
-                    isActive('/my-quests') ? "text-primary bg-primary/5" : "text-muted-foreground hover:bg-muted"
+                    location.pathname.startsWith('/profile') ? "text-primary bg-primary/5" : "text-muted-foreground hover:bg-muted"
                   }`}
                   onClick={() => setIsOpen(false)}
                 >
-                  My Quests
+                  My Hub
                 </Link>
               )}
               
@@ -303,12 +303,12 @@ export function Navbar() {
                       {user.email}
                     </p>
                     <Link
-                      to="/profile"
+                      to="/profile?tab=cliques"
                       className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md text-muted-foreground hover:bg-muted"
                       onClick={() => setIsOpen(false)}
                     >
                       <User className="h-4 w-4" />
-                      Profile
+                      My Cliques
                     </Link>
                     {isCreator && (
                       <Link

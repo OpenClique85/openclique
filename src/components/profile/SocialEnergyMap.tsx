@@ -2,9 +2,12 @@
  * =============================================================================
  * SocialEnergyMap - Visual 3-axis map with weighted sliders (must total 100)
  * =============================================================================
+ * 
+ * FIXED: Weight input now uses +/- buttons and debounced manual input
+ * to prevent value jumping during typing.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
@@ -14,7 +17,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Lock, Unlock, Eye, EyeOff, Sparkles, ChevronDown, Check, Loader2 } from 'lucide-react';
+import { Lock, Unlock, Eye, EyeOff, Sparkles, ChevronDown, Check, Loader2, Minus, Plus } from 'lucide-react';
 import { TooltipInfo } from '@/components/ui/tooltip-info';
 import {
   useSocialEnergy,
@@ -75,6 +78,11 @@ export function SocialEnergyMap({ userId, compact = false }: SocialEnergyMapProp
   });
 
   const [hasWeightChanges, setHasWeightChanges] = useState(false);
+  
+  // Track which input is being edited (for manual typing)
+  const [editingAxis, setEditingAxis] = useState<AxisKey | null>(null);
+  const [editingValue, setEditingValue] = useState<string>('');
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   // Sync local values with fetched data
   useEffect(() => {
@@ -112,9 +120,9 @@ export function SocialEnergyMap({ userId, compact = false }: SocialEnergyMapProp
     }
   };
 
-  // Weight adjustment with redistribution
-  const handleWeightChange = useCallback(
-    (changedAxis: AxisKey, newValue: number) => {
+  // Redistribute points among other axes when one changes
+  const redistributeWeights = useCallback(
+    (changedAxis: AxisKey, newValue: number): AxisWeights => {
       const clampedValue = Math.max(0, Math.min(100, newValue));
       const otherAxes = (['energy', 'structure', 'focus'] as AxisKey[]).filter(
         (a) => a !== changedAxis
@@ -152,11 +160,72 @@ export function SocialEnergyMap({ userId, compact = false }: SocialEnergyMapProp
         }
       }
 
-      setLocalWeights(newWeights);
-      setHasWeightChanges(true);
+      return newWeights;
     },
     [localWeights]
   );
+
+  // Handle +/- button clicks (immediate redistribution)
+  const handleWeightAdjust = useCallback(
+    (axis: AxisKey, delta: number) => {
+      const newValue = localWeights[axis] + delta;
+      if (newValue < 0 || newValue > 100) return;
+      
+      const newWeights = redistributeWeights(axis, newValue);
+      setLocalWeights(newWeights);
+      setHasWeightChanges(true);
+    },
+    [localWeights, redistributeWeights]
+  );
+
+  // Handle manual input focus
+  const handleInputFocus = (axis: AxisKey) => {
+    setEditingAxis(axis);
+    setEditingValue(String(localWeights[axis]));
+  };
+
+  // Handle manual input change (just store value, don't redistribute yet)
+  const handleInputChange = (value: string) => {
+    // Only allow numeric input
+    if (value === '' || /^\d+$/.test(value)) {
+      setEditingValue(value);
+      
+      // Debounce the redistribution
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+      
+      debounceRef.current = setTimeout(() => {
+        if (editingAxis && value !== '') {
+          const numValue = parseInt(value, 10);
+          if (!isNaN(numValue) && numValue >= 0 && numValue <= 100) {
+            const newWeights = redistributeWeights(editingAxis, numValue);
+            setLocalWeights(newWeights);
+            setHasWeightChanges(true);
+          }
+        }
+      }, 500);
+    }
+  };
+
+  // Handle input blur (finalize)
+  const handleInputBlur = () => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+    
+    if (editingAxis && editingValue !== '') {
+      const numValue = parseInt(editingValue, 10);
+      if (!isNaN(numValue) && numValue >= 0 && numValue <= 100) {
+        const newWeights = redistributeWeights(editingAxis, numValue);
+        setLocalWeights(newWeights);
+        setHasWeightChanges(true);
+      }
+    }
+    
+    setEditingAxis(null);
+    setEditingValue('');
+  };
 
   const handleSaveWeights = async () => {
     await updateWeights(localWeights);
@@ -253,14 +322,24 @@ export function SocialEnergyMap({ userId, compact = false }: SocialEnergyMapProp
 
       {/* Weight budget indicator */}
       {isOwner && (
-        <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
-          <span className="text-sm font-medium">Importance points:</span>
-          <Badge variant={totalWeight === 100 ? 'default' : 'destructive'}>
-            {totalWeight}/100
-          </Badge>
-          {totalWeight === 100 && <Check className="h-4 w-4 text-green-500" />}
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 border">
+          <span className="text-sm font-medium">Importance Budget:</span>
+          <div className="flex items-center gap-2">
+            <Badge 
+              variant={totalWeight === 100 ? 'default' : 'destructive'}
+              className="text-sm px-3"
+            >
+              {totalWeight}/100 pts
+            </Badge>
+            {totalWeight === 100 && <Check className="h-4 w-4 text-green-500" />}
+            {totalWeight !== 100 && (
+              <span className="text-xs text-destructive">
+                {totalWeight < 100 ? `Add ${100 - totalWeight} pts` : `Remove ${totalWeight - 100} pts`}
+              </span>
+            )}
+          </div>
           <TooltipInfo
-            text="Distribute 100 points across the axes to show which matters most for your squad matching"
+            text="Distribute 100 points across the axes to show which matters most for your squad matching. Use +/- buttons or type directly."
             side="right"
           />
         </div>
@@ -270,25 +349,56 @@ export function SocialEnergyMap({ userId, compact = false }: SocialEnergyMapProp
       <div className="space-y-8">
         {AXES.map(({ key, axisKey, config }) => (
           <div key={key} className="space-y-3">
-            {/* Axis header */}
+            {/* Axis header with weight controls */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="font-medium">{config.label}</span>
                 <TooltipInfo text={config.tooltip} />
               </div>
               {isOwner && (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">Importance:</span>
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-muted-foreground mr-2">Importance:</span>
+                  
+                  {/* Minus button */}
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => handleWeightAdjust(key, -5)}
+                    disabled={socialEnergy.is_locked || localWeights[key] <= 0}
+                  >
+                    <Minus className="h-3 w-3" />
+                  </Button>
+                  
+                  {/* Weight input */}
                   <input
-                    type="number"
-                    min={0}
-                    max={100}
-                    value={localWeights[key]}
-                    onChange={(e) => handleWeightChange(key, parseInt(e.target.value) || 0)}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={editingAxis === key ? editingValue : localWeights[key]}
+                    onChange={(e) => handleInputChange(e.target.value)}
+                    onFocus={() => handleInputFocus(key)}
+                    onBlur={handleInputBlur}
                     disabled={socialEnergy.is_locked}
-                    className="w-14 h-7 text-center text-sm border rounded-md bg-background"
+                    className={cn(
+                      "w-12 h-7 text-center text-sm font-medium border rounded-md bg-background",
+                      "focus:ring-2 focus:ring-primary focus:outline-none",
+                      socialEnergy.is_locked && "opacity-50 cursor-not-allowed"
+                    )}
                   />
-                  <span className="text-xs text-muted-foreground">pts</span>
+                  
+                  {/* Plus button */}
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => handleWeightAdjust(key, 5)}
+                    disabled={socialEnergy.is_locked || localWeights[key] >= 100}
+                  >
+                    <Plus className="h-3 w-3" />
+                  </Button>
+                  
+                  <span className="text-xs text-muted-foreground ml-1">pts</span>
                 </div>
               )}
             </div>
