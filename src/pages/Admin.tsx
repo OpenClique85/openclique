@@ -44,6 +44,7 @@ import { SquadArchivalManager } from '@/components/admin/SquadArchivalManager';
 import { UGCManager } from '@/components/admin/UGCManager';
 import { InviteCodesManager } from '@/components/admin/InviteCodesManager';
 import { OnboardingFeedbackManager } from '@/components/admin/OnboardingFeedbackManager';
+import { PlatformStats } from '@/components/admin/PlatformStats';
 
 export default function Admin() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
@@ -51,7 +52,7 @@ export default function Admin() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-dvh flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -59,7 +60,7 @@ export default function Admin() {
 
   if (!user || !isAdmin) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
+      <div className="min-h-dvh bg-background flex flex-col">
         <Navbar />
         <main className="flex-1 container mx-auto px-4 py-12 text-center">
           <h1 className="text-2xl font-display font-bold mb-4">Access Denied</h1>
@@ -132,10 +133,13 @@ export default function Admin() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-dvh bg-background flex flex-col">
       <Navbar />
       
       <main className="flex-1 container mx-auto px-4 py-8">
+        {/* Key Stats Dashboard */}
+        <PlatformStats />
+
         <div className="mb-8">
           <h1 className="text-3xl font-display font-bold text-foreground">Quest Ops Console</h1>
           <p className="text-muted-foreground mt-1">Manage quests, partners, and gamification</p>

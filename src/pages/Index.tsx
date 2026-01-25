@@ -63,7 +63,7 @@ import BuggsFloating from "@/components/BuggsFloating";
  */
 const Index = () => {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-dvh flex flex-col">
       {/* ============ NAVIGATION ============ */}
       <Navbar />
       

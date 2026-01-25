@@ -20,10 +20,10 @@ import {
 } from 'lucide-react';
 
 export default function SponsorDashboard() {
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, isAdmin, profile: userProfile } = useAuth();
 
   // Fetch sponsor profile
-  const { data: profile, isLoading: profileLoading } = useQuery({
+  const { data: profile, isLoading: profileLoading, refetch: refetchProfile } = useQuery({
     queryKey: ['sponsor-profile', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -36,6 +36,43 @@ export default function SponsorDashboard() {
       return data;
     },
     enabled: !!user,
+  });
+
+  // Auto-create sponsor profile for admins who don't have one
+  useQuery({
+    queryKey: ['admin-sponsor-profile-setup', user?.id, isAdmin, profile?.id],
+    queryFn: async () => {
+      if (!user || !isAdmin || profile) return null;
+      
+      // Create a sponsor profile for the admin
+      const displayName = userProfile?.display_name || user.email?.split('@')[0] || 'Admin';
+      
+      const { error: profileError } = await supabase
+        .from('sponsor_profiles')
+        .insert({
+          user_id: user.id,
+          name: `${displayName} (Admin)`,
+          company_name: 'OpenClique Admin',
+          description: 'OpenClique Admin Account',
+          status: 'approved',
+        });
+      
+      if (profileError && !profileError.message.includes('duplicate')) {
+        console.error('Error creating admin sponsor profile:', profileError);
+        return null;
+      }
+      
+      // Also add sponsor role if not present
+      await supabase
+        .from('user_roles')
+        .insert({ user_id: user.id, role: 'sponsor' })
+        .single();
+      
+      // Refetch the sponsor profile
+      refetchProfile();
+      return true;
+    },
+    enabled: !!user && isAdmin && !profileLoading && !profile,
   });
 
   // Fetch stats
@@ -82,7 +119,7 @@ export default function SponsorDashboard() {
 
   if (authLoading || profileLoading) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-dvh flex flex-col">
         <Navbar />
         <main className="flex-1 flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -92,10 +129,10 @@ export default function SponsorDashboard() {
     );
   }
 
-  // Not a sponsor
+  // Not a sponsor - auto-provision for admins
   if (!profile) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-dvh flex flex-col">
         <Navbar />
         <main className="flex-1 flex items-center justify-center p-4">
           <Card className="max-w-md w-full text-center">
@@ -118,7 +155,7 @@ export default function SponsorDashboard() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-muted/30">
+    <div className="min-h-dvh flex flex-col bg-muted/30">
       <Navbar />
       <SponsorPortalNav />
       

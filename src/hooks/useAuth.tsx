@@ -68,7 +68,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsCreator(data === true);
   };
 
-  const checkSponsorStatus = async (userId: string) => {
+  const checkSponsorStatus = async (userId: string, userIsAdmin: boolean) => {
+    // Admins automatically have sponsor privileges
+    if (userIsAdmin) {
+      setIsSponsor(true);
+      return;
+    }
     const { data } = await supabase.rpc('has_role', {
       _user_id: userId,
       _role: 'sponsor'
@@ -90,7 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             fetchProfile(session.user.id);
             const userIsAdmin = await checkAdminStatus(session.user.id);
             checkCreatorStatus(session.user.id, userIsAdmin);
-            checkSponsorStatus(session.user.id);
+            checkSponsorStatus(session.user.id, userIsAdmin);
           }, 0);
         } else {
           setProfile(null);
@@ -114,8 +119,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
         checkAdminStatus(session.user.id).then(userIsAdmin => {
           checkCreatorStatus(session.user.id, userIsAdmin);
+          checkSponsorStatus(session.user.id, userIsAdmin);
         });
-        checkSponsorStatus(session.user.id);
       } else {
         setIsProfileLoaded(true);
         setIsLoading(false);

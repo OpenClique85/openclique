@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
-import { Calendar, DollarSign, Clock, Users, Gift, ExternalLink, Star, Sparkles } from 'lucide-react';
+import { Calendar, DollarSign, Clock, Users, Gift, ExternalLink, Star, Sparkles, Flame } from 'lucide-react';
 import type { Quest } from '@/hooks/useQuests';
 import { useQuestRating } from '@/hooks/useQuestRatings';
 import { useCreatorSlug } from '@/hooks/useCreatorSlugs';
+import { useQuestStats } from '@/hooks/useQuestStats';
 import { Badge } from '@/components/ui/badge';
 import logo from '@/assets/oc-icon.png';
 
@@ -45,6 +46,12 @@ const QuestCard = ({ quest, onClick }: QuestCardProps) => {
   const { data: creatorInfo } = useCreatorSlug(
     quest.creatorType === 'community' ? quest.creatorId : undefined
   );
+
+  // Fetch live signup and squad stats
+  const { data: questStats } = useQuestStats(quest.id);
+  const signupCount = questStats?.signupCount || 0;
+  const squadCount = questStats?.squadCount || 0;
+  const isPopular = signupCount >= 5; // Show "hot" indicator if 5+ signups
 
   const handleCreatorClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -112,6 +119,27 @@ const QuestCard = ({ quest, onClick }: QuestCardProps) => {
             <Users className="w-4 h-4 shrink-0" />
             <span className="truncate">{quest.metadata.squadSize}</span>
           </div>
+        </div>
+
+        {/* Signup & Squad Stats */}
+        <div className="flex items-center gap-3 mb-3 text-sm">
+          <div className="flex items-center gap-1.5 text-muted-foreground">
+            <Users className="w-4 h-4" />
+            <span className="font-medium text-foreground">{signupCount}</span>
+            <span>signed up</span>
+          </div>
+          {squadCount > 0 && (
+            <div className="flex items-center gap-1.5 text-muted-foreground">
+              <span className="text-foreground font-medium">{squadCount}</span>
+              <span>squad{squadCount !== 1 ? 's' : ''}</span>
+            </div>
+          )}
+          {isPopular && (
+            <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 gap-1">
+              <Flame className="h-3 w-3" />
+              Popular
+            </Badge>
+          )}
         </div>
 
         {/* Description */}
