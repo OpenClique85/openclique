@@ -59,3 +59,6 @@ verify_jwt = false
 
 [functions.check-warmup-status]
 verify_jwt = false
+
+[functions.infer-traits]
+verify_jwt = false
