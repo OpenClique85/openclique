@@ -238,6 +238,54 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_inference_log: {
+        Row: {
+          admin_triggered_by: string | null
+          created_at: string | null
+          decision_traces: Json
+          id: string
+          input_snapshot: Json
+          model_used: string
+          prompt_version: string
+          raw_output: Json
+          run_type: string
+          source_id: string | null
+          tokens_used: number | null
+          traits_suggested: string[]
+          user_id: string
+        }
+        Insert: {
+          admin_triggered_by?: string | null
+          created_at?: string | null
+          decision_traces: Json
+          id?: string
+          input_snapshot: Json
+          model_used: string
+          prompt_version: string
+          raw_output: Json
+          run_type: string
+          source_id?: string | null
+          tokens_used?: number | null
+          traits_suggested: string[]
+          user_id: string
+        }
+        Update: {
+          admin_triggered_by?: string | null
+          created_at?: string | null
+          decision_traces?: Json
+          id?: string
+          input_snapshot?: Json
+          model_used?: string
+          prompt_version?: string
+          raw_output?: Json
+          run_type?: string
+          source_id?: string | null
+          tokens_used?: number | null
+          traits_suggested?: string[]
+          user_id?: string
+        }
+        Relationships: []
+      }
       auth_rate_monitor: {
         Row: {
           created_at: string | null
@@ -567,6 +615,62 @@ export type Database = {
           total_size_bytes?: number | null
         }
         Relationships: []
+      }
+      draft_traits: {
+        Row: {
+          ai_model: string | null
+          ai_prompt_version: string | null
+          confidence: number | null
+          created_at: string | null
+          decided_at: string | null
+          decision_trace: Json | null
+          explanation: string | null
+          id: string
+          source: string
+          source_id: string | null
+          status: string | null
+          trait_slug: string
+          user_id: string
+        }
+        Insert: {
+          ai_model?: string | null
+          ai_prompt_version?: string | null
+          confidence?: number | null
+          created_at?: string | null
+          decided_at?: string | null
+          decision_trace?: Json | null
+          explanation?: string | null
+          id?: string
+          source: string
+          source_id?: string | null
+          status?: string | null
+          trait_slug: string
+          user_id: string
+        }
+        Update: {
+          ai_model?: string | null
+          ai_prompt_version?: string | null
+          confidence?: number | null
+          created_at?: string | null
+          decided_at?: string | null
+          decision_trace?: Json | null
+          explanation?: string | null
+          id?: string
+          source?: string
+          source_id?: string | null
+          status?: string | null
+          trait_slug?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "draft_traits_trait_slug_fkey"
+            columns: ["trait_slug"]
+            isOneToOne: false
+            referencedRelation: "trait_library"
+            referencedColumns: ["slug"]
+          },
+        ]
       }
       feature_flag_audit: {
         Row: {
@@ -3354,6 +3458,48 @@ export type Database = {
           },
         ]
       }
+      trait_library: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string | null
+          display_name: string
+          emoji: string | null
+          id: string
+          is_active: boolean | null
+          is_negative: boolean | null
+          slug: string
+          updated_at: string | null
+          version: number | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description?: string | null
+          display_name: string
+          emoji?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_negative?: boolean | null
+          slug: string
+          updated_at?: string | null
+          version?: number | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          display_name?: string
+          emoji?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_negative?: boolean | null
+          slug?: string
+          updated_at?: string | null
+          version?: number | null
+        }
+        Relationships: []
+      }
       ugc_submissions: {
         Row: {
           caption: string | null
@@ -3552,6 +3698,57 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "streak_rules"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_traits: {
+        Row: {
+          created_at: string | null
+          id: string
+          importance: number | null
+          source: string
+          source_draft_id: string | null
+          trait_slug: string
+          updated_at: string | null
+          user_id: string
+          visibility: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          importance?: number | null
+          source: string
+          source_draft_id?: string | null
+          trait_slug: string
+          updated_at?: string | null
+          user_id: string
+          visibility?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          importance?: number | null
+          source?: string
+          source_draft_id?: string | null
+          trait_slug?: string
+          updated_at?: string | null
+          user_id?: string
+          visibility?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_traits_source_draft_id_fkey"
+            columns: ["source_draft_id"]
+            isOneToOne: false
+            referencedRelation: "draft_traits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_traits_trait_slug_fkey"
+            columns: ["trait_slug"]
+            isOneToOne: false
+            referencedRelation: "trait_library"
+            referencedColumns: ["slug"]
           },
         ]
       }
