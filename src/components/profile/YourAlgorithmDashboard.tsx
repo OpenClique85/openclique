@@ -13,11 +13,13 @@ import { AlgorithmHeroCard } from './AlgorithmHeroCard';
 import { PendingSuggestionsSection } from './PendingSuggestionsSection';
 import { TraitCard } from './TraitCard';
 import { AlgorithmStoryModal } from './AlgorithmStoryModal';
+import { ShareAlgorithmCard } from './ShareAlgorithmCard';
 import { ProfileEditModal } from '@/components/ProfileEditModal';
 
 export function YourAlgorithmDashboard() {
   const { profile } = useAuth();
   const [showStoryModal, setShowStoryModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const [showPreferencesModal, setShowPreferencesModal] = useState(false);
   
   const {
@@ -61,6 +63,7 @@ export function YourAlgorithmDashboard() {
         totalAccepted={totalAccepted}
         totalPending={totalPending}
         onSeeStory={() => setShowStoryModal(true)}
+        onShare={() => setShowShareModal(true)}
         isEmpty={isEmpty}
         onStartDiscovering={() => setShowPreferencesModal(true)}
       />
@@ -102,6 +105,15 @@ export function YourAlgorithmDashboard() {
         onClose={() => setShowStoryModal(false)}
         displayName={displayName}
         traits={acceptedTraits}
+      />
+
+      {/* Share Modal */}
+      <ShareAlgorithmCard
+        open={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        displayName={displayName}
+        traits={topTraits}
+        totalTraits={totalAccepted}
       />
 
       {/* Preferences Modal for empty state */}

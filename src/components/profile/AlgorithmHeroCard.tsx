@@ -6,7 +6,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Sparkles, Play, Dna } from 'lucide-react';
+import { Sparkles, Play, Dna, Share2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { UserTraitWithLibrary } from '@/hooks/useYourAlgorithm';
 
@@ -16,6 +16,7 @@ interface AlgorithmHeroCardProps {
   totalAccepted: number;
   totalPending: number;
   onSeeStory: () => void;
+  onShare: () => void;
   isEmpty: boolean;
   onStartDiscovering?: () => void;
 }
@@ -26,6 +27,7 @@ export function AlgorithmHeroCard({
   totalAccepted,
   totalPending,
   onSeeStory,
+  onShare,
   isEmpty,
   onStartDiscovering,
 }: AlgorithmHeroCardProps) {
@@ -125,16 +127,26 @@ export function AlgorithmHeroCard({
           )}
         </div>
 
-        {/* See My Story button */}
+        {/* Action buttons */}
         {totalAccepted > 0 && (
-          <Button 
-            variant="outline" 
-            onClick={onSeeStory}
-            className="gap-2 bg-background/50 hover:bg-background/80"
-          >
-            <Play className="w-4 h-4" />
-            See My Story
-          </Button>
+          <div className="flex flex-wrap gap-3">
+            <Button 
+              variant="outline" 
+              onClick={onSeeStory}
+              className="gap-2 bg-background/50 hover:bg-background/80"
+            >
+              <Play className="w-4 h-4" />
+              See My Story
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={onShare}
+              className="gap-2 bg-background/50 hover:bg-background/80"
+            >
+              <Share2 className="w-4 h-4" />
+              Share
+            </Button>
+          </div>
         )}
       </CardContent>
     </Card>
