@@ -10,7 +10,8 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   isLoading: boolean;
-  isProfileLoaded: boolean; // NEW: tracks if profile fetch completed
+  isProfileLoaded: boolean;
+  isRolesLoaded: boolean; // NEW: tracks if role checks completed
   isAdmin: boolean;
   isCreator: boolean;
   isSponsor: boolean;
@@ -28,7 +29,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isProfileLoaded, setIsProfileLoaded] = useState(false); // NEW
+  const [isProfileLoaded, setIsProfileLoaded] = useState(false);
+  const [isRolesLoaded, setIsRolesLoaded] = useState(false); // NEW
   const [isAdmin, setIsAdmin] = useState(false);
   const [isCreator, setIsCreator] = useState(false);
   const [isSponsor, setIsSponsor] = useState(false);
@@ -90,16 +92,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Defer Supabase calls with setTimeout to prevent deadlock
         if (session?.user) {
-          setIsProfileLoaded(false); // Reset before fetching
+          setIsProfileLoaded(false);
+          setIsRolesLoaded(false); // Reset before checking roles
           setTimeout(async () => {
             fetchProfile(session.user.id);
             const userIsAdmin = await checkAdminStatus(session.user.id);
-            checkCreatorStatus(session.user.id, userIsAdmin);
-            checkSponsorStatus(session.user.id, userIsAdmin);
+            await Promise.all([
+              checkCreatorStatus(session.user.id, userIsAdmin),
+              checkSponsorStatus(session.user.id, userIsAdmin)
+            ]);
+            setIsRolesLoaded(true); // Mark roles as loaded after all checks
           }, 0);
         } else {
           setProfile(null);
-          setIsProfileLoaded(true); // No user = profile loading complete (null)
+          setIsProfileLoaded(true);
+          setIsRolesLoaded(true); // No user = roles loading complete
           setIsAdmin(false);
           setIsCreator(false);
           setIsSponsor(false);
@@ -108,21 +115,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        setIsProfileLoaded(false); // Reset before fetching
+        setIsProfileLoaded(false);
+        setIsRolesLoaded(false); // Reset before checking roles
         fetchProfile(session.user.id).then(() => {
           setIsLoading(false);
         });
-        checkAdminStatus(session.user.id).then(userIsAdmin => {
-          checkCreatorStatus(session.user.id, userIsAdmin);
-          checkSponsorStatus(session.user.id, userIsAdmin);
-        });
+        const userIsAdmin = await checkAdminStatus(session.user.id);
+        await Promise.all([
+          checkCreatorStatus(session.user.id, userIsAdmin),
+          checkSponsorStatus(session.user.id, userIsAdmin)
+        ]);
+        setIsRolesLoaded(true); // Mark roles as loaded
       } else {
         setIsProfileLoaded(true);
+        setIsRolesLoaded(true);
         setIsLoading(false);
       }
     });
@@ -178,6 +189,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       profile,
       isLoading,
       isProfileLoaded,
+      isRolesLoaded,
       isAdmin,
       isCreator,
       isSponsor,

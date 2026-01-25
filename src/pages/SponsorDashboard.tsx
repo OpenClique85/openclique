@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 
 export default function SponsorDashboard() {
-  const { user, isLoading: authLoading, isAdmin, profile: userProfile } = useAuth();
+  const { user, isLoading: authLoading, isAdmin, isRolesLoaded, profile: userProfile } = useAuth();
 
   // Fetch sponsor profile
   const { data: profile, isLoading: profileLoading, refetch: refetchProfile } = useQuery({
@@ -40,19 +40,31 @@ export default function SponsorDashboard() {
 
   // Auto-create sponsor profile for admins who don't have one
   useQuery({
-    queryKey: ['admin-sponsor-profile-setup', user?.id, isAdmin, profile?.id],
+    queryKey: ['admin-sponsor-profile-setup', user?.id, isAdmin, profile?.id, isRolesLoaded],
     queryFn: async () => {
       if (!user || !isAdmin || profile) return null;
       
       // Create a sponsor profile for the admin
       const displayName = userProfile?.display_name || user.email?.split('@')[0] || 'Admin';
       
+      // First check if profile already exists (may have been created by another tab)
+      const { data: existing } = await supabase
+        .from('sponsor_profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      if (existing) {
+        refetchProfile();
+        return true;
+      }
+      
       const { error: profileError } = await supabase
         .from('sponsor_profiles')
         .insert({
           user_id: user.id,
           name: `${displayName} (Admin)`,
-          company_name: 'OpenClique Admin',
+          sponsor_type: 'brand',
           description: 'OpenClique Admin Account',
           status: 'approved',
         });
@@ -62,17 +74,20 @@ export default function SponsorDashboard() {
         return null;
       }
       
-      // Also add sponsor role if not present
-      await supabase
+      // Also add sponsor role if not present (ignore duplicate errors)
+      const { error: roleError } = await supabase
         .from('user_roles')
-        .insert({ user_id: user.id, role: 'sponsor' })
-        .single();
+        .insert({ user_id: user.id, role: 'sponsor' });
+      
+      if (roleError && !roleError.message.includes('duplicate')) {
+        console.error('Error adding sponsor role:', roleError);
+      }
       
       // Refetch the sponsor profile
       refetchProfile();
       return true;
     },
-    enabled: !!user && isAdmin && !profileLoading && !profile,
+    enabled: !!user && isAdmin && isRolesLoaded && !profileLoading && !profile,
   });
 
   // Fetch stats
@@ -117,7 +132,8 @@ export default function SponsorDashboard() {
     enabled: !!profile?.id,
   });
 
-  if (authLoading || profileLoading) {
+  // Wait for roles to load before showing fallback UI
+  if (authLoading || profileLoading || !isRolesLoaded) {
     return (
       <div className="min-h-dvh flex flex-col">
         <Navbar />
