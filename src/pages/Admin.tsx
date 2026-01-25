@@ -45,6 +45,7 @@ import { UGCManager } from '@/components/admin/UGCManager';
 import { InviteCodesManager } from '@/components/admin/InviteCodesManager';
 import { OnboardingFeedbackManager } from '@/components/admin/OnboardingFeedbackManager';
 import { PlatformStats } from '@/components/admin/PlatformStats';
+import { QuestArchivesManager } from '@/components/admin/QuestArchivesManager';
 
 export default function Admin() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
@@ -81,6 +82,7 @@ export default function Admin() {
       case 'pilot-instances': return <PilotInstancesManager />;
       // Operations
       case 'quests': return <QuestsManager />;
+      case 'quest-archives': return <QuestArchivesManager />;
       case 'squads': return <PersistentSquadsManager />;
       case 'squads-directory': return <SquadsDirectory />;
       case 'squad-comparison': return <SquadComparisonView />;

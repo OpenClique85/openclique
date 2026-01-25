@@ -1,9 +1,10 @@
 /**
  * Hook to fetch signup counts and squad counts for quests
- * Provides live popularity data for quest cards
+ * Provides REAL-TIME popularity data for quest cards via Supabase Realtime
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 interface QuestStats {
@@ -13,6 +14,34 @@ interface QuestStats {
 }
 
 export function useQuestStats(questId: string | undefined) {
+  const queryClient = useQueryClient();
+
+  // Set up realtime subscription for this specific quest
+  useEffect(() => {
+    if (!questId) return;
+
+    const channel = supabase
+      .channel(`quest-signups-${questId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // INSERT, UPDATE, DELETE
+          schema: 'public',
+          table: 'quest_signups',
+          filter: `quest_id=eq.${questId}`,
+        },
+        () => {
+          // Invalidate query to refetch fresh counts
+          queryClient.invalidateQueries({ queryKey: ['quest-stats', questId] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [questId, queryClient]);
+
   return useQuery({
     queryKey: ['quest-stats', questId],
     queryFn: async (): Promise<QuestStats> => {
@@ -43,12 +72,43 @@ export function useQuestStats(questId: string | undefined) {
     },
     enabled: !!questId,
     staleTime: 30000, // Cache for 30 seconds
-    refetchInterval: 60000, // Refetch every minute for live updates
+    // No refetchInterval - realtime handles updates now
   });
 }
 
 // Batch hook for multiple quests (more efficient for list views)
+// Uses a single realtime subscription for all quest_signups changes
 export function useMultipleQuestStats(questIds: string[]) {
+  const queryClient = useQueryClient();
+
+  // Set up single realtime subscription for all quest signups
+  useEffect(() => {
+    if (questIds.length === 0) return;
+
+    const channel = supabase
+      .channel('quest-signups-batch')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'quest_signups',
+        },
+        (payload) => {
+          // Check if the affected quest is in our list
+          const affectedQuestId = (payload.new as any)?.quest_id || (payload.old as any)?.quest_id;
+          if (affectedQuestId && questIds.includes(affectedQuestId)) {
+            queryClient.invalidateQueries({ queryKey: ['multiple-quest-stats'] });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [questIds.join(','), queryClient]);
+
   return useQuery({
     queryKey: ['multiple-quest-stats', questIds.sort().join(',')],
     queryFn: async (): Promise<Record<string, QuestStats>> => {
@@ -97,6 +157,6 @@ export function useMultipleQuestStats(questIds: string[]) {
     },
     enabled: questIds.length > 0,
     staleTime: 30000,
-    refetchInterval: 60000,
+    // No refetchInterval - realtime handles updates now
   });
 }
