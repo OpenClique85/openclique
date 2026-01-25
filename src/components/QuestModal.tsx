@@ -158,10 +158,10 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] p-0 gap-0">
+      <DialogContent className="max-w-2xl p-0 gap-0 flex flex-col">
         {/* Hero Image */}
         {quest.image && quest.image !== '/placeholder.svg' && (
-          <div className="relative h-48 w-full overflow-hidden rounded-t-lg">
+          <div className="relative h-32 sm:h-48 w-full overflow-hidden flex-shrink-0">
             <img 
               src={quest.image} 
               alt={quest.imageAlt}
@@ -171,13 +171,13 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
           </div>
         )}
         
-        <DialogHeader className="p-6 pb-4 border-b border-border">
-          <div className="flex items-start gap-4">
-            <span className="text-5xl" role="img" aria-hidden="true">
+        <DialogHeader className="p-4 sm:p-6 pb-3 sm:pb-4 border-b border-border flex-shrink-0">
+          <div className="flex items-start gap-3 sm:gap-4">
+            <span className="text-4xl sm:text-5xl" role="img" aria-hidden="true">
               {quest.icon}
             </span>
             <div className="flex-1 min-w-0">
-              <DialogTitle className="font-display text-2xl font-bold text-foreground mb-2">
+              <DialogTitle className="font-display text-xl sm:text-2xl font-bold text-foreground mb-2">
                 {quest.title}
               </DialogTitle>
               <div className="flex flex-wrap items-center gap-2">
@@ -194,7 +194,7 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
                   <div className="flex items-center gap-1 text-sm ml-1">
                     <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
                     <span className="font-medium text-foreground">{rating.toFixed(1)}</span>
-                    <span className="text-muted-foreground text-xs">({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})</span>
+                    <span className="text-muted-foreground text-xs">({reviewCount})</span>
                   </div>
                 )}
               </div>
@@ -202,8 +202,8 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
           </div>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 max-h-[60vh]">
-          <div className="p-6 space-y-6">
+        <ScrollArea className="flex-1 min-h-0">
+          <div className="p-4 sm:p-6 space-y-5 sm:space-y-6 pb-24 sm:pb-6">
             {/* Quick Info */}
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div className="flex items-center gap-2 text-muted-foreground">
@@ -324,30 +324,30 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
 
             {/* Progression Section */}
             <QuestProgressionSection treeId={quest.progressionTree} />
-
-            {/* CTA Section */}
-            <div className="pt-4 border-t border-border">
-              <Button
-                size="lg"
-                className={`w-full ${ctaStyles}`}
-                onClick={() => handleCTAClick()}
-                disabled={statusConfig.ctaDisabled || isJoining}
-              >
-                {isJoining ? 'Joining...' : user ? statusConfig.ctaText : 'Sign in to Join'}
-              </Button>
-              {quest.status === 'open' && (
-                <p className="text-xs text-muted-foreground text-center mt-2">
-                  Spots available for the Austin pilot
-                </p>
-              )}
-              {quest.status === 'closed' && (
-                <p className="text-xs text-muted-foreground text-center mt-2">
-                  Join the waitlist to be notified of openings
-                </p>
-              )}
-            </div>
           </div>
         </ScrollArea>
+        
+        {/* Fixed Mobile CTA - Always visible */}
+        <div className="fixed bottom-0 inset-x-0 p-4 pb-safe bg-background/95 backdrop-blur-sm border-t shadow-lg sm:relative sm:bottom-auto sm:inset-x-auto sm:border-t sm:shadow-none sm:bg-transparent sm:backdrop-blur-none sm:p-4 sm:pb-4 z-10">
+          <Button
+            size="lg"
+            className={`w-full ${ctaStyles} min-h-[48px]`}
+            onClick={() => handleCTAClick()}
+            disabled={statusConfig.ctaDisabled || isJoining}
+          >
+            {isJoining ? 'Joining...' : user ? statusConfig.ctaText : 'Sign in to Join'}
+          </Button>
+          {quest.status === 'open' && (
+            <p className="text-xs text-muted-foreground text-center mt-2">
+              Spots available for the Austin pilot
+            </p>
+          )}
+          {quest.status === 'closed' && (
+            <p className="text-xs text-muted-foreground text-center mt-2">
+              Join the waitlist to be notified of openings
+            </p>
+          )}
+        </div>
       </DialogContent>
       
       {/* Instance Picker Modal */}

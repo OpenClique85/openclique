@@ -286,7 +286,7 @@ export default function QuestCard() {
   const isPast = eventDate < now;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-dvh bg-background pb-24">
       {/* Floating Help Button */}
       <GetHelpButton
         variant="floating"
@@ -297,12 +297,12 @@ export default function QuestCard() {
       />
       
       {/* Header */}
-      <div className="bg-primary text-primary-foreground p-6 pb-8">
+      <div className="bg-primary text-primary-foreground p-4 sm:p-6 pb-6 sm:pb-8">
         <div className="max-w-lg mx-auto">
           <div className="flex items-center gap-3 mb-4">
-            <span className="text-4xl">{instance.icon}</span>
+            <span className="text-3xl sm:text-4xl">{instance.icon}</span>
             <div>
-              <h1 className="text-xl font-bold">{instance.title}</h1>
+              <h1 className="text-lg sm:text-xl font-bold">{instance.title}</h1>
               {participant?.squad_name && (
                 <Badge variant="secondary" className="mt-1">
                   Squad: {participant.squad_name}
