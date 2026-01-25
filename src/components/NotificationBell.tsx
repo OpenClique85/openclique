@@ -74,7 +74,7 @@ export function NotificationBell() {
           )}
         </div>
         
-        <ScrollArea className="h-[300px]">
+        <ScrollArea className="max-h-[60vh] sm:max-h-[300px]">
           {isLoading ? (
             <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
               Loading...

@@ -207,7 +207,7 @@ export default function Auth() {
 
   if (showForgotPassword) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
+      <div className="min-h-dvh bg-background flex flex-col">
         {/* Header */}
         <header className="p-4">
           <button 
@@ -265,7 +265,7 @@ export default function Auth() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-dvh bg-background flex flex-col">
       {/* Feedback Modal */}
       <OnboardingFeedbackModal 
         open={showFeedbackModal} 

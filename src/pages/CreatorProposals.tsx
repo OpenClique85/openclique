@@ -35,7 +35,7 @@ export default function CreatorProposals() {
 
   if (authLoading || profileLoading) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
+      <div className="min-h-dvh bg-background flex flex-col">
         <Navbar />
         <main className="flex-1 flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -48,7 +48,7 @@ export default function CreatorProposals() {
   // Not a creator
   if (!creatorProfile) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
+      <div className="min-h-dvh bg-background flex flex-col">
         <Navbar />
         <main className="flex-1 container mx-auto px-4 py-12 text-center">
           <Sparkles className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -66,7 +66,7 @@ export default function CreatorProposals() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-dvh bg-background flex flex-col">
       <Navbar />
       <CreatorPortalNav />
       
