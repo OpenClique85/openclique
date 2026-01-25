@@ -47,6 +47,7 @@ import { OnboardingFeedbackManager } from '@/components/admin/OnboardingFeedback
 import { PlatformStats } from '@/components/admin/PlatformStats';
 import { QuestArchivesManager } from '@/components/admin/QuestArchivesManager';
 import { TraitLibraryManager, UserProfileInspector, AIInferenceLogsViewer, EmergingTraitsReview } from '@/components/admin/identity';
+import { PromptManager } from '@/components/admin/ai/PromptManager';
 
 export default function Admin() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
@@ -119,6 +120,7 @@ export default function Admin() {
       case 'emerging-traits': return <EmergingTraitsReview />;
       case 'user-inspector': return <UserProfileInspector />;
       case 'ai-logs': return <AIInferenceLogsViewer />;
+      case 'ai-prompts': return <PromptManager />;
       // Gamification
       case 'xp-levels': return <XPLevelsManager />;
       case 'achievements': return <AchievementsManager />;

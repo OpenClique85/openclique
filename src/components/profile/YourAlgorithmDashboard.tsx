@@ -15,6 +15,9 @@ import { TraitCard } from './TraitCard';
 import { AlgorithmStoryModal } from './AlgorithmStoryModal';
 import { ShareAlgorithmCard } from './ShareAlgorithmCard';
 import { ProfileEditModal } from '@/components/ProfileEditModal';
+import { SocialEnergyMap } from './SocialEnergyMap';
+import { GroupRoleMap } from './GroupRoleMap';
+import { WrappedGallery } from './WrappedGallery';
 
 export function YourAlgorithmDashboard() {
   const { profile } = useAuth();
@@ -67,6 +70,15 @@ export function YourAlgorithmDashboard() {
         isEmpty={isEmpty}
         onStartDiscovering={() => setShowPreferencesModal(true)}
       />
+
+      {/* Social Energy Map */}
+      <SocialEnergyMap />
+
+      {/* Group Role Map */}
+      <GroupRoleMap />
+
+      {/* Wrapped Cards Gallery */}
+      <WrappedGallery />
 
       {/* Pending Suggestions */}
       <PendingSuggestionsSection
