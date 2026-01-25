@@ -1,6 +1,6 @@
 /**
  * =============================================================================
- * useSocialEnergy Hook - Manages user's Social Energy Map position
+ * useSocialEnergy Hook - Manages user's Social Energy Map position with weights
  * =============================================================================
  */
 
@@ -18,6 +18,9 @@ export interface SocialEnergy {
   energy_axis: number;     // 0=Cozy, 100=Lively
   structure_axis: number;  // 0=Spontaneous, 100=Structured
   focus_axis: number;      // 0=Deep Talk, 100=Shared Doing
+  energy_weight: number;   // Importance weight (sums to 100)
+  structure_weight: number;
+  focus_weight: number;
   source: EnergySource;
   is_locked: boolean;
   visibility: Visibility;
@@ -26,29 +29,41 @@ export interface SocialEnergy {
   updated_at: string;
 }
 
+export interface AxisWeights {
+  energy: number;
+  structure: number;
+  focus: number;
+}
+
 // Axis labels and descriptions
 export const ENERGY_AXIS = {
-  label: 'Energy',
-  low: { name: 'Cozy', description: 'Coffee chats, intimate gatherings' },
-  high: { name: 'Lively', description: 'Parties, group adventures' },
+  label: 'Energy Level',
+  tooltip: 'How much energy you want from social settings',
+  low: { name: 'Cozy', description: 'Quiet coffee chats, intimate gatherings', emoji: '☕' },
+  high: { name: 'Lively', description: 'High-energy parties, group adventures', emoji: '⚡' },
 };
 
 export const STRUCTURE_AXIS = {
   label: 'Structure',
-  low: { name: 'Spontaneous', description: 'Go with the flow' },
-  high: { name: 'Structured', description: 'Clear plan & agenda' },
+  tooltip: 'How much planning you prefer before events',
+  low: { name: 'Spontaneous', description: 'Go with the flow, last-minute plans', emoji: '🎲' },
+  high: { name: 'Structured', description: 'Clear plan in advance, set agenda', emoji: '📋' },
 };
 
 export const FOCUS_AXIS = {
-  label: 'Flow',
-  low: { name: 'Deep Talk', description: 'Meaningful conversations' },
-  high: { name: 'Shared Doing', description: 'Activities & experiences' },
+  label: 'Focus',
+  tooltip: 'What you want to be doing when together',
+  low: { name: 'Deep Talk', description: 'Meaningful conversations, getting to know people', emoji: '💬' },
+  high: { name: 'Shared Doing', description: 'Activity-focused, experiences over talking', emoji: '🎯' },
 };
 
 const DEFAULT_ENERGY: Omit<SocialEnergy, 'id' | 'user_id' | 'created_at' | 'updated_at'> = {
   energy_axis: 50,
   structure_axis: 50,
   focus_axis: 50,
+  energy_weight: 34,
+  structure_weight: 33,
+  focus_weight: 33,
   source: 'default',
   is_locked: false,
   visibility: 'public',
@@ -142,6 +157,30 @@ export function useSocialEnergy(userId?: string) {
     await updateMutation.mutateAsync({ [axis]: value });
   };
 
+  // Update weights (must total 100)
+  const updateWeights = async (weights: AxisWeights) => {
+    if (socialEnergy?.is_locked) {
+      toast.error('Your social energy is locked. Unlock it first to make changes.');
+      return;
+    }
+
+    // Normalize to ensure they sum to 100
+    const total = weights.energy + weights.structure + weights.focus;
+    const normalized = {
+      energy_weight: Math.round((weights.energy / total) * 100),
+      structure_weight: Math.round((weights.structure / total) * 100),
+      focus_weight: Math.round((weights.focus / total) * 100),
+    };
+
+    // Adjust for rounding errors
+    const sum = normalized.energy_weight + normalized.structure_weight + normalized.focus_weight;
+    if (sum !== 100) {
+      normalized.energy_weight += 100 - sum;
+    }
+
+    await updateMutation.mutateAsync(normalized);
+  };
+
   // Toggle lock
   const toggleLock = async () => {
     if (!socialEnergy) return;
@@ -184,6 +223,18 @@ export function useSocialEnergy(userId?: string) {
     return labels.length > 0 ? labels.join(' ') : 'Balanced Explorer';
   };
 
+  // Get current weights
+  const getWeights = (): AxisWeights => {
+    if (!socialEnergy) {
+      return { energy: 34, structure: 33, focus: 33 };
+    }
+    return {
+      energy: socialEnergy.energy_weight ?? 34,
+      structure: socialEnergy.structure_weight ?? 33,
+      focus: socialEnergy.focus_weight ?? 33,
+    };
+  };
+
   return {
     socialEnergy: socialEnergy || {
       ...DEFAULT_ENERGY,
@@ -196,9 +247,13 @@ export function useSocialEnergy(userId?: string) {
     isOwner: user?.id === targetUserId,
     hasData: !!socialEnergy,
 
+    // Weight helpers
+    weights: getWeights(),
+
     // Actions
     initialize: () => initializeMutation.mutateAsync(),
     updateAxis,
+    updateWeights,
     toggleLock,
     updateVisibility,
     toggleMatching,
