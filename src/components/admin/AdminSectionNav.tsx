@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { 
   Target, Users, MessageSquare, BarChart3, Gamepad2,
   ChevronDown, ChevronRight, Wrench, FileText,
-  Shield, Library, CheckSquare, HeadphonesIcon, Image, Ticket
+  Shield, Library, CheckSquare, HeadphonesIcon, Image, Ticket, Brain
 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -105,6 +105,16 @@ export const ADMIN_SECTIONS: AdminSection[] = [
       { id: 'invite-codes', label: 'Invite Codes' },
       { id: 'onboarding-feedback', label: 'Onboarding Feedback' },
       { id: 'analytics', label: 'Analytics' },
+    ],
+  },
+  {
+    id: 'identity',
+    label: 'Identity System',
+    icon: <Brain className="h-4 w-4" />,
+    tabs: [
+      { id: 'trait-library', label: 'Trait Library' },
+      { id: 'user-inspector', label: 'User Inspector' },
+      { id: 'ai-logs', label: 'AI Inference Logs' },
     ],
   },
   {
