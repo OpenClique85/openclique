@@ -98,29 +98,29 @@ export function SquadWarmUpRoom({ squadId, onInstructionsUnlocked }: SquadWarmUp
   const squadName = squad.name || 'Your Squad';
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 pb-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">{squadName}</h2>
-          <p className="text-muted-foreground">
+          <h2 className="text-xl sm:text-2xl font-bold">{squadName}</h2>
+          <p className="text-sm text-muted-foreground">
             {questInstance?.title} · {questInstance?.scheduled_date && format(new Date(questInstance.scheduled_date), 'MMM d, yyyy')}
           </p>
         </div>
-        <Badge variant="outline" className="text-sm">
+        <Badge variant="outline" className="text-xs sm:text-sm">
           {SQUAD_STATUS_LABELS[squad.status as SquadStatus] || squad.status}
         </Badge>
       </div>
 
       {/* Progress Bar */}
       <Card>
-        <CardHeader className="pb-2">
+        <CardHeader className="pb-2 px-4 sm:px-6">
           <CardTitle className="text-base flex items-center gap-2">
             <Users className="h-4 w-4" />
             Squad Readiness
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-4 sm:px-6">
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>{progress.readyMembers} of {progress.totalMembers} ready</span>
@@ -167,17 +167,17 @@ export function SquadWarmUpRoom({ squadId, onInstructionsUnlocked }: SquadWarmUp
 
       {/* Main Content Grid */}
       {!isApproved && (
-        <div className="grid lg:grid-cols-2 gap-6">
+        <div className="grid lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Chat Section */}
-          <Card className="flex flex-col h-[400px]">
-            <CardHeader className="pb-2">
+          <Card className="flex flex-col h-[300px] sm:h-[400px]">
+            <CardHeader className="pb-2 px-4 sm:px-6">
               <CardTitle className="text-base flex items-center gap-2">
                 <MessageCircle className="h-4 w-4" />
                 Squad Chat
               </CardTitle>
             </CardHeader>
-            <CardContent className="flex-1 flex flex-col">
-              <ScrollArea className="flex-1 pr-4">
+            <CardContent className="flex-1 flex flex-col px-4 sm:px-6 overflow-hidden">
+              <ScrollArea className="flex-1 pr-2 sm:pr-4">
                 <div className="space-y-3">
                   {messages.length === 0 && (
                     <p className="text-muted-foreground text-sm text-center py-4">
@@ -209,14 +209,14 @@ export function SquadWarmUpRoom({ squadId, onInstructionsUnlocked }: SquadWarmUp
                 </div>
               </ScrollArea>
               
-              <Separator className="my-3" />
+              <Separator className="my-2 sm:my-3" />
               
               <div className="flex gap-2">
                 <Textarea
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
                   placeholder="Say something to your squad..."
-                  className="min-h-[60px] resize-none"
+                  className="min-h-[50px] sm:min-h-[60px] resize-none text-sm"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
@@ -228,6 +228,7 @@ export function SquadWarmUpRoom({ squadId, onInstructionsUnlocked }: SquadWarmUp
                   size="icon"
                   onClick={handleSendChat}
                   disabled={!chatInput.trim() || isSending}
+                  className="min-h-[48px] min-w-[48px]"
                 >
                   <Send className="h-4 w-4" />
                 </Button>
@@ -273,7 +274,7 @@ export function SquadWarmUpRoom({ squadId, onInstructionsUnlocked }: SquadWarmUp
                     <Button
                       onClick={handleSubmitPrompt}
                       disabled={!promptResponse.trim() || isSubmittingPrompt}
-                      className="w-full"
+                      className="w-full min-h-[48px]"
                     >
                       {isSubmittingPrompt ? 'Submitting...' : 'Submit Response'}
                     </Button>
@@ -318,11 +319,14 @@ export function SquadWarmUpRoom({ squadId, onInstructionsUnlocked }: SquadWarmUp
                     <Button
                       onClick={handleConfirmReadiness}
                       disabled={isConfirmingReadiness}
-                      className="w-full"
+                      className="w-full min-h-[48px]"
                       variant="default"
                     >
-                      {isConfirmingReadiness ? 'Confirming...' : "I'm Ready and Understand the Quest Expectations"}
+                      {isConfirmingReadiness ? 'Confirming...' : "I'm Ready"}
                     </Button>
+                    <p className="text-xs text-center text-muted-foreground mt-2">
+                      I understand the quest timing and expectations
+                    </p>
                   </div>
                 )}
               </CardContent>

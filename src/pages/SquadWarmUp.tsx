@@ -196,19 +196,20 @@ export default function SquadWarmUp() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-muted/30">
+    <div className="min-h-dvh flex flex-col bg-muted/30">
       <Navbar />
       
-      <main className="flex-1 container max-w-4xl mx-auto py-6 px-4">
+      <main className="flex-1 container max-w-4xl mx-auto py-4 sm:py-6 px-4 pb-6">
         {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
+        <div className="mb-4 sm:mb-6">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
             <Link 
               to="/my-quests" 
               className="text-sm text-muted-foreground hover:text-primary flex items-center gap-1"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to My Quests
+              <span className="hidden sm:inline">Back to My Quests</span>
+              <span className="sm:hidden">Back</span>
             </Link>
             <GetHelpButton
               variant="link"
@@ -220,10 +221,10 @@ export default function SquadWarmUp() {
           </div>
           
           <div className="flex items-center gap-3">
-            <span className="text-3xl">{instance?.icon}</span>
+            <span className="text-2xl sm:text-3xl">{instance?.icon}</span>
             <div>
-              <h1 className="text-2xl font-bold">{instance?.title}</h1>
-              <p className="text-muted-foreground">
+              <h1 className="text-xl sm:text-2xl font-bold">{instance?.title}</h1>
+              <p className="text-sm text-muted-foreground">
                 Squad: {squad.squad_name}
               </p>
             </div>

@@ -291,10 +291,10 @@ export default function QuestDetail() {
   const spotsRemaining = quest.capacity_total ? quest.capacity_total - signupCount : null;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-dvh bg-background flex flex-col">
       <Navbar />
       
-      <main className="container max-w-4xl mx-auto px-4 py-8">
+      <main className="container max-w-4xl mx-auto px-4 py-8 flex-1 pb-32 md:pb-8">
         {/* Back button */}
         <Button 
           variant="ghost" 
@@ -468,10 +468,10 @@ export default function QuestDetail() {
           </div>
         )}
         
-        {/* CTA Section */}
-        <div className="sticky bottom-4 bg-background/95 backdrop-blur-sm p-4 rounded-xl border shadow-lg">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div>
+        {/* CTA Section - Fixed on mobile */}
+        <div className="fixed bottom-0 inset-x-0 p-4 pb-safe bg-background/95 backdrop-blur-sm border-t shadow-lg md:relative md:bottom-auto md:inset-x-auto md:p-0 md:pb-0 md:bg-transparent md:backdrop-blur-none md:border-0 md:shadow-none md:mt-8 z-40">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 md:bg-background/95 md:backdrop-blur-sm md:p-4 md:rounded-xl md:border md:shadow-lg">
+            <div className="text-center sm:text-left w-full sm:w-auto">
               {userSignup ? (
                 <p className="text-sm text-muted-foreground">
                   You're <span className="font-medium text-foreground">{userSignup.status}</span> for this quest
@@ -496,16 +496,16 @@ export default function QuestDetail() {
               )}
             </div>
             
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full sm:w-auto">
               {userSignup ? (
                 <>
                   <ShareQuestButton quest={quest} />
-                  <Button onClick={() => navigate('/my-quests')}>
+                  <Button onClick={() => navigate('/my-quests')} className="flex-1 sm:flex-initial min-h-[48px]">
                     View My Quests
                   </Button>
                 </>
               ) : canJoin ? (
-                <Button size="lg" onClick={() => handleJoin()} disabled={isJoining}>
+                <Button size="lg" onClick={() => handleJoin()} disabled={isJoining} className="w-full sm:w-auto min-h-[48px]">
                   {isJoining ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -518,16 +518,16 @@ export default function QuestDetail() {
                   )}
                 </Button>
               ) : !meetsRequirements && user ? (
-                <Button size="lg" disabled variant="secondary">
+                <Button size="lg" disabled variant="secondary" className="w-full sm:w-auto min-h-[48px]">
                   <Lock className="mr-2 h-4 w-4" />
                   Locked
                 </Button>
               ) : !user && statusConfig.canJoin ? (
-                <Button size="lg" onClick={() => handleJoin()}>
+                <Button size="lg" onClick={() => handleJoin()} className="w-full sm:w-auto min-h-[48px]">
                   Sign In to Join
                 </Button>
               ) : (
-                <Button size="lg" disabled>
+                <Button size="lg" disabled className="w-full sm:w-auto min-h-[48px]">
                   {statusConfig.label}
                 </Button>
               )}
