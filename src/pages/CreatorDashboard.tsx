@@ -12,7 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { usePendingOrgRequests } from '@/hooks/usePendingOrgRequests';
 
 export default function CreatorDashboard() {
-  const { user, isLoading: authLoading, isAdmin, profile } = useAuth();
+  const { user, isLoading: authLoading, isAdmin, isRolesLoaded, profile } = useAuth();
   const { data: pendingOrgRequests = 0 } = usePendingOrgRequests();
   
   // Fetch creator profile
@@ -37,12 +37,24 @@ export default function CreatorDashboard() {
 
   // Auto-create creator profile for admins who don't have one
   useQuery({
-    queryKey: ['admin-creator-profile-setup', user?.id, isAdmin, creatorProfile?.id],
+    queryKey: ['admin-creator-profile-setup', user?.id, isAdmin, creatorProfile?.id, isRolesLoaded],
     queryFn: async () => {
       if (!user || !isAdmin || creatorProfile) return null;
       
       // Create a creator profile for the admin
       const displayName = profile?.display_name || user.email?.split('@')[0] || 'Admin';
+      
+      // First check if profile already exists
+      const { data: existing } = await supabase
+        .from('creator_profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      if (existing) {
+        refetchProfile();
+        return true;
+      }
       
       const { error: profileError } = await supabase
         .from('creator_profiles')
@@ -61,16 +73,19 @@ export default function CreatorDashboard() {
       }
       
       // Also add quest_creator role if not present
-      await supabase
+      const { error: roleError } = await supabase
         .from('user_roles')
-        .insert({ user_id: user.id, role: 'quest_creator' })
-        .single();
+        .insert({ user_id: user.id, role: 'quest_creator' });
+      
+      if (roleError && !roleError.message.includes('duplicate')) {
+        console.error('Error adding quest_creator role:', roleError);
+      }
       
       // Refetch the creator profile
       refetchProfile();
       return true;
     },
-    enabled: !!user && isAdmin && !profileLoading && !creatorProfile,
+    enabled: !!user && isAdmin && isRolesLoaded && !profileLoading && !creatorProfile,
   });
 
   // Fetch creator's quests stats
@@ -99,7 +114,8 @@ export default function CreatorDashboard() {
     enabled: !!user,
   });
 
-  if (authLoading || profileLoading) {
+  // Wait for roles to load before showing fallback UI
+  if (authLoading || profileLoading || !isRolesLoaded) {
     return (
       <div className="min-h-dvh bg-background flex flex-col">
         <Navbar />
