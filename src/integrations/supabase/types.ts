@@ -4039,6 +4039,47 @@ export type Database = {
           },
         ]
       }
+      user_role_rankings: {
+        Row: {
+          created_at: string | null
+          id: string
+          rank_1: string
+          rank_2: string
+          rank_3: string
+          rank_4: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          rank_1: string
+          rank_2: string
+          rank_3: string
+          rank_4: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          rank_1?: string
+          rank_2?: string
+          rank_3?: string
+          rank_4?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_role_rankings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_role_signals: {
         Row: {
           created_at: string | null
@@ -4102,11 +4143,14 @@ export type Database = {
         Row: {
           created_at: string | null
           energy_axis: number | null
+          energy_weight: number | null
           focus_axis: number | null
+          focus_weight: number | null
           id: string
           is_locked: boolean | null
           source: string | null
           structure_axis: number | null
+          structure_weight: number | null
           updated_at: string | null
           use_for_matching: boolean | null
           user_id: string | null
@@ -4115,11 +4159,14 @@ export type Database = {
         Insert: {
           created_at?: string | null
           energy_axis?: number | null
+          energy_weight?: number | null
           focus_axis?: number | null
+          focus_weight?: number | null
           id?: string
           is_locked?: boolean | null
           source?: string | null
           structure_axis?: number | null
+          structure_weight?: number | null
           updated_at?: string | null
           use_for_matching?: boolean | null
           user_id?: string | null
@@ -4128,11 +4175,14 @@ export type Database = {
         Update: {
           created_at?: string | null
           energy_axis?: number | null
+          energy_weight?: number | null
           focus_axis?: number | null
+          focus_weight?: number | null
           id?: string
           is_locked?: boolean | null
           source?: string | null
           structure_axis?: number | null
+          structure_weight?: number | null
           updated_at?: string | null
           use_for_matching?: boolean | null
           user_id?: string | null

@@ -1,11 +1,10 @@
 /**
  * =============================================================================
- * SocialEnergyMap - Visual 3-axis map showing user's social energy position
+ * SocialEnergyMap - Visual 3-axis map with weighted sliders (must total 100)
  * =============================================================================
  */
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
@@ -15,8 +14,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Lock, Unlock, Eye, EyeOff, Sparkles, ChevronDown, Coffee, Zap, Calendar, Shuffle, MessageCircle, Mountain } from 'lucide-react';
-import { useSocialEnergy, ENERGY_AXIS, STRUCTURE_AXIS, FOCUS_AXIS, type Visibility } from '@/hooks/useSocialEnergy';
+import { Lock, Unlock, Eye, EyeOff, Sparkles, ChevronDown, Check, Loader2 } from 'lucide-react';
+import { TooltipInfo } from '@/components/ui/tooltip-info';
+import {
+  useSocialEnergy,
+  ENERGY_AXIS,
+  STRUCTURE_AXIS,
+  FOCUS_AXIS,
+  type Visibility,
+  type AxisWeights,
+} from '@/hooks/useSocialEnergy';
 import { cn } from '@/lib/utils';
 
 interface SocialEnergyMapProps {
@@ -24,14 +31,30 @@ interface SocialEnergyMapProps {
   compact?: boolean;
 }
 
+type AxisKey = 'energy' | 'structure' | 'focus';
+
+interface AxisConfig {
+  key: AxisKey;
+  axisKey: 'energy_axis' | 'structure_axis' | 'focus_axis';
+  config: typeof ENERGY_AXIS;
+}
+
+const AXES: AxisConfig[] = [
+  { key: 'energy', axisKey: 'energy_axis', config: ENERGY_AXIS },
+  { key: 'structure', axisKey: 'structure_axis', config: STRUCTURE_AXIS },
+  { key: 'focus', axisKey: 'focus_axis', config: FOCUS_AXIS },
+];
+
 export function SocialEnergyMap({ userId, compact = false }: SocialEnergyMapProps) {
   const {
     socialEnergy,
     isLoading,
     isOwner,
     hasData,
+    weights,
     initialize,
     updateAxis,
+    updateWeights,
     toggleLock,
     updateVisibility,
     toggleMatching,
@@ -39,22 +62,35 @@ export function SocialEnergyMap({ userId, compact = false }: SocialEnergyMapProp
     isUpdating,
   } = useSocialEnergy(userId);
 
-  const [localValues, setLocalValues] = useState({
+  const [localPositions, setLocalPositions] = useState({
     energy: 50,
     structure: 50,
     focus: 50,
   });
 
+  const [localWeights, setLocalWeights] = useState<AxisWeights>({
+    energy: 34,
+    structure: 33,
+    focus: 33,
+  });
+
+  const [hasWeightChanges, setHasWeightChanges] = useState(false);
+
   // Sync local values with fetched data
   useEffect(() => {
     if (socialEnergy) {
-      setLocalValues({
+      setLocalPositions({
         energy: socialEnergy.energy_axis,
         structure: socialEnergy.structure_axis,
         focus: socialEnergy.focus_axis,
       });
     }
   }, [socialEnergy]);
+
+  useEffect(() => {
+    setLocalWeights(weights);
+    setHasWeightChanges(false);
+  }, [weights]);
 
   // Initialize if no data and user is owner
   useEffect(() => {
@@ -63,34 +99,85 @@ export function SocialEnergyMap({ userId, compact = false }: SocialEnergyMapProp
     }
   }, [isLoading, hasData, isOwner, initialize]);
 
-  if (isLoading) {
-    return (
-      <Card className={cn(compact ? 'p-4' : '')}>
-        <CardContent className="pt-6">
-          <div className="h-48 flex items-center justify-center">
-            <div className="animate-pulse text-muted-foreground">Loading...</div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  const handleSliderChange = async (
-    axis: 'energy' | 'structure' | 'focus',
-    value: number[]
-  ) => {
-    const newValue = value[0];
-    setLocalValues((prev) => ({ ...prev, [axis]: newValue }));
+  const handlePositionChange = (axis: AxisKey, value: number[]) => {
+    setLocalPositions((prev) => ({ ...prev, [axis]: value[0] }));
   };
 
-  const handleSliderCommit = async (
-    axis: 'energy_axis' | 'structure_axis' | 'focus_axis',
+  const handlePositionCommit = async (
+    axisKey: 'energy_axis' | 'structure_axis' | 'focus_axis',
     value: number[]
   ) => {
     if (isOwner && !socialEnergy.is_locked) {
-      await updateAxis(axis, value[0]);
+      await updateAxis(axisKey, value[0]);
     }
   };
+
+  // Weight adjustment with redistribution
+  const handleWeightChange = useCallback(
+    (changedAxis: AxisKey, newValue: number) => {
+      const clampedValue = Math.max(0, Math.min(100, newValue));
+      const otherAxes = (['energy', 'structure', 'focus'] as AxisKey[]).filter(
+        (a) => a !== changedAxis
+      );
+
+      const remaining = 100 - clampedValue;
+      const currentOthersTotal = otherAxes.reduce((sum, a) => sum + localWeights[a], 0);
+
+      let newWeights: AxisWeights;
+
+      if (currentOthersTotal === 0) {
+        // Distribute evenly
+        newWeights = {
+          ...localWeights,
+          [changedAxis]: clampedValue,
+          [otherAxes[0]]: Math.floor(remaining / 2),
+          [otherAxes[1]]: Math.ceil(remaining / 2),
+        };
+      } else {
+        // Proportional distribution
+        const ratio0 = localWeights[otherAxes[0]] / currentOthersTotal;
+        const ratio1 = localWeights[otherAxes[1]] / currentOthersTotal;
+
+        newWeights = {
+          ...localWeights,
+          [changedAxis]: clampedValue,
+          [otherAxes[0]]: Math.round(remaining * ratio0),
+          [otherAxes[1]]: Math.round(remaining * ratio1),
+        };
+
+        // Fix rounding
+        const sum = Object.values(newWeights).reduce((a, b) => a + b, 0);
+        if (sum !== 100) {
+          newWeights[otherAxes[0]] += 100 - sum;
+        }
+      }
+
+      setLocalWeights(newWeights);
+      setHasWeightChanges(true);
+    },
+    [localWeights]
+  );
+
+  const handleSaveWeights = async () => {
+    await updateWeights(localWeights);
+    setHasWeightChanges(false);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4 py-4">
+        <div className="h-6 w-48 bg-muted animate-pulse rounded" />
+        <div className="space-y-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="space-y-2">
+              <div className="h-4 w-32 bg-muted animate-pulse rounded" />
+              <div className="h-2 w-full bg-muted animate-pulse rounded" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   const visibilityLabels: Record<Visibility, { label: string; icon: typeof Eye }> = {
     public: { label: 'Public', icon: Eye },
@@ -99,186 +186,186 @@ export function SocialEnergyMap({ userId, compact = false }: SocialEnergyMapProp
   };
 
   const VisibilityIcon = visibilityLabels[socialEnergy.visibility as Visibility]?.icon || Eye;
+  const totalWeight = localWeights.energy + localWeights.structure + localWeights.focus;
 
   return (
-    <Card className={cn(compact ? 'p-4' : '')}>
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
+    <div className="space-y-6">
+      {/* Header with controls */}
+      <div className="flex items-start justify-between gap-4">
+        <div>
           <div className="flex items-center gap-2">
-            <CardTitle className="text-lg">Social Energy Map</CardTitle>
+            <p className="font-medium">{getPositionLabel()}</p>
             {socialEnergy.source === 'ai_suggested' && (
-              <Badge variant="secondary" className="gap-1">
+              <Badge variant="secondary" className="gap-1 text-xs">
                 <Sparkles className="h-3 w-3" />
                 AI Suggested
               </Badge>
             )}
           </div>
-          {isOwner && (
-            <div className="flex items-center gap-2">
-              {/* Visibility dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="gap-1 h-8">
-                    <VisibilityIcon className="h-4 w-4" />
-                    <span className="hidden sm:inline text-xs">
-                      {visibilityLabels[socialEnergy.visibility as Visibility]?.label}
-                    </span>
-                    <ChevronDown className="h-3 w-3" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => updateVisibility('public')}>
-                    <Eye className="h-4 w-4 mr-2" />
-                    Public
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => updateVisibility('squad_only')}>
-                    <EyeOff className="h-4 w-4 mr-2" />
-                    Squad Only
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => updateVisibility('private')}>
-                    <EyeOff className="h-4 w-4 mr-2" />
-                    Private
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              {/* Lock toggle */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={toggleLock}
-                disabled={isUpdating}
-              >
-                {socialEnergy.is_locked ? (
-                  <Lock className="h-4 w-4" />
-                ) : (
-                  <Unlock className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-          )}
+          <p className="text-sm text-muted-foreground mt-1">
+            Set where you fall on each axis, then allocate importance points
+          </p>
         </div>
-        <p className="text-sm text-muted-foreground">
-          {getPositionLabel()}
-        </p>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Energy Axis */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Coffee className="h-4 w-4" />
-              <span>{ENERGY_AXIS.low.name}</span>
-            </div>
-            <span className="font-medium">{ENERGY_AXIS.label}</span>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <span>{ENERGY_AXIS.high.name}</span>
-              <Zap className="h-4 w-4" />
-            </div>
-          </div>
-          <Slider
-            value={[localValues.energy]}
-            onValueChange={(v) => handleSliderChange('energy', v)}
-            onValueCommit={(v) => handleSliderCommit('energy_axis', v)}
-            max={100}
-            step={1}
-            disabled={!isOwner || socialEnergy.is_locked}
-            className={cn(
-              'transition-opacity',
-              (!isOwner || socialEnergy.is_locked) && 'opacity-60'
-            )}
-          />
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>{ENERGY_AXIS.low.description}</span>
-            <span>{ENERGY_AXIS.high.description}</span>
-          </div>
-        </div>
-
-        {/* Structure Axis */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Shuffle className="h-4 w-4" />
-              <span>{STRUCTURE_AXIS.low.name}</span>
-            </div>
-            <span className="font-medium">{STRUCTURE_AXIS.label}</span>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <span>{STRUCTURE_AXIS.high.name}</span>
-              <Calendar className="h-4 w-4" />
-            </div>
-          </div>
-          <Slider
-            value={[localValues.structure]}
-            onValueChange={(v) => handleSliderChange('structure', v)}
-            onValueCommit={(v) => handleSliderCommit('structure_axis', v)}
-            max={100}
-            step={1}
-            disabled={!isOwner || socialEnergy.is_locked}
-            className={cn(
-              'transition-opacity',
-              (!isOwner || socialEnergy.is_locked) && 'opacity-60'
-            )}
-          />
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>{STRUCTURE_AXIS.low.description}</span>
-            <span>{STRUCTURE_AXIS.high.description}</span>
-          </div>
-        </div>
-
-        {/* Focus Axis */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <MessageCircle className="h-4 w-4" />
-              <span>{FOCUS_AXIS.low.name}</span>
-            </div>
-            <span className="font-medium">{FOCUS_AXIS.label}</span>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <span>{FOCUS_AXIS.high.name}</span>
-              <Mountain className="h-4 w-4" />
-            </div>
-          </div>
-          <Slider
-            value={[localValues.focus]}
-            onValueChange={(v) => handleSliderChange('focus', v)}
-            onValueCommit={(v) => handleSliderCommit('focus_axis', v)}
-            max={100}
-            step={1}
-            disabled={!isOwner || socialEnergy.is_locked}
-            className={cn(
-              'transition-opacity',
-              (!isOwner || socialEnergy.is_locked) && 'opacity-60'
-            )}
-          />
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>{FOCUS_AXIS.low.description}</span>
-            <span>{FOCUS_AXIS.high.description}</span>
-          </div>
-        </div>
-
-        {/* Matching toggle */}
         {isOwner && (
-          <div className="pt-2 border-t flex items-center justify-between">
-            <div className="text-sm">
-              <p className="font-medium">Use for squad matching</p>
-              <p className="text-xs text-muted-foreground">
-                {socialEnergy.use_for_matching
-                  ? 'Your energy map helps find compatible squads'
-                  : 'Your energy map is not used for matching'}
-              </p>
-            </div>
+          <div className="flex items-center gap-1">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="gap-1 h-8">
+                  <VisibilityIcon className="h-4 w-4" />
+                  <span className="hidden sm:inline text-xs">
+                    {visibilityLabels[socialEnergy.visibility as Visibility]?.label}
+                  </span>
+                  <ChevronDown className="h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => updateVisibility('public')}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  Public
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => updateVisibility('squad_only')}>
+                  <EyeOff className="h-4 w-4 mr-2" />
+                  Squad Only
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => updateVisibility('private')}>
+                  <EyeOff className="h-4 w-4 mr-2" />
+                  Private
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <Button
-              variant={socialEnergy.use_for_matching ? 'default' : 'outline'}
-              size="sm"
-              onClick={toggleMatching}
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={toggleLock}
               disabled={isUpdating}
             >
-              {socialEnergy.use_for_matching ? 'Active' : 'Disabled'}
+              {socialEnergy.is_locked ? (
+                <Lock className="h-4 w-4" />
+              ) : (
+                <Unlock className="h-4 w-4" />
+              )}
             </Button>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+
+      {/* Weight budget indicator */}
+      {isOwner && (
+        <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
+          <span className="text-sm font-medium">Importance points:</span>
+          <Badge variant={totalWeight === 100 ? 'default' : 'destructive'}>
+            {totalWeight}/100
+          </Badge>
+          {totalWeight === 100 && <Check className="h-4 w-4 text-green-500" />}
+          <TooltipInfo
+            text="Distribute 100 points across the axes to show which matters most for your squad matching"
+            side="right"
+          />
+        </div>
+      )}
+
+      {/* Axis sliders */}
+      <div className="space-y-8">
+        {AXES.map(({ key, axisKey, config }) => (
+          <div key={key} className="space-y-3">
+            {/* Axis header */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="font-medium">{config.label}</span>
+                <TooltipInfo text={config.tooltip} />
+              </div>
+              {isOwner && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Importance:</span>
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    value={localWeights[key]}
+                    onChange={(e) => handleWeightChange(key, parseInt(e.target.value) || 0)}
+                    disabled={socialEnergy.is_locked}
+                    className="w-14 h-7 text-center text-sm border rounded-md bg-background"
+                  />
+                  <span className="text-xs text-muted-foreground">pts</span>
+                </div>
+              )}
+            </div>
+
+            {/* Position labels */}
+            <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <span>{config.low.emoji}</span>
+                <span>{config.low.name}</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <span>{config.high.name}</span>
+                <span>{config.high.emoji}</span>
+              </div>
+            </div>
+
+            {/* Position slider */}
+            <Slider
+              value={[localPositions[key]]}
+              onValueChange={(v) => handlePositionChange(key, v)}
+              onValueCommit={(v) => handlePositionCommit(axisKey, v)}
+              max={100}
+              step={1}
+              disabled={!isOwner || socialEnergy.is_locked}
+              className={cn(
+                'transition-opacity',
+                (!isOwner || socialEnergy.is_locked) && 'opacity-60'
+              )}
+            />
+
+            {/* Endpoint descriptions */}
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span className="max-w-[45%]">{config.low.description}</span>
+              <span className="max-w-[45%] text-right">{config.high.description}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Save weights button */}
+      {isOwner && hasWeightChanges && totalWeight === 100 && (
+        <Button onClick={handleSaveWeights} disabled={isUpdating} className="w-full">
+          {isUpdating ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            <>
+              <Check className="h-4 w-4 mr-2" />
+              Save Importance
+            </>
+          )}
+        </Button>
+      )}
+
+      {/* Matching toggle */}
+      {isOwner && (
+        <div className="pt-4 border-t flex items-center justify-between">
+          <div className="text-sm">
+            <p className="font-medium">Use for squad matching</p>
+            <p className="text-xs text-muted-foreground">
+              {socialEnergy.use_for_matching
+                ? 'Your energy map helps find compatible squads'
+                : 'Your energy map is not used for matching'}
+            </p>
+          </div>
+          <Button
+            variant={socialEnergy.use_for_matching ? 'default' : 'outline'}
+            size="sm"
+            onClick={toggleMatching}
+            disabled={isUpdating}
+          >
+            {socialEnergy.use_for_matching ? 'Active' : 'Disabled'}
+          </Button>
+        </div>
+      )}
+    </div>
   );
 }
