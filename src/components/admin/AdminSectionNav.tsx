@@ -113,6 +113,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
     icon: <Brain className="h-4 w-4" />,
     tabs: [
       { id: 'trait-library', label: 'Trait Library' },
+      { id: 'emerging-traits', label: 'Emerging Traits' },
       { id: 'user-inspector', label: 'User Inspector' },
       { id: 'ai-logs', label: 'AI Inference Logs' },
     ],

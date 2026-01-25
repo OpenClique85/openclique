@@ -672,6 +672,96 @@ export type Database = {
           },
         ]
       }
+      emerging_trait_proposals: {
+        Row: {
+          ai_confidence_gaps: Json | null
+          created_at: string
+          created_trait_id: string | null
+          detection_source: string
+          evidence_samples: Json | null
+          frequency_count: number | null
+          id: string
+          merged_into_trait_slug: string | null
+          potential_user_count: number | null
+          proposed_category: string
+          proposed_description: string | null
+          proposed_display_name: string
+          proposed_emoji: string | null
+          proposed_slug: string
+          retroactive_drafts_created: number | null
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          similar_existing_traits: string[] | null
+          status: string
+          trigger_criteria: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          ai_confidence_gaps?: Json | null
+          created_at?: string
+          created_trait_id?: string | null
+          detection_source: string
+          evidence_samples?: Json | null
+          frequency_count?: number | null
+          id?: string
+          merged_into_trait_slug?: string | null
+          potential_user_count?: number | null
+          proposed_category: string
+          proposed_description?: string | null
+          proposed_display_name: string
+          proposed_emoji?: string | null
+          proposed_slug: string
+          retroactive_drafts_created?: number | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          similar_existing_traits?: string[] | null
+          status?: string
+          trigger_criteria?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          ai_confidence_gaps?: Json | null
+          created_at?: string
+          created_trait_id?: string | null
+          detection_source?: string
+          evidence_samples?: Json | null
+          frequency_count?: number | null
+          id?: string
+          merged_into_trait_slug?: string | null
+          potential_user_count?: number | null
+          proposed_category?: string
+          proposed_description?: string | null
+          proposed_display_name?: string
+          proposed_emoji?: string | null
+          proposed_slug?: string
+          retroactive_drafts_created?: number | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          similar_existing_traits?: string[] | null
+          status?: string
+          trigger_criteria?: string[] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emerging_trait_proposals_created_trait_id_fkey"
+            columns: ["created_trait_id"]
+            isOneToOne: false
+            referencedRelation: "trait_library"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "emerging_trait_proposals_merged_into_trait_slug_fkey"
+            columns: ["merged_into_trait_slug"]
+            isOneToOne: false
+            referencedRelation: "trait_library"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
       feature_flag_audit: {
         Row: {
           changed_by: string
@@ -3461,39 +3551,48 @@ export type Database = {
       trait_library: {
         Row: {
           category: string
+          changelog: Json | null
           created_at: string | null
+          created_by: string | null
           description: string | null
           display_name: string
           emoji: string | null
           id: string
           is_active: boolean | null
           is_negative: boolean | null
+          last_modified_by: string | null
           slug: string
           updated_at: string | null
           version: number | null
         }
         Insert: {
           category: string
+          changelog?: Json | null
           created_at?: string | null
+          created_by?: string | null
           description?: string | null
           display_name: string
           emoji?: string | null
           id?: string
           is_active?: boolean | null
           is_negative?: boolean | null
+          last_modified_by?: string | null
           slug: string
           updated_at?: string | null
           version?: number | null
         }
         Update: {
           category?: string
+          changelog?: Json | null
           created_at?: string | null
+          created_by?: string | null
           description?: string | null
           display_name?: string
           emoji?: string | null
           id?: string
           is_active?: boolean | null
           is_negative?: boolean | null
+          last_modified_by?: string | null
           slug?: string
           updated_at?: string | null
           version?: number | null
