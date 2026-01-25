@@ -522,6 +522,8 @@ function TraitForm({ data, onChange, isCreate }: TraitFormProps) {
 }
 
 function TraitPreview({ trait }: { trait: Trait }) {
+  const changelog = (trait.changelog as Array<{ version: number; changes: string; date: string; by?: string }>) || [];
+  
   return (
     <div className="space-y-4">
       {/* User-facing card preview */}
@@ -552,6 +554,24 @@ function TraitPreview({ trait }: { trait: Trait }) {
         <p><strong>Version:</strong> {trait.version}</p>
         <p><strong>Created:</strong> {trait.created_at ? new Date(trait.created_at).toLocaleDateString() : 'N/A'}</p>
       </div>
+
+      {/* Version History */}
+      {changelog.length > 0 && (
+        <div className="pt-4 border-t border-border">
+          <p className="text-sm font-medium text-foreground mb-2">Version History</p>
+          <div className="space-y-2 max-h-40 overflow-y-auto">
+            {changelog.map((entry, idx) => (
+              <div key={idx} className="text-xs bg-muted/50 rounded p-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">v{entry.version}</span>
+                  <span className="text-muted-foreground">{entry.date}</span>
+                </div>
+                <p className="text-muted-foreground mt-1">{entry.changes}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

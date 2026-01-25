@@ -46,7 +46,7 @@ import { InviteCodesManager } from '@/components/admin/InviteCodesManager';
 import { OnboardingFeedbackManager } from '@/components/admin/OnboardingFeedbackManager';
 import { PlatformStats } from '@/components/admin/PlatformStats';
 import { QuestArchivesManager } from '@/components/admin/QuestArchivesManager';
-import { TraitLibraryManager, UserProfileInspector, AIInferenceLogsViewer } from '@/components/admin/identity';
+import { TraitLibraryManager, UserProfileInspector, AIInferenceLogsViewer, EmergingTraitsReview } from '@/components/admin/identity';
 
 export default function Admin() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
@@ -116,6 +116,7 @@ export default function Admin() {
       case 'analytics': return <Analytics />;
       // Identity System
       case 'trait-library': return <TraitLibraryManager />;
+      case 'emerging-traits': return <EmergingTraitsReview />;
       case 'user-inspector': return <UserProfileInspector />;
       case 'ai-logs': return <AIInferenceLogsViewer />;
       // Gamification

@@ -7,3 +7,4 @@
 export { TraitLibraryManager } from './TraitLibraryManager';
 export { AIInferenceLogsViewer } from './AIInferenceLogsViewer';
 export { UserProfileInspector } from './UserProfileInspector';
+export { EmergingTraitsReview } from './EmergingTraitsReview';
