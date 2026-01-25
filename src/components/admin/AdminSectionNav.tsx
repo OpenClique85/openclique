@@ -116,6 +116,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
       { id: 'emerging-traits', label: 'Emerging Traits' },
       { id: 'user-inspector', label: 'User Inspector' },
       { id: 'ai-logs', label: 'AI Inference Logs' },
+      { id: 'ai-prompts', label: 'AI Prompts' },
     ],
   },
   {

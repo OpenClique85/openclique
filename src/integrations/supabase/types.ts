@@ -286,6 +286,136 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_prompt_variables: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          example_value: Json | null
+          id: string
+          prompt_id: string | null
+          variable_name: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          example_value?: Json | null
+          id?: string
+          prompt_id?: string | null
+          variable_name: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          example_value?: Json | null
+          id?: string
+          prompt_id?: string | null
+          variable_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_prompt_variables_prompt_id_fkey"
+            columns: ["prompt_id"]
+            isOneToOne: false
+            referencedRelation: "ai_prompts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_prompt_versions: {
+        Row: {
+          changelog: string | null
+          created_at: string | null
+          created_by: string | null
+          id: string
+          personality_context: string | null
+          prompt_id: string | null
+          prompt_template: string
+          version: number
+        }
+        Insert: {
+          changelog?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          personality_context?: string | null
+          prompt_id?: string | null
+          prompt_template: string
+          version: number
+        }
+        Update: {
+          changelog?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          personality_context?: string | null
+          prompt_id?: string | null
+          prompt_template?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_prompt_versions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_prompt_versions_prompt_id_fkey"
+            columns: ["prompt_id"]
+            isOneToOne: false
+            referencedRelation: "ai_prompts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_prompts: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          personality_context: string | null
+          prompt_key: string
+          prompt_name: string
+          prompt_template: string
+          updated_at: string | null
+          version: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          personality_context?: string | null
+          prompt_key: string
+          prompt_name: string
+          prompt_template: string
+          updated_at?: string | null
+          version?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          personality_context?: string | null
+          prompt_key?: string
+          prompt_name?: string
+          prompt_template?: string
+          updated_at?: string | null
+          version?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_prompts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       auth_rate_monitor: {
         Row: {
           created_at: string | null
@@ -1096,6 +1226,44 @@ export type Database = {
           },
         ]
       }
+      identity_snapshots: {
+        Row: {
+          created_at: string | null
+          id: string
+          milestone_key: string | null
+          narrative: string | null
+          snapshot_data: Json
+          snapshot_type: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          milestone_key?: string | null
+          narrative?: string | null
+          snapshot_data: Json
+          snapshot_type: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          milestone_key?: string | null
+          narrative?: string | null
+          snapshot_data?: Json
+          snapshot_type?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "identity_snapshots_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invite_codes: {
         Row: {
           code: string
@@ -1783,6 +1951,39 @@ export type Database = {
           id?: string
           message?: string | null
           status?: string | null
+        }
+        Relationships: []
+      }
+      personality_type_mappings: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          quest_affinities: string[] | null
+          role_tendencies: string[] | null
+          suggested_energy: Json | null
+          system: string
+          type_value: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          quest_affinities?: string[] | null
+          role_tendencies?: string[] | null
+          suggested_energy?: Json | null
+          system: string
+          type_value: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          quest_affinities?: string[] | null
+          role_tendencies?: string[] | null
+          suggested_energy?: Json | null
+          system?: string
+          type_value?: string
         }
         Relationships: []
       }
@@ -3015,6 +3216,68 @@ export type Database = {
           },
         ]
       }
+      squad_appreciations: {
+        Row: {
+          appreciation_type: string
+          created_at: string | null
+          free_text: string | null
+          from_user_id: string | null
+          id: string
+          quest_id: string | null
+          squad_id: string | null
+          to_user_id: string | null
+        }
+        Insert: {
+          appreciation_type: string
+          created_at?: string | null
+          free_text?: string | null
+          from_user_id?: string | null
+          id?: string
+          quest_id?: string | null
+          squad_id?: string | null
+          to_user_id?: string | null
+        }
+        Update: {
+          appreciation_type?: string
+          created_at?: string | null
+          free_text?: string | null
+          from_user_id?: string | null
+          id?: string
+          quest_id?: string | null
+          squad_id?: string | null
+          to_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "squad_appreciations_from_user_id_fkey"
+            columns: ["from_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "squad_appreciations_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "squad_appreciations_squad_id_fkey"
+            columns: ["squad_id"]
+            isOneToOne: false
+            referencedRelation: "quest_squads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "squad_appreciations_to_user_id_fkey"
+            columns: ["to_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       squad_archive_reports: {
         Row: {
           created_at: string
@@ -3738,6 +4001,82 @@ export type Database = {
           },
         ]
       }
+      user_personality_types: {
+        Row: {
+          created_at: string | null
+          id: string
+          system: string
+          type_value: string
+          updated_at: string | null
+          user_id: string | null
+          visibility: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          system: string
+          type_value: string
+          updated_at?: string | null
+          user_id?: string | null
+          visibility?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          system?: string
+          type_value?: string
+          updated_at?: string | null
+          user_id?: string | null
+          visibility?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_personality_types_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_role_signals: {
+        Row: {
+          created_at: string | null
+          id: string
+          role_type: string
+          signal_source: string
+          source_id: string | null
+          user_id: string | null
+          weight: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role_type: string
+          signal_source: string
+          source_id?: string | null
+          user_id?: string | null
+          weight?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role_type?: string
+          signal_source?: string
+          source_id?: string | null
+          user_id?: string | null
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_role_signals_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -3758,6 +4097,56 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_social_energy: {
+        Row: {
+          created_at: string | null
+          energy_axis: number | null
+          focus_axis: number | null
+          id: string
+          is_locked: boolean | null
+          source: string | null
+          structure_axis: number | null
+          updated_at: string | null
+          use_for_matching: boolean | null
+          user_id: string | null
+          visibility: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          energy_axis?: number | null
+          focus_axis?: number | null
+          id?: string
+          is_locked?: boolean | null
+          source?: string | null
+          structure_axis?: number | null
+          updated_at?: string | null
+          use_for_matching?: boolean | null
+          user_id?: string | null
+          visibility?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          energy_axis?: number | null
+          focus_axis?: number | null
+          id?: string
+          is_locked?: boolean | null
+          source?: string | null
+          structure_axis?: number | null
+          updated_at?: string | null
+          use_for_matching?: boolean | null
+          user_id?: string | null
+          visibility?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_social_energy_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_streaks: {
         Row: {
@@ -3809,6 +4198,7 @@ export type Database = {
           source_draft_id: string | null
           trait_slug: string
           updated_at: string | null
+          use_for_matching: boolean | null
           user_id: string
           visibility: string | null
         }
@@ -3820,6 +4210,7 @@ export type Database = {
           source_draft_id?: string | null
           trait_slug: string
           updated_at?: string | null
+          use_for_matching?: boolean | null
           user_id: string
           visibility?: string | null
         }
@@ -3831,6 +4222,7 @@ export type Database = {
           source_draft_id?: string | null
           trait_slug?: string
           updated_at?: string | null
+          use_for_matching?: boolean | null
           user_id?: string
           visibility?: string | null
         }
@@ -3990,6 +4382,53 @@ export type Database = {
           status?: string | null
         }
         Relationships: []
+      }
+      wrapped_cards: {
+        Row: {
+          card_data: Json
+          card_narrative: string | null
+          card_type: string
+          generated_at: string | null
+          id: string
+          is_included_in_share: boolean | null
+          milestone_trigger: string | null
+          period_end: string | null
+          period_start: string | null
+          user_id: string | null
+        }
+        Insert: {
+          card_data: Json
+          card_narrative?: string | null
+          card_type: string
+          generated_at?: string | null
+          id?: string
+          is_included_in_share?: boolean | null
+          milestone_trigger?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          card_data?: Json
+          card_narrative?: string | null
+          card_type?: string
+          generated_at?: string | null
+          id?: string
+          is_included_in_share?: boolean | null
+          milestone_trigger?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wrapped_cards_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       xp_transactions: {
         Row: {
