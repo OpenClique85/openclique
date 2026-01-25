@@ -216,6 +216,32 @@ export function ProfileEditModal({ open, onClose }: ProfileEditModalProps) {
     return prefs;
   };
 
+  // Trigger AI trait inference
+  const triggerTraitInference = async () => {
+    if (!user?.id) return;
+    
+    try {
+      const { error } = await supabase.functions.invoke('infer-traits', {
+        body: {
+          user_id: user.id,
+          run_type: 'intake',
+        },
+      });
+      
+      if (error) {
+        console.error('Trait inference error:', error);
+        // Don't show error to user - inference is a background enhancement
+      } else {
+        toast({
+          title: 'Analyzing your preferences...',
+          description: 'Check "Your Algorithm" tab for new trait suggestions!',
+        });
+      }
+    } catch (err) {
+      console.error('Failed to trigger trait inference:', err);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -230,6 +256,14 @@ export function ProfileEditModal({ open, onClose }: ProfileEditModalProps) {
     setError('');
     
     const preferences = JSON.parse(JSON.stringify(buildPreferences()));
+    
+    // Check if preferences have meaningful data for trait inference
+    const hasEnoughPreferences = !!(
+      preferences.social_style || 
+      preferences.intent || 
+      preferences.group_comfort ||
+      preferences.interests
+    );
     
     const { error: updateError } = await supabase
       .from('profiles')
@@ -251,6 +285,12 @@ export function ProfileEditModal({ open, onClose }: ProfileEditModalProps) {
       title: 'Profile updated!',
       description: 'Your preferences have been saved.'
     });
+    
+    // Trigger AI inference if we have enough preference data
+    if (hasEnoughPreferences) {
+      triggerTraitInference();
+    }
+    
     onClose();
   };
 
