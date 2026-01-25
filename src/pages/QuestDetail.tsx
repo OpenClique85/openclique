@@ -283,6 +283,34 @@ export default function QuestDetail() {
     return null;
   }
 
+  // Handle cancelled/revoked/paused quests - show friendly unavailable message
+  const isUnavailable = ['cancelled', 'revoked', 'paused'].includes(quest.status || '');
+  
+  if (isUnavailable) {
+    return (
+      <div className="min-h-dvh bg-background flex flex-col">
+        <Navbar />
+        <main className="flex-1 container mx-auto px-4 py-16 text-center">
+          <div className="max-w-md mx-auto">
+            <span className="text-6xl mb-6 block">{quest.icon || '🚫'}</span>
+            <h1 className="text-2xl font-display font-bold mb-4">Quest No Longer Available</h1>
+            <p className="text-muted-foreground mb-6">
+              {quest.status === 'cancelled' 
+                ? "This quest has been cancelled." 
+                : quest.status === 'paused'
+                ? "This quest is temporarily paused. Check back later!"
+                : "This quest is no longer available."}
+            </p>
+            <Button onClick={() => navigate('/quests')}>
+              Browse Available Quests
+            </Button>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   const statusConfig = STATUS_CONFIG[quest.status || 'draft'];
   const themeColor = THEME_COLORS[quest.theme_color as keyof typeof THEME_COLORS] || THEME_COLORS.pink;
 

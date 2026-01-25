@@ -46,6 +46,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
     icon: <Library className="h-4 w-4" />,
     tabs: [
       { id: 'quests', label: 'Quest Templates' },
+      { id: 'quest-archives', label: 'Quest Archives' },
       { id: 'orgs', label: 'Organizations' },
       { id: 'squads-directory', label: 'Squad Directory' },
       { id: 'squad-comparison', label: 'Squad Comparison' },
