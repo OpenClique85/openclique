@@ -1,14 +1,18 @@
 import { QuestFormData, PROGRESSION_TREES, WIZARD_STEPS } from '../types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, AlertCircle, Calendar, MapPin, Users, DollarSign, Gift } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { Check, AlertCircle, Calendar, MapPin, Users, DollarSign, Gift, Sparkles } from 'lucide-react';
 
 interface ReviewStepProps {
   formData: QuestFormData;
   completedSteps: number[];
+  attestationChecked?: boolean;
+  onAttestationChange?: (checked: boolean) => void;
 }
 
-export function ReviewStep({ formData, completedSteps }: ReviewStepProps) {
+export function ReviewStep({ formData, completedSteps, attestationChecked = false, onAttestationChange }: ReviewStepProps) {
   const progressionTree = PROGRESSION_TREES.find(t => t.value === formData.progression_tree);
   
   const missingRequired = [];
@@ -49,11 +53,19 @@ export function ReviewStep({ formData, completedSteps }: ReviewStepProps) {
             <span className="text-4xl">{formData.icon}</span>
             <div>
               <CardTitle className="text-xl">{formData.title || 'Untitled Quest'}</CardTitle>
-              {progressionTree && (
-                <Badge variant="secondary" className="mt-1">
-                  {progressionTree.emoji} {progressionTree.label}
-                </Badge>
-              )}
+              <div className="flex items-center gap-2 mt-1">
+                {progressionTree && (
+                  <Badge variant="secondary">
+                    {progressionTree.emoji} {progressionTree.label}
+                  </Badge>
+                )}
+                {formData.ai_generated && (
+                  <Badge variant="outline" className="gap-1">
+                    <Sparkles className="w-3 h-3" />
+                    AI-Assisted
+                  </Badge>
+                )}
+              </div>
             </div>
           </div>
         </CardHeader>
@@ -107,11 +119,43 @@ export function ReviewStep({ formData, completedSteps }: ReviewStepProps) {
             </div>
           )}
 
+          {/* AI-generated tags */}
+          {formData.ai_draft_suggested_tags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {formData.ai_draft_suggested_tags.map((tag) => (
+                <Badge key={tag} variant="secondary" className="text-xs gap-1">
+                  <Sparkles className="w-3 h-3" />
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          )}
+
           {/* Rewards */}
           {formData.rewards && (
             <div className="flex items-start gap-2 pt-2 text-sm">
               <Gift className="w-4 h-4 text-amber-500 mt-0.5" />
               <span className="text-muted-foreground">{formData.rewards}</span>
+            </div>
+          )}
+
+          {/* Objectives preview */}
+          {formData.ai_draft_objectives.length > 0 && (
+            <div className="pt-2 space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">Objectives:</p>
+              <ul className="space-y-1">
+                {formData.ai_draft_objectives.slice(0, 3).map((obj, i) => (
+                  <li key={i} className="text-sm flex items-center gap-2">
+                    <Check className="w-3 h-3 text-green-500" />
+                    {obj.objective_text}
+                  </li>
+                ))}
+                {formData.ai_draft_objectives.length > 3 && (
+                  <li className="text-sm text-muted-foreground">
+                    +{formData.ai_draft_objectives.length - 3} more objectives
+                  </li>
+                )}
+              </ul>
             </div>
           )}
         </CardContent>
@@ -120,8 +164,8 @@ export function ReviewStep({ formData, completedSteps }: ReviewStepProps) {
       {/* Step Completion Summary */}
       <div className="space-y-2">
         <p className="text-sm font-medium text-muted-foreground">Step Completion</p>
-        <div className="grid grid-cols-3 gap-2">
-          {WIZARD_STEPS.slice(0, 8).map((step) => (
+        <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
+          {WIZARD_STEPS.slice(0, -1).map((step) => (
             <div 
               key={step.id}
               className={`flex items-center gap-2 p-2 rounded-lg text-xs ${
@@ -140,6 +184,25 @@ export function ReviewStep({ formData, completedSteps }: ReviewStepProps) {
           ))}
         </div>
       </div>
+
+      {/* Attestation Checkbox */}
+      {onAttestationChange && (
+        <div className="flex items-start space-x-3 rounded-lg border p-4 bg-muted/50">
+          <Checkbox
+            id="attestation"
+            checked={attestationChecked}
+            onCheckedChange={(checked) => onAttestationChange(checked === true)}
+          />
+          <div className="grid gap-1.5 leading-none">
+            <Label htmlFor="attestation" className="text-sm font-medium cursor-pointer">
+              I reviewed this quest and it reflects my intent.
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              By checking this, you confirm the information is accurate and ready for admin review.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Submission info */}
       <div className="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground">

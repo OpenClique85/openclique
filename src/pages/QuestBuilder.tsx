@@ -21,6 +21,8 @@ import {
 import {
   BasicsStep,
   TimingStep,
+  ConstraintsStep,
+  AIDraftStep,
   ExperienceStep,
   ObjectivesStep,
   ExpectationsStep,
@@ -107,6 +109,7 @@ export default function QuestBuilder() {
   useEffect(() => {
     if (existingQuest) {
       setFormData({
+        ...defaultFormData,
         id: existingQuest.id,
         slug: existingQuest.slug,
         review_status: existingQuest.review_status || 'draft',
@@ -143,6 +146,10 @@ export default function QuestBuilder() {
         meeting_location_name: existingQuest.meeting_location_name || '',
         meeting_address: existingQuest.meeting_address || '',
         whatsapp_invite_link: existingQuest.whatsapp_invite_link || '',
+        // Load constraint values from quest_constraints table or use defaults
+        safety_level: (existingQuest.safety_level as QuestFormData['safety_level']) || 'public_only',
+        ai_generated: existingQuest.ai_generated || false,
+        ai_version: existingQuest.ai_version || '',
       });
     } else if (eventbriteData && !questId) {
       // Pre-populate from Eventbrite import data
@@ -356,18 +363,22 @@ export default function QuestBuilder() {
       case 2:
         return <TimingStep formData={formData} updateFormData={updateFormData} />;
       case 3:
-        return <ExperienceStep formData={formData} updateFormData={updateFormData} />;
+        return <ConstraintsStep formData={formData} updateFormData={updateFormData} />;
       case 4:
-        return <ObjectivesStep formData={formData} updateFormData={updateFormData} />;
+        return <AIDraftStep formData={formData} updateFormData={updateFormData} />;
       case 5:
-        return <ExpectationsStep formData={formData} updateFormData={updateFormData} />;
+        return <ExperienceStep formData={formData} updateFormData={updateFormData} />;
       case 6:
-        return <SafetyStep formData={formData} updateFormData={updateFormData} />;
+        return <ObjectivesStep formData={formData} updateFormData={updateFormData} />;
       case 7:
-        return <CapacityStep formData={formData} updateFormData={updateFormData} />;
+        return <ExpectationsStep formData={formData} updateFormData={updateFormData} />;
       case 8:
-        return <MediaStep formData={formData} updateFormData={updateFormData} />;
+        return <SafetyStep formData={formData} updateFormData={updateFormData} />;
       case 9:
+        return <CapacityStep formData={formData} updateFormData={updateFormData} />;
+      case 10:
+        return <MediaStep formData={formData} updateFormData={updateFormData} />;
+      case 11:
         return <ReviewStep formData={formData} completedSteps={completedSteps} />;
       default:
         return null;
