@@ -3,6 +3,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { QuestFormData } from '../types';
 import { ClipboardList } from 'lucide-react';
+import { AIFieldSuggester } from '../AIFieldSuggester';
 
 interface ExpectationsStepProps {
   formData: QuestFormData;
@@ -10,6 +11,17 @@ interface ExpectationsStepProps {
 }
 
 export function ExpectationsStep({ formData, updateFormData }: ExpectationsStepProps) {
+  const questContext = {
+    title: formData.title,
+    theme: formData.theme,
+    progression_tree: formData.progression_tree,
+    short_description: formData.short_description,
+    constraints_physical_intensity: formData.constraints_physical_intensity,
+    constraints_social_intensity: formData.constraints_social_intensity,
+    constraints_indoor_outdoor: formData.constraints_indoor_outdoor,
+    constraints_age_requirement: formData.constraints_age_requirement,
+  };
+
   return (
     <div className="space-y-6">
       <div className="bg-creator/5 border border-creator/20 rounded-lg p-4">
@@ -40,6 +52,13 @@ export function ExpectationsStep({ formData, updateFormData }: ExpectationsStepP
           onChange={(e) => updateFormData({ what_to_bring: e.target.value })}
           rows={5}
         />
+        <AIFieldSuggester
+          fieldName="what_to_bring"
+          fieldLabel="What to Bring"
+          currentValue={formData.what_to_bring}
+          onSuggestion={(value) => updateFormData({ what_to_bring: value })}
+          questContext={questContext}
+        />
       </div>
 
       {/* Dress Code */}
@@ -51,9 +70,18 @@ export function ExpectationsStep({ formData, updateFormData }: ExpectationsStepP
           value={formData.dress_code}
           onChange={(e) => updateFormData({ dress_code: e.target.value })}
         />
-        <p className="text-sm text-muted-foreground">
-          What should participants wear? Any specific requirements?
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            What should participants wear? Any specific requirements?
+          </p>
+          <AIFieldSuggester
+            fieldName="dress_code"
+            fieldLabel="Dress Code"
+            currentValue={formData.dress_code}
+            onSuggestion={(value) => updateFormData({ dress_code: value })}
+            questContext={questContext}
+          />
+        </div>
       </div>
 
       {/* Physical Requirements */}
@@ -69,9 +97,18 @@ or 'Moderate hiking with some steep sections, good fitness recommended'"
           onChange={(e) => updateFormData({ physical_requirements: e.target.value })}
           rows={4}
         />
-        <p className="text-sm text-muted-foreground">
-          Be honest about physical demands so participants can self-select.
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            Be honest about physical demands so participants can self-select.
+          </p>
+          <AIFieldSuggester
+            fieldName="physical_requirements"
+            fieldLabel="Physical Requirements"
+            currentValue={formData.physical_requirements}
+            onSuggestion={(value) => updateFormData({ physical_requirements: value })}
+            questContext={questContext}
+          />
+        </div>
       </div>
     </div>
   );

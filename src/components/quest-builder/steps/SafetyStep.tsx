@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { QuestFormData } from '../types';
 import { Shield } from 'lucide-react';
+import { AIFieldSuggester } from '../AIFieldSuggester';
 
 interface SafetyStepProps {
   formData: QuestFormData;
@@ -18,6 +19,17 @@ const AGE_OPTIONS = [
 ];
 
 export function SafetyStep({ formData, updateFormData }: SafetyStepProps) {
+  const questContext = {
+    title: formData.title,
+    theme: formData.theme,
+    progression_tree: formData.progression_tree,
+    short_description: formData.short_description,
+    constraints_physical_intensity: formData.constraints_physical_intensity,
+    constraints_social_intensity: formData.constraints_social_intensity,
+    constraints_indoor_outdoor: formData.constraints_indoor_outdoor,
+    constraints_age_requirement: formData.constraints_age_requirement,
+  };
+
   return (
     <div className="space-y-6">
       <div className="bg-creator/5 border border-creator/20 rounded-lg p-4">
@@ -50,6 +62,9 @@ export function SafetyStep({ formData, updateFormData }: SafetyStepProps) {
             ))}
           </SelectContent>
         </Select>
+        <p className="text-sm text-muted-foreground">
+          This should match the constraints set in Step 3.
+        </p>
       </div>
 
       {/* Safety Notes */}
@@ -67,17 +82,26 @@ export function SafetyStep({ formData, updateFormData }: SafetyStepProps) {
           onChange={(e) => updateFormData({ safety_notes: e.target.value })}
           rows={6}
         />
-        <p className="text-sm text-muted-foreground">
-          Include any health, environmental, or accessibility considerations.
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            Include any health, environmental, or accessibility considerations.
+          </p>
+          <AIFieldSuggester
+            fieldName="safety_notes"
+            fieldLabel="Safety Notes"
+            currentValue={formData.safety_notes}
+            onSuggestion={(value) => updateFormData({ safety_notes: value })}
+            questContext={questContext}
+          />
+        </div>
       </div>
 
       {/* Emergency Contact */}
       <div className="space-y-2">
-        <Label htmlFor="emergency_contact" className="text-base font-medium">Emergency Contact</Label>
+        <Label htmlFor="emergency_contact" className="text-base font-medium">Emergency Contact *</Label>
         <Input
           id="emergency_contact"
-          placeholder="Your phone number for day-of emergencies"
+          placeholder="Your phone number for day-of emergencies (e.g., 512-555-0123)"
           value={formData.emergency_contact}
           onChange={(e) => updateFormData({ emergency_contact: e.target.value })}
         />

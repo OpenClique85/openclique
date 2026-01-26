@@ -5,6 +5,7 @@ import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { QuestFormData } from '../types';
 import { Users, DollarSign, Gift, Repeat, UsersRound } from 'lucide-react';
+import { RewardTemplateSelector } from '../RewardTemplateSelector';
 
 interface CapacityStepProps {
   formData: QuestFormData;
@@ -116,16 +117,23 @@ export function CapacityStep({ formData, updateFormData }: CapacityStepProps) {
       </div>
 
       {/* Rewards */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         <div className="flex items-center gap-2">
           <Gift className="w-4 h-4 text-muted-foreground" />
           <Label htmlFor="rewards" className="text-base font-medium">Rewards & What They'll Earn</Label>
         </div>
+        
+        {/* Reward Templates */}
+        <RewardTemplateSelector 
+          currentValue={formData.rewards}
+          onUpdate={(value) => updateFormData({ rewards: value })}
+        />
+        
         <Textarea
           id="rewards"
           placeholder="What do participants get for completing this quest?
 
-Examples:
+Use the buttons above to add templated rewards, or type your own:
 - +50 XP toward Culture Vulture badge
 - Exclusive merch bundle
 - $25 gift card to local restaurant
