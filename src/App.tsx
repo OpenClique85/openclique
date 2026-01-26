@@ -73,6 +73,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const Auth = lazy(() => import("./pages/Auth"));
 const MyQuests = lazy(() => import("./pages/MyQuests"));
 const Profile = lazy(() => import("./pages/Profile"));
+const Settings = lazy(() => import("./pages/Settings"));
 
 // Clique pages
 const CliqueDetail = lazy(() => import("./pages/CliqueDetail"));
@@ -187,6 +188,7 @@ const App = () => (
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/my-quests" element={<ProtectedRoute><MyQuests /></ProtectedRoute>} />
                 <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
                 <Route path="/cliques/new" element={<ProtectedRoute><CliqueCreate /></ProtectedRoute>} />
                 <Route path="/cliques/:cliqueId" element={<ProtectedRoute><CliqueDetail /></ProtectedRoute>} />
                 <Route path="/cliques/:cliqueId/warmup" element={<ProtectedRoute><CliqueWarmUp /></ProtectedRoute>} />

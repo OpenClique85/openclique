@@ -6,17 +6,15 @@
  * Contains:
  * - Your Algorithm dashboard
  * - Progress & Gamification
- * - Settings
+ * - Quick Settings links to /settings page
  */
 
 import { YourAlgorithmDashboard } from '@/components/profile/YourAlgorithmDashboard';
 import { ProfileGamificationSection } from '@/components/profile/ProfileGamificationSection';
 import { Separator } from '@/components/ui/separator';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
-import { Settings, Bell, Shield, HelpCircle } from 'lucide-react';
+import { Settings, Bell, Shield, HelpCircle, Database, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface MeTabProps {
@@ -55,10 +53,10 @@ export function MeTab({ userId }: MeTabProps) {
                 <Bell className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="font-medium">Notifications</p>
-                  <p className="text-sm text-muted-foreground">Email and push notification preferences</p>
+                  <p className="text-sm text-muted-foreground">Email and in-app notification preferences</p>
                 </div>
               </div>
-              <Link to="/notifications">
+              <Link to="/settings?tab=notifications">
                 <Button variant="outline" size="sm">Manage</Button>
               </Link>
             </div>
@@ -72,7 +70,37 @@ export function MeTab({ userId }: MeTabProps) {
                   <p className="text-sm text-muted-foreground">Control who sees your profile and activity</p>
                 </div>
               </div>
-              <Badge variant="secondary">Coming Soon</Badge>
+              <Link to="/settings?tab=privacy">
+                <Button variant="outline" size="sm">Manage</Button>
+              </Link>
+            </div>
+
+            {/* Your Data */}
+            <div className="py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Database className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <p className="font-medium">Your Data</p>
+                  <p className="text-sm text-muted-foreground">Export or manage your data</p>
+                </div>
+              </div>
+              <Link to="/settings?tab=data">
+                <Button variant="outline" size="sm">Manage</Button>
+              </Link>
+            </div>
+
+            {/* Account */}
+            <div className="py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Trash2 className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <p className="font-medium">Account</p>
+                  <p className="text-sm text-muted-foreground">Delete account or manage account status</p>
+                </div>
+              </div>
+              <Link to="/settings?tab=account">
+                <Button variant="outline" size="sm">Manage</Button>
+              </Link>
             </div>
 
             {/* Help & Support */}

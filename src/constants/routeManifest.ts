@@ -42,6 +42,7 @@ export const ROUTE_MANIFEST: RouteDefinition[] = [
   { path: '/support', page: 'Support', protection: 'auth', description: 'Support ticket list', category: 'auth' },
   { path: '/support/:ticketId', page: 'SupportTicketDetail', protection: 'auth', description: 'Individual support ticket thread', category: 'auth' },
   { path: '/feedback/:questId', page: 'FeedbackFlow', protection: 'auth', description: 'Post-quest feedback wizard', category: 'auth' },
+  { path: '/settings', page: 'Settings', protection: 'auth', description: 'User settings, privacy, notifications, and account management', category: 'auth' },
   
   // ==========================================================================
   // FUNNEL / SIGNUP PAGES
