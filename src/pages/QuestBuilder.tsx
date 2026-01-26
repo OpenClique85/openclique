@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -60,10 +60,41 @@ export default function QuestBuilder() {
   // Get Eventbrite data from navigation state (if coming from import)
   const eventbriteData = location.state?.eventbriteData;
 
-  const [currentStep, setCurrentStep] = useState(1);
+  // Use sessionStorage to persist step across potential remounts
+  const getInitialStep = () => {
+    const storageKey = `quest-builder-step-${questId || 'new'}`;
+    const saved = sessionStorage.getItem(storageKey);
+    return saved ? parseInt(saved, 10) : 1;
+  };
+  
+  const [currentStep, setCurrentStep] = useState(getInitialStep);
   const [formData, setFormData] = useState<QuestFormData>(defaultFormData);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  
+  // Track component mount to detect remounts (debug only)
+  const mountCount = useRef(0);
+  mountCount.current += 1;
+  
+  // Persist step to sessionStorage whenever it changes
+  useEffect(() => {
+    const storageKey = `quest-builder-step-${questId || 'new'}`;
+    sessionStorage.setItem(storageKey, String(currentStep));
+  }, [currentStep, questId]);
+  
+  // Clear session storage when component unmounts intentionally (navigation away)
+  useEffect(() => {
+    return () => {
+      // Only clear if navigating away, not on remount
+      // We detect this by checking if the window is still on the same route
+      setTimeout(() => {
+        if (!window.location.pathname.includes('/creator/quests')) {
+          const storageKey = `quest-builder-step-${questId || 'new'}`;
+          sessionStorage.removeItem(storageKey);
+        }
+      }, 100);
+    };
+  }, [questId]);
 
   // Check if user is a creator
   const { data: creatorProfile, isLoading: profileLoading } = useQuery({
@@ -191,9 +222,9 @@ export default function QuestBuilder() {
     }
   }, [existingQuest, eventbriteData, questId]);
 
-  const updateFormData = (updates: Partial<QuestFormData>) => {
+  const updateFormData = useCallback((updates: Partial<QuestFormData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
-  };
+  }, []);
 
   // Generate slug from title
   const generateSlug = (title: string) => {
@@ -335,25 +366,32 @@ export default function QuestBuilder() {
     }
   };
 
-  const goToStep = (step: number) => {
-    // Mark current step as completed when moving forward
-    if (step > currentStep && !completedSteps.includes(currentStep)) {
-      setCompletedSteps(prev => [...prev, currentStep]);
-    }
-    setCurrentStep(step);
-  };
+  const goToStep = useCallback((step: number) => {
+    setCurrentStep(prevStep => {
+      if (step > prevStep) {
+        setCompletedSteps(prev => 
+          prev.includes(prevStep) ? prev : [...prev, prevStep]
+        );
+      }
+      return step;
+    });
+  }, []);
 
-  const nextStep = () => {
-    if (currentStep < WIZARD_STEPS.length) {
-      goToStep(currentStep + 1);
-    }
-  };
+  const nextStep = useCallback(() => {
+    setCurrentStep(prev => {
+      if (prev < WIZARD_STEPS.length) {
+        setCompletedSteps(completed => 
+          completed.includes(prev) ? completed : [...completed, prev]
+        );
+        return prev + 1;
+      }
+      return prev;
+    });
+  }, []);
 
-  const prevStep = () => {
-    if (currentStep > 1) {
-      goToStep(currentStep - 1);
-    }
-  };
+  const prevStep = useCallback(() => {
+    setCurrentStep(prev => prev > 1 ? prev - 1 : prev);
+  }, []);
 
   // Render current step
   const renderStep = () => {
