@@ -11,6 +11,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import ShareQuestButton from '@/components/ShareQuestButton';
 import { InstancePicker, QuestInstance } from '@/components/quests';
+import { GetHelpButton } from '@/components/support';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -582,6 +583,13 @@ export default function QuestDetail() {
           </div>
         </div>
       </main>
+      
+      {/* Contextual Help Button */}
+      <GetHelpButton
+        variant="floating"
+        contextQuestId={quest.id}
+        contextQuestTitle={quest.title}
+      />
       
       {/* Instance Picker Modal */}
       <InstancePicker
