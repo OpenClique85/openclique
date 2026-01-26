@@ -127,7 +127,7 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
       toast({
         title: nowPinned ? "Quest saved!" : "Quest removed",
         description: nowPinned 
-          ? "Find it in your profile under Pinned Quests."
+          ? "Find it in your Hub → Quests tab under 'Saved for Later'."
           : "Quest removed from your saved list.",
       });
     } catch (error) {
