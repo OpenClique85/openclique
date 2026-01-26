@@ -50,6 +50,7 @@ import { CliquesManager } from '@/components/admin/CliquesManager';
 import { TraitLibraryManager, UserProfileInspector, AIInferenceLogsViewer, EmergingTraitsReview } from '@/components/admin/identity';
 import { PromptManager } from '@/components/admin/ai/PromptManager';
 import { OrgApplicationsManager } from '@/components/admin/OrgApplicationsManager';
+import { ModerationDashboard } from '@/components/admin/ModerationDashboard';
 
 export default function Admin() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
@@ -98,6 +99,7 @@ export default function Admin() {
       case 'support-inbox': return <SupportDashboard />;
       case 'support-dm': return <AdminDirectMessages />;
       case 'cliques-manager': return <CliquesManager />;
+      case 'moderation-dashboard': return <ModerationDashboard />;
       case 'support-analytics': return <SupportAnalytics />;
       case 'support-categories': return <IssueCategoriesManager />;
       // Partners

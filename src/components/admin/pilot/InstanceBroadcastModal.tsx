@@ -211,7 +211,7 @@ export function InstanceBroadcastModal({
           </DialogTitle>
           <DialogDescription>
             Send an important message to ALL users signed up for this quest,
-            including those not yet assigned to squads.
+            including those not yet assigned to cliques.
           </DialogDescription>
         </DialogHeader>
 

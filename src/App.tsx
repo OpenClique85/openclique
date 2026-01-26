@@ -111,6 +111,7 @@ const CreatorInbox = lazy(() => import("./pages/CreatorInbox"));
 const CreatorBrowseListings = lazy(() => import("./pages/CreatorBrowseListings"));
 const QuestBuilder = lazy(() => import("./pages/QuestBuilder"));
 const OrgPortal = lazy(() => import("./pages/OrgPortal"));
+const OrgPage = lazy(() => import("./pages/OrgPage"));
 
 // Sponsor pages (separate chunk for sponsor portal)
 const SponsorOnboarding = lazy(() => import("./pages/SponsorOnboarding"));
@@ -199,6 +200,7 @@ const App = () => (
                 {/* CREATOR PAGES */}
                 <Route path="/creators" element={<CreatorsHub />} />
                 <Route path="/org/:slug" element={<OrgPortal />} />
+                <Route path="/organizations/:orgSlug" element={<OrgPage />} />
                 <Route path="/creators/content-creators" element={<ContentCreatorsPage />} />
                 <Route path="/creators/quest-creators" element={<QuestCreatorsPage />} />
                 <Route path="/creators/onboard" element={<CreatorOnboarding />} />

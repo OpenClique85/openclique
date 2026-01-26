@@ -233,7 +233,7 @@ export const VIDEO_SECTION = {
 
 export const BENEFITS = [
   {
-    title: "Small, Easy to Join Squads",
+    title: "Small, Easy to Join Cliques",
     description: "Groups of 3-6 people. Finish together, unlock rewards together.",
     icon: "users",
   },
@@ -271,7 +271,7 @@ export const HOW_IT_WORKS = {
     {
       number: 2,
       title: "Get Matched",
-      description: "We pair you with a small squad (3-6 people) based on shared interests.",
+      description: "We pair you with a small clique (3-6 people) based on shared interests.",
     },
     {
       number: 3,
@@ -288,7 +288,7 @@ export const HOW_IT_WORKS = {
   buggs: {
     title: "Meet BUGGS, Your AI Guide",
     subtitle: "The rabbit pulling levers behind the curtain",
-    description: "BUGGS is your squad's guide: there when you need a nudge, never when you don't.",
+    description: "BUGGS is your clique's guide: there when you need a nudge, never when you don't.",
     features: [
       "Conversation starters when things get quiet",
       "Gentle reminders so no one forgets the details",
@@ -376,7 +376,7 @@ export const FAQ = [
   },
   {
     question: "How does matching work?",
-    answer: "Our AI considers your interests, availability, location, and adventure preferences to match you with compatible squad members. We optimize for shared interests while also introducing you to people you might not otherwise meet.",
+    answer: "Our AI considers your interests, availability, location, and adventure preferences to match you with compatible clique members. We optimize for shared interests while also introducing you to people you might not otherwise meet.",
   },
   {
     question: "What cities are you in?",
@@ -398,10 +398,10 @@ export const FAQ = [
 
 export const PILOT_PAGE = {
   title: "Find Your Quest",
-  subtitle: "Your squad is waiting. Pick an adventure and show up.",
+  subtitle: "Your clique is waiting. Pick an adventure and show up.",
   whatToExpect: [
     "Come solo, bring friends, or rally your crew",
-    "Get matched with a small squad of 3-6 people",
+    "Get matched with a small clique of 3-6 people",
     "We plan the adventure—you just show up",
     "Keep coming back to the people you vibe with",
   ],

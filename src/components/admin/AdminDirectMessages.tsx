@@ -577,7 +577,7 @@ function ComposeMessage({ onSent }: { onSent: () => void }) {
             <SelectContent>
               <SelectItem value="none">No Context</SelectItem>
               <SelectItem value="quest">Quest</SelectItem>
-              <SelectItem value="squad">Squad</SelectItem>
+              <SelectItem value="squad">Clique</SelectItem>
               <SelectItem value="ticket">Support Ticket</SelectItem>
             </SelectContent>
           </Select>
