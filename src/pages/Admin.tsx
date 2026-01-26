@@ -51,6 +51,7 @@ import { TraitLibraryManager, UserProfileInspector, AIInferenceLogsViewer, Emerg
 import { PromptManager } from '@/components/admin/ai/PromptManager';
 import { OrgApplicationsManager } from '@/components/admin/OrgApplicationsManager';
 import { ModerationDashboard } from '@/components/admin/ModerationDashboard';
+import { PilotDemandDashboard, TierAccountsView, TierApplicationsManager, ARRForecasting } from '@/components/admin/payments';
 
 export default function Admin() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
@@ -118,6 +119,11 @@ export default function Admin() {
       // Growth
       case 'invite-codes': return <InviteCodesManager />;
       case 'onboarding-feedback': return <OnboardingFeedbackManager />;
+      // Payments & Premium
+      case 'pilot-demand': return <PilotDemandDashboard />;
+      case 'tier-accounts': return <TierAccountsView />;
+      case 'tier-applications': return <TierApplicationsManager />;
+      case 'arr-forecasting': return <ARRForecasting />;
       // Insights
       // Insights
       case 'analytics': return <Analytics />;
