@@ -19,3 +19,5 @@ export { ReadyCheckCard } from './ReadyCheckCard';
 export { CreateReadyCheckModal } from './CreateReadyCheckModal';
 export { CliqueLoreTab } from './CliqueLoreTab';
 export { CliqueApplicationsInbox } from './CliqueApplicationsInbox';
+export { EventLobby } from './EventLobby';
+export { LFCBrowser } from './LFCBrowser';
