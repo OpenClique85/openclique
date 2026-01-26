@@ -1,441 +1,294 @@
 
-# User Privacy, Data Control & Account Management System
+# Recruit a Friend Feature Implementation Plan
 
 ## Overview
 
-This plan implements a comprehensive user control system covering privacy settings, notification preferences, data management, account deletion with feedback collection, and confirmation emails. The goal is to provide users with full transparency and control over their data while maintaining a seamless, trustworthy experience.
+This plan implements a complete "Recruit a Friend" feature that allows users who have signed up for a quest to invite new users to join OpenClique and automatically sign up for the same quest. The system includes XP rewards, badges, achievements, and admin analytics.
 
----
-
-## What You'll Get
-
-1. **Full Settings Page** - A dedicated `/settings` page replacing the "Coming Soon" badges
-2. **Privacy Controls** - Granular visibility settings for profile, activity, and matching
-3. **Notification Preferences** - Email and in-app notification opt-in/opt-out controls
-4. **Data Export** - Download all your data in JSON format
-5. **Account Deletion Flow** - Multi-step confirmation with feedback collection
-6. **Exit Survey** - Capture reasons for leaving to improve the product
-7. **Confirmation Email** - Automated email confirming account deletion
-8. **Updated Legal Pages** - Enhanced Privacy Policy and Terms reflecting new features
-
----
-
-## System Architecture
+## User Experience Flow
 
 ```text
-+------------------+     +-------------------+     +--------------------+
-|   MeTab          | --> |  Settings Page    | --> |  Delete Account    |
-|  (Quick Links)   |     |  /settings        |     |  Multi-step Flow   |
-+------------------+     +-------------------+     +--------------------+
-                               |                           |
-                    +----------+----------+                |
-                    |          |          |                |
-               +--------+ +--------+ +--------+     +-------------+
-               |Privacy | |Notif.  | |Data    |     | Feedback    |
-               |Settings| |Prefs   | |Export  |     | Collection  |
-               +--------+ +--------+ +--------+     +-------------+
-                                                          |
-                                                   +-------------+
-                                                   | Edge Func   |
-                                                   | delete-acct |
-                                                   +-------------+
-                                                          |
-                                                   +-------------+
-                                                   | Confirm     |
-                                                   | Email       |
-                                                   +-------------+
+1. User signs up for a quest
+2. On their Profile Hub "Quests" tab, they see a "Recruit a Friend" button
+3. Clicking the button shows a modal with:
+   - Unique friend code (e.g., "QUEST-ABC123")
+   - Shareable link with the code embedded
+   - Copy buttons for code and link
+   - XP reward preview (+50 XP)
+4. Friend clicks link or enters code during signup
+5. Friend creates account and is auto-signed up for the quest
+6. Original user receives:
+   - +50 XP (immediate)
+   - One-time "Friend Recruiter" badge (first friend only)
+   - "Social Connector" achievement (5 friends)
+   - "Community Builder" achievement (10 friends)
+7. Both users are flagged for squad grouping (existing feature)
 ```
 
 ---
 
-## Phase 1: Database Schema Updates
+## Database Changes
 
-### 1.1 Add Notification Preferences Column
-Extend the `profiles` table with notification preferences:
+### 1. New Table: `friend_invites`
 
-```sql
-ALTER TABLE public.profiles 
-ADD COLUMN IF NOT EXISTS notification_preferences JSONB DEFAULT '{
-  "email_quest_recommendations": true,
-  "email_quest_reminders": true,
-  "email_squad_updates": true,
-  "email_marketing": false,
-  "in_app_quest_recommendations": true,
-  "in_app_squad_updates": true,
-  "in_app_general": true
-}'::jsonb;
-```
-
-### 1.2 Add Privacy Settings Column
-Extend the `profiles` table with privacy controls:
+Tracks quest-specific friend recruitment codes, separate from general referrals.
 
 ```sql
-ALTER TABLE public.profiles 
-ADD COLUMN IF NOT EXISTS privacy_settings JSONB DEFAULT '{
-  "profile_visibility": "public",
-  "show_activity_history": true,
-  "allow_matching": true,
-  "show_in_squad_lists": true,
-  "show_xp_and_badges": true
-}'::jsonb;
-```
-
-### 1.3 Create Account Deletion Feedback Table
-Track exit feedback for product improvement:
-
-```sql
-CREATE TABLE public.account_deletion_feedback (
+CREATE TABLE public.friend_invites (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_email TEXT NOT NULL,
-  display_name TEXT,
-  reasons TEXT[] DEFAULT '{}',
-  other_reason TEXT,
-  feedback TEXT,
-  would_return BOOLEAN,
-  data_exported BOOLEAN DEFAULT false,
-  deleted_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  code TEXT NOT NULL UNIQUE,
+  referrer_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  quest_id UUID NOT NULL REFERENCES public.quests(id) ON DELETE CASCADE,
+  referred_user_id UUID REFERENCES auth.users(id),
+  created_at TIMESTAMPTZ DEFAULT now(),
+  redeemed_at TIMESTAMPTZ,
+  UNIQUE(referrer_user_id, quest_id)
 );
-
--- RLS: Only service role can access
-ALTER TABLE public.account_deletion_feedback ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Service role only" ON public.account_deletion_feedback
-  FOR ALL USING (false);
 ```
 
-### 1.4 Create Account Deletion Requests Table
-Track deletion requests for audit and processing:
+### 2. New RPC: `redeem_friend_invite`
+
+Handles account creation + quest signup + XP + achievement unlock flow.
 
 ```sql
-CREATE TABLE public.account_deletion_requests (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL,
-  user_email TEXT NOT NULL,
-  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'completed', 'cancelled')),
-  scheduled_at TIMESTAMPTZ NOT NULL DEFAULT (now() + interval '7 days'),
-  processed_at TIMESTAMPTZ,
-  cancellation_reason TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
-ALTER TABLE public.account_deletion_requests ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Users can view own requests" ON public.account_deletion_requests
-  FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Users can create requests" ON public.account_deletion_requests
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can cancel requests" ON public.account_deletion_requests
-  FOR UPDATE USING (auth.uid() = user_id AND status = 'pending');
+CREATE OR REPLACE FUNCTION public.redeem_friend_invite(p_code TEXT, p_new_user_id UUID)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_invite RECORD;
+  v_recruit_count INTEGER;
+  v_new_achievements JSONB := '[]';
+BEGIN
+  -- Validate invite code
+  SELECT * INTO v_invite FROM friend_invites
+  WHERE code = UPPER(TRIM(p_code))
+  AND redeemed_at IS NULL;
+  
+  IF v_invite IS NULL THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Invalid or already used code');
+  END IF;
+  
+  -- Mark invite as redeemed
+  UPDATE friend_invites SET
+    referred_user_id = p_new_user_id,
+    redeemed_at = now()
+  WHERE id = v_invite.id;
+  
+  -- Auto-signup new user for the quest
+  INSERT INTO quest_signups (user_id, quest_id, status)
+  VALUES (p_new_user_id, v_invite.quest_id, 'pending')
+  ON CONFLICT (user_id, quest_id) DO NOTHING;
+  
+  -- Award referrer 50 XP
+  PERFORM award_xp(v_invite.referrer_user_id, 50, 'friend_recruit', v_invite.id::text);
+  
+  -- Count successful referrals for achievements
+  SELECT COUNT(*) INTO v_recruit_count
+  FROM friend_invites
+  WHERE referrer_user_id = v_invite.referrer_user_id
+  AND redeemed_at IS NOT NULL;
+  
+  -- Check and unlock achievements
+  SELECT json_agg(row_to_json(t)) INTO v_new_achievements
+  FROM check_and_unlock_achievements(v_invite.referrer_user_id) t;
+  
+  -- Link for squad grouping (existing referrals table)
+  INSERT INTO referrals (referrer_user_id, quest_id, referral_code, referred_user_id, signed_up_at)
+  VALUES (v_invite.referrer_user_id, v_invite.quest_id, p_code, p_new_user_id, now())
+  ON CONFLICT (referral_code) DO UPDATE SET
+    referred_user_id = p_new_user_id,
+    signed_up_at = now();
+  
+  RETURN jsonb_build_object(
+    'success', true,
+    'quest_id', v_invite.quest_id,
+    'referrer_id', v_invite.referrer_user_id,
+    'recruit_count', v_recruit_count,
+    'achievements', v_new_achievements
+  );
+END;
+$$;
 ```
+
+### 3. Update `check_and_unlock_achievements` Function
+
+Add new criteria type `friend_recruit_count`:
+
+```sql
+-- Add to the achievement check logic:
+ELSIF v_criteria->>'type' = 'friend_recruit_count' THEN
+  SELECT COUNT(*) INTO v_recruit_count
+  FROM friend_invites
+  WHERE referrer_user_id = p_user_id AND redeemed_at IS NOT NULL;
+  v_qualified := v_recruit_count >= (v_criteria->>'count')::integer;
+```
+
+### 4. New Achievement Templates
+
+Insert into `achievement_templates`:
+
+| Name | Criteria | XP Reward | Icon |
+|------|----------|-----------|------|
+| Friend Recruiter | `{"type": "friend_recruit_count", "count": 1}` | 25 | 🤝 |
+| Social Connector | `{"type": "friend_recruit_count", "count": 5}` | 75 | 🌟 |
+| Community Builder | `{"type": "friend_recruit_count", "count": 10}` | 150 | 🏆 |
+
+### 5. New Badge Template
+
+Insert into `badge_templates`:
+
+| Name | Description | Icon |
+|------|-------------|------|
+| Friend Bringer | Recruited your first friend to OpenClique | 👋 |
 
 ---
 
-## Phase 2: Settings Page & Components
+## Frontend Components
 
-### 2.1 Create Settings Page (`/settings`)
+### 1. `RecruitFriendButton` Component
 
-**File: `src/pages/Settings.tsx`**
-
-A comprehensive settings page with tabbed sections:
-- **Profile** - Basic info, display name (links to ProfileEditModal)
-- **Privacy** - Visibility controls, matching preferences
-- **Notifications** - Email and in-app notification toggles
-- **Data** - Export data, view data summary
-- **Account** - Delete account, deactivation options
-
-### 2.2 Privacy Settings Component
-
-**File: `src/components/settings/PrivacySettings.tsx`**
-
-Controls include:
-- Profile visibility (public/squad-only/private)
-- Show activity history to squad members
-- Allow AI-based matching
-- Appear in squad member lists
-- Show XP, badges, and level publicly
-
-### 2.3 Notification Preferences Component
-
-**File: `src/components/settings/NotificationPreferences.tsx`**
-
-Toggle controls for:
-- Email: Quest recommendations, reminders, squad updates, marketing
-- In-app: Recommendations, squad updates, general announcements
-- Include "Unsubscribe from all" quick action
-
-### 2.4 Data Management Component
-
-**File: `src/components/settings/DataManagement.tsx`**
+New component: `src/components/quests/RecruitFriendButton.tsx`
 
 Features:
-- "Download My Data" button (exports profile, preferences, activity)
-- Data summary showing what we store
-- Link to Privacy Policy
+- Generates/retrieves friend invite code
+- Shows shareable link with code
+- Copy buttons for code and full link
+- XP reward preview (+50 XP per friend)
+- Progress toward achievements
 
----
+### 2. Add to `QuestsTab.tsx`
 
-## Phase 3: Account Deletion Flow
+Add "Recruit a Friend" button to quest cards for `pending`, `confirmed`, or `standby` signups:
 
-### 3.1 Delete Account Modal
-
-**File: `src/components/settings/DeleteAccountModal.tsx`**
-
-Multi-step flow:
-1. **Inform** - Explain what deletion means, 7-day grace period
-2. **Feedback** - Exit survey with reason checkboxes
-3. **Export** - Option to download data before deletion
-4. **Confirm** - Type "DELETE" to confirm, final warning
-
-### 3.2 Exit Survey Options
-
-Reason checkboxes:
-- "I'm not using the app enough"
-- "I didn't find quests I was interested in"
-- "Privacy concerns"
-- "Moving away from Austin"
-- "Found another community"
-- "The app was confusing to use"
-- "Bad experience with a squad"
-- "Other" (with text field)
-
-Additional fields:
-- "What could we have done better?" (optional text)
-- "Would you consider returning in the future?" (yes/maybe/no)
-
-### 3.3 Deletion Edge Function
-
-**File: `supabase/functions/delete-account/index.ts`**
-
-This function handles the complete account deletion:
-
-1. **Validate request** - Verify user identity and confirmation
-2. **Store feedback** - Save exit survey to `account_deletion_feedback`
-3. **Export data** (if requested) - Generate JSON export
-4. **Delete user data** from all tables:
-   - `notifications`, `feedback`, `quest_signups`
-   - `squad_members`, `xp_transactions`, `user_xp`, `user_tree_xp`
-   - `user_traits`, `user_badges`, `user_achievements`
-   - `user_streaks`, `user_social_energy`, `trust_scores`
-   - `identity_snapshots`, `draft_traits`, `referrals`
-   - `support_tickets`, `ticket_messages`
-   - `clique_*` tables, `squad_*` tables
-   - `ugc_submissions`, `participant_proofs`
-   - And all other user-linked tables
-5. **Delete profile** - Remove from `profiles` table
-6. **Delete auth user** - Remove from `auth.users`
-7. **Send confirmation email** - Via Resend
-
-### 3.4 Confirmation Email Template
-
-Add to `supabase/functions/send-email/index.ts`:
-
-```typescript
-account_deleted: (vars) => `
-  <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="text-align: center; margin-bottom: 30px;">
-      <h1 style="color: #6b7280; margin: 0;">Account Deleted</h1>
-    </div>
-    <p style="font-size: 16px; color: #333;">Hey ${escapeHtml(vars.display_name || "there")},</p>
-    <p style="font-size: 16px; color: #333;">Your OpenClique account has been successfully deleted as requested.</p>
-    
-    <div style="background: #f3f4f6; border-left: 4px solid #6b7280; padding: 15px; margin: 20px 0;">
-      <p style="margin: 0 0 10px 0;"><strong>What's been removed:</strong></p>
-      <ul style="margin: 0; padding-left: 20px; font-size: 14px;">
-        <li>Your profile and preferences</li>
-        <li>Quest signup history</li>
-        <li>Squad memberships</li>
-        <li>XP, badges, and achievements</li>
-        <li>All associated data</li>
-      </ul>
-    </div>
-    
-    ${vars.data_exported === 'true' ? `
-      <p style="font-size: 14px; color: #666;">
-        ✅ You downloaded a copy of your data before deletion.
-      </p>
-    ` : ''}
-    
-    <p style="font-size: 14px; color: #666;">
-      We're sad to see you go. If you ever want to return, you're always welcome 
-      to create a new account.
-    </p>
-    
-    <p style="font-size: 14px; color: #666;">
-      If you didn't request this deletion, please contact us immediately at 
-      <a href="mailto:hello@openclique.com">hello@openclique.com</a>.
-    </p>
-    
-    <p style="font-size: 14px; color: #666;">— The OpenClique Team</p>
-  </div>
-`
+```tsx
+{(signup.status === 'pending' || signup.status === 'confirmed' || signup.status === 'standby') && (
+  <RecruitFriendButton 
+    questId={signup.quest.id} 
+    questSlug={signup.quest.slug}
+  />
+)}
 ```
 
----
+### 3. Update Auth Flow
 
-## Phase 4: Data Export Feature
+Modify `src/pages/Auth.tsx` to:
+- Check for `?invite=FRIEND-XXXXX` query param
+- After successful signup, call `redeem_friend_invite` RPC
+- Show celebration modal with quest auto-signup confirmation
 
-### 4.1 Export Data Edge Function
+### 4. Hook: `useFriendInvite`
 
-**File: `supabase/functions/export-user-data/index.ts`**
-
-Generates a comprehensive JSON export containing:
-- Profile information (name, email, preferences)
-- Quest history (signups, completions)
-- Squad memberships and roles
-- XP and achievement history
-- Feedback submitted
-- Notification history
-
-Export is downloadable as `openclique-data-export-{date}.json`
-
-### 4.2 Data Summary Component
-
-Shows users a breakdown of what data we have:
-- Profile data (preferences, matching info)
-- Activity data (quests joined, squads formed)
-- Engagement data (XP, badges, streaks)
-- Communications (notifications received)
-
----
-
-## Phase 5: Update MeTab & Navigation
-
-### 5.1 Update MeTab Quick Settings
-
-Replace "Coming Soon" badges with functional links:
+New hook: `src/hooks/useFriendInvite.ts`
 
 ```typescript
-// Privacy - now links to settings
-<Link to="/settings?tab=privacy">
-  <Button variant="outline" size="sm">Manage</Button>
-</Link>
-
-// Add Account section
-<div className="py-4 flex items-center justify-between">
-  <div className="flex items-center gap-3">
-    <Database className="h-5 w-5 text-muted-foreground" />
-    <div>
-      <p className="font-medium">Your Data</p>
-      <p className="text-sm text-muted-foreground">Export or delete your data</p>
-    </div>
-  </div>
-  <Link to="/settings?tab=data">
-    <Button variant="outline" size="sm">Manage</Button>
-  </Link>
-</div>
-```
-
-### 5.2 Add Route to Route Manifest
-
-```typescript
-{ 
-  path: '/settings', 
-  page: 'Settings', 
-  protection: 'authenticated', 
-  description: 'User settings, privacy, and account management',
-  category: 'user' 
+export function useFriendInvite(questId: string) {
+  // Generate or fetch existing invite code
+  // Return code, link, copy functions
+  // Track successful recruitments for user
 }
 ```
 
 ---
 
-## Phase 6: Legal Page Updates
+## Admin Analytics
 
-### 6.1 Update Privacy Policy
+### 1. Add to `PlatformStats.tsx`
 
-Add sections for:
-- Self-service data deletion
-- Data export rights
-- Notification preferences
-- Privacy controls
-- 7-day deletion grace period
+New stat card:
+- **Friends Recruited**: Total count from `friend_invites` where `redeemed_at IS NOT NULL`
 
-### 6.2 Update Terms of Service
+### 2. New Admin Tab: `ReferralAnalytics.tsx`
 
-Add sections for:
-- Account deletion terms
-- Data retention after deletion
-- Right to cancel deletion within 7 days
+Add under Growth section:
+
+```text
+Growth
+  ├── Invite Codes
+  ├── Onboarding Feedback
+  ├── Analytics
+  └── Friend Referrals (NEW)
+```
+
+Component: `src/components/admin/ReferralAnalytics.tsx`
+
+Features:
+- Total friends recruited (all-time)
+- Friends recruited this week/month
+- Top recruiters leaderboard (anonymized or full names)
+- Conversion funnel: Invites Created → Clicked → Redeemed
+- Distribution chart: Users by recruit count (0, 1-4, 5-9, 10+)
+- Recruit-to-quest-completion rate
 
 ---
 
-## Technical Details
+## XP & Gamification Updates
 
-### Files to Create
+### 1. Update `useUserXP.ts` Labels
+
+Add new source label:
+```typescript
+friend_recruit: 'Friend Recruited',
+```
+
+### 2. Update Achievement Toast
+
+The existing `showAchievementToast` will automatically display when achievements unlock via the RPC flow.
+
+---
+
+## Files to Create
 
 | File | Purpose |
 |------|---------|
-| `src/pages/Settings.tsx` | Main settings page with tabs |
-| `src/components/settings/PrivacySettings.tsx` | Privacy toggle controls |
-| `src/components/settings/NotificationPreferences.tsx` | Email/in-app preferences |
-| `src/components/settings/DataManagement.tsx` | Export and data summary |
-| `src/components/settings/DeleteAccountModal.tsx` | Multi-step deletion flow |
-| `src/components/settings/AccountSettings.tsx` | Account section with delete button |
-| `src/hooks/useSettings.ts` | Hook for fetching/updating settings |
-| `supabase/functions/delete-account/index.ts` | Account deletion handler |
-| `supabase/functions/export-user-data/index.ts` | Data export generator |
+| `src/components/quests/RecruitFriendButton.tsx` | Main recruit button with modal |
+| `src/hooks/useFriendInvite.ts` | Hook for invite code management |
+| `src/components/admin/ReferralAnalytics.tsx` | Admin analytics dashboard |
+| `supabase/migrations/XXXXXX_friend_invites.sql` | Database migration |
 
-### Files to Modify
+## Files to Modify
 
 | File | Changes |
 |------|---------|
-| `src/components/profile/MeTab.tsx` | Add functional links, remove "Coming Soon" |
-| `src/constants/routeManifest.ts` | Add `/settings` route |
-| `src/App.tsx` | Add Settings route |
-| `supabase/functions/send-email/index.ts` | Add `account_deleted` template |
-| `src/pages/Privacy.tsx` | Add self-service deletion section |
-| `src/pages/Terms.tsx` | Add account deletion terms |
-| `src/types/profile.ts` | Add notification/privacy preference types |
-
-### Database Migrations
-
-1. Add `notification_preferences` column to `profiles`
-2. Add `privacy_settings` column to `profiles`
-3. Create `account_deletion_feedback` table
-4. Create `account_deletion_requests` table
+| `src/components/profile/QuestsTab.tsx` | Add RecruitFriendButton to quest cards |
+| `src/pages/Auth.tsx` | Handle friend invite code redemption |
+| `src/hooks/useUserXP.ts` | Add `friend_recruit` label |
+| `src/components/admin/AdminSectionNav.tsx` | Add Friend Referrals tab |
+| `src/pages/Admin.tsx` | Add ReferralAnalytics case |
+| `src/components/admin/PlatformStats.tsx` | Add recruit count stat |
 
 ---
 
-## User Experience Flow
+## Technical Considerations
 
-### Accessing Settings
-1. User navigates to Profile > Me tab
-2. Clicks "Manage" next to Privacy, Notifications, or Data
-3. Lands on Settings page with appropriate tab selected
+### Code Format
+Friend invite codes use format: `FRIEND-{8_CHAR_RANDOM}`
+- Example: `FRIEND-X7K2M9PQ`
+- Uppercase, alphanumeric, easy to share verbally
 
-### Deleting Account
-1. User goes to Settings > Account tab
-2. Clicks "Delete Account" button
-3. **Step 1**: Reads explanation of what deletion means
-4. **Step 2**: Fills out exit survey (optional but encouraged)
-5. **Step 3**: Option to export data before deletion
-6. **Step 4**: Types "DELETE" to confirm
-7. Account enters 7-day grace period
-8. Receives confirmation email
-9. Can cancel within 7 days via email link
-10. After 7 days, deletion is permanent
+### Squad Grouping Integration
+The `redeem_friend_invite` RPC inserts into the existing `referrals` table with `referred_user_id` populated. The `recommend-squads` edge function already uses this data to create "referral clusters" for squad formation.
 
-### Cancelling Deletion
-- Link in confirmation email allows cancellation
-- Can also cancel from Settings if still logged in
-- Clear messaging about grace period
+### Security
+- RLS policies ensure users can only see their own invites
+- Admins can view all invites for analytics
+- Codes expire after 30 days (optional, can be added)
+
+### Mobile Considerations
+- RecruitFriendButton uses responsive dialog/drawer pattern
+- Share functionality uses native share API when available
+- Code is copy-friendly for messaging apps
 
 ---
 
-## Security Considerations
+## Implementation Order
 
-- Account deletion requires re-authentication
-- 7-day grace period prevents accidental deletion
-- Exit feedback stored without PII linkage (uses email hash)
-- Data export requires authentication
-- Deletion confirmation email sent to verified email
-- All operations logged in audit trail
-
----
-
-## Success Metrics
-
-After implementation, we can track:
-- Exit survey completion rate
-- Top reasons for leaving
-- Data export usage
-- Deletion cancellation rate
-- "Would return" sentiment
+1. **Database Migration** - Create `friend_invites` table, RPC functions, achievement templates
+2. **Hooks** - Create `useFriendInvite` hook
+3. **Components** - Build `RecruitFriendButton` with modal
+4. **QuestsTab Integration** - Add button to quest cards
+5. **Auth Flow** - Handle invite code redemption on signup
+6. **Admin Analytics** - Add `ReferralAnalytics` component
+7. **PlatformStats** - Add recruit count to dashboard
+8. **Testing** - End-to-end flow verification
