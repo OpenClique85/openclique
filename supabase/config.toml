@@ -62,3 +62,9 @@ verify_jwt = false
 
 [functions.infer-traits]
 verify_jwt = false
+
+[functions.import-eventbrite-event]
+verify_jwt = false
+
+[functions.eventbrite-search]
+verify_jwt = false

@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { CreatorPortalNav } from '@/components/creators/CreatorPortalNav';
@@ -6,14 +7,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
-import { Loader2, Sparkles, Plus, ClipboardList, Star, Users, TrendingUp, Building2 } from 'lucide-react';
+import { Loader2, Sparkles, Plus, ClipboardList, Star, Users, TrendingUp, Building2, Upload } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { usePendingOrgRequests } from '@/hooks/usePendingOrgRequests';
+import { EventbriteImportModal } from '@/components/eventbrite/EventbriteImportModal';
 
 export default function CreatorDashboard() {
   const { user, isLoading: authLoading, isAdmin, isRolesLoaded, profile } = useAuth();
   const { data: pendingOrgRequests = 0 } = usePendingOrgRequests();
+  const navigate = useNavigate();
+  const [eventbriteModalOpen, setEventbriteModalOpen] = useState(false);
   
   // Fetch creator profile
   const { data: creatorProfile, isLoading: profileLoading, refetch: refetchProfile } = useQuery({
@@ -163,12 +167,24 @@ export default function CreatorDashboard() {
               Design experiences that bring people together.
             </p>
           </div>
-          <Button asChild size="lg" className="gap-2">
-            <Link to="/creator/quests/new">
-              <Plus className="h-5 w-5" />
-              Create New Quest
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="gap-2"
+              onClick={() => setEventbriteModalOpen(true)}
+            >
+              <Upload className="h-5 w-5" />
+              <span className="hidden sm:inline">Import from Eventbrite</span>
+              <span className="sm:hidden">Import</span>
+            </Button>
+            <Button asChild size="lg" className="gap-2">
+              <Link to="/creator/quests/new">
+                <Plus className="h-5 w-5" />
+                Create New Quest
+              </Link>
+            </Button>
+          </div>
         </div>
 
         {/* Stats Cards */}
@@ -277,6 +293,16 @@ export default function CreatorDashboard() {
       </main>
       
       <Footer />
+
+      {/* Eventbrite Import Modal */}
+      <EventbriteImportModal
+        open={eventbriteModalOpen}
+        onOpenChange={setEventbriteModalOpen}
+        onEventImported={(eventData) => {
+          // Navigate to the quick quest import page with event data
+          navigate('/creator/quests/import-eventbrite', { state: { eventData } });
+        }}
+      />
     </div>
   );
 }
