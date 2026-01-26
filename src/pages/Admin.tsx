@@ -37,7 +37,7 @@ import { NotificationConsole } from '@/components/admin/notifications';
 import { DocsManager, DocsExportPanel, DocsPlaybookManager } from '@/components/admin/docs';
 import { PilotInstancesManager } from '@/components/admin/pilot';
 import { ApprovalInbox, OpsAlerts, AuditLogViewer } from '@/components/admin/control-room';
-import { SquadsDirectory } from '@/components/admin/SquadsDirectory';
+import { EnterpriseOrgsManager } from '@/components/admin/EnterpriseOrgsManager';
 import { SquadComparisonView } from '@/components/admin/SquadComparisonView';
 import { SquadHealthDashboard } from '@/components/admin/SquadHealthDashboard';
 import { SquadArchivalManager } from '@/components/admin/SquadArchivalManager';
@@ -91,7 +91,7 @@ export default function Admin() {
       case 'quests': return <QuestsManager />;
       case 'quest-archives': return <QuestArchivesManager />;
       case 'squads': return <PersistentSquadsManager />;
-      case 'squads-directory': return <SquadsDirectory />;
+      case 'enterprise-view': return <EnterpriseOrgsManager />;
       case 'squad-comparison': return <SquadComparisonView />;
       case 'squad-health': return <SquadHealthDashboard />;
       case 'squad-archival': return <SquadArchivalManager />;

@@ -3037,18 +3037,21 @@ export type Database = {
       profile_organizations: {
         Row: {
           joined_at: string
+          onboarded_at: string | null
           org_id: string
           profile_id: string
           role: Database["public"]["Enums"]["org_member_role"]
         }
         Insert: {
           joined_at?: string
+          onboarded_at?: string | null
           org_id: string
           profile_id: string
           role?: Database["public"]["Enums"]["org_member_role"]
         }
         Update: {
           joined_at?: string
+          onboarded_at?: string | null
           org_id?: string
           profile_id?: string
           role?: Database["public"]["Enums"]["org_member_role"]
@@ -6277,6 +6280,7 @@ export type Database = {
         Args: { p_clique_id: string; p_role: string }
         Returns: undefined
       }
+      delete_clique: { Args: { p_clique_id: string }; Returns: Json }
       generate_friend_invite_code: { Args: never; Returns: string }
       generate_invite_code: {
         Args: {
