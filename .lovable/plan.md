@@ -1,294 +1,433 @@
 
-# Recruit a Friend Feature Implementation Plan
+# Complete Organizations, Clubs & Admin Enhancement Plan
 
 ## Overview
 
-This plan implements a complete "Recruit a Friend" feature that allows users who have signed up for a quest to invite new users to join OpenClique and automatically sign up for the same quest. The system includes XP rewards, badges, achievements, and admin analytics.
-
-## User Experience Flow
-
-```text
-1. User signs up for a quest
-2. On their Profile Hub "Quests" tab, they see a "Recruit a Friend" button
-3. Clicking the button shows a modal with:
-   - Unique friend code (e.g., "QUEST-ABC123")
-   - Shareable link with the code embedded
-   - Copy buttons for code and link
-   - XP reward preview (+50 XP)
-4. Friend clicks link or enters code during signup
-5. Friend creates account and is auto-signed up for the quest
-6. Original user receives:
-   - +50 XP (immediate)
-   - One-time "Friend Recruiter" badge (first friend only)
-   - "Social Connector" achievement (5 friends)
-   - "Community Builder" achievement (10 friends)
-7. Both users are flagged for squad grouping (existing feature)
-```
+This plan addresses a comprehensive overhaul of the organization/club system, admin console restructuring, and documentation updates. The goal is to make it "dead easy" to join clubs like "Marketing Club" or "Operations Club" while providing club leaders with powerful management tools and rolling up analytics to the UT Austin enterprise level.
 
 ---
 
-## Database Changes
+## Part 1: My Organizations Tab on Profile Hub
 
-### 1. New Table: `friend_invites`
+### Current State
+- Profile Hub has 3 tabs: Cliques | Quests | Me
+- Users have no visibility into their organization memberships from their hub
+- No way to redeem club codes directly from the profile
 
-Tracks quest-specific friend recruitment codes, separate from general referrals.
+### Implementation
 
-```sql
-CREATE TABLE public.friend_invites (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  code TEXT NOT NULL UNIQUE,
-  referrer_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  quest_id UUID NOT NULL REFERENCES public.quests(id) ON DELETE CASCADE,
-  referred_user_id UUID REFERENCES auth.users(id),
-  created_at TIMESTAMPTZ DEFAULT now(),
-  redeemed_at TIMESTAMPTZ,
-  UNIQUE(referrer_user_id, quest_id)
-);
+**New Component: `src/components/profile/OrganizationsTab.tsx`**
+
+Features:
+- Display all organizations user belongs to (from `profile_organizations`)
+- Show club cards with: name, role, member count, and recent quests
+- "Redeem Club Code" button with modal input
+- Quests from user's organizations displayed in a dedicated section
+- Visual distinction between umbrella orgs (e.g., UT Austin) and clubs (e.g., GBAT)
+
+**Profile.tsx Changes:**
+- Add 4th tab: "Organizations" or integrate into existing tabs
+- Add Building2 icon for Organizations tab
+- Tab URL param: `?tab=orgs`
+
+**Mobile Action Bar Update:**
+- Consider adding Organizations as a navigation option or keeping it within Profile
+
+---
+
+## Part 2: Social Chair Onboarding Flow
+
+### Purpose
+Guide new club admins through setting up their dashboard after receiving a creator code.
+
+### New Components
+
+**`src/components/clubs/SocialChairOnboarding.tsx`**
+
+Multi-step wizard:
+1. **Welcome Step**: Explain the Social Chair role and what they can do
+2. **Dashboard Tour**: Highlight key features (event management, clique ops, broadcasts)
+3. **Generate Invite Code**: Walk through creating their first club invite code
+4. **Create First Quest**: Template selection and quick quest creation
+5. **Completion**: Celebration and link to full dashboard
+
+**Trigger Points:**
+- When a user with `social_chair` role visits `/org/[slug]` for the first time
+- Track onboarding completion in `profile_organizations` or `user_onboarding` table
+- Add `social_chair_onboarded_at` column or use localStorage
+
+**SocialChairDashboard.tsx Updates:**
+- Add "Invite Codes" tab alongside Cliques and Broadcast
+- Show generated codes with quick copy buttons
+- Display code usage stats
+
+---
+
+## Part 3: Codes & Keys Organization in Admin
+
+### Current State
+- Invite codes are in "Growth > Invite Codes"
+- Organization invite codes (`org_invite_codes`) are not visible in admin
+- No unified view of all access codes across the platform
+
+### Implementation
+
+**Rename & Restructure "Invite Codes" to "Codes & Keys"**
+
+New tab structure within `InviteCodesManager.tsx`:
+1. **Platform Codes**: admin, tester, early_access, creator, sponsor codes (existing)
+2. **Organization Codes**: All `org_invite_codes` grouped by org
+3. **Friend Invites**: From `friend_invites` table (quest-specific recruit codes)
+
+**New Features:**
+- Filter by: code type, organization, status (active/expired)
+- Quick copy buttons for code and full invite URL
+- Search across all code types
+- Org codes show: org name, uses count, expiration
+- Generate org-specific codes directly from admin (not just from Social Chair dashboard)
+
+**AdminSectionNav.tsx Update:**
+- Rename "Invite Codes" to "Codes & Keys"
+
+---
+
+## Part 4: Organization View vs Enterprise View
+
+### Current State
+- Single "Organizations" tab showing all orgs flat
+- No distinction between umbrella orgs and child clubs
+- No aggregate analytics for enterprise accounts
+
+### Implementation
+
+**Update AdminSectionNav.tsx:**
+```
+Organizations
+  ├── Clubs & Orgs      (non-umbrella organizations, child clubs)
+  ├── Enterprise View   (umbrella orgs like UT Austin with rollup analytics)
+  └── Applications      (existing)
 ```
 
-### 2. New RPC: `redeem_friend_invite`
+**New Component: `src/components/admin/EnterpriseOrgsManager.tsx`**
 
-Handles account creation + quest signup + XP + achievement unlock flow.
+Features:
+- List all umbrella organizations (`is_umbrella = true`)
+- For each umbrella, show:
+  - Child clubs count and list
+  - Total members across all child clubs
+  - Active quests count
+  - Clique formation rate
+  - Quest completion rate
+- Drill-down to individual club stats
+- Contract/billing information (from enterprise pricing fields)
+- Verified domains management
+
+**OrgsManager.tsx Updates:**
+- Add filter: "Umbrellas Only" / "Clubs Only"
+- Display `parent_org_id` relationship (show parent org name)
+- Add `is_umbrella` toggle in create/edit modal
+- Add `verified_domains` array editor
+- Add `social_chair` to member role dropdown options
+- Show enterprise tier/pricing status if applicable
+
+---
+
+## Part 5: Delete Cliques Functionality
+
+### Current State
+- CliquesManager only allows viewing and archiving
+- No way to permanently delete cliques
+
+### Implementation
+
+**Database: New RPC `delete_clique`**
 
 ```sql
-CREATE OR REPLACE FUNCTION public.redeem_friend_invite(p_code TEXT, p_new_user_id UUID)
-RETURNS JSONB
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $$
+CREATE OR REPLACE FUNCTION delete_clique(p_clique_id UUID)
+RETURNS JSONB AS $$
 DECLARE
-  v_invite RECORD;
-  v_recruit_count INTEGER;
-  v_new_achievements JSONB := '[]';
+  v_active_members INTEGER;
 BEGIN
-  -- Validate invite code
-  SELECT * INTO v_invite FROM friend_invites
-  WHERE code = UPPER(TRIM(p_code))
-  AND redeemed_at IS NULL;
+  -- Check for active members
+  SELECT COUNT(*) INTO v_active_members
+  FROM squad_members 
+  WHERE persistent_squad_id = p_clique_id 
+  AND status = 'active';
   
-  IF v_invite IS NULL THEN
-    RETURN jsonb_build_object('success', false, 'error', 'Invalid or already used code');
+  IF v_active_members > 0 THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Cannot delete clique with active members. Archive first.');
   END IF;
   
-  -- Mark invite as redeemed
-  UPDATE friend_invites SET
-    referred_user_id = p_new_user_id,
-    redeemed_at = now()
-  WHERE id = v_invite.id;
+  -- Delete related records
+  DELETE FROM squad_chat_messages WHERE squad_id = p_clique_id;
+  DELETE FROM squad_quest_invites WHERE squad_id = p_clique_id;
+  DELETE FROM clique_role_assignments WHERE clique_id = p_clique_id;
+  DELETE FROM squad_members WHERE persistent_squad_id = p_clique_id;
   
-  -- Auto-signup new user for the quest
-  INSERT INTO quest_signups (user_id, quest_id, status)
-  VALUES (p_new_user_id, v_invite.quest_id, 'pending')
-  ON CONFLICT (user_id, quest_id) DO NOTHING;
+  -- Delete the clique
+  DELETE FROM squads WHERE id = p_clique_id;
   
-  -- Award referrer 50 XP
-  PERFORM award_xp(v_invite.referrer_user_id, 50, 'friend_recruit', v_invite.id::text);
-  
-  -- Count successful referrals for achievements
-  SELECT COUNT(*) INTO v_recruit_count
-  FROM friend_invites
-  WHERE referrer_user_id = v_invite.referrer_user_id
-  AND redeemed_at IS NOT NULL;
-  
-  -- Check and unlock achievements
-  SELECT json_agg(row_to_json(t)) INTO v_new_achievements
-  FROM check_and_unlock_achievements(v_invite.referrer_user_id) t;
-  
-  -- Link for squad grouping (existing referrals table)
-  INSERT INTO referrals (referrer_user_id, quest_id, referral_code, referred_user_id, signed_up_at)
-  VALUES (v_invite.referrer_user_id, v_invite.quest_id, p_code, p_new_user_id, now())
-  ON CONFLICT (referral_code) DO UPDATE SET
-    referred_user_id = p_new_user_id,
-    signed_up_at = now();
-  
-  RETURN jsonb_build_object(
-    'success', true,
-    'quest_id', v_invite.quest_id,
-    'referrer_id', v_invite.referrer_user_id,
-    'recruit_count', v_recruit_count,
-    'achievements', v_new_achievements
-  );
+  RETURN jsonb_build_object('success', true);
 END;
-$$;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 ```
 
-### 3. Update `check_and_unlock_achievements` Function
-
-Add new criteria type `friend_recruit_count`:
-
-```sql
--- Add to the achievement check logic:
-ELSIF v_criteria->>'type' = 'friend_recruit_count' THEN
-  SELECT COUNT(*) INTO v_recruit_count
-  FROM friend_invites
-  WHERE referrer_user_id = p_user_id AND redeemed_at IS NOT NULL;
-  v_qualified := v_recruit_count >= (v_criteria->>'count')::integer;
-```
-
-### 4. New Achievement Templates
-
-Insert into `achievement_templates`:
-
-| Name | Criteria | XP Reward | Icon |
-|------|----------|-----------|------|
-| Friend Recruiter | `{"type": "friend_recruit_count", "count": 1}` | 25 | 🤝 |
-| Social Connector | `{"type": "friend_recruit_count", "count": 5}` | 75 | 🌟 |
-| Community Builder | `{"type": "friend_recruit_count", "count": 10}` | 150 | 🏆 |
-
-### 5. New Badge Template
-
-Insert into `badge_templates`:
-
-| Name | Description | Icon |
-|------|-------------|------|
-| Friend Bringer | Recruited your first friend to OpenClique | 👋 |
+**CliquesManager.tsx Updates:**
+- Add "Delete" button (only visible for archived cliques or those with 0 active members)
+- Confirmation dialog with warning about permanent deletion
+- Call `delete_clique` RPC on confirmation
 
 ---
 
-## Frontend Components
+## Part 6: Remove Squad Directory
 
-### 1. `RecruitFriendButton` Component
+### Current State
+- SquadsDirectory shows instance-based squads (quest_squads)
+- CliquesManager shows persistent cliques (squads table)
+- This creates confusion as "cliques" is the new terminology
 
-New component: `src/components/quests/RecruitFriendButton.tsx`
+### Implementation
 
-Features:
-- Generates/retrieves friend invite code
-- Shows shareable link with code
-- Copy buttons for code and full link
-- XP reward preview (+50 XP per friend)
-- Progress toward achievements
-
-### 2. Add to `QuestsTab.tsx`
-
-Add "Recruit a Friend" button to quest cards for `pending`, `confirmed`, or `standby` signups:
-
-```tsx
-{(signup.status === 'pending' || signup.status === 'confirmed' || signup.status === 'standby') && (
-  <RecruitFriendButton 
-    questId={signup.quest.id} 
-    questSlug={signup.quest.slug}
-  />
-)}
-```
-
-### 3. Update Auth Flow
-
-Modify `src/pages/Auth.tsx` to:
-- Check for `?invite=FRIEND-XXXXX` query param
-- After successful signup, call `redeem_friend_invite` RPC
-- Show celebration modal with quest auto-signup confirmation
-
-### 4. Hook: `useFriendInvite`
-
-New hook: `src/hooks/useFriendInvite.ts`
-
+**AdminSectionNav.tsx Changes:**
+Remove `squads-directory` from the tabs array:
 ```typescript
-export function useFriendInvite(questId: string) {
-  // Generate or fetch existing invite code
-  // Return code, link, copy functions
-  // Track successful recruitments for user
-}
+// REMOVE from squads-cliques section:
+{ id: 'squads-directory', label: 'Squad Directory' },
 ```
+
+**Admin.tsx Changes:**
+- Remove `SquadsDirectory` import
+- Remove `case 'squads-directory'` from renderContent switch
+
+**Keep File:**
+- Keep `SquadsDirectory.tsx` file for now (might be useful for audit/legacy)
+- Or mark as deprecated with comment
 
 ---
 
-## Admin Analytics
+## Part 7: Admin Structure Cleanup
 
-### 1. Add to `PlatformStats.tsx`
+### Navigation Reorganization
 
-New stat card:
-- **Friends Recruited**: Total count from `friend_invites` where `redeemed_at IS NOT NULL`
+**Final AdminSectionNav Structure:**
 
-### 2. New Admin Tab: `ReferralAnalytics.tsx`
+```
+Quests Manager
+  ├── All Quests
+  ├── Active Instances
+  └── Archives
 
-Add under Growth section:
+Approvals & Ops
+  ├── Quest Approvals
+  ├── Ops Alerts
+  └── Audit Log
 
-```text
-Growth
-  ├── Invite Codes
-  ├── Onboarding Feedback
+Squads & Cliques
+  ├── Cliques (with delete capability)
+  ├── Comparison
+  ├── Health
+  └── Archival
+
+Organizations
+  ├── Clubs & Orgs (non-umbrella, with parent org display)
+  ├── Enterprise View (NEW - umbrella analytics)
+  └── Applications
+
+Support
+  ├── Ticket Inbox
+  ├── Direct Messages
+  ├── Flags & Trust
   ├── Analytics
-  └── Friend Referrals (NEW)
+  └── Issue Categories
+
+Partners
+  ├── Creators
+  ├── Sponsors
+  ├── Testimonials
+  ├── Creator View
+  └── Sponsor View
+
+Content
+  ├── UGC Gallery
+  └── Testimonials
+
+Communications
+  ├── Messaging
+  ├── Notification Console
+  ├── WhatsApp
+  └── Signup Links
+
+Payments & Premium
+  ├── Pilot Demand
+  ├── Tier Accounts
+  ├── Applications
+  └── ARR Forecasting
+
+Growth
+  ├── Codes & Keys (RENAMED, expanded)
+  ├── Friend Referrals
+  ├── Onboarding Feedback
+  └── Analytics
+
+Identity System
+  ├── Trait Library
+  ├── Emerging Traits
+  ├── User Inspector
+  ├── AI Inference Logs
+  └── AI Prompts
+
+Gamification
+  ├── XP & Levels
+  ├── Achievements
+  ├── Badges
+  └── Streaks
+
+Ops & Dev
+  ├── Shadow Mode
+  ├── Event Timeline
+  ├── Flow Debugger
+  ├── Manual Overrides
+  ├── Feature Flags
+  ├── Security Tools
+  └── Dev Tools
+
+Documentation
+  ├── System Docs
+  ├── Operations Playbooks
+  └── Export Handoff Pack
 ```
-
-Component: `src/components/admin/ReferralAnalytics.tsx`
-
-Features:
-- Total friends recruited (all-time)
-- Friends recruited this week/month
-- Top recruiters leaderboard (anonymized or full names)
-- Conversion funnel: Invites Created → Clicked → Redeemed
-- Distribution chart: Users by recruit count (0, 1-4, 5-9, 10+)
-- Recruit-to-quest-completion rate
 
 ---
 
-## XP & Gamification Updates
+## Part 8: Documentation Updates
 
-### 1. Update `useUserXP.ts` Labels
+### System Docs Updates (DocsManager)
 
-Add new source label:
-```typescript
-friend_recruit: 'Friend Recruited',
-```
+**Add New Documents:**
 
-### 2. Update Achievement Toast
+| Category | Subcategory | Title |
+|----------|-------------|-------|
+| flow | organization | Organization & Club Join Flow |
+| flow | social_chair | Social Chair Onboarding Flow |
+| rule | organizations | Club Hierarchy & Permissions |
+| security | rbac | Organization Role Matrix (add social_chair, org_admin) |
 
-The existing `showAchievementToast` will automatically display when achievements unlock via the RPC flow.
+**Update Existing:**
+- "RBAC Permission Matrix" - Add social_chair and org_admin roles
+- "Product Overview" - Add section on enterprise/club model
+
+### Operations Playbooks Updates (DocsPlaybookManager)
+
+**Add New Documents:**
+
+| Category | Subcategory | Title |
+|----------|-------------|-------|
+| playbook | club_onboarding | Club Leader Onboarding Runbook |
+| playbook | enterprise_setup | Enterprise Account Setup Guide |
+| process | club_management | Club Code Distribution Process |
+| sla | enterprise | Enterprise Support SLA |
+
+### Export Handoff Pack Updates (DocsExportPanel)
+
+**Add to CTO sections:**
+- Organization hierarchy documentation
+- Club management flows
+
+**Add to COO sections:**
+- Enterprise setup playbook
+- Club leader onboarding process
 
 ---
 
-## Files to Create
+## Files Summary
+
+### Files to Create
 
 | File | Purpose |
 |------|---------|
-| `src/components/quests/RecruitFriendButton.tsx` | Main recruit button with modal |
-| `src/hooks/useFriendInvite.ts` | Hook for invite code management |
-| `src/components/admin/ReferralAnalytics.tsx` | Admin analytics dashboard |
-| `supabase/migrations/XXXXXX_friend_invites.sql` | Database migration |
+| `src/components/profile/OrganizationsTab.tsx` | My Organizations tab for Profile Hub |
+| `src/components/clubs/SocialChairOnboarding.tsx` | Multi-step onboarding wizard |
+| `src/components/admin/EnterpriseOrgsManager.tsx` | Enterprise umbrella analytics |
+| `supabase/migrations/XXXXXX_delete_clique.sql` | Add delete_clique RPC |
 
-## Files to Modify
+### Files to Modify
 
 | File | Changes |
 |------|---------|
-| `src/components/profile/QuestsTab.tsx` | Add RecruitFriendButton to quest cards |
-| `src/pages/Auth.tsx` | Handle friend invite code redemption |
-| `src/hooks/useUserXP.ts` | Add `friend_recruit` label |
-| `src/components/admin/AdminSectionNav.tsx` | Add Friend Referrals tab |
-| `src/pages/Admin.tsx` | Add ReferralAnalytics case |
-| `src/components/admin/PlatformStats.tsx` | Add recruit count stat |
+| `src/pages/Profile.tsx` | Add Organizations tab |
+| `src/components/admin/AdminSectionNav.tsx` | Remove squads-directory, rename invite-codes, add enterprise-view |
+| `src/pages/Admin.tsx` | Update routing for new structure |
+| `src/components/admin/OrgsManager.tsx` | Add umbrella toggle, parent_org selector, verified domains, social_chair role |
+| `src/components/admin/CliquesManager.tsx` | Add delete functionality |
+| `src/components/admin/InviteCodesManager.tsx` | Add org_invite_codes tab, rename to Codes & Keys |
+| `src/components/clubs/SocialChairDashboard.tsx` | Add invite codes tab, onboarding check |
+
+### Files to Remove from Navigation (Keep Files)
+
+| File | Reason |
+|------|--------|
+| `src/components/admin/SquadsDirectory.tsx` | Redundant with CliquesManager, removed from nav |
 
 ---
 
 ## Technical Considerations
 
-### Code Format
-Friend invite codes use format: `FRIEND-{8_CHAR_RANDOM}`
-- Example: `FRIEND-X7K2M9PQ`
-- Uppercase, alphanumeric, easy to share verbally
+### Database Schema (Already Exists)
+- `organizations.is_umbrella` - Boolean for enterprise umbrellas
+- `organizations.parent_org_id` - FK for club-to-umbrella relationship
+- `organizations.verified_domains` - Text array for email domain verification
+- `org_invite_codes` - Table for organization-specific invite codes
+- `profile_organizations.role` - Includes social_chair, org_admin
 
-### Squad Grouping Integration
-The `redeem_friend_invite` RPC inserts into the existing `referrals` table with `referred_user_id` populated. The `recommend-squads` edge function already uses this data to create "referral clusters" for squad formation.
+### Analytics Rollup Query (for Enterprise View)
+```sql
+WITH umbrella_stats AS (
+  SELECT 
+    o.id as umbrella_id,
+    o.name as umbrella_name,
+    COUNT(DISTINCT child.id) as club_count,
+    COUNT(DISTINCT po.profile_id) as total_members,
+    COUNT(DISTINCT q.id) as total_quests
+  FROM organizations o
+  LEFT JOIN organizations child ON child.parent_org_id = o.id
+  LEFT JOIN profile_organizations po ON po.org_id = child.id
+  LEFT JOIN quests q ON q.org_id = child.id AND q.status = 'open'
+  WHERE o.is_umbrella = true
+  GROUP BY o.id, o.name
+)
+SELECT * FROM umbrella_stats;
+```
 
-### Security
-- RLS policies ensure users can only see their own invites
-- Admins can view all invites for analytics
-- Codes expire after 30 days (optional, can be added)
-
-### Mobile Considerations
-- RecruitFriendButton uses responsive dialog/drawer pattern
-- Share functionality uses native share API when available
-- Code is copy-friendly for messaging apps
+### RLS Considerations
+- Ensure `social_chair` role has proper access to `org_invite_codes` (already in place)
+- Enterprise admins need visibility across child orgs
 
 ---
 
 ## Implementation Order
 
-1. **Database Migration** - Create `friend_invites` table, RPC functions, achievement templates
-2. **Hooks** - Create `useFriendInvite` hook
-3. **Components** - Build `RecruitFriendButton` with modal
-4. **QuestsTab Integration** - Add button to quest cards
-5. **Auth Flow** - Handle invite code redemption on signup
-6. **Admin Analytics** - Add `ReferralAnalytics` component
-7. **PlatformStats** - Add recruit count to dashboard
-8. **Testing** - End-to-end flow verification
+1. **Database Migration** - Add delete_clique RPC
+2. **Admin Cleanup** - Remove Squad Directory from nav, rename Invite Codes
+3. **OrgsManager Enhancement** - Add umbrella fields, parent org, verified domains
+4. **Enterprise View** - Create EnterpriseOrgsManager component
+5. **Codes & Keys** - Expand InviteCodesManager with org codes
+6. **CliquesManager** - Add delete functionality
+7. **Profile Organizations Tab** - Create OrganizationsTab component
+8. **Social Chair Onboarding** - Create onboarding wizard
+9. **Documentation** - Update system docs and playbooks
+10. **Testing** - End-to-end flow verification
+
+---
+
+## User Journey: Club Leader Setup
+
+1. Admin creates "GBAT" org under UT Austin umbrella in admin panel
+2. Admin generates creator code with type "organization" for GBAT
+3. GBAT leader receives code, signs up, redeems code
+4. GBAT leader is assigned `social_chair` role by admin
+5. On first visit to `/org/gbat`, Social Chair Onboarding starts
+6. GBAT leader completes onboarding, generates member invite codes
+7. GBAT leader shares codes with club members
+8. Members redeem codes, appear in GBAT's member list
+9. GBAT leader creates quests, members receive notifications
+10. Analytics roll up to UT Austin enterprise view
