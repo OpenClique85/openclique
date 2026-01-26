@@ -1,11 +1,32 @@
 /**
- * ClubDashboardPage - Social Chair Dashboard for club management
+ * =============================================================================
+ * ClubDashboardPage - Social Chair Dashboard Route Handler
+ * =============================================================================
  * 
- * This page:
- * - Fetches organization by slug from URL params
- * - Verifies user has social_chair, admin, or org_admin role
- * - Renders SocialChairDashboard if authorized
- * - Shows access denied if not authorized
+ * Protected page that renders the Social Chair Dashboard for authorized users.
+ * Accessed via route: `/org/:slug/dashboard`
+ * 
+ * ## Authorization Flow
+ * 
+ * ```
+ * 1. Extract slug from URL params
+ * 2. Query organizations table by slug
+ * 3. Query profile_organizations for user's role
+ * 4. Render dashboard OR access denied based on role
+ * ```
+ * 
+ * ## Authorized Roles
+ * 
+ * - `social_chair` - Primary club manager
+ * - `org_admin` - Organization-level admin
+ * - `admin` - Platform admin (global access)
+ * 
+ * ## Related Routes
+ * 
+ * - `/org/:slug` - Public org portal (OrgPortal component)
+ * - `/org/:slug/dashboard` - This page (Social Chair only)
+ * 
+ * @module pages/ClubDashboardPage
  */
 
 import { useParams, Link } from 'react-router-dom';
@@ -18,6 +39,10 @@ import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowLeft, Loader2, ShieldX, Building2 } from 'lucide-react';
+
+// -----------------------------------------------------------------------------
+// COMPONENT
+// -----------------------------------------------------------------------------
 
 export default function ClubDashboardPage() {
   const { slug } = useParams<{ slug: string }>();

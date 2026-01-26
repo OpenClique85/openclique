@@ -1,13 +1,41 @@
 /**
- * ClubDetailView - Drill-down view for a club
+ * =============================================================================
+ * ClubDetailView - Enterprise Portal Club Drill-Down
+ * =============================================================================
  * 
- * Shows full club dashboard with:
- * - Club info & settings
- * - Member list with roles
- * - Social chair management
- * - Quests under this club
- * - Invite codes
- * - Admin actions
+ * Full-featured admin view for a single club within the Enterprise Portal.
+ * Provides comprehensive management capabilities for platform administrators.
+ * 
+ * ## Features
+ * 
+ * - **Overview**: Club details, stats, and social chairs
+ * - **Members**: List all members, remove members, assign social chairs
+ * - **Quests**: View quests associated with this club
+ * - **Invite Codes**: Manage all invite codes with label/role info
+ * 
+ * ## Tab Structure
+ * 
+ * ```
+ * ClubDetailView
+ *   ├── Overview Tab
+ *   │     ├── Club details (type, created, parent org)
+ *   │     └── Social Chairs section
+ *   ├── Members Tab
+ *   │     └── Member table with role badges and remove action
+ *   ├── Quests Tab
+ *   │     └── Quest table with status badges
+ *   └── Invite Codes Tab
+ *         └── Code table with label, role, usage, actions
+ * ```
+ * 
+ * ## Data Sources
+ * 
+ * - `organizations` - Club details
+ * - `profile_organizations` - Member list and roles
+ * - `org_invite_codes` - Invite codes with new label/role fields
+ * - `quests` - Quests where org_id matches
+ * 
+ * @module enterprise/ClubDetailView
  */
 
 import { useState } from 'react';
@@ -58,11 +86,23 @@ import {
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
+// -----------------------------------------------------------------------------
+// TYPE DEFINITIONS
+// -----------------------------------------------------------------------------
+
+/**
+ * Props for the ClubDetailView component
+ */
 interface ClubDetailViewProps {
+  /** UUID of the club to display */
   clubId: string;
+  /** Callback to navigate back to the clubs list */
   onBack: () => void;
 }
 
+/**
+ * Club record with parent organization info
+ */
 interface ClubDetails {
   id: string;
   name: string;
@@ -72,9 +112,13 @@ interface ClubDetails {
   parent_org_id: string | null;
   suspended_at: string | null;
   created_at: string;
+  /** Resolved parent organization info */
   parent_org?: { name: string; slug: string } | null;
 }
 
+/**
+ * Club member record with profile info
+ */
 interface ClubMember {
   profile_id: string;
   org_id: string;
@@ -86,10 +130,15 @@ interface ClubMember {
   } | null;
 }
 
+/**
+ * Invite code record with new label/role fields
+ */
 interface ClubInviteCode {
   id: string;
   code: string;
+  /** Human-readable label (e.g., "Spring 2026 Cohort") */
   label: string | null;
+  /** Role auto-assigned on redemption */
   auto_assign_role: string | null;
   is_active: boolean;
   uses_count: number;
@@ -98,6 +147,9 @@ interface ClubInviteCode {
   created_at: string;
 }
 
+/**
+ * Quest record for the quests tab
+ */
 interface ClubQuest {
   id: string;
   title: string;
@@ -106,6 +158,10 @@ interface ClubQuest {
   start_datetime: string | null;
   created_at: string;
 }
+
+// -----------------------------------------------------------------------------
+// COMPONENT
+// -----------------------------------------------------------------------------
 
 export function ClubDetailView({ clubId, onBack }: ClubDetailViewProps) {
   const { user } = useAuth();

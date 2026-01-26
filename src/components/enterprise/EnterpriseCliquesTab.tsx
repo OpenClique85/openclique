@@ -1,11 +1,36 @@
 /**
- * EnterpriseCliquesTab - Manage cliques/squads across the platform
+ * =============================================================================
+ * EnterpriseCliquesTab - Platform-Wide Clique Management
+ * =============================================================================
  * 
- * Features:
- * - List all cliques with filtering
- * - Archive/delete cliques
- * - View clique details
- * - Remove members from cliques
+ * Admin component for managing all cliques/squads across the platform.
+ * Includes organization filtering to see which club each clique belongs to.
+ * 
+ * ## Features
+ * 
+ * - **List All Cliques**: View with member/message counts
+ * - **Organization Filter**: Filter by specific org or "Unaffiliated"
+ * - **Archive/Reactivate**: Soft-delete cliques
+ * - **Delete**: Permanently remove empty cliques
+ * - **Member Management**: View and remove individual members
+ * 
+ * ## Data Flow
+ * 
+ * ```
+ * EnterpriseCliquesTab
+ *   ├── Query: squads (all cliques)
+ *   ├── Query: organizations (for org lookup by slug)
+ *   ├── Aggregate: squad_members (member count)
+ *   ├── Aggregate: squad_chat_messages (message count)
+ *   └── Mutations: archive, delete, remove member
+ * ```
+ * 
+ * ## Organization Mapping
+ * 
+ * Cliques link to organizations via `squads.org_code` → `organizations.slug`.
+ * This enables filtering and displaying which club a clique belongs to.
+ * 
+ * @module enterprise/EnterpriseCliquesTab
  */
 
 import { useState } from 'react';
@@ -64,6 +89,13 @@ import {
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
+// -----------------------------------------------------------------------------
+// TYPE DEFINITIONS
+// -----------------------------------------------------------------------------
+
+/**
+ * Clique record with computed counts and organization info
+ */
 interface Clique {
   id: string;
   name: string;
@@ -71,13 +103,21 @@ interface Clique {
   commitment_style: string | null;
   archived_at: string | null;
   created_at: string;
+  /** Organization slug (links to organizations.slug) */
   org_code: string | null;
+  /** Computed: number of active members */
   member_count?: number;
+  /** Computed: number of chat messages */
   message_count?: number;
+  /** Resolved organization name */
   org_name?: string | null;
+  /** Resolved organization UUID */
   org_id?: string | null;
 }
 
+/**
+ * Member record with profile info for the members modal
+ */
 interface CliqueMember {
   id: string;
   user_id: string;
@@ -88,6 +128,10 @@ interface CliqueMember {
     display_name: string | null;
   } | null;
 }
+
+// -----------------------------------------------------------------------------
+// COMPONENT
+// -----------------------------------------------------------------------------
 
 export function EnterpriseCliquesTab() {
   const queryClient = useQueryClient();
