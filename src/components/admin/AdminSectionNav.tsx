@@ -23,36 +23,44 @@ export interface AdminSection {
 
 export const ADMIN_SECTIONS: AdminSection[] = [
   {
-    id: 'mission-control',
-    label: 'Mission Control',
+    id: 'quests-manager',
+    label: 'Quests Manager',
     icon: <Target className="h-4 w-4" />,
     tabs: [
+      { id: 'quests', label: 'All Quests' },
       { id: 'pilot-instances', label: 'Active Instances' },
-      { id: 'ops-alerts', label: 'Ops Alerts' },
+      { id: 'quest-archives', label: 'Archives' },
     ],
   },
   {
     id: 'approvals',
-    label: 'Approvals',
+    label: 'Approvals & Ops',
     icon: <CheckSquare className="h-4 w-4" />,
     tabs: [
       { id: 'approval-inbox', label: 'Quest Approvals' },
+      { id: 'ops-alerts', label: 'Ops Alerts' },
       { id: 'audit-log', label: 'Audit Log' },
     ],
   },
   {
-    id: 'catalog',
-    label: 'Quest Catalog',
+    id: 'squads-cliques',
+    label: 'Squads & Cliques',
     icon: <Library className="h-4 w-4" />,
     tabs: [
-      { id: 'quests', label: 'Quest Templates' },
-      { id: 'quest-archives', label: 'Quest Archives' },
-      { id: 'orgs', label: 'Organizations' },
-      { id: 'org-applications', label: 'Org Applications' },
       { id: 'squads-directory', label: 'Squad Directory' },
-      { id: 'squad-comparison', label: 'Squad Comparison' },
-      { id: 'squad-health', label: 'Squad Health' },
+      { id: 'cliques-manager', label: 'Cliques' },
+      { id: 'squad-comparison', label: 'Comparison' },
+      { id: 'squad-health', label: 'Health' },
       { id: 'squad-archival', label: 'Archival' },
+    ],
+  },
+  {
+    id: 'orgs',
+    label: 'Organizations',
+    icon: <Users className="h-4 w-4" />,
+    tabs: [
+      { id: 'orgs', label: 'All Organizations' },
+      { id: 'org-applications', label: 'Applications' },
     ],
   },
   {
@@ -62,7 +70,6 @@ export const ADMIN_SECTIONS: AdminSection[] = [
     tabs: [
       { id: 'support-inbox', label: 'Ticket Inbox' },
       { id: 'support-dm', label: 'Direct Messages' },
-      { id: 'cliques-manager', label: 'Clique Moderation' },
       { id: 'moderation-dashboard', label: 'Flags & Trust' },
       { id: 'support-analytics', label: 'Analytics' },
       { id: 'support-categories', label: 'Issue Categories' },

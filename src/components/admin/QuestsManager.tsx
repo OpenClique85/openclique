@@ -203,21 +203,65 @@ export function QuestsManager() {
     
     setIsChangingStatus(true);
     
+    // Update the quest status
     const { error } = await supabase
       .from('quests')
       .update({ status: pendingStatus })
       .eq('id', statusChangeQuest.id);
     
-    setIsChangingStatus(false);
-    setStatusChangeQuest(null);
-    setPendingStatus(null);
-    
     if (error) {
+      setIsChangingStatus(false);
       toast({ variant: 'destructive', title: 'Failed to update status', description: error.message });
       return;
     }
     
-    toast({ title: `Quest ${pendingStatus === 'cancelled' ? 'cancelled' : pendingStatus === 'paused' ? 'paused' : 'updated'}` });
+    // If cancelling or pausing, notify signed-up users
+    if (pendingStatus === 'cancelled' || pendingStatus === 'paused') {
+      try {
+        // Get all users who signed up for this quest
+        const { data: signups } = await supabase
+          .from('quest_signups')
+          .select('user_id')
+          .eq('quest_id', statusChangeQuest.id)
+          .in('status', ['pending', 'confirmed', 'standby']);
+        
+        if (signups && signups.length > 0) {
+          const notificationTitle = pendingStatus === 'cancelled' 
+            ? `Quest Cancelled: ${statusChangeQuest.title}`
+            : `Quest Paused: ${statusChangeQuest.title}`;
+          
+          const notificationBody = pendingStatus === 'cancelled'
+            ? 'This quest has been cancelled. We apologize for any inconvenience.'
+            : 'This quest has been temporarily paused. We\'ll notify you when it resumes.';
+          
+          // Create notifications for all signed-up users
+          const notifications = signups.map(signup => ({
+            user_id: signup.user_id,
+            type: 'general' as const,
+            title: notificationTitle,
+            body: notificationBody,
+            quest_id: statusChangeQuest.id,
+          }));
+          
+          await supabase.from('notifications').insert(notifications);
+          
+          toast({ 
+            title: `Quest ${pendingStatus} and ${signups.length} user${signups.length !== 1 ? 's' : ''} notified` 
+          });
+        } else {
+          toast({ title: `Quest ${pendingStatus === 'cancelled' ? 'cancelled' : 'paused'}` });
+        }
+      } catch (notifyError) {
+        console.error('Failed to send notifications:', notifyError);
+        toast({ title: `Quest ${pendingStatus === 'cancelled' ? 'cancelled' : 'paused'} (notifications failed)` });
+      }
+    } else {
+      toast({ title: `Quest status updated to ${pendingStatus}` });
+    }
+    
+    setIsChangingStatus(false);
+    setStatusChangeQuest(null);
+    setPendingStatus(null);
     fetchQuests();
   };
 
