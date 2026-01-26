@@ -2,16 +2,28 @@
  * =============================================================================
  * TutorialOverlay - Spotlight and tooltip overlay for tutorial steps
  * =============================================================================
+ * 
+ * Enhanced to show action requirements and completion status for interactive steps.
  */
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useTutorial } from './TutorialProvider';
+import { useTutorial, TutorialAction } from './TutorialProvider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { ChevronLeft, ChevronRight, X, Sparkles } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { ChevronLeft, ChevronRight, X, Sparkles, Check, Lock } from 'lucide-react';
 import buggsIcon from '@/assets/buggs-icon.png';
+
+const ACTION_LABELS: Record<TutorialAction, string> = {
+  navigate: 'Navigate',
+  click: 'Click',
+  observe: 'Look',
+  profile_update: 'Update your profile',
+  quest_signup: 'Sign up for a quest',
+  squad_chat: 'Send a message in squad chat',
+};
 
 export function TutorialOverlay() {
   const navigate = useNavigate();
@@ -20,15 +32,19 @@ export function TutorialOverlay() {
     isActive,
     currentStep,
     steps,
+    completedActions,
     nextStep,
     prevStep,
     skipTutorial,
+    canProceed,
   } = useTutorial();
 
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
 
   const step = steps[currentStep];
   const progress = ((currentStep + 1) / steps.length) * 100;
+  
+  const isActionComplete = step?.action ? completedActions.has(step.action) : true;
 
   // Navigate to step route if needed
   useEffect(() => {
@@ -128,9 +144,36 @@ export function TutorialOverlay() {
 
           {/* Content */}
           <div className="p-4">
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-sm text-muted-foreground mb-3">
               {step.description}
             </p>
+            
+            {/* Action requirement badge */}
+            {step.requiresCompletion && step.action && (
+              <div className="mb-4">
+                <Badge 
+                  variant={isActionComplete ? 'default' : 'secondary'}
+                  className={`gap-1 ${isActionComplete ? 'bg-green-600' : ''}`}
+                >
+                  {isActionComplete ? (
+                    <>
+                      <Check className="h-3 w-3" />
+                      Completed
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="h-3 w-3" />
+                      {ACTION_LABELS[step.action]}
+                    </>
+                  )}
+                </Badge>
+                {step.xpReward && !isActionComplete && (
+                  <span className="ml-2 text-xs text-sunset font-medium">
+                    +{step.xpReward} XP
+                  </span>
+                )}
+              </div>
+            )}
 
             {/* Progress */}
             <Progress value={progress} className="h-1 mb-4" />
@@ -156,11 +199,21 @@ export function TutorialOverlay() {
                 Skip Tour
               </Button>
 
-              <Button size="sm" onClick={nextStep}>
+              <Button 
+                size="sm" 
+                onClick={nextStep}
+                disabled={!canProceed}
+                className={!canProceed ? 'opacity-50' : ''}
+              >
                 {currentStep === steps.length - 1 ? (
                   <>
                     <Sparkles className="h-4 w-4 mr-1" />
                     Let's Go!
+                  </>
+                ) : !canProceed ? (
+                  <>
+                    Complete Action
+                    <Lock className="h-4 w-4 ml-1" />
                   </>
                 ) : (
                   <>

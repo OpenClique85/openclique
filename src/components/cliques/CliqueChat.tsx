@@ -1,16 +1,20 @@
 /**
  * CliqueChat - Real-time chat for clique members
+ * Awards XP on first message sent (for tutorial completion)
  */
 
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useAwardXP } from '@/hooks/useUserXP';
+import { useTutorial } from '@/components/tutorial/TutorialProvider';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Loader2 } from 'lucide-react';
+import { Send, Loader2, Sparkles } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 
 interface ChatMessage {
   id: string;
@@ -28,10 +32,14 @@ interface CliqueChatProps {
 
 export function CliqueChat({ cliqueId, isLeader }: CliqueChatProps) {
   const { user } = useAuth();
+  const { toast } = useToast();
+  const awardXP = useAwardXP();
+  const { markActionComplete, completedActions } = useTutorial();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasAwardedFirstMessageXP, setHasAwardedFirstMessageXP] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const fetchMessages = async () => {
@@ -139,6 +147,31 @@ export function CliqueChat({ cliqueId, isLeader }: CliqueChatProps) {
     }
 
     setNewMessage('');
+    
+    // Mark tutorial action complete and award XP for first message
+    if (!hasAwardedFirstMessageXP && !completedActions.has('squad_chat')) {
+      setHasAwardedFirstMessageXP(true);
+      markActionComplete('squad_chat');
+      
+      try {
+        await awardXP.mutateAsync({
+          amount: 10,
+          source: 'squad_chat_first',
+          sourceId: cliqueId,
+        });
+        
+        toast({
+          title: (
+            <span className="flex items-center gap-2">
+              First message sent! <Sparkles className="h-4 w-4 text-sunset" /> +10 XP
+            </span>
+          ) as unknown as string,
+          description: 'You\'re connecting with your clique!',
+        });
+      } catch {
+        // XP award is non-critical
+      }
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
