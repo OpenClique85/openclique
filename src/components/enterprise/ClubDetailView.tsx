@@ -89,6 +89,8 @@ interface ClubMember {
 interface ClubInviteCode {
   id: string;
   code: string;
+  label: string | null;
+  auto_assign_role: string | null;
   is_active: boolean;
   uses_count: number;
   max_uses: number | null;
@@ -585,6 +587,8 @@ export function ClubDetailView({ clubId, onBack }: ClubDetailViewProps) {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Code</TableHead>
+                        <TableHead>Label</TableHead>
+                        <TableHead>Role</TableHead>
                         <TableHead>Uses</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Expires</TableHead>
@@ -596,6 +600,14 @@ export function ClubDetailView({ clubId, onBack }: ClubDetailViewProps) {
                         <TableRow key={code.id}>
                           <TableCell className="font-mono font-medium">
                             {code.code}
+                          </TableCell>
+                          <TableCell>
+                            {code.label || <span className="text-muted-foreground">—</span>}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="capitalize">
+                              {code.auto_assign_role || 'member'}
+                            </Badge>
                           </TableCell>
                           <TableCell>
                             {code.uses_count}{code.max_uses ? ` / ${code.max_uses}` : ''}

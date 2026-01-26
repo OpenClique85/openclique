@@ -2437,34 +2437,40 @@ export type Database = {
       }
       org_invite_codes: {
         Row: {
+          auto_assign_role: string | null
           code: string
           created_at: string
           created_by: string
           expires_at: string | null
           id: string
           is_active: boolean
+          label: string | null
           max_uses: number | null
           org_id: string
           uses_count: number
         }
         Insert: {
+          auto_assign_role?: string | null
           code: string
           created_at?: string
           created_by: string
           expires_at?: string | null
           id?: string
           is_active?: boolean
+          label?: string | null
           max_uses?: number | null
           org_id: string
           uses_count?: number
         }
         Update: {
+          auto_assign_role?: string | null
           code?: string
           created_at?: string
           created_by?: string
           expires_at?: string | null
           id?: string
           is_active?: boolean
+          label?: string | null
           max_uses?: number | null
           org_id?: string
           uses_count?: number
