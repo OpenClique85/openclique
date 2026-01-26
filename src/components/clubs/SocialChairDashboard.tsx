@@ -10,6 +10,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { InviteCodesTab } from './InviteCodesTab';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -47,6 +48,10 @@ import {
   Target,
   Megaphone,
   Loader2,
+  Ticket,
+  Copy,
+  Link2,
+  Plus,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -310,6 +315,10 @@ export function SocialChairDashboard({ clubId, clubName }: SocialChairDashboardP
                 <Users className="h-4 w-4" />
                 Cliques
               </TabsTrigger>
+              <TabsTrigger value="invite-codes" className="gap-1">
+                <Ticket className="h-4 w-4" />
+                Invite Codes
+              </TabsTrigger>
               <TabsTrigger value="broadcast" className="gap-1">
                 <Megaphone className="h-4 w-4" />
                 Broadcast
@@ -415,6 +424,11 @@ export function SocialChairDashboard({ clubId, clubName }: SocialChairDashboardP
                   )}
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            {/* Invite Codes Tab */}
+            <TabsContent value="invite-codes">
+              <InviteCodesTab clubId={clubId} clubName={clubName} />
             </TabsContent>
 
             {/* Broadcast Tab */}

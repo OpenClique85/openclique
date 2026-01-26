@@ -12,9 +12,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { Copy, Plus, Link2, Users, Shield, Sparkles, BarChart3, Download, ExternalLink, Palette, Building2, Store } from 'lucide-react';
+import { Copy, Plus, Link2, Users, Shield, Sparkles, BarChart3, Download, ExternalLink, Palette, Building2, Store, UserPlus, Ticket } from 'lucide-react';
 
 type InviteCodeType = 'admin' | 'tester' | 'early_access' | 'creator' | 'organization' | 'sponsor';
 
@@ -39,6 +40,207 @@ interface Redemption {
   referral_source: string | null;
   invite_codes: { code: string; type: InviteCodeType; label: string | null } | null;
   profiles: { display_name: string; email: string | null } | null;
+}
+
+// Organization Codes Section
+function OrgCodesSection() {
+  const { data: orgCodes, isLoading } = useQuery({
+    queryKey: ['org-invite-codes-all'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('org_invite_codes')
+        .select(`
+          *,
+          organization:organizations(id, name, slug)
+        `)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const copyToClipboard = (code: string) => {
+    navigator.clipboard.writeText(`${window.location.origin}/auth?club=${code}`);
+    toast.success('Invite link copied!');
+  };
+
+  const copyCodeOnly = (code: string) => {
+    navigator.clipboard.writeText(code);
+    toast.success('Code copied!');
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Building2 className="h-5 w-5" />
+          Organization Invite Codes
+        </CardTitle>
+        <CardDescription>Invite codes for clubs and organizations</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <p className="text-muted-foreground">Loading...</p>
+        ) : orgCodes?.length === 0 ? (
+          <p className="text-muted-foreground">No organization codes yet. Social Chairs can create them from their dashboard.</p>
+        ) : (
+          <ScrollArea className="h-[400px]">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Code</TableHead>
+                  <TableHead>Organization</TableHead>
+                  <TableHead>Label</TableHead>
+                  <TableHead>Uses</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Expires</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {orgCodes?.map((code: any) => (
+                  <TableRow key={code.id}>
+                    <TableCell>
+                      <code className="bg-muted px-2 py-1 rounded text-sm font-mono">
+                        {code.code}
+                      </code>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">
+                        {code.organization?.name || 'Unknown'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{code.label || '—'}</TableCell>
+                    <TableCell>
+                      {code.uses_count}
+                      {code.max_uses && ` / ${code.max_uses}`}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{code.auto_assign_role || 'member'}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      {code.expires_at
+                        ? format(new Date(code.expires_at), 'MMM d, yyyy')
+                        : 'Never'}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={code.is_active ? 'default' : 'secondary'}>
+                        {code.is_active ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <Button variant="ghost" size="sm" onClick={() => copyCodeOnly(code.code)}>
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => copyToClipboard(code.code)}>
+                          <Link2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ScrollArea>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// Friend Invites Section
+function FriendInvitesSection() {
+  const { data: friendInvites, isLoading } = useQuery({
+    queryKey: ['friend-invites-all'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('friend_invites')
+        .select(`
+          *,
+          quest:quests(id, title),
+          referrer:profiles!friend_invites_referrer_user_id_fkey(display_name)
+        `)
+        .order('created_at', { ascending: false })
+        .limit(100);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const copyToClipboard = (code: string, questId: string) => {
+    navigator.clipboard.writeText(`${window.location.origin}/quest/${questId}?ref=${code}`);
+    toast.success('Friend invite link copied!');
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <UserPlus className="h-5 w-5" />
+          Friend Recruit Codes
+        </CardTitle>
+        <CardDescription>Quest-specific friend recruitment codes</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <p className="text-muted-foreground">Loading...</p>
+        ) : friendInvites?.length === 0 ? (
+          <p className="text-muted-foreground">No friend invites yet.</p>
+        ) : (
+          <ScrollArea className="h-[400px]">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Code</TableHead>
+                  <TableHead>Quest</TableHead>
+                  <TableHead>Referrer</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Created</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {friendInvites?.map((invite: any) => (
+                  <TableRow key={invite.id}>
+                    <TableCell>
+                      <code className="bg-muted px-2 py-1 rounded text-sm font-mono">
+                        {invite.code}
+                      </code>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm">{invite.quest?.title || 'Unknown'}</span>
+                    </TableCell>
+                    <TableCell>{invite.referrer?.display_name || 'Unknown'}</TableCell>
+                    <TableCell>
+                      {invite.redeemed_at ? (
+                        <Badge variant="default">Redeemed</Badge>
+                      ) : (
+                        <Badge variant="secondary">Pending</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {format(new Date(invite.created_at), 'MMM d, yyyy')}
+                    </TableCell>
+                    <TableCell>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => copyToClipboard(invite.code, invite.quest_id)}
+                      >
+                        <Link2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ScrollArea>
+        )}
+      </CardContent>
+    </Card>
+  );
 }
 
 export function InviteCodesManager() {
@@ -227,7 +429,9 @@ export function InviteCodesManager() {
       <Tabs defaultValue="codes" className="space-y-4">
         <div className="flex items-center justify-between">
           <TabsList>
-            <TabsTrigger value="codes">Invite Codes</TabsTrigger>
+            <TabsTrigger value="codes">Platform Codes</TabsTrigger>
+            <TabsTrigger value="org-codes">Organization Codes</TabsTrigger>
+            <TabsTrigger value="friend-invites">Friend Invites</TabsTrigger>
             <TabsTrigger value="redemptions">Redemptions</TabsTrigger>
           </TabsList>
           
@@ -427,6 +631,16 @@ export function InviteCodesManager() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Organization Codes Tab */}
+        <TabsContent value="org-codes" className="space-y-4">
+          <OrgCodesSection />
+        </TabsContent>
+
+        {/* Friend Invites Tab */}
+        <TabsContent value="friend-invites" className="space-y-4">
+          <FriendInvitesSection />
         </TabsContent>
 
         <TabsContent value="redemptions" className="space-y-4">
