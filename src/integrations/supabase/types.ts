@@ -1780,6 +1780,44 @@ export type Database = {
           },
         ]
       }
+      friend_invites: {
+        Row: {
+          code: string
+          created_at: string | null
+          id: string
+          quest_id: string
+          redeemed_at: string | null
+          referred_user_id: string | null
+          referrer_user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          id?: string
+          quest_id: string
+          redeemed_at?: string | null
+          referred_user_id?: string | null
+          referrer_user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          id?: string
+          quest_id?: string
+          redeemed_at?: string | null
+          referred_user_id?: string | null
+          referrer_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "friend_invites_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       identity_snapshots: {
         Row: {
           created_at: string | null
@@ -6239,6 +6277,7 @@ export type Database = {
         Args: { p_clique_id: string; p_role: string }
         Returns: undefined
       }
+      generate_friend_invite_code: { Args: never; Returns: string }
       generate_invite_code: {
         Args: {
           p_expires_days?: number
@@ -6250,6 +6289,13 @@ export type Database = {
         Returns: string
       }
       generate_simple_invite_code: { Args: never; Returns: string }
+      get_or_create_friend_invite: {
+        Args: { p_quest_id: string }
+        Returns: {
+          code: string
+          created: boolean
+        }[]
+      }
       get_or_create_instance: {
         Args: { p_quest_id: string }
         Returns: {
@@ -6347,6 +6393,10 @@ export type Database = {
       record_referral_signup: {
         Args: { p_referral_code: string; p_user_id: string }
         Returns: undefined
+      }
+      redeem_friend_invite: {
+        Args: { p_code: string; p_new_user_id: string }
+        Returns: Json
       }
       redeem_invite_code: {
         Args: {

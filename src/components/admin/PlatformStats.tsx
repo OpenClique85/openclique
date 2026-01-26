@@ -15,7 +15,8 @@ import {
   Building2, 
   Trophy,
   TrendingUp,
-  Target
+  Target,
+  UserPlus
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -71,6 +72,7 @@ export function PlatformStats() {
         sponsorsResult,
         squadsResult,
         orgsResult,
+        friendsRecruitedResult,
       ] = await Promise.all([
         supabase.from('profiles').select('*', { count: 'exact', head: true }),
         supabase.from('quest_signups').select('*', { count: 'exact', head: true }),
@@ -80,6 +82,7 @@ export function PlatformStats() {
         supabase.from('sponsor_profiles').select('*', { count: 'exact', head: true }).eq('status', 'approved'),
         supabase.from('quest_squads').select('*', { count: 'exact', head: true }).not('status', 'eq', 'cancelled'),
         supabase.from('organizations').select('*', { count: 'exact', head: true }).eq('is_active', true),
+        supabase.from('friend_invites').select('*', { count: 'exact', head: true }).not('redeemed_at', 'is', null),
       ]);
 
       return {
@@ -91,6 +94,7 @@ export function PlatformStats() {
         activeSponsors: sponsorsResult.count || 0,
         activeSquads: squadsResult.count || 0,
         activeOrgs: orgsResult.count || 0,
+        friendsRecruited: friendsRecruitedResult.count || 0,
       };
     },
     staleTime: 60000, // Cache for 1 minute
@@ -150,6 +154,12 @@ export function PlatformStats() {
           label="Organizations"
           value={stats?.activeOrgs || 0}
           icon={<Building2 className="h-4 w-4" />}
+          loading={isLoading}
+        />
+        <StatCard
+          label="Friends Recruited"
+          value={stats?.friendsRecruited || 0}
+          icon={<UserPlus className="h-4 w-4" />}
           loading={isLoading}
         />
       </div>

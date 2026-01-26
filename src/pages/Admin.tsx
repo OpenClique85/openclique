@@ -44,6 +44,7 @@ import { SquadArchivalManager } from '@/components/admin/SquadArchivalManager';
 import { UGCManager } from '@/components/admin/UGCManager';
 import { InviteCodesManager } from '@/components/admin/InviteCodesManager';
 import { OnboardingFeedbackManager } from '@/components/admin/OnboardingFeedbackManager';
+import { ReferralAnalytics } from '@/components/admin/ReferralAnalytics';
 import { PlatformStats } from '@/components/admin/PlatformStats';
 import { QuestArchivesManager } from '@/components/admin/QuestArchivesManager';
 import { CliquesManager } from '@/components/admin/CliquesManager';
@@ -118,6 +119,7 @@ export default function Admin() {
       case 'notification-console': return <NotificationConsole />;
       // Growth
       case 'invite-codes': return <InviteCodesManager />;
+      case 'friend-referrals': return <ReferralAnalytics />;
       case 'onboarding-feedback': return <OnboardingFeedbackManager />;
       // Payments & Premium
       case 'pilot-demand': return <PilotDemandDashboard />;

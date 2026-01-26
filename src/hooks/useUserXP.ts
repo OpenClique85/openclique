@@ -151,6 +151,7 @@ export function formatXPSource(source: string): string {
     // Social/referrals
     referral: 'Referral Bonus',
     referral_signup: 'Friend Joined',
+    friend_recruit: 'Friend Recruited',
     
     // Admin/manual
     admin_bonus: 'Bonus Award',

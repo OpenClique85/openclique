@@ -16,6 +16,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { ContinueYourJourney } from '@/components/progression/ContinueYourJourney';
 import { RewardClaimCard, RewardClaimModal } from '@/components/rewards';
 import { QuestJourneyTimeline } from '@/components/quests';
+import { RecruitFriendButton } from '@/components/quests/RecruitFriendButton';
 import { CancelModal } from '@/components/CancelModal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -403,19 +404,25 @@ export function QuestsTab({ userId }: QuestsTabProps) {
                     </>
                   )}
                   
-                  <div className="flex gap-2 pt-2">
+                  <div className="flex flex-wrap gap-2 pt-2">
                     <Button variant="outline" size="sm" asChild>
                       <Link to={`/quests`}>View Details</Link>
                     </Button>
                     {(signup.status === 'pending' || signup.status === 'confirmed' || signup.status === 'standby') && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-destructive hover:text-destructive"
-                        onClick={() => handleCancelClick(signup)}
-                      >
-                        I Can't Go
-                      </Button>
+                      <>
+                        <RecruitFriendButton 
+                          questId={signup.quest.id} 
+                          questTitle={signup.quest.title}
+                        />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => handleCancelClick(signup)}
+                        >
+                          I Can't Go
+                        </Button>
+                      </>
                     )}
                   </div>
                 </CardContent>
