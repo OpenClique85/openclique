@@ -43,7 +43,7 @@
 
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
-import { Menu, X, ChevronDown, LogIn, LogOut, User, ClipboardList, Sparkles, Building2 } from "lucide-react";
+import { Menu, X, ChevronDown, LogIn, LogOut, User, ClipboardList, Sparkles, Building2, Users, Search, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -97,14 +97,52 @@ export function Navbar() {
             ))}
             {/* Profile - visible when logged in */}
             {user && (
-              <Link
-                to="/profile"
-                className={`text-sm font-medium px-3 py-2 rounded-md transition-colors hover:bg-muted ${
-                  location.pathname.startsWith('/profile') ? "text-primary bg-primary/5" : "text-muted-foreground"
-                }`}
-              >
-                My Hub
-              </Link>
+              <>
+                {/* My Cliques Dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      className={`text-sm font-medium px-3 py-2 rounded-md transition-colors hover:bg-muted flex items-center gap-1 ${
+                        location.pathname.startsWith('/cliques') ? "text-primary bg-primary/5" : "text-muted-foreground"
+                      }`}
+                    >
+                      <Users className="h-4 w-4" />
+                      My Cliques
+                      <ChevronDown className="h-3 w-3" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-48">
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile?tab=cliques" className="flex items-center gap-2 cursor-pointer">
+                        <Users className="h-4 w-4" />
+                        My Cliques
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/cliques/discover" className="flex items-center gap-2 cursor-pointer">
+                        <Search className="h-4 w-4" />
+                        Looking for Clique
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to="/cliques/new" className="flex items-center gap-2 cursor-pointer text-primary">
+                        <Plus className="h-4 w-4" />
+                        Form a Clique
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                
+                <Link
+                  to="/profile"
+                  className={`text-sm font-medium px-3 py-2 rounded-md transition-colors hover:bg-muted ${
+                    location.pathname === '/profile' ? "text-primary bg-primary/5" : "text-muted-foreground"
+                  }`}
+                >
+                  My Hub
+                </Link>
+              </>
             )}
           </div>
 
@@ -253,17 +291,46 @@ export function Navbar() {
                 </Link>
               ))}
               
-              {/* My Hub for logged in users */}
+              {/* My Cliques section for logged in users */}
               {user && (
-                <Link
-                  to="/profile"
-                  className={`text-sm font-medium px-3 py-2 rounded-md transition-colors ${
-                    location.pathname.startsWith('/profile') ? "text-primary bg-primary/5" : "text-muted-foreground hover:bg-muted"
-                  }`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  My Hub
-                </Link>
+                <>
+                  <div className="mt-3 pt-3 border-t border-border">
+                    <p className="text-xs text-muted-foreground px-3 pb-2">My Cliques</p>
+                    <Link
+                      to="/profile?tab=cliques"
+                      className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md text-muted-foreground hover:bg-muted"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <Users className="h-4 w-4" />
+                      My Cliques
+                    </Link>
+                    <Link
+                      to="/cliques/discover"
+                      className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md text-muted-foreground hover:bg-muted"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <Search className="h-4 w-4" />
+                      Looking for Clique
+                    </Link>
+                    <Link
+                      to="/cliques/new"
+                      className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md text-primary hover:bg-muted"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <Plus className="h-4 w-4" />
+                      Form a Clique
+                    </Link>
+                  </div>
+                  <Link
+                    to="/profile"
+                    className={`text-sm font-medium px-3 py-2 rounded-md transition-colors mt-1 ${
+                      location.pathname === '/profile' ? "text-primary bg-primary/5" : "text-muted-foreground hover:bg-muted"
+                    }`}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    My Hub
+                  </Link>
+                </>
               )}
               
               {/* Get Involved section */}

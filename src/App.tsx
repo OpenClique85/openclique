@@ -53,6 +53,8 @@ import Quests from "./pages/Quests";
 import QuestDetail from "./pages/QuestDetail";
 import CliqueDetail from "./pages/CliqueDetail";
 import CliqueWarmUp from "./pages/CliqueWarmUp";
+import CliqueCreate from "./pages/CliqueCreate";
+import JoinClique from "./pages/JoinClique";
 import QuestCard from "./pages/QuestCard";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
@@ -128,8 +130,10 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/my-quests" element={<ProtectedRoute><MyQuests /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+              <Route path="/cliques/new" element={<ProtectedRoute><CliqueCreate /></ProtectedRoute>} />
               <Route path="/cliques/:cliqueId" element={<ProtectedRoute><CliqueDetail /></ProtectedRoute>} />
               <Route path="/cliques/:cliqueId/warmup" element={<ProtectedRoute><CliqueWarmUp /></ProtectedRoute>} />
+              <Route path="/join/:code" element={<JoinClique />} />
               {/* Legacy routes for backward compatibility */}
               <Route path="/squads/:squadId" element={<ProtectedRoute><CliqueDetail /></ProtectedRoute>} />
               <Route path="/warmup/:squadId" element={<ProtectedRoute><CliqueWarmUp /></ProtectedRoute>} />

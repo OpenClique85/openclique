@@ -4,6 +4,7 @@
  * =============================================================================
  * 
  * Features:
+ * - "Form a Clique" CTA at the top
  * - Rich hero cards for each active clique
  * - Clique chat preview
  * - Suggest Quest functionality
@@ -25,7 +26,8 @@ import {
   Crown,
   Compass,
   Loader2,
-  Sparkles
+  Sparkles,
+  Plus
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { SuggestQuestModal } from '@/components/cliques/SuggestQuestModal';
@@ -225,26 +227,56 @@ export function CliquesTab({ userId }: CliquesTabProps) {
 
   if (cliques.length === 0) {
     return (
-      <Card className="border-dashed">
-        <CardContent className="py-16 text-center">
-          <Users className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-          <h3 className="text-lg font-display font-semibold mb-2">No Cliques Yet</h3>
-          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-            Complete your first quest to be matched with a clique. Your clique will appear here with group chat, upcoming adventures, and more.
-          </p>
+      <div className="space-y-6">
+        {/* Form a Clique CTA */}
+        <div className="flex justify-end">
           <Button asChild>
-            <Link to="/quests">
-              <Compass className="h-4 w-4 mr-2" />
-              Find Your First Quest
+            <Link to="/cliques/new">
+              <Plus className="h-4 w-4 mr-2" />
+              Form a Clique
             </Link>
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+
+        <Card className="border-dashed">
+          <CardContent className="py-16 text-center">
+            <Users className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+            <h3 className="text-lg font-display font-semibold mb-2">No Cliques Yet</h3>
+            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+              Form your own clique or complete a quest to be matched with one. 
+              Your cliques will appear here with group chat, upcoming adventures, and more.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button asChild>
+                <Link to="/cliques/new">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Form a Clique
+                </Link>
+              </Button>
+              <Button variant="outline" asChild>
+                <Link to="/quests">
+                  <Compass className="h-4 w-4 mr-2" />
+                  Find a Quest
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
   return (
     <div className="space-y-4">
+      {/* Form a Clique CTA */}
+      <div className="flex justify-end mb-2">
+        <Button asChild>
+          <Link to="/cliques/new">
+            <Plus className="h-4 w-4 mr-2" />
+            Form a Clique
+          </Link>
+        </Button>
+      </div>
       {cliques.map((clique) => {
         const leader = clique.members.find(m => m.role === 'leader');
         const isCurrentUserLeader = leader?.user_id === userId;
