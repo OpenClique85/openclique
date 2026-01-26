@@ -17,6 +17,13 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -50,7 +57,9 @@ import {
   MessageCircle,
   Calendar,
   Loader2,
-  UserMinus
+  UserMinus,
+  Building2,
+  Filter
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -62,8 +71,11 @@ interface Clique {
   commitment_style: string | null;
   archived_at: string | null;
   created_at: string;
+  org_code: string | null;
   member_count?: number;
   message_count?: number;
+  org_name?: string | null;
+  org_id?: string | null;
 }
 
 interface CliqueMember {
@@ -81,18 +93,32 @@ export function EnterpriseCliquesTab() {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const [showArchived, setShowArchived] = useState(false);
+  const [selectedOrgFilter, setSelectedOrgFilter] = useState<string>('all');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showMembersModal, setShowMembersModal] = useState(false);
   const [selectedClique, setSelectedClique] = useState<Clique | null>(null);
   const [cliqueMembers, setCliqueMembers] = useState<CliqueMember[]>([]);
 
-  // Fetch cliques
+  // Fetch all organizations for the filter dropdown
+  const { data: organizations = [] } = useQuery({
+    queryKey: ['enterprise-orgs-filter'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('organizations')
+        .select('id, name, slug')
+        .order('name');
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch cliques with organization info
   const { data: cliques, isLoading } = useQuery({
     queryKey: ['enterprise-cliques', showArchived],
     queryFn: async () => {
       let query = supabase
         .from('squads')
-        .select('id, name, theme_tags, commitment_style, archived_at, created_at')
+        .select('id, name, theme_tags, commitment_style, archived_at, created_at, org_code')
         .order('created_at', { ascending: false });
 
       if (!showArchived) {
@@ -102,7 +128,22 @@ export function EnterpriseCliquesTab() {
       const { data, error } = await query;
       if (error) throw error;
 
-      // Get member and message counts
+      // Create a map of org_code -> org details
+      const orgCodes = [...new Set((data || []).map(c => c.org_code).filter(Boolean))];
+      const orgMap = new Map<string, { id: string; name: string }>();
+      
+      if (orgCodes.length > 0) {
+        const { data: orgs } = await supabase
+          .from('organizations')
+          .select('id, name, slug')
+          .in('slug', orgCodes);
+        
+        (orgs || []).forEach(org => {
+          orgMap.set(org.slug, { id: org.id, name: org.name });
+        });
+      }
+
+      // Get member and message counts, plus org info
       const cliquesWithCounts = await Promise.all(
         (data || []).map(async (clique) => {
           const { count: memberCount } = await supabase
@@ -116,10 +157,14 @@ export function EnterpriseCliquesTab() {
             .select('*', { count: 'exact', head: true })
             .eq('squad_id', clique.id);
 
+          const orgInfo = clique.org_code ? orgMap.get(clique.org_code) : null;
+
           return {
             ...clique,
             member_count: memberCount || 0,
             message_count: messageCount || 0,
+            org_name: orgInfo?.name || null,
+            org_id: orgInfo?.id || null,
           };
         })
       );
@@ -223,9 +268,15 @@ export function EnterpriseCliquesTab() {
     },
   });
 
-  const filteredCliques = cliques?.filter(c =>
-    c.name.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
+  // Filter cliques by search and organization
+  const filteredCliques = cliques?.filter(c => {
+    const matchesSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesOrg = 
+      selectedOrgFilter === 'all' ||
+      (selectedOrgFilter === 'unaffiliated' && !c.org_id) ||
+      c.org_id === selectedOrgFilter;
+    return matchesSearch && matchesOrg;
+  }) || [];
 
   return (
     <div className="space-y-6">
@@ -246,15 +297,35 @@ export function EnterpriseCliquesTab() {
         </Button>
       </div>
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search cliques..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-9"
-        />
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search cliques..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <Select value={selectedOrgFilter} onValueChange={setSelectedOrgFilter}>
+          <SelectTrigger className="w-full sm:w-[220px]">
+            <Filter className="h-4 w-4 mr-2" />
+            <SelectValue placeholder="Filter by organization" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Organizations</SelectItem>
+            <SelectItem value="unaffiliated">Unaffiliated</SelectItem>
+            {organizations.map((org) => (
+              <SelectItem key={org.id} value={org.id}>
+                <div className="flex items-center gap-2">
+                  <Building2 className="h-3.5 w-3.5" />
+                  {org.name}
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Cliques Table */}
@@ -278,6 +349,7 @@ export function EnterpriseCliquesTab() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Clique</TableHead>
+                    <TableHead>Organization</TableHead>
                     <TableHead>Members</TableHead>
                     <TableHead>Messages</TableHead>
                     <TableHead>Style</TableHead>
@@ -307,6 +379,16 @@ export function EnterpriseCliquesTab() {
                             )}
                           </div>
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        {clique.org_name ? (
+                          <Badge variant="secondary" className="gap-1">
+                            <Building2 className="h-3 w-3" />
+                            {clique.org_name}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">Independent</span>
+                        )}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">

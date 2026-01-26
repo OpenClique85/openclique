@@ -116,6 +116,7 @@ const CreatorBrowseListings = lazy(() => import("./pages/CreatorBrowseListings")
 const QuestBuilder = lazy(() => import("./pages/QuestBuilder"));
 const ImportEventbriteQuest = lazy(() => import("./pages/ImportEventbriteQuest"));
 const OrgPortal = lazy(() => import("./pages/OrgPortal"));
+const ClubDashboardPage = lazy(() => import("./pages/ClubDashboardPage"));
 const OrgPage = lazy(() => import("./pages/OrgPage"));
 const EventbriteCallback = lazy(() => import("./pages/EventbriteCallback"));
 const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
@@ -216,6 +217,7 @@ const App = () => (
                 {/* CREATOR PAGES */}
                 <Route path="/creators" element={<CreatorsHub />} />
                 <Route path="/org/:slug" element={<OrgPortal />} />
+                <Route path="/org/:slug/dashboard" element={<ProtectedRoute><ClubDashboardPage /></ProtectedRoute>} />
                 <Route path="/organizations/:orgSlug" element={<OrgPage />} />
                 <Route path="/creators/content-creators" element={<ContentCreatorsPage />} />
                 <Route path="/creators/quest-creators" element={<QuestCreatorsPage />} />
