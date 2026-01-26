@@ -9,15 +9,28 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import type { Quest } from '@/hooks/useQuests';
 import { useQuestRating } from '@/hooks/useQuestRatings';
 import { useCreatorSlug } from '@/hooks/useCreatorSlugs';
+import { useTogglePinQuest, useIsQuestPinned } from '@/hooks/usePinnedQuests';
+import { useUserCliques } from '@/hooks/useUserCliques';
+import { useQuestAffinity } from '@/hooks/useQuestAffinity';
 import { InstancePicker, QuestInstance } from '@/components/quests';
 import QuestProgressionSection from './progression/QuestProgressionSection';
-import { MapPin, Calendar, DollarSign, Users, Gift, Star, ChevronRight } from 'lucide-react';
+import { 
+  MapPin, Calendar, DollarSign, Users, Gift, Star, ChevronRight,
+  Bookmark, BookmarkCheck, Send, Loader2, Sparkles, UserCheck
+} from 'lucide-react';
 
 interface QuestModalProps {
   quest: Quest | null;
@@ -46,6 +59,26 @@ const ctaColorStyles: Record<string, string> = {
   muted: 'bg-primary hover:bg-primary/90 text-primary-foreground opacity-60 cursor-not-allowed',
 };
 
+// Map trait keys to friendly labels
+const TRAIT_LABELS: Record<string, string> = {
+  'adventurous': 'Adventurous types',
+  'creative': 'Creative minds',
+  'social_butterfly': 'Social butterflies',
+  'intellectual': 'Intellectual explorers',
+  'wellness_focused': 'Wellness focused',
+  'culture_seeker': 'Culture seekers',
+  'connector': 'Natural connectors',
+  'introvert_friendly': 'Introverts welcome',
+  'extrovert_energy': 'High-energy folks',
+  'foodie': 'Foodies',
+  'active_lifestyle': 'Active lifestyles',
+  'night_owl': 'Night owls',
+  'early_bird': 'Early birds',
+  'newcomer': 'Newcomers to Austin',
+  'student': 'Students',
+  'professional': 'Professionals',
+};
+
 const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -64,11 +97,83 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
     quest?.creatorType === 'community' ? quest?.creatorId : undefined
   );
 
+  // Pin functionality
+  const isPinned = useIsQuestPinned(quest?.id);
+  const { toggle: togglePin, isPending: isPinPending } = useTogglePinQuest();
+
+  // User's cliques for "suggest to clique"
+  const { data: userCliques = [] } = useUserCliques();
+
+  // Quest affinity for "who it's for"
+  const { data: affinities = [] } = useQuestAffinity(quest?.id);
+
   if (!quest) return null;
 
   const statusConfig = QUEST_STATUS_CONFIG[quest.status];
   const statusStyles = statusColorStyles[statusConfig.color];
   const ctaStyles = ctaColorStyles[statusConfig.color];
+
+  const handlePinClick = async () => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to save quests for later.",
+      });
+      return;
+    }
+    
+    try {
+      const nowPinned = await togglePin(quest.id);
+      toast({
+        title: nowPinned ? "Quest saved!" : "Quest removed",
+        description: nowPinned 
+          ? "Find it in your profile under Pinned Quests."
+          : "Quest removed from your saved list.",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update saved quest.",
+      });
+    }
+  };
+
+  const handleSuggestToClique = async (cliqueId: string, cliqueName: string) => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to suggest quests to your clique.",
+      });
+      return;
+    }
+
+    try {
+      // Create a squad_quest_invite for the clique
+      const { error } = await supabase
+        .from('squad_quest_invites')
+        .insert({
+          squad_id: cliqueId,
+          quest_id: quest.id,
+          proposed_by: user.id,
+          status: 'pending',
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Quest suggested!",
+        description: `Your clique "${cliqueName}" will see this quest suggestion.`,
+      });
+    } catch (error: any) {
+      console.error('Error suggesting quest:', error);
+      toast({
+        variant: "destructive",
+        title: "Failed to suggest quest",
+        description: error.message || "Please try again.",
+      });
+    }
+  };
 
   const handleCTAClick = async (instanceIdOverride?: string) => {
     if (statusConfig.ctaDisabled) return;
@@ -158,7 +263,7 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl p-0 gap-0 flex flex-col">
+      <DialogContent className="max-w-2xl max-h-[90vh] p-0 gap-0 flex flex-col overflow-hidden">
         {/* Hero Image */}
         {quest.image && quest.image !== '/placeholder.svg' && (
           <div className="relative h-32 sm:h-48 w-full overflow-hidden flex-shrink-0">
@@ -168,6 +273,56 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
+            
+            {/* Action buttons on image */}
+            <div className="absolute top-3 right-3 flex gap-2">
+              <Button
+                size="icon"
+                variant="secondary"
+                className="h-9 w-9 bg-background/80 backdrop-blur-sm hover:bg-background"
+                onClick={handlePinClick}
+                disabled={isPinPending}
+              >
+                {isPinPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : isPinned ? (
+                  <BookmarkCheck className="h-4 w-4 text-primary" />
+                ) : (
+                  <Bookmark className="h-4 w-4" />
+                )}
+              </Button>
+              
+              {userCliques.length > 0 && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      size="icon"
+                      variant="secondary"
+                      className="h-9 w-9 bg-background/80 backdrop-blur-sm hover:bg-background"
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
+                      Suggest to Clique
+                    </div>
+                    {userCliques.map((clique) => (
+                      <DropdownMenuItem
+                        key={clique.id}
+                        onClick={() => handleSuggestToClique(clique.id, clique.name)}
+                      >
+                        <Users className="h-4 w-4 mr-2" />
+                        {clique.name}
+                        <span className="ml-auto text-xs text-muted-foreground">
+                          {clique.member_count} members
+                        </span>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
           </div>
         )}
         
@@ -202,8 +357,8 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
           </div>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 min-h-0">
-          <div className="p-4 sm:p-6 space-y-5 sm:space-y-6 pb-24 sm:pb-6">
+        <ScrollArea className="flex-1 min-h-0 overflow-y-auto">
+          <div className="p-4 sm:p-6 space-y-5 sm:space-y-6 pb-28 sm:pb-6">
             {/* Quick Info */}
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div className="flex items-center gap-2 text-muted-foreground">
@@ -226,10 +381,37 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
               )}
             </div>
 
+            {/* Who It's For - Personality Affinity */}
+            {affinities.length > 0 && (
+              <section className="space-y-3">
+                <h4 className="font-display font-semibold text-foreground flex items-center gap-2">
+                  <UserCheck className="w-4 h-4 text-primary" />
+                  Who It's For
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {affinities.map((affinity) => (
+                    <Badge 
+                      key={affinity.trait_key} 
+                      variant="secondary"
+                      className="px-3 py-1.5 text-sm"
+                    >
+                      <Sparkles className="w-3 h-3 mr-1.5 text-primary" />
+                      {TRAIT_LABELS[affinity.trait_key] || affinity.trait_key.replace(/_/g, ' ')}
+                    </Badge>
+                  ))}
+                </div>
+                {affinities[0]?.explanation && (
+                  <p className="text-sm text-muted-foreground italic">
+                    "{affinities[0].explanation}"
+                  </p>
+                )}
+              </section>
+            )}
+
             {/* Description */}
             <section className="space-y-2">
               <h4 className="font-display font-semibold text-foreground">About This Quest</h4>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-muted-foreground text-sm leading-relaxed">
                 {quest.shortDescription}
               </p>
             </section>
@@ -329,14 +511,34 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
         
         {/* Fixed Mobile CTA - Always visible */}
         <div className="fixed bottom-0 inset-x-0 p-4 pb-safe bg-background/95 backdrop-blur-sm border-t shadow-lg sm:relative sm:bottom-auto sm:inset-x-auto sm:border-t sm:shadow-none sm:bg-transparent sm:backdrop-blur-none sm:p-4 sm:pb-4 z-10">
-          <Button
-            size="lg"
-            className={`w-full ${ctaStyles} min-h-[48px]`}
-            onClick={() => handleCTAClick()}
-            disabled={statusConfig.ctaDisabled || isJoining}
-          >
-            {isJoining ? 'Joining...' : user ? statusConfig.ctaText : 'Sign in to Join'}
-          </Button>
+          <div className="flex gap-2">
+            {/* Pin button for mobile (when no image) */}
+            {(!quest.image || quest.image === '/placeholder.svg') && (
+              <Button
+                size="lg"
+                variant="outline"
+                className="min-h-[48px]"
+                onClick={handlePinClick}
+                disabled={isPinPending}
+              >
+                {isPinPending ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : isPinned ? (
+                  <BookmarkCheck className="h-5 w-5 text-primary" />
+                ) : (
+                  <Bookmark className="h-5 w-5" />
+                )}
+              </Button>
+            )}
+            <Button
+              size="lg"
+              className={`flex-1 ${ctaStyles} min-h-[48px]`}
+              onClick={() => handleCTAClick()}
+              disabled={statusConfig.ctaDisabled || isJoining}
+            >
+              {isJoining ? 'Joining...' : user ? statusConfig.ctaText : 'Sign in to Join'}
+            </Button>
+          </div>
           {quest.status === 'open' && (
             <p className="text-xs text-muted-foreground text-center mt-2">
               Spots available for the Austin pilot

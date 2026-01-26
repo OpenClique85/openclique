@@ -11,17 +11,19 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { ContinueYourJourney } from '@/components/progression/ContinueYourJourney';
 import { RewardClaimCard, RewardClaimModal } from '@/components/rewards';
 import { QuestJourneyTimeline } from '@/components/quests';
 import { RecruitFriendButton } from '@/components/quests/RecruitFriendButton';
 import { CancelModal } from '@/components/CancelModal';
+import { usePinnedQuests, useUnpinQuest } from '@/hooks/usePinnedQuests';
+import { useQuests } from '@/hooks/useQuests';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, MapPin, Calendar, MessageCircle, ExternalLink, Star, CheckCircle, Gift, Sparkles, Search } from 'lucide-react';
+import { Loader2, MapPin, Calendar, MessageCircle, ExternalLink, Star, CheckCircle, Gift, Sparkles, Search, Bookmark, X } from 'lucide-react';
 import { format } from 'date-fns';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -269,6 +271,20 @@ export function QuestsTab({ userId }: QuestsTabProps) {
     );
   }
 
+  // Pinned quests
+  const { data: pinnedQuests = [], isLoading: isPinnedLoading } = usePinnedQuests();
+  const { data: allQuests = [] } = useQuests();
+  const unpinMutation = useUnpinQuest();
+  const navigate = useNavigate();
+
+  // Get full quest data for pinned quests
+  const pinnedQuestsWithData = pinnedQuests
+    .map(pin => {
+      const quest = allQuests.find(q => q.id === pin.quest_id);
+      return quest ? { ...quest, pinnedAt: pin.pinned_at } : null;
+    })
+    .filter(Boolean);
+
   return (
     <div className="space-y-8">
       {/* Header with Browse CTA */}
@@ -284,6 +300,52 @@ export function QuestsTab({ userId }: QuestsTabProps) {
           </Link>
         </Button>
       </div>
+
+      {/* Pinned Quests */}
+      {pinnedQuestsWithData.length > 0 && (
+        <section>
+          <h3 className="text-lg font-display font-semibold mb-3 flex items-center gap-2">
+            <Bookmark className="h-5 w-5 text-primary" />
+            Saved for Later ({pinnedQuestsWithData.length})
+          </h3>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {pinnedQuestsWithData.map((quest: any) => (
+              <Card 
+                key={quest.id} 
+                className="overflow-hidden cursor-pointer hover:border-primary/50 transition-colors"
+                onClick={() => navigate('/quests')}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3">
+                    <span className="text-2xl">{quest.icon || '🎯'}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">{quest.title}</p>
+                      <p className="text-sm text-muted-foreground">{quest.metadata?.date}</p>
+                      {quest.theme && (
+                        <Badge variant="secondary" className="mt-1 text-xs">
+                          {quest.theme}
+                        </Badge>
+                      )}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 shrink-0"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        unpinMutation.mutate(quest.id);
+                      }}
+                      disabled={unpinMutation.isPending}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Your Rewards */}
       {availableRewards.length > 0 && (
