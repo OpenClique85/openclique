@@ -36,6 +36,7 @@ import { SecurityTools } from '@/components/admin/ops/SecurityTools';
 import { NotificationConsole } from '@/components/admin/notifications';
 import { DocsManager, DocsExportPanel, DocsPlaybookManager } from '@/components/admin/docs';
 import { PilotInstancesManager } from '@/components/admin/pilot';
+import { PilotProgramsManager, PilotAnalyticsDashboard, PilotNotesManager, PilotTemplatesManager } from '@/components/admin/pilots';
 import { ApprovalInbox, OpsAlerts, AuditLogViewer } from '@/components/admin/control-room';
 import { EnterpriseOrgsManager } from '@/components/admin/EnterpriseOrgsManager';
 import { SquadComparisonView } from '@/components/admin/SquadComparisonView';
@@ -87,6 +88,11 @@ export default function Admin() {
       case 'audit-log': return <AuditLogViewer />;
       // Quest Ops
       case 'pilot-instances': return <PilotInstancesManager />;
+      // Pilot Programs
+      case 'pilot-programs': return <PilotProgramsManager />;
+      case 'pilot-analytics': return <PilotAnalyticsDashboard />;
+      case 'pilot-notes': return <PilotNotesManager />;
+      case 'pilot-templates': return <PilotTemplatesManager />;
       // Operations
       case 'quests': return <QuestsManager />;
       case 'quest-archives': return <QuestArchivesManager />;

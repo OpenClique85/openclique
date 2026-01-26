@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { 
   Target, Users, MessageSquare, BarChart3, Gamepad2,
   ChevronDown, ChevronRight, Wrench, FileText,
-  Shield, Library, CheckSquare, HeadphonesIcon, Image, Ticket, Brain, CreditCard
+  Shield, Library, CheckSquare, HeadphonesIcon, Image, Ticket, Brain, CreditCard, FlaskConical
 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -40,6 +40,17 @@ export const ADMIN_SECTIONS: AdminSection[] = [
       { id: 'approval-inbox', label: 'Quest Approvals' },
       { id: 'ops-alerts', label: 'Ops Alerts' },
       { id: 'audit-log', label: 'Audit Log' },
+    ],
+  },
+  {
+    id: 'pilots',
+    label: 'Pilots',
+    icon: <FlaskConical className="h-4 w-4" />,
+    tabs: [
+      { id: 'pilot-programs', label: 'Active Pilots' },
+      { id: 'pilot-analytics', label: 'Pilot Analytics' },
+      { id: 'pilot-templates', label: 'Templates' },
+      { id: 'pilot-notes', label: 'Notes & Issues' },
     ],
   },
   {

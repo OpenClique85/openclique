@@ -2937,6 +2937,149 @@ export type Database = {
         }
         Relationships: []
       }
+      pilot_notes: {
+        Row: {
+          content: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          note_type: string | null
+          pilot_id: string
+          related_quest_id: string | null
+          related_user_id: string | null
+          tags: string[] | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          note_type?: string | null
+          pilot_id: string
+          related_quest_id?: string | null
+          related_user_id?: string | null
+          tags?: string[] | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          note_type?: string | null
+          pilot_id?: string
+          related_quest_id?: string | null
+          related_user_id?: string | null
+          tags?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pilot_notes_pilot_id_fkey"
+            columns: ["pilot_id"]
+            isOneToOne: false
+            referencedRelation: "pilot_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pilot_notes_related_quest_id_fkey"
+            columns: ["related_quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pilot_programs: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          end_date: string
+          hypothesis: string | null
+          id: string
+          name: string
+          org_id: string | null
+          slug: string
+          start_date: string
+          status: string | null
+          success_criteria: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          end_date: string
+          hypothesis?: string | null
+          id?: string
+          name: string
+          org_id?: string | null
+          slug: string
+          start_date: string
+          status?: string | null
+          success_criteria?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          end_date?: string
+          hypothesis?: string | null
+          id?: string
+          name?: string
+          org_id?: string | null
+          slug?: string
+          start_date?: string
+          status?: string | null
+          success_criteria?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pilot_programs_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pilot_templates: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          default_duration_days: number | null
+          description: string | null
+          hypothesis_template: string | null
+          id: string
+          name: string
+          success_criteria_template: Json | null
+          suggested_metrics: string[] | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          default_duration_days?: number | null
+          description?: string | null
+          hypothesis_template?: string | null
+          id?: string
+          name: string
+          success_criteria_template?: Json | null
+          suggested_metrics?: string[] | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          default_duration_days?: number | null
+          description?: string | null
+          hypothesis_template?: string | null
+          id?: string
+          name?: string
+          success_criteria_template?: Json | null
+          suggested_metrics?: string[] | null
+        }
+        Relationships: []
+      }
       premium_interest: {
         Row: {
           acknowledged_pricing: boolean | null
@@ -6308,6 +6451,7 @@ export type Database = {
           needs_picker: boolean
         }[]
       }
+      get_pilot_metrics: { Args: { p_pilot_id: string }; Returns: Json }
       get_ranked_quests: {
         Args: {
           p_limit?: number
