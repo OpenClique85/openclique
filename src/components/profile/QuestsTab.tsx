@@ -63,6 +63,13 @@ interface QuestsTabProps {
 }
 
 export function QuestsTab({ userId }: QuestsTabProps) {
+  const navigate = useNavigate();
+  
+  // All hooks must be called before any conditional returns
+  const { data: pinnedQuests = [], isLoading: isPinnedLoading } = usePinnedQuests();
+  const { data: allQuests = [] } = useQuests();
+  const unpinMutation = useUnpinQuest();
+  
   const [signups, setSignups] = useState<SignupWithJourney[]>([]);
   const [availableRewards, setAvailableRewards] = useState<RewardWithSponsor[]>([]);
   const [claimedRewardIds, setClaimedRewardIds] = useState<Set<string>>(new Set());
@@ -270,12 +277,6 @@ export function QuestsTab({ userId }: QuestsTabProps) {
       </div>
     );
   }
-
-  // Pinned quests
-  const { data: pinnedQuests = [], isLoading: isPinnedLoading } = usePinnedQuests();
-  const { data: allQuests = [] } = useQuests();
-  const unpinMutation = useUnpinQuest();
-  const navigate = useNavigate();
 
   // Get full quest data for pinned quests
   const pinnedQuestsWithData = pinnedQuests
