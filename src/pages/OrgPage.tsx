@@ -12,8 +12,9 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { ClubDirectory, SocialChairDashboard } from '@/components/clubs';
 import { SchoolVerificationModal } from '@/components/org/SchoolVerificationModal';
+import { OrgClubEvents } from '@/components/org/OrgClubEvents';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -145,15 +146,7 @@ export default function OrgPage() {
               {org.is_umbrella ? (
                 <ClubDirectory umbrellaOrgId={org.id} umbrellaOrgName={org.name} />
               ) : (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Club Events</CardTitle>
-                    <CardDescription>Browse upcoming events from {org.name}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">No upcoming events</p>
-                  </CardContent>
-                </Card>
+                <OrgClubEvents orgId={org.id} orgName={org.name} />
               )}
             </TabsContent>
             <TabsContent value="dashboard">
@@ -163,15 +156,7 @@ export default function OrgPage() {
         ) : org.is_umbrella ? (
           <ClubDirectory umbrellaOrgId={org.id} umbrellaOrgName={org.name} />
         ) : (
-          <Card>
-            <CardHeader>
-              <CardTitle>Club Events</CardTitle>
-              <CardDescription>Browse upcoming events from {org.name}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">No upcoming events</p>
-            </CardContent>
-          </Card>
+          <OrgClubEvents orgId={org.id} orgName={org.name} />
         )}
 
         {/* Verification Modal */}

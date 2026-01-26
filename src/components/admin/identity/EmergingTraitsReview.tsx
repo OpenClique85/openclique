@@ -144,9 +144,19 @@ export function EmergingTraitsReview() {
         },
       });
 
-      // TODO: Trigger retroactive draft generation edge function
-      // For now, just log that this should happen
-      console.log(`[emerging-traits] Should generate retroactive drafts for trait: ${proposal.proposed_slug}`);
+      // Trigger retroactive draft generation
+      supabase.functions.invoke('generate-retroactive-drafts', {
+        body: {
+          trait_slug: proposal.proposed_slug,
+          trigger_criteria: proposal.trigger_criteria || [],
+        },
+      }).then(({ data, error }) => {
+        if (error) {
+          console.error('[emerging-traits] Retroactive generation failed:', error);
+        } else {
+          console.log(`[emerging-traits] Generated ${data?.drafts_created || 0} retroactive drafts for ${proposal.proposed_slug}`);
+        }
+      });
 
       return newTrait;
     },
