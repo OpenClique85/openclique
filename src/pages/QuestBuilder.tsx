@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -30,12 +30,33 @@ import {
   ReviewStep,
 } from '@/components/quest-builder/steps';
 
+// Helper to format Eventbrite address
+const formatEventbriteAddress = (address: any): string => {
+  if (!address) return '';
+  if (typeof address === 'string') return address;
+  return address.localized_address_display || 
+         [address.address_1, address.city, address.region].filter(Boolean).join(', ');
+};
+
+// Helper to calculate duration in minutes from start/end times
+const calculateDurationMinutes = (start: string | null, end: string | null): number => {
+  if (!start || !end) return 120;
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  const diffMs = endDate.getTime() - startDate.getTime();
+  return Math.max(30, Math.round(diffMs / (1000 * 60)));
+};
+
 export default function QuestBuilder() {
   const { questId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Get Eventbrite data from navigation state (if coming from import)
+  const eventbriteData = location.state?.eventbriteData;
 
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<QuestFormData>(defaultFormData);
@@ -82,7 +103,7 @@ export default function QuestBuilder() {
     enabled: !!questId && !!user,
   });
 
-  // Populate form with existing quest data
+  // Populate form with existing quest data OR Eventbrite import data
   useEffect(() => {
     if (existingQuest) {
       setFormData({
@@ -123,8 +144,45 @@ export default function QuestBuilder() {
         meeting_address: existingQuest.meeting_address || '',
         whatsapp_invite_link: existingQuest.whatsapp_invite_link || '',
       });
+    } else if (eventbriteData && !questId) {
+      // Pre-populate from Eventbrite import data
+      const durationMinutes = calculateDurationMinutes(
+        eventbriteData.start_datetime,
+        eventbriteData.end_datetime
+      );
+      
+      setFormData({
+        ...defaultFormData,
+        // Step 1: Basics - Title, description, etc.
+        title: eventbriteData.name || '',
+        short_description: eventbriteData.description?.slice(0, 280) || '',
+        
+        // Step 2: Timing - Dates and duration
+        start_datetime: eventbriteData.start_datetime 
+          ? new Date(eventbriteData.start_datetime).toISOString().slice(0, 16) 
+          : '',
+        end_datetime: eventbriteData.end_datetime 
+          ? new Date(eventbriteData.end_datetime).toISOString().slice(0, 16) 
+          : '',
+        default_duration_minutes: durationMinutes,
+        
+        // Step 3: Experience - Full description
+        full_description: eventbriteData.description || '',
+        
+        // Step 7: Capacity
+        capacity_total: eventbriteData.capacity || 24,
+        cost_description: eventbriteData.is_free ? 'Free' : 'See Eventbrite for pricing',
+        
+        // Step 8: Media & Location
+        image_url: eventbriteData.image_url || '',
+        meeting_location_name: eventbriteData.venue_name || '',
+        meeting_address: formatEventbriteAddress(eventbriteData.venue_address),
+      });
+      
+      // Mark first few steps as completed since we have data
+      setCompletedSteps([1, 2, 3, 8]);
     }
-  }, [existingQuest]);
+  }, [existingQuest, eventbriteData, questId]);
 
   const updateFormData = (updates: Partial<QuestFormData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
@@ -147,7 +205,7 @@ export default function QuestBuilder() {
       
       const slug = formData.slug || generateSlug(formData.title) + '-' + Date.now().toString(36);
       
-      const questData = {
+      const questData: Record<string, unknown> = {
         title: formData.title.trim(),
         slug,
         icon: formData.icon,
@@ -184,12 +242,20 @@ export default function QuestBuilder() {
         submitted_at: submitForReview ? new Date().toISOString() : null,
         status: 'draft' as const,
       };
+      
+      // Include Eventbrite data if this is an import
+      if (eventbriteData && !formData.id) {
+        questData.eventbrite_event_id = eventbriteData.eventbrite_event_id;
+        questData.created_via = 'eventbrite';
+        questData.external_ticket_url = eventbriteData.ticket_url;
+        questData.is_ticketed = !eventbriteData.is_free;
+      }
 
       if (formData.id) {
         // Update existing
         const { data, error } = await supabase
           .from('quests')
-          .update(questData)
+          .update(questData as any)
           .eq('id', formData.id)
           .eq('creator_id', user.id)
           .select()
@@ -201,7 +267,7 @@ export default function QuestBuilder() {
         // Create new
         const { data, error } = await supabase
           .from('quests')
-          .insert(questData)
+          .insert(questData as any)
           .select()
           .single();
         
