@@ -21,7 +21,7 @@ export default function OrgPage() {
   const { user } = useAuth();
 
   const { data: org, isLoading } = useQuery({
-    queryKey: ['org', orgSlug],
+    queryKey: ['organization', orgSlug],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('organizations')

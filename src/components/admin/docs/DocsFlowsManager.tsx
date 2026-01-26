@@ -34,7 +34,7 @@ interface SystemDoc {
   updated_at: string;
 }
 
-const SUBCATEGORIES = ['quest', 'signup', 'squad', 'gamification', 'feedback', 'listing', 'ticket', 'support'];
+const SUBCATEGORIES = ['quest', 'signup', 'clique', 'gamification', 'feedback', 'listing', 'ticket', 'support', 'organization', 'club'];
 
 export function DocsFlowsManager() {
   const queryClient = useQueryClient();

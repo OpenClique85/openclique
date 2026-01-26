@@ -259,7 +259,7 @@ export function RunOfShowControls({ instance }: RunOfShowControlsProps) {
                 size="sm"
                 onClick={() => setRecipientType('squad')}
               >
-                By Squad
+                By Clique
               </Button>
             </div>
 

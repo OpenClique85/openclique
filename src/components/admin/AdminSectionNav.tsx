@@ -63,6 +63,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
       { id: 'support-inbox', label: 'Ticket Inbox' },
       { id: 'support-dm', label: 'Direct Messages' },
       { id: 'cliques-manager', label: 'Clique Moderation' },
+      { id: 'moderation-dashboard', label: 'Flags & Trust' },
       { id: 'support-analytics', label: 'Analytics' },
       { id: 'support-categories', label: 'Issue Categories' },
     ],
