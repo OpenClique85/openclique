@@ -61,6 +61,7 @@ export function EventbriteImportModal({
   const [importedEvent, setImportedEvent] = useState<EventbriteEventData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [duplicateQuest, setDuplicateQuest] = useState<{ id: string; slug: string; title: string } | null>(null);
+  const [activeTab, setActiveTab] = useState('url');
 
   // Check for duplicate quests when we have an imported event
   const { data: existingQuest, isLoading: checkingDuplicate } = useQuery({
@@ -144,7 +145,7 @@ export function EventbriteImportModal({
         </DialogHeader>
 
         {!importedEvent ? (
-          <Tabs defaultValue="url" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="url" className="gap-2">
                 <Link2 className="h-4 w-4" />
@@ -196,6 +197,7 @@ export function EventbriteImportModal({
               <EventbriteBrowseTab 
                 onSelectEvent={handleSelectFromBrowse}
                 isCreatingQuest={false}
+                onSwitchToUrlTab={() => setActiveTab('url')}
               />
             </TabsContent>
           </Tabs>

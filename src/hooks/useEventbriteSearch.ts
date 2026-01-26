@@ -39,6 +39,9 @@ interface SearchResult {
     total_count: number;
     has_more: boolean;
   };
+  message?: string;
+  apiDeprecated?: boolean;
+  organizationName?: string;
 }
 
 export function useEventbriteSearch(params: SearchParams = {}) {
@@ -95,5 +98,8 @@ export function useEventbriteSearch(params: SearchParams = {}) {
     prevPage,
     refetch,
     currentParams: searchParams,
+    message: data?.message,
+    apiDeprecated: data?.apiDeprecated,
+    organizationName: data?.organizationName,
   };
 }
