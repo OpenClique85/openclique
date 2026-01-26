@@ -109,82 +109,84 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <TutorialOverlay />
-          <TutorialPrompt />
           
           <BrowserRouter>
-          <Routes>
-            {/* MAIN PAGES */}
-            <Route path="/" element={<Index />} />
-            <Route path="/how-it-works" element={<HowItWorks />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/quests" element={<Quests />} />
-            <Route path="/quests/:slug" element={<QuestDetail />} />
-            <Route path="/quest-card/:token" element={<QuestCard />} />
+            {/* Tutorial components must be inside BrowserRouter since they use useNavigate */}
+            <TutorialOverlay />
+            <TutorialPrompt />
             
-            {/* AUTH */}
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/my-quests" element={<ProtectedRoute><MyQuests /></ProtectedRoute>} />
-            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-            <Route path="/squads/:squadId" element={<ProtectedRoute><SquadDetail /></ProtectedRoute>} />
-            <Route path="/warmup/:squadId" element={<ProtectedRoute><SquadWarmUp /></ProtectedRoute>} />
-            <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
-            <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
-            <Route path="/support/:ticketId" element={<ProtectedRoute><SupportTicketDetail /></ProtectedRoute>} />
-            <Route path="/admin" element={<ProtectedRoute requireAdmin><Admin /></ProtectedRoute>} />
-            <Route path="/admin/pilot/:instanceId" element={<ProtectedRoute requireAdmin><PilotControlRoom /></ProtectedRoute>} />
-            <Route path="/feedback/:questId" element={<ProtectedRoute><FeedbackFlow /></ProtectedRoute>} />
-            
-            {/* SIGNUP/FUNNEL PAGES */}
-            <Route path="/pilot" element={<Pilot />} />
-            <Route path="/partners" element={<Partners />} />
-            <Route path="/work-with-us" element={<WorkWithUs />} />
-            
-            {/* CREATOR PAGES */}
-            <Route path="/creators" element={<CreatorsHub />} />
-            <Route path="/org/:slug" element={<OrgPortal />} />
-            <Route path="/creators/content-creators" element={<ContentCreatorsPage />} />
-            <Route path="/creators/quest-creators" element={<QuestCreatorsPage />} />
-            <Route path="/creators/onboard" element={<CreatorOnboarding />} />
-            <Route path="/creators/directory" element={<CreatorsDirectory />} />
-            <Route path="/creators/:slug" element={<CreatorPublicProfile />} />
-            <Route path="/creator" element={<ProtectedRoute><CreatorDashboard /></ProtectedRoute>} />
-            <Route path="/creator/quests" element={<ProtectedRoute><CreatorQuests /></ProtectedRoute>} />
-            <Route path="/creator/inbox" element={<ProtectedRoute><CreatorInbox /></ProtectedRoute>} />
-            <Route path="/creator/proposals" element={<ProtectedRoute><CreatorProposals /></ProtectedRoute>} />
-            <Route path="/creator/org-requests" element={<ProtectedRoute><CreatorOrgRequests /></ProtectedRoute>} />
-            <Route path="/creator/analytics" element={<ProtectedRoute><CreatorAnalyticsPage /></ProtectedRoute>} />
-            <Route path="/creator/profile" element={<ProtectedRoute><CreatorProfile /></ProtectedRoute>} />
-            <Route path="/creator/quests/new" element={<ProtectedRoute><QuestBuilder /></ProtectedRoute>} />
-            <Route path="/creator/quests/:questId/edit" element={<ProtectedRoute><QuestBuilder /></ProtectedRoute>} />
-            
-            {/* SPONSOR PAGES */}
-            <Route path="/sponsors/onboard" element={<SponsorOnboarding />} />
-            <Route path="/sponsors/:slug" element={<SponsorPublicProfile />} />
-            <Route path="/sponsor" element={<ProtectedRoute><SponsorDashboard /></ProtectedRoute>} />
-            <Route path="/sponsor/rewards" element={<ProtectedRoute><SponsorRewards /></ProtectedRoute>} />
-            <Route path="/sponsor/venues" element={<ProtectedRoute><SponsorVenues /></ProtectedRoute>} />
-            <Route path="/sponsor/listings" element={<ProtectedRoute><SponsorListings /></ProtectedRoute>} />
-            <Route path="/sponsor/discover" element={<ProtectedRoute><SponsorDiscover /></ProtectedRoute>} />
-            <Route path="/sponsor/browse-creators" element={<ProtectedRoute><SponsorBrowseCreators /></ProtectedRoute>} />
-            <Route path="/sponsor/browse-orgs" element={<ProtectedRoute><SponsorBrowseOrgs /></ProtectedRoute>} />
-            <Route path="/sponsor/org-requests" element={<ProtectedRoute><SponsorOrgRequests /></ProtectedRoute>} />
-            <Route path="/sponsor/proposals" element={<ProtectedRoute><SponsorProposals /></ProtectedRoute>} />
-            <Route path="/sponsor/analytics" element={<ProtectedRoute><SponsorAnalytics /></ProtectedRoute>} />
-            <Route path="/sponsor/profile" element={<ProtectedRoute><SponsorProfile /></ProtectedRoute>} />
-            
-            {/* CREATOR BROWSE */}
-            <Route path="/creator/browse-listings" element={<ProtectedRoute><CreatorBrowseListings /></ProtectedRoute>} />
-            
-            {/* LEGAL PAGES */}
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/terms" element={<Terms />} />
-            
-            {/* 404 */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+            <Routes>
+              {/* MAIN PAGES */}
+              <Route path="/" element={<Index />} />
+              <Route path="/how-it-works" element={<HowItWorks />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/quests" element={<Quests />} />
+              <Route path="/quests/:slug" element={<QuestDetail />} />
+              <Route path="/quest-card/:token" element={<QuestCard />} />
+              
+              {/* AUTH */}
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/my-quests" element={<ProtectedRoute><MyQuests /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+              <Route path="/squads/:squadId" element={<ProtectedRoute><SquadDetail /></ProtectedRoute>} />
+              <Route path="/warmup/:squadId" element={<ProtectedRoute><SquadWarmUp /></ProtectedRoute>} />
+              <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+              <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
+              <Route path="/support/:ticketId" element={<ProtectedRoute><SupportTicketDetail /></ProtectedRoute>} />
+              <Route path="/admin" element={<ProtectedRoute requireAdmin><Admin /></ProtectedRoute>} />
+              <Route path="/admin/pilot/:instanceId" element={<ProtectedRoute requireAdmin><PilotControlRoom /></ProtectedRoute>} />
+              <Route path="/feedback/:questId" element={<ProtectedRoute><FeedbackFlow /></ProtectedRoute>} />
+              
+              {/* SIGNUP/FUNNEL PAGES */}
+              <Route path="/pilot" element={<Pilot />} />
+              <Route path="/partners" element={<Partners />} />
+              <Route path="/work-with-us" element={<WorkWithUs />} />
+              
+              {/* CREATOR PAGES */}
+              <Route path="/creators" element={<CreatorsHub />} />
+              <Route path="/org/:slug" element={<OrgPortal />} />
+              <Route path="/creators/content-creators" element={<ContentCreatorsPage />} />
+              <Route path="/creators/quest-creators" element={<QuestCreatorsPage />} />
+              <Route path="/creators/onboard" element={<CreatorOnboarding />} />
+              <Route path="/creators/directory" element={<CreatorsDirectory />} />
+              <Route path="/creators/:slug" element={<CreatorPublicProfile />} />
+              <Route path="/creator" element={<ProtectedRoute><CreatorDashboard /></ProtectedRoute>} />
+              <Route path="/creator/quests" element={<ProtectedRoute><CreatorQuests /></ProtectedRoute>} />
+              <Route path="/creator/inbox" element={<ProtectedRoute><CreatorInbox /></ProtectedRoute>} />
+              <Route path="/creator/proposals" element={<ProtectedRoute><CreatorProposals /></ProtectedRoute>} />
+              <Route path="/creator/org-requests" element={<ProtectedRoute><CreatorOrgRequests /></ProtectedRoute>} />
+              <Route path="/creator/analytics" element={<ProtectedRoute><CreatorAnalyticsPage /></ProtectedRoute>} />
+              <Route path="/creator/profile" element={<ProtectedRoute><CreatorProfile /></ProtectedRoute>} />
+              <Route path="/creator/quests/new" element={<ProtectedRoute><QuestBuilder /></ProtectedRoute>} />
+              <Route path="/creator/quests/:questId/edit" element={<ProtectedRoute><QuestBuilder /></ProtectedRoute>} />
+              
+              {/* SPONSOR PAGES */}
+              <Route path="/sponsors/onboard" element={<SponsorOnboarding />} />
+              <Route path="/sponsors/:slug" element={<SponsorPublicProfile />} />
+              <Route path="/sponsor" element={<ProtectedRoute><SponsorDashboard /></ProtectedRoute>} />
+              <Route path="/sponsor/rewards" element={<ProtectedRoute><SponsorRewards /></ProtectedRoute>} />
+              <Route path="/sponsor/venues" element={<ProtectedRoute><SponsorVenues /></ProtectedRoute>} />
+              <Route path="/sponsor/listings" element={<ProtectedRoute><SponsorListings /></ProtectedRoute>} />
+              <Route path="/sponsor/discover" element={<ProtectedRoute><SponsorDiscover /></ProtectedRoute>} />
+              <Route path="/sponsor/browse-creators" element={<ProtectedRoute><SponsorBrowseCreators /></ProtectedRoute>} />
+              <Route path="/sponsor/browse-orgs" element={<ProtectedRoute><SponsorBrowseOrgs /></ProtectedRoute>} />
+              <Route path="/sponsor/org-requests" element={<ProtectedRoute><SponsorOrgRequests /></ProtectedRoute>} />
+              <Route path="/sponsor/proposals" element={<ProtectedRoute><SponsorProposals /></ProtectedRoute>} />
+              <Route path="/sponsor/analytics" element={<ProtectedRoute><SponsorAnalytics /></ProtectedRoute>} />
+              <Route path="/sponsor/profile" element={<ProtectedRoute><SponsorProfile /></ProtectedRoute>} />
+              
+              {/* CREATOR BROWSE */}
+              <Route path="/creator/browse-listings" element={<ProtectedRoute><CreatorBrowseListings /></ProtectedRoute>} />
+              
+              {/* LEGAL PAGES */}
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
+              
+              {/* 404 */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
       </TutorialProvider>
     </AuthProvider>
   </QueryClientProvider>
