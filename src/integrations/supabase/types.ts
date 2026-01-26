@@ -1237,6 +1237,146 @@ export type Database = {
           },
         ]
       }
+      eventbrite_connections: {
+        Row: {
+          access_token: string
+          connected_at: string
+          eventbrite_email: string | null
+          eventbrite_user_id: string | null
+          id: string
+          is_active: boolean | null
+          last_sync_at: string | null
+          org_id: string | null
+          refresh_token: string | null
+          token_expires_at: string | null
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          connected_at?: string
+          eventbrite_email?: string | null
+          eventbrite_user_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          org_id?: string | null
+          refresh_token?: string | null
+          token_expires_at?: string | null
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          connected_at?: string
+          eventbrite_email?: string | null
+          eventbrite_user_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          org_id?: string | null
+          refresh_token?: string | null
+          token_expires_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "eventbrite_connections_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "eventbrite_connections_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      eventbrite_events: {
+        Row: {
+          capacity: number | null
+          created_at: string | null
+          currency: string | null
+          eventbrite_event_id: string
+          eventbrite_url: string
+          id: string
+          is_free: boolean | null
+          last_synced_at: string | null
+          max_ticket_price: number | null
+          min_ticket_price: number | null
+          organizer_id: string | null
+          organizer_name: string | null
+          quest_id: string | null
+          raw_event_data: Json | null
+          sync_error: string | null
+          ticket_classes: Json | null
+          ticket_url: string | null
+          tickets_sold: number | null
+          updated_at: string | null
+          venue_address: Json | null
+          venue_id: string | null
+          venue_name: string | null
+        }
+        Insert: {
+          capacity?: number | null
+          created_at?: string | null
+          currency?: string | null
+          eventbrite_event_id: string
+          eventbrite_url: string
+          id?: string
+          is_free?: boolean | null
+          last_synced_at?: string | null
+          max_ticket_price?: number | null
+          min_ticket_price?: number | null
+          organizer_id?: string | null
+          organizer_name?: string | null
+          quest_id?: string | null
+          raw_event_data?: Json | null
+          sync_error?: string | null
+          ticket_classes?: Json | null
+          ticket_url?: string | null
+          tickets_sold?: number | null
+          updated_at?: string | null
+          venue_address?: Json | null
+          venue_id?: string | null
+          venue_name?: string | null
+        }
+        Update: {
+          capacity?: number | null
+          created_at?: string | null
+          currency?: string | null
+          eventbrite_event_id?: string
+          eventbrite_url?: string
+          id?: string
+          is_free?: boolean | null
+          last_synced_at?: string | null
+          max_ticket_price?: number | null
+          min_ticket_price?: number | null
+          organizer_id?: string | null
+          organizer_name?: string | null
+          quest_id?: string | null
+          raw_event_data?: Json | null
+          sync_error?: string | null
+          ticket_classes?: Json | null
+          ticket_url?: string | null
+          tickets_sold?: number | null
+          updated_at?: string | null
+          venue_address?: Json | null
+          venue_id?: string | null
+          venue_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "eventbrite_events_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feature_flag_audit: {
         Row: {
           changed_by: string
@@ -1832,6 +1972,48 @@ export type Database = {
           subject?: string | null
           template_key?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      moderation_flags: {
+        Row: {
+          created_at: string | null
+          details: string | null
+          id: string
+          reason: string
+          reporter_id: string
+          resolution_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
+          target_id: string
+          target_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          details?: string | null
+          id?: string
+          reason: string
+          reporter_id: string
+          resolution_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          target_id: string
+          target_type: string
+        }
+        Update: {
+          created_at?: string | null
+          details?: string | null
+          id?: string
+          reason?: string
+          reporter_id?: string
+          resolution_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          target_id?: string
+          target_type?: string
         }
         Relationships: []
       }
@@ -2994,6 +3176,8 @@ export type Database = {
           duration_notes: string | null
           emergency_contact: string | null
           end_datetime: string | null
+          eventbrite_event_id: string | null
+          external_ticket_url: string | null
           full_description: string | null
           highlights: Json | null
           icon: string | null
@@ -3002,6 +3186,7 @@ export type Database = {
           is_active: boolean | null
           is_repeatable: boolean | null
           is_sponsored: boolean | null
+          is_ticketed: boolean | null
           meeting_address: string | null
           meeting_location_name: string | null
           min_level: number | null
@@ -3065,6 +3250,8 @@ export type Database = {
           duration_notes?: string | null
           emergency_contact?: string | null
           end_datetime?: string | null
+          eventbrite_event_id?: string | null
+          external_ticket_url?: string | null
           full_description?: string | null
           highlights?: Json | null
           icon?: string | null
@@ -3073,6 +3260,7 @@ export type Database = {
           is_active?: boolean | null
           is_repeatable?: boolean | null
           is_sponsored?: boolean | null
+          is_ticketed?: boolean | null
           meeting_address?: string | null
           meeting_location_name?: string | null
           min_level?: number | null
@@ -3136,6 +3324,8 @@ export type Database = {
           duration_notes?: string | null
           emergency_contact?: string | null
           end_datetime?: string | null
+          eventbrite_event_id?: string | null
+          external_ticket_url?: string | null
           full_description?: string | null
           highlights?: Json | null
           icon?: string | null
@@ -3144,6 +3334,7 @@ export type Database = {
           is_active?: boolean | null
           is_repeatable?: boolean | null
           is_sponsored?: boolean | null
+          is_ticketed?: boolean | null
           meeting_address?: string | null
           meeting_location_name?: string | null
           min_level?: number | null
@@ -3216,6 +3407,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      rate_limits: {
+        Row: {
+          action_count: number | null
+          action_type: string
+          id: string
+          user_id: string
+          window_start: string
+        }
+        Insert: {
+          action_count?: number | null
+          action_type: string
+          id?: string
+          user_id: string
+          window_start: string
+        }
+        Update: {
+          action_count?: number | null
+          action_type?: string
+          id?: string
+          user_id?: string
+          window_start?: string
+        }
+        Relationships: []
       }
       referrals: {
         Row: {
@@ -4189,8 +4404,11 @@ export type Database = {
           id: string
           invite_code: string | null
           invite_link_enabled: boolean | null
+          lfc_bio: string | null
           lfc_enabled: boolean | null
           lfc_listing_enabled: boolean | null
+          lfc_looking_for: string[] | null
+          lfc_scope: string | null
           max_members: number | null
           name: string
           org_code: string | null
@@ -4210,8 +4428,11 @@ export type Database = {
           id?: string
           invite_code?: string | null
           invite_link_enabled?: boolean | null
+          lfc_bio?: string | null
           lfc_enabled?: boolean | null
           lfc_listing_enabled?: boolean | null
+          lfc_looking_for?: string[] | null
+          lfc_scope?: string | null
           max_members?: number | null
           name?: string
           org_code?: string | null
@@ -4231,8 +4452,11 @@ export type Database = {
           id?: string
           invite_code?: string | null
           invite_link_enabled?: boolean | null
+          lfc_bio?: string | null
           lfc_enabled?: boolean | null
           lfc_listing_enabled?: boolean | null
+          lfc_looking_for?: string[] | null
+          lfc_scope?: string | null
           max_members?: number | null
           name?: string
           org_code?: string | null
@@ -4599,6 +4823,48 @@ export type Database = {
           slug?: string
           updated_at?: string | null
           version?: number | null
+        }
+        Relationships: []
+      }
+      trust_scores: {
+        Row: {
+          avg_rating: number | null
+          cancelled_quests: number | null
+          created_at: string | null
+          entity_id: string
+          entity_type: string
+          flags_received: number | null
+          id: string
+          last_calculated_at: string | null
+          score: number | null
+          successful_quests: number | null
+          warnings_issued: number | null
+        }
+        Insert: {
+          avg_rating?: number | null
+          cancelled_quests?: number | null
+          created_at?: string | null
+          entity_id: string
+          entity_type: string
+          flags_received?: number | null
+          id?: string
+          last_calculated_at?: string | null
+          score?: number | null
+          successful_quests?: number | null
+          warnings_issued?: number | null
+        }
+        Update: {
+          avg_rating?: number | null
+          cancelled_quests?: number | null
+          created_at?: string | null
+          entity_id?: string
+          entity_type?: string
+          flags_received?: number | null
+          id?: string
+          last_calculated_at?: string | null
+          score?: number | null
+          successful_quests?: number | null
+          warnings_issued?: number | null
         }
         Relationships: []
       }
@@ -5300,6 +5566,10 @@ export type Database = {
         }
         Returns: number
       }
+      calculate_trust_score: {
+        Args: { p_entity_id: string; p_entity_type: string }
+        Returns: number
+      }
       check_and_unlock_achievements: {
         Args: { p_user_id: string }
         Returns: {
@@ -5307,6 +5577,15 @@ export type Database = {
           achievement_name: string
           xp_reward: number
         }[]
+      }
+      check_rate_limit: {
+        Args: {
+          p_action_type: string
+          p_max_actions?: number
+          p_user_id: string
+          p_window_minutes?: number
+        }
+        Returns: boolean
       }
       check_squad_readiness: { Args: { p_squad_id: string }; Returns: Json }
       check_streak_bonus: {
@@ -5364,6 +5643,19 @@ export type Database = {
           instance_id: string
           instances_available: number
           needs_picker: boolean
+        }[]
+      }
+      get_ranked_quests: {
+        Args: {
+          p_limit?: number
+          p_org_id?: string
+          p_progression_tree?: string
+        }
+        Returns: {
+          quest_id: string
+          rank_score: number
+          slug: string
+          title: string
         }[]
       }
       get_upcoming_instances: {
