@@ -7,7 +7,7 @@
  * to prevent value jumping during typing.
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
@@ -122,29 +122,30 @@ export function SocialEnergyMap({ userId, compact = false }: SocialEnergyMapProp
 
   // Handle direct weight changes WITHOUT auto-redistribution
   // Users can go into deficit or surplus until they reach exactly 100
-  const handleWeightChange = useCallback(
-    (axis: AxisKey, newValue: number): AxisWeights => {
-      const clampedValue = Math.max(0, Math.min(100, newValue));
-      return {
-        ...localWeights,
-        [axis]: clampedValue,
-      };
-    },
-    [localWeights]
-  );
-
-  // Handle +/- button clicks (direct change, no redistribution)
-  const handleWeightAdjust = useCallback(
-    (axis: AxisKey, delta: number) => {
-      const newValue = localWeights[axis] + delta;
-      if (newValue < 0 || newValue > 100) return;
+  // Handle +/- button clicks using functional update to avoid stale closures
+  const handleWeightAdjust = (axis: AxisKey, delta: number) => {
+    setLocalWeights(prev => {
+      const newValue = prev[axis] + delta;
+      // Allow any value between 0 and 100 (no total constraint during editing)
+      if (newValue < 0 || newValue > 100) return prev;
       
-      const newWeights = handleWeightChange(axis, newValue);
-      setLocalWeights(newWeights);
       setHasWeightChanges(true);
-    },
-    [localWeights, handleWeightChange]
-  );
+      return {
+        ...prev,
+        [axis]: newValue,
+      };
+    });
+  };
+
+  // Handle direct value setting from input
+  const handleWeightSet = (axis: AxisKey, newValue: number) => {
+    const clampedValue = Math.max(0, Math.min(100, newValue));
+    setLocalWeights(prev => ({
+      ...prev,
+      [axis]: clampedValue,
+    }));
+    setHasWeightChanges(true);
+  };
 
   // Handle manual input focus
   const handleInputFocus = (axis: AxisKey) => {
@@ -167,9 +168,7 @@ export function SocialEnergyMap({ userId, compact = false }: SocialEnergyMapProp
         if (editingAxis && value !== '') {
           const numValue = parseInt(value, 10);
           if (!isNaN(numValue) && numValue >= 0 && numValue <= 100) {
-            const newWeights = handleWeightChange(editingAxis, numValue);
-            setLocalWeights(newWeights);
-            setHasWeightChanges(true);
+            handleWeightSet(editingAxis, numValue);
           }
         }
       }, 300);
@@ -185,9 +184,7 @@ export function SocialEnergyMap({ userId, compact = false }: SocialEnergyMapProp
     if (editingAxis && editingValue !== '') {
       const numValue = parseInt(editingValue, 10);
       if (!isNaN(numValue) && numValue >= 0 && numValue <= 100) {
-        const newWeights = handleWeightChange(editingAxis, numValue);
-        setLocalWeights(newWeights);
-        setHasWeightChanges(true);
+        handleWeightSet(editingAxis, numValue);
       }
     }
     
