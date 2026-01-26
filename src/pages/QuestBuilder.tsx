@@ -295,11 +295,15 @@ export default function QuestBuilder() {
         }
       }
     },
-    onError: (error) => {
-      console.error('Save error:', error);
+    onError: (error: any) => {
+      console.error('Save error full:', JSON.stringify(error, null, 2));
+      console.error('Save error message:', error?.message);
+      console.error('Save error details:', error?.details);
+      console.error('Save error hint:', error?.hint);
+      console.error('Save error code:', error?.code);
       toast({
         title: 'Save Failed',
-        description: 'Could not save your quest. Please try again.',
+        description: error?.message || 'Could not save your quest. Please try again.',
         variant: 'destructive',
       });
     },
