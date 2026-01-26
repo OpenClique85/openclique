@@ -3080,6 +3080,38 @@ export type Database = {
         }
         Relationships: []
       }
+      pinned_quests: {
+        Row: {
+          id: string
+          notes: string | null
+          pinned_at: string
+          quest_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          notes?: string | null
+          pinned_at?: string
+          quest_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          notes?: string | null
+          pinned_at?: string
+          quest_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pinned_quests_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       premium_interest: {
         Row: {
           acknowledged_pricing: boolean | null
