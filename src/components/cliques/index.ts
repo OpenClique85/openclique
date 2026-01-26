@@ -6,7 +6,6 @@
 
 export { ReenlistPrompt } from './ReenlistPrompt';
 export { CliqueCard } from './CliqueCard';
-export { MyCliquesSection } from './MyCliquesSection';
 export { CliqueWarmUpRoom } from './CliqueWarmUpRoom';
 export { WarmUpProgressBar } from './WarmUpProgressBar';
 export { SuggestQuestModal } from './SuggestQuestModal';
@@ -19,3 +18,4 @@ export { CreatePollModal } from './CreatePollModal';
 export { ReadyCheckCard } from './ReadyCheckCard';
 export { CreateReadyCheckModal } from './CreateReadyCheckModal';
 export { CliqueLoreTab } from './CliqueLoreTab';
+export { CliqueApplicationsInbox } from './CliqueApplicationsInbox';

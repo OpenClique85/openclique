@@ -19,6 +19,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { CliqueRolesManager } from '@/components/cliques/CliqueRolesManager';
 import { CliqueSettingsModal } from '@/components/cliques/CliqueSettingsModal';
+import { CliqueApplicationsInbox } from '@/components/cliques/CliqueApplicationsInbox';
 import { 
   Loader2, 
   ArrowLeft, 
@@ -376,41 +377,56 @@ export default function CliqueDetail() {
 
           {/* Members Tab */}
           <TabsContent value="members">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg font-display">Members ({members.length}/6)</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {members.map((member) => (
-                    <div 
-                      key={member.id} 
-                      className="flex items-center justify-between py-2 border-b last:border-0"
-                    >
-                      <div className="flex items-center gap-3">
-                        {member.role === 'leader' ? (
-                          <div className="p-1.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">
-                            <Crown className="h-4 w-4" />
-                          </div>
-                        ) : (
-                          <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center text-sm font-medium">
-                            {member.display_name.charAt(0).toUpperCase()}
-                          </div>
-                        )}
-                        <div>
-                          <span className="font-medium">
-                            {member.user_id === user?.id ? 'You' : member.display_name}
-                          </span>
-                          {member.role === 'leader' && (
-                            <Badge variant="outline" className="ml-2 text-xs">Clique Leader</Badge>
+            <div className="space-y-4">
+              {/* Applications Inbox (Leader only) */}
+              {isLeader && !isArchived && (
+                <CliqueApplicationsInbox
+                  cliqueId={cliqueId!}
+                  currentUserId={user?.id || ''}
+                  isLeader={isLeader}
+                  onApplicationProcessed={() => {
+                    // Refresh members
+                    window.location.reload();
+                  }}
+                />
+              )}
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg font-display">Members ({members.length}/6)</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {members.map((member) => (
+                      <div 
+                        key={member.id} 
+                        className="flex items-center justify-between py-2 border-b last:border-0"
+                      >
+                        <div className="flex items-center gap-3">
+                          {member.role === 'leader' ? (
+                            <div className="p-1.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">
+                              <Crown className="h-4 w-4" />
+                            </div>
+                          ) : (
+                            <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center text-sm font-medium">
+                              {member.display_name.charAt(0).toUpperCase()}
+                            </div>
                           )}
+                          <div>
+                            <span className="font-medium">
+                              {member.user_id === user?.id ? 'You' : member.display_name}
+                            </span>
+                            {member.role === 'leader' && (
+                              <Badge variant="outline" className="ml-2 text-xs">Clique Leader</Badge>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* Roles Tab */}
