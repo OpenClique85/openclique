@@ -75,17 +75,34 @@ export const AUSTIN_SCHOOLS: AustinSchool[] = [
   { id: 'other', name: 'Other', domain: null, emoji: '🎓', color: '#6B7280' },
 ];
 
+// Matching filters for quest filtering (hard filters)
+export type AlcoholPreference = 'no_alcohol' | 'ok_optional' | 'likes_drinking';
+export type PhysicalPreference = 'low' | 'medium' | 'high' | 'any';
+export type SocialPreference = 'chill' | 'moderate' | 'high' | 'any';
+
+export interface MatchingFilters {
+  alcohol_preference?: AlcoholPreference;
+  physical_preference?: PhysicalPreference;
+  social_preference?: SocialPreference;
+  accessibility_needed?: boolean;
+  birthdate?: string; // ISO date for age gating
+}
+
 // Full preferences interface
 export interface UserPreferences {
   // Existing field
   interest_tags?: string[];
   
+  // NEW: Matching filters for quest discovery
+  matching_filters?: MatchingFilters;
+  
   // Demographics (optional, for matching)
   demographics?: {
     age_range?: AgeRange;
     area?: AustinArea;
-    school?: SchoolInfo; // NEW: School/university info
-    show_school_publicly?: boolean; // NEW: Privacy toggle
+    school?: SchoolInfo; // School/university info
+    show_school_publicly?: boolean; // Privacy toggle
+    birthdate?: string; // For age gating
   };
   
   // Social Energy & Style
