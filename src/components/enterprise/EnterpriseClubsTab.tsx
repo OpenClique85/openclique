@@ -88,7 +88,11 @@ interface UmbrellaOrg {
   slug: string;
 }
 
-export function EnterpriseClubsTab() {
+interface EnterpriseClubsTabProps {
+  onSelectClub?: (clubId: string) => void;
+}
+
+export function EnterpriseClubsTab({ onSelectClub }: EnterpriseClubsTabProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
@@ -337,14 +341,18 @@ export function EnterpriseClubsTab() {
                 </TableHeader>
                 <TableBody>
                   {filteredClubs.map((club) => (
-                    <TableRow key={club.id}>
+                    <TableRow 
+                      key={club.id}
+                      className={onSelectClub ? "cursor-pointer hover:bg-muted/50" : ""}
+                      onClick={() => onSelectClub?.(club.id)}
+                    >
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
                             <Building2 className="h-4 w-4 text-blue-600" />
                           </div>
                           <div>
-                            <p className="font-medium">{club.name}</p>
+                            <p className={`font-medium ${onSelectClub ? "hover:text-primary" : ""}`}>{club.name}</p>
                             <p className="text-xs text-muted-foreground">/{club.slug}</p>
                           </div>
                         </div>
