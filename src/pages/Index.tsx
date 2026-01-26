@@ -107,7 +107,7 @@ const Index = () => {
       {/* ============ FLOATING MASCOT ============ */}
       {/* BUGGS appears in bottom-right corner with a message bubble */}
       {/* To change the message, edit the "message" prop below */}
-      <BuggsFloating message="Ready to find your squad?" />
+      <BuggsFloating message="Ready to find your clique?" />
     </div>
   );
 };
