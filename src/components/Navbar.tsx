@@ -95,54 +95,19 @@ export function Navbar() {
                 {link.label}
               </Link>
             ))}
-            {/* Profile - visible when logged in */}
+            {/* My Hub - consolidated profile link for logged in users */}
             {user && (
-              <>
-                {/* My Cliques Dropdown */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      className={`text-sm font-medium px-3 py-2 rounded-md transition-colors hover:bg-muted flex items-center gap-1 ${
-                        location.pathname.startsWith('/cliques') ? "text-primary bg-primary/5" : "text-muted-foreground"
-                      }`}
-                    >
-                      <Users className="h-4 w-4" />
-                      My Cliques
-                      <ChevronDown className="h-3 w-3" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-48">
-                    <DropdownMenuItem asChild>
-                      <Link to="/profile?tab=cliques" className="flex items-center gap-2 cursor-pointer">
-                        <Users className="h-4 w-4" />
-                        My Cliques
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/cliques/discover" className="flex items-center gap-2 cursor-pointer">
-                        <Search className="h-4 w-4" />
-                        Looking for Clique
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link to="/cliques/new" className="flex items-center gap-2 cursor-pointer text-primary">
-                        <Plus className="h-4 w-4" />
-                        Form a Clique
-                      </Link>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                
-                <Link
-                  to="/profile"
-                  className={`text-sm font-medium px-3 py-2 rounded-md transition-colors hover:bg-muted ${
-                    location.pathname === '/profile' ? "text-primary bg-primary/5" : "text-muted-foreground"
-                  }`}
-                >
-                  My Hub
-                </Link>
-              </>
+              <Link
+                to="/profile"
+                className={`text-sm font-medium px-3 py-2 rounded-md transition-colors hover:bg-muted flex items-center gap-1.5 ${
+                  location.pathname === '/profile' || location.pathname.startsWith('/cliques') 
+                    ? "text-primary bg-primary/5" 
+                    : "text-muted-foreground"
+                }`}
+              >
+                <Users className="h-4 w-4" />
+                My Hub
+              </Link>
             )}
           </div>
 
@@ -291,46 +256,20 @@ export function Navbar() {
                 </Link>
               ))}
               
-              {/* My Cliques section for logged in users */}
+              {/* My Hub link for logged in users */}
               {user && (
-                <>
-                  <div className="mt-3 pt-3 border-t border-border">
-                    <p className="text-xs text-muted-foreground px-3 pb-2">My Cliques</p>
-                    <Link
-                      to="/profile?tab=cliques"
-                      className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md text-muted-foreground hover:bg-muted"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      <Users className="h-4 w-4" />
-                      My Cliques
-                    </Link>
-                    <Link
-                      to="/cliques/discover"
-                      className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md text-muted-foreground hover:bg-muted"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      <Search className="h-4 w-4" />
-                      Looking for Clique
-                    </Link>
-                    <Link
-                      to="/cliques/new"
-                      className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md text-primary hover:bg-muted"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      <Plus className="h-4 w-4" />
-                      Form a Clique
-                    </Link>
-                  </div>
-                  <Link
-                    to="/profile"
-                    className={`text-sm font-medium px-3 py-2 rounded-md transition-colors mt-1 ${
-                      location.pathname === '/profile' ? "text-primary bg-primary/5" : "text-muted-foreground hover:bg-muted"
-                    }`}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    My Hub
-                  </Link>
-                </>
+                <Link
+                  to="/profile"
+                  className={`flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md mt-1 ${
+                    location.pathname === '/profile' || location.pathname.startsWith('/cliques')
+                      ? "text-primary bg-primary/5" 
+                      : "text-muted-foreground hover:bg-muted"
+                  }`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  <Users className="h-4 w-4" />
+                  My Hub
+                </Link>
               )}
               
               {/* Get Involved section */}
@@ -370,12 +309,12 @@ export function Navbar() {
                       {user.email}
                     </p>
                     <Link
-                      to="/profile?tab=cliques"
+                      to="/profile"
                       className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md text-muted-foreground hover:bg-muted"
                       onClick={() => setIsOpen(false)}
                     >
-                      <User className="h-4 w-4" />
-                      My Cliques
+                      <Users className="h-4 w-4" />
+                      My Hub
                     </Link>
                     {isCreator && (
                       <Link
