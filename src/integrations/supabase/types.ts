@@ -4412,7 +4412,7 @@ export type Database = {
           role_assigned_by: string | null
           role_declined_at: string | null
           signup_id: string | null
-          squad_id: string
+          squad_id: string | null
           status: string | null
           user_id: string
         }
@@ -4426,7 +4426,7 @@ export type Database = {
           role_assigned_by?: string | null
           role_declined_at?: string | null
           signup_id?: string | null
-          squad_id: string
+          squad_id?: string | null
           status?: string | null
           user_id: string
         }
@@ -4440,7 +4440,7 @@ export type Database = {
           role_assigned_by?: string | null
           role_declined_at?: string | null
           signup_id?: string | null
-          squad_id?: string
+          squad_id?: string | null
           status?: string | null
           user_id?: string
         }
