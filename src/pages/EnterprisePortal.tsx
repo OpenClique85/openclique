@@ -9,6 +9,7 @@
  * - Analytics dashboard
  * - Social chair role assignment
  * - Account suspension/deletion
+ * - Drill-down views for orgs and clubs
  */
 
 import { useState } from 'react';
@@ -33,11 +34,20 @@ import { EnterpriseClubsTab } from '@/components/enterprise/EnterpriseClubsTab';
 import { EnterpriseMembersTab } from '@/components/enterprise/EnterpriseMembersTab';
 import { EnterpriseCliquesTab } from '@/components/enterprise/EnterpriseCliquesTab';
 import { EnterpriseAnalyticsTab } from '@/components/enterprise/EnterpriseAnalyticsTab';
+import { OrgDetailView } from '@/components/enterprise/OrgDetailView';
+import { ClubDetailView } from '@/components/enterprise/ClubDetailView';
+
+// View state type
+type ViewState = 
+  | { type: 'list' }
+  | { type: 'org-detail'; orgId: string }
+  | { type: 'club-detail'; clubId: string };
 
 export default function EnterprisePortal() {
   const { isAdmin, isLoading, isRolesLoaded } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('organizations');
+  const [viewState, setViewState] = useState<ViewState>({ type: 'list' });
 
   // Wait for roles to load before checking access
   if (isLoading || !isRolesLoaded) {
@@ -71,6 +81,89 @@ export default function EnterprisePortal() {
             </CardHeader>
           </Card>
         </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Handle drill-down navigation
+  const handleSelectOrg = (orgId: string) => {
+    setViewState({ type: 'org-detail', orgId });
+  };
+
+  const handleSelectClub = (clubId: string) => {
+    setViewState({ type: 'club-detail', clubId });
+  };
+
+  const handleBack = () => {
+    setViewState({ type: 'list' });
+  };
+
+  // Render detail views when drilled down
+  if (viewState.type === 'org-detail') {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar />
+        
+        {/* Enterprise Header */}
+        <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-b">
+          <div className="container mx-auto px-4 py-8">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-primary/10">
+                <GraduationCap className="h-8 w-8 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-display font-bold">Enterprise Portal</h1>
+                <p className="text-muted-foreground">
+                  Organization Details
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <main className="flex-1 container mx-auto px-4 py-8">
+          <OrgDetailView 
+            orgId={viewState.orgId} 
+            onBack={handleBack}
+            onSelectClub={handleSelectClub}
+          />
+        </main>
+
+        <Footer />
+      </div>
+    );
+  }
+
+  if (viewState.type === 'club-detail') {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar />
+        
+        {/* Enterprise Header */}
+        <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-b">
+          <div className="container mx-auto px-4 py-8">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-blue-100 dark:bg-blue-900/30">
+                <Building2 className="h-8 w-8 text-blue-600" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-display font-bold">Enterprise Portal</h1>
+                <p className="text-muted-foreground">
+                  Club Details
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <main className="flex-1 container mx-auto px-4 py-8">
+          <ClubDetailView 
+            clubId={viewState.clubId} 
+            onBack={handleBack}
+          />
+        </main>
+
         <Footer />
       </div>
     );
@@ -123,11 +216,14 @@ export default function EnterprisePortal() {
           </TabsList>
 
           <TabsContent value="organizations">
-            <EnterpriseOrgsTab />
+            <EnterpriseOrgsTab 
+              onSelectOrg={handleSelectOrg}
+              onSelectClub={handleSelectClub}
+            />
           </TabsContent>
 
           <TabsContent value="clubs">
-            <EnterpriseClubsTab />
+            <EnterpriseClubsTab onSelectClub={handleSelectClub} />
           </TabsContent>
 
           <TabsContent value="members">
