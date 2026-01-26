@@ -124,6 +124,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
     icon: <Ticket className="h-4 w-4" />,
     tabs: [
       { id: 'invite-codes', label: 'Invite Codes' },
+      { id: 'friend-referrals', label: 'Friend Referrals' },
       { id: 'onboarding-feedback', label: 'Onboarding Feedback' },
       { id: 'analytics', label: 'Analytics' },
     ],

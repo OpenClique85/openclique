@@ -87,6 +87,14 @@ export default function Auth() {
   const redeemInviteCode = async () => {
     if (!inviteCode.trim()) return null;
     
+    // Check if it's a friend invite code (FRIEND-XXXXXXXX format)
+    const isFriendCode = inviteCode.trim().toUpperCase().startsWith('FRIEND-');
+    
+    if (isFriendCode) {
+      // Handled separately after signup in handleSignUp
+      return null;
+    }
+    
     const { data, error } = await supabase.rpc('redeem_invite_code', {
       p_code: inviteCode.trim(),
       p_user_agent: navigator.userAgent,
@@ -99,6 +107,31 @@ export default function Auth() {
     }
     
     return data as { success: boolean; redemption_id?: string; code_type?: string; code_label?: string; error?: string };
+  };
+
+  const redeemFriendInvite = async (userId: string) => {
+    if (!inviteCode.trim()) return null;
+    
+    const isFriendCode = inviteCode.trim().toUpperCase().startsWith('FRIEND-');
+    if (!isFriendCode) return null;
+    
+    const { data, error } = await supabase.rpc('redeem_friend_invite', {
+      p_code: inviteCode.trim(),
+      p_new_user_id: userId,
+    });
+    
+    if (error) {
+      console.error('Friend invite error:', error);
+      return null;
+    }
+    
+    return data as { 
+      success: boolean; 
+      error?: string; 
+      quest_id?: string;
+      referrer_id?: string;
+      recruit_count?: number;
+    };
   };
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -133,15 +166,6 @@ export default function Auth() {
     setIsSubmitting(true);
     const { error } = await signUp(email, password);
     
-    if (!error && inviteCode) {
-      // Redeem invite code after successful signup
-      const result = await redeemInviteCode();
-      if (result?.success && result.redemption_id) {
-        setRedemptionId(result.redemption_id);
-        setInviteCodeLabel(result.code_label || null);
-      }
-    }
-    
     setIsSubmitting(false);
     
     if (error) {
@@ -154,7 +178,35 @@ export default function Auth() {
         title: 'Sign up failed',
         description: message
       });
-    } else if (!inviteCode) {
+      return;
+    }
+    
+    // Handle invite code redemption after successful signup
+    // The user state will be updated via auth listener, but we can check session
+    if (inviteCode) {
+      const isFriendCode = inviteCode.trim().toUpperCase().startsWith('FRIEND-');
+      
+      if (isFriendCode) {
+        // Get fresh session to get the new user ID
+        const { data: { session: newSession } } = await supabase.auth.getSession();
+        if (newSession?.user) {
+          const friendResult = await redeemFriendInvite(newSession.user.id);
+          if (friendResult?.success) {
+            toast({
+              title: 'Welcome to the quest!',
+              description: "You've been signed up for the quest your friend invited you to.",
+            });
+          }
+        }
+      } else {
+        // Redeem regular invite code
+        const result = await redeemInviteCode();
+        if (result?.success && result.redemption_id) {
+          setRedemptionId(result.redemption_id);
+          setInviteCodeLabel(result.code_label || null);
+        }
+      }
+    } else {
       toast({
         title: 'Account created!',
         description: 'Welcome to OpenClique. You can now access your quests.'
