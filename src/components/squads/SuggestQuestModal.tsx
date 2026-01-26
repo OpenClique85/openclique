@@ -71,9 +71,10 @@ export function SuggestQuestModal({
   const fetchAvailableQuests = async () => {
     setIsLoading(true);
     
-    // Fetch upcoming quest instances that are recruiting
-    const today = new Date().toISOString().split('T')[0];
-    const { data: instances, error } = await supabase
+    const now = new Date().toISOString();
+    
+    // First try quest_instances that are recruiting
+    const { data: instances } = await supabase
       .from('quest_instances')
       .select(`
         id,
@@ -84,23 +85,45 @@ export function SuggestQuestModal({
         meeting_point_name,
         progression_tree
       `)
-      .gte('scheduled_date', today)
+      .gte('scheduled_date', now.split('T')[0])
       .eq('status', 'recruiting')
       .order('scheduled_date', { ascending: true })
       .limit(20);
 
-    if (!error && instances) {
-      // Filter out quests already invited/proposed to this squad
-      const { data: existingInvites } = await supabase
-        .from('squad_quest_invites')
-        .select('quest_id')
-        .eq('squad_id', squadId);
+    // Also fetch open quests directly (they may not have instances yet)
+    const { data: quests } = await supabase
+      .from('quests')
+      .select(`
+        id,
+        title,
+        icon,
+        start_datetime,
+        meeting_location_name,
+        progression_tree
+      `)
+      .eq('status', 'open')
+      .eq('visibility', 'public')
+      .gte('start_datetime', now)
+      .order('start_datetime', { ascending: true })
+      .limit(20);
 
-      const existingQuestIds = new Set(existingInvites?.map(i => i.quest_id) || []);
+    // Filter out quests already invited/proposed to this squad
+    const { data: existingInvites } = await supabase
+      .from('squad_quest_invites')
+      .select('quest_id')
+      .eq('squad_id', squadId);
 
-      const availableQuests: Quest[] = instances
-        .filter(inst => !existingQuestIds.has(inst.id))
-        .map(inst => ({
+    const existingQuestIds = new Set(existingInvites?.map(i => i.quest_id) || []);
+
+    // Combine instances and quests, deduplicating by ID
+    const seenIds = new Set<string>();
+    const availableQuests: Quest[] = [];
+
+    // Add instances first
+    instances?.forEach(inst => {
+      if (!existingQuestIds.has(inst.id) && !seenIds.has(inst.id)) {
+        seenIds.add(inst.id);
+        availableQuests.push({
           id: inst.id,
           title: inst.title,
           icon: inst.icon,
@@ -108,11 +131,35 @@ export function SuggestQuestModal({
           start_time: inst.start_time,
           meeting_point_name: inst.meeting_point_name,
           progression_tree: inst.progression_tree
-        }));
+        });
+      }
+    });
 
-      setQuests(availableQuests);
-    }
-    
+    // Add quests that don't have instances yet
+    quests?.forEach(quest => {
+      if (!existingQuestIds.has(quest.id) && !seenIds.has(quest.id)) {
+        seenIds.add(quest.id);
+        const startDate = quest.start_datetime ? new Date(quest.start_datetime) : null;
+        availableQuests.push({
+          id: quest.id,
+          title: quest.title,
+          icon: quest.icon,
+          scheduled_date: startDate ? startDate.toISOString().split('T')[0] : '',
+          start_time: startDate ? startDate.toTimeString().slice(0, 5) : '',
+          meeting_point_name: quest.meeting_location_name,
+          progression_tree: quest.progression_tree
+        });
+      }
+    });
+
+    // Sort by date
+    availableQuests.sort((a, b) => {
+      const dateA = a.scheduled_date || '';
+      const dateB = b.scheduled_date || '';
+      return dateA.localeCompare(dateB);
+    });
+
+    setQuests(availableQuests);
     setIsLoading(false);
   };
 
