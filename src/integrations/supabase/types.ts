@@ -6022,6 +6022,8 @@ export type Database = {
         Returns: undefined
       }
       is_admin: { Args: never; Returns: boolean }
+      is_clique_member: { Args: { p_clique_id: string }; Returns: boolean }
+      is_squad_member: { Args: { p_squad_id: string }; Returns: boolean }
       join_org_via_email: {
         Args: { p_email: string; p_org_id: string }
         Returns: Json
