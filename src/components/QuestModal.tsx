@@ -274,8 +274,8 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
             
-            {/* Action buttons on image */}
-            <div className="absolute top-3 right-3 flex gap-2">
+            {/* Action buttons on image - positioned left to avoid dialog close button */}
+            <div className="absolute top-3 left-3 flex gap-2">
               <Button
                 size="icon"
                 variant="secondary"
