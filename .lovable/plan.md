@@ -1,433 +1,500 @@
 
-# Complete Organizations, Clubs & Admin Enhancement Plan
+# Pilot Manager Implementation Plan
 
 ## Overview
 
-This plan addresses a comprehensive overhaul of the organization/club system, admin console restructuring, and documentation updates. The goal is to make it "dead easy" to join clubs like "Marketing Club" or "Operations Club" while providing club leaders with powerful management tools and rolling up analytics to the UT Austin enterprise level.
+This implementation creates a complete Pilot Manager section in the admin console to track, analyze, and export metrics for structured pilot programs. The first pilot "Prove Retention & Growth" will run from February 1-28, 2025.
 
 ---
 
-## Part 1: My Organizations Tab on Profile Hub
+## Part 1: Database Schema
 
-### Current State
-- Profile Hub has 3 tabs: Cliques | Quests | Me
-- Users have no visibility into their organization memberships from their hub
-- No way to redeem club codes directly from the profile
+### New Tables
 
-### Implementation
+**Table 1: `pilot_programs`**
 
-**New Component: `src/components/profile/OrganizationsTab.tsx`**
-
-Features:
-- Display all organizations user belongs to (from `profile_organizations`)
-- Show club cards with: name, role, member count, and recent quests
-- "Redeem Club Code" button with modal input
-- Quests from user's organizations displayed in a dedicated section
-- Visual distinction between umbrella orgs (e.g., UT Austin) and clubs (e.g., GBAT)
-
-**Profile.tsx Changes:**
-- Add 4th tab: "Organizations" or integrate into existing tabs
-- Add Building2 icon for Organizations tab
-- Tab URL param: `?tab=orgs`
-
-**Mobile Action Bar Update:**
-- Consider adding Organizations as a navigation option or keeping it within Profile
-
----
-
-## Part 2: Social Chair Onboarding Flow
-
-### Purpose
-Guide new club admins through setting up their dashboard after receiving a creator code.
-
-### New Components
-
-**`src/components/clubs/SocialChairOnboarding.tsx`**
-
-Multi-step wizard:
-1. **Welcome Step**: Explain the Social Chair role and what they can do
-2. **Dashboard Tour**: Highlight key features (event management, clique ops, broadcasts)
-3. **Generate Invite Code**: Walk through creating their first club invite code
-4. **Create First Quest**: Template selection and quick quest creation
-5. **Completion**: Celebration and link to full dashboard
-
-**Trigger Points:**
-- When a user with `social_chair` role visits `/org/[slug]` for the first time
-- Track onboarding completion in `profile_organizations` or `user_onboarding` table
-- Add `social_chair_onboarded_at` column or use localStorage
-
-**SocialChairDashboard.tsx Updates:**
-- Add "Invite Codes" tab alongside Cliques and Broadcast
-- Show generated codes with quick copy buttons
-- Display code usage stats
-
----
-
-## Part 3: Codes & Keys Organization in Admin
-
-### Current State
-- Invite codes are in "Growth > Invite Codes"
-- Organization invite codes (`org_invite_codes`) are not visible in admin
-- No unified view of all access codes across the platform
-
-### Implementation
-
-**Rename & Restructure "Invite Codes" to "Codes & Keys"**
-
-New tab structure within `InviteCodesManager.tsx`:
-1. **Platform Codes**: admin, tester, early_access, creator, sponsor codes (existing)
-2. **Organization Codes**: All `org_invite_codes` grouped by org
-3. **Friend Invites**: From `friend_invites` table (quest-specific recruit codes)
-
-**New Features:**
-- Filter by: code type, organization, status (active/expired)
-- Quick copy buttons for code and full invite URL
-- Search across all code types
-- Org codes show: org name, uses count, expiration
-- Generate org-specific codes directly from admin (not just from Social Chair dashboard)
-
-**AdminSectionNav.tsx Update:**
-- Rename "Invite Codes" to "Codes & Keys"
-
----
-
-## Part 4: Organization View vs Enterprise View
-
-### Current State
-- Single "Organizations" tab showing all orgs flat
-- No distinction between umbrella orgs and child clubs
-- No aggregate analytics for enterprise accounts
-
-### Implementation
-
-**Update AdminSectionNav.tsx:**
-```
-Organizations
-  ├── Clubs & Orgs      (non-umbrella organizations, child clubs)
-  ├── Enterprise View   (umbrella orgs like UT Austin with rollup analytics)
-  └── Applications      (existing)
-```
-
-**New Component: `src/components/admin/EnterpriseOrgsManager.tsx`**
-
-Features:
-- List all umbrella organizations (`is_umbrella = true`)
-- For each umbrella, show:
-  - Child clubs count and list
-  - Total members across all child clubs
-  - Active quests count
-  - Clique formation rate
-  - Quest completion rate
-- Drill-down to individual club stats
-- Contract/billing information (from enterprise pricing fields)
-- Verified domains management
-
-**OrgsManager.tsx Updates:**
-- Add filter: "Umbrellas Only" / "Clubs Only"
-- Display `parent_org_id` relationship (show parent org name)
-- Add `is_umbrella` toggle in create/edit modal
-- Add `verified_domains` array editor
-- Add `social_chair` to member role dropdown options
-- Show enterprise tier/pricing status if applicable
-
----
-
-## Part 5: Delete Cliques Functionality
-
-### Current State
-- CliquesManager only allows viewing and archiving
-- No way to permanently delete cliques
-
-### Implementation
-
-**Database: New RPC `delete_clique`**
+Stores pilot program definitions with time bounds and success criteria.
 
 ```sql
-CREATE OR REPLACE FUNCTION delete_clique(p_clique_id UUID)
-RETURNS JSONB AS $$
+CREATE TABLE public.pilot_programs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  slug TEXT NOT NULL UNIQUE,
+  description TEXT,
+  hypothesis TEXT,
+  success_criteria JSONB DEFAULT '[]',
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  status TEXT DEFAULT 'planned' CHECK (status IN ('planned', 'active', 'completed', 'cancelled')),
+  org_id UUID REFERENCES public.organizations(id),
+  created_by UUID REFERENCES auth.users(id),
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- RLS: Admin-only access
+ALTER TABLE public.pilot_programs ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Admins can manage pilot programs" ON public.pilot_programs FOR ALL USING (public.is_admin());
+```
+
+**Table 2: `pilot_notes`**
+
+Stores observations, issues, decisions, and milestones during pilots.
+
+```sql
+CREATE TABLE public.pilot_notes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  pilot_id UUID NOT NULL REFERENCES public.pilot_programs(id) ON DELETE CASCADE,
+  note_type TEXT DEFAULT 'observation' CHECK (note_type IN ('observation', 'issue', 'decision', 'milestone', 'risk')),
+  content TEXT NOT NULL,
+  tags TEXT[] DEFAULT '{}',
+  related_quest_id UUID REFERENCES public.quests(id),
+  related_user_id UUID REFERENCES auth.users(id),
+  created_by UUID REFERENCES auth.users(id),
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- RLS: Admin-only access
+ALTER TABLE public.pilot_notes ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Admins can manage pilot notes" ON public.pilot_notes FOR ALL USING (public.is_admin());
+```
+
+**Table 3: `pilot_templates`**
+
+Stores reusable pilot configurations for future programs.
+
+```sql
+CREATE TABLE public.pilot_templates (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  description TEXT,
+  default_duration_days INTEGER DEFAULT 28,
+  hypothesis_template TEXT,
+  success_criteria_template JSONB DEFAULT '[]',
+  suggested_metrics TEXT[] DEFAULT '{}',
+  created_by UUID REFERENCES auth.users(id),
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- RLS: Admin-only access
+ALTER TABLE public.pilot_templates ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Admins can manage pilot templates" ON public.pilot_templates FOR ALL USING (public.is_admin());
+```
+
+### Database Function: `get_pilot_metrics`
+
+Time-gated metrics calculation for a specific pilot.
+
+```sql
+CREATE OR REPLACE FUNCTION get_pilot_metrics(p_pilot_id UUID)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = 'public'
+AS $$
 DECLARE
-  v_active_members INTEGER;
+  v_pilot RECORD;
+  v_start TIMESTAMPTZ;
+  v_end TIMESTAMPTZ;
+  v_new_users INTEGER;
+  v_signups INTEGER;
+  v_completed INTEGER;
+  v_squads_formed INTEGER;
+  v_invites_created INTEGER;
+  v_invites_redeemed INTEGER;
+  v_repeat_users INTEGER;
+  v_cliques INTEGER;
+  v_avg_rating NUMERIC;
+  v_avg_belonging NUMERIC;
+  v_feedback_count INTEGER;
 BEGIN
-  -- Check for active members
-  SELECT COUNT(*) INTO v_active_members
-  FROM squad_members 
-  WHERE persistent_squad_id = p_clique_id 
-  AND status = 'active';
-  
-  IF v_active_members > 0 THEN
-    RETURN jsonb_build_object('success', false, 'error', 'Cannot delete clique with active members. Archive first.');
+  SELECT * INTO v_pilot FROM pilot_programs WHERE id = p_pilot_id;
+  IF v_pilot IS NULL THEN
+    RETURN jsonb_build_object('error', 'Pilot not found');
   END IF;
-  
-  -- Delete related records
-  DELETE FROM squad_chat_messages WHERE squad_id = p_clique_id;
-  DELETE FROM squad_quest_invites WHERE squad_id = p_clique_id;
-  DELETE FROM clique_role_assignments WHERE clique_id = p_clique_id;
-  DELETE FROM squad_members WHERE persistent_squad_id = p_clique_id;
-  
-  -- Delete the clique
-  DELETE FROM squads WHERE id = p_clique_id;
-  
-  RETURN jsonb_build_object('success', true);
+
+  v_start := v_pilot.start_date::timestamptz;
+  v_end := (v_pilot.end_date + 1)::timestamptz;
+
+  -- Engagement metrics
+  SELECT COUNT(*) INTO v_new_users FROM profiles 
+  WHERE created_at >= v_start AND created_at < v_end;
+
+  SELECT COUNT(*) INTO v_signups FROM quest_signups 
+  WHERE signed_up_at >= v_start AND signed_up_at < v_end;
+
+  SELECT COUNT(*) INTO v_completed FROM quest_signups 
+  WHERE status = 'completed' AND updated_at >= v_start AND updated_at < v_end;
+
+  SELECT COUNT(*) INTO v_squads_formed FROM quest_squads 
+  WHERE created_at >= v_start AND created_at < v_end;
+
+  -- Growth metrics
+  SELECT COUNT(*) INTO v_invites_created FROM friend_invites 
+  WHERE created_at >= v_start AND created_at < v_end;
+
+  SELECT COUNT(*) INTO v_invites_redeemed FROM friend_invites 
+  WHERE redeemed_at >= v_start AND redeemed_at < v_end;
+
+  -- Retention metrics
+  SELECT COUNT(DISTINCT user_id) INTO v_repeat_users 
+  FROM quest_signups 
+  WHERE signed_up_at >= v_start AND signed_up_at < v_end
+  GROUP BY user_id HAVING COUNT(*) >= 2;
+
+  SELECT COUNT(*) INTO v_cliques FROM squads 
+  WHERE created_at >= v_start AND created_at < v_end;
+
+  -- Satisfaction metrics
+  SELECT AVG(rating_1_5), AVG(belonging_delta), COUNT(*)
+  INTO v_avg_rating, v_avg_belonging, v_feedback_count
+  FROM feedback 
+  WHERE submitted_at >= v_start AND submitted_at < v_end;
+
+  RETURN jsonb_build_object(
+    'pilot', jsonb_build_object(
+      'id', v_pilot.id,
+      'name', v_pilot.name,
+      'start_date', v_pilot.start_date,
+      'end_date', v_pilot.end_date,
+      'status', v_pilot.status,
+      'hypothesis', v_pilot.hypothesis,
+      'success_criteria', v_pilot.success_criteria
+    ),
+    'engagement', jsonb_build_object(
+      'new_users', COALESCE(v_new_users, 0),
+      'quest_signups', COALESCE(v_signups, 0),
+      'quests_completed', COALESCE(v_completed, 0),
+      'squads_formed', COALESCE(v_squads_formed, 0),
+      'completion_rate', CASE WHEN v_signups > 0 
+        THEN ROUND((v_completed::numeric / v_signups) * 100, 1) ELSE 0 END
+    ),
+    'growth', jsonb_build_object(
+      'friend_invites_created', COALESCE(v_invites_created, 0),
+      'friend_invites_redeemed', COALESCE(v_invites_redeemed, 0),
+      'referral_rate', CASE WHEN v_invites_created > 0 
+        THEN ROUND((v_invites_redeemed::numeric / v_invites_created) * 100, 1) ELSE 0 END,
+      'k_factor', CASE WHEN v_new_users > 0 
+        THEN ROUND(v_invites_redeemed::numeric / v_new_users, 2) ELSE 0 END
+    ),
+    'retention', jsonb_build_object(
+      'repeat_users', COALESCE(v_repeat_users, 0),
+      'cliques_formed', COALESCE(v_cliques, 0),
+      'repeat_rate', CASE WHEN v_new_users > 0 
+        THEN ROUND((v_repeat_users::numeric / v_new_users) * 100, 1) ELSE 0 END
+    ),
+    'satisfaction', jsonb_build_object(
+      'avg_rating', ROUND(COALESCE(v_avg_rating, 0), 2),
+      'avg_belonging_delta', ROUND(COALESCE(v_avg_belonging, 0), 2),
+      'feedback_count', COALESCE(v_feedback_count, 0)
+    ),
+    'generated_at', now()
+  );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 ```
 
-**CliquesManager.tsx Updates:**
-- Add "Delete" button (only visible for archived cliques or those with 0 active members)
-- Confirmation dialog with warning about permanent deletion
-- Call `delete_clique` RPC on confirmation
+### Seed Data: Pilot 1
+
+```sql
+INSERT INTO pilot_programs (name, slug, description, hypothesis, success_criteria, start_date, end_date, status)
+VALUES (
+  'Pilot 1: Prove Retention & Growth',
+  'pilot-1-retention-growth',
+  'First structured pilot to validate core product assumptions with UT Austin student organizations. Track retention, referral, and satisfaction metrics.',
+  'If we provide structured, low-pressure quest experiences with small group formation, users will return for multiple quests and recruit their friends.',
+  '[
+    {"metric": "Week 1 Retention", "target": "30%", "description": "Users who sign up for 2nd quest within 7 days"},
+    {"metric": "Friend Referral Rate", "target": "20%", "description": "Users who invite at least one friend"},
+    {"metric": "Repeat Quest Rate", "target": "40%", "description": "Users who complete 2+ quests"},
+    {"metric": "Average Rating", "target": "4.0+", "description": "Quest satisfaction rating"}
+  ]'::jsonb,
+  '2025-02-01',
+  '2025-02-28',
+  'planned'
+);
+```
 
 ---
 
-## Part 6: Remove Squad Directory
+## Part 2: Admin Navigation Update
 
-### Current State
-- SquadsDirectory shows instance-based squads (quest_squads)
-- CliquesManager shows persistent cliques (squads table)
-- This creates confusion as "cliques" is the new terminology
+### Add "Pilots" Section to AdminSectionNav.tsx
 
-### Implementation
+Add a new section with the Flask/Beaker icon between "Approvals & Ops" and "Squads & Cliques":
 
-**AdminSectionNav.tsx Changes:**
-Remove `squads-directory` from the tabs array:
 ```typescript
-// REMOVE from squads-cliques section:
-{ id: 'squads-directory', label: 'Squad Directory' },
-```
-
-**Admin.tsx Changes:**
-- Remove `SquadsDirectory` import
-- Remove `case 'squads-directory'` from renderContent switch
-
-**Keep File:**
-- Keep `SquadsDirectory.tsx` file for now (might be useful for audit/legacy)
-- Or mark as deprecated with comment
-
----
-
-## Part 7: Admin Structure Cleanup
-
-### Navigation Reorganization
-
-**Final AdminSectionNav Structure:**
-
-```
-Quests Manager
-  ├── All Quests
-  ├── Active Instances
-  └── Archives
-
-Approvals & Ops
-  ├── Quest Approvals
-  ├── Ops Alerts
-  └── Audit Log
-
-Squads & Cliques
-  ├── Cliques (with delete capability)
-  ├── Comparison
-  ├── Health
-  └── Archival
-
-Organizations
-  ├── Clubs & Orgs (non-umbrella, with parent org display)
-  ├── Enterprise View (NEW - umbrella analytics)
-  └── Applications
-
-Support
-  ├── Ticket Inbox
-  ├── Direct Messages
-  ├── Flags & Trust
-  ├── Analytics
-  └── Issue Categories
-
-Partners
-  ├── Creators
-  ├── Sponsors
-  ├── Testimonials
-  ├── Creator View
-  └── Sponsor View
-
-Content
-  ├── UGC Gallery
-  └── Testimonials
-
-Communications
-  ├── Messaging
-  ├── Notification Console
-  ├── WhatsApp
-  └── Signup Links
-
-Payments & Premium
-  ├── Pilot Demand
-  ├── Tier Accounts
-  ├── Applications
-  └── ARR Forecasting
-
-Growth
-  ├── Codes & Keys (RENAMED, expanded)
-  ├── Friend Referrals
-  ├── Onboarding Feedback
-  └── Analytics
-
-Identity System
-  ├── Trait Library
-  ├── Emerging Traits
-  ├── User Inspector
-  ├── AI Inference Logs
-  └── AI Prompts
-
-Gamification
-  ├── XP & Levels
-  ├── Achievements
-  ├── Badges
-  └── Streaks
-
-Ops & Dev
-  ├── Shadow Mode
-  ├── Event Timeline
-  ├── Flow Debugger
-  ├── Manual Overrides
-  ├── Feature Flags
-  ├── Security Tools
-  └── Dev Tools
-
-Documentation
-  ├── System Docs
-  ├── Operations Playbooks
-  └── Export Handoff Pack
+{
+  id: 'pilots',
+  label: 'Pilots',
+  icon: <FlaskConical className="h-4 w-4" />,
+  tabs: [
+    { id: 'pilot-programs', label: 'Active Pilots' },
+    { id: 'pilot-analytics', label: 'Pilot Analytics' },
+    { id: 'pilot-templates', label: 'Templates' },
+    { id: 'pilot-notes', label: 'Notes & Issues' },
+  ],
+},
 ```
 
 ---
 
-## Part 8: Documentation Updates
+## Part 3: Frontend Components
 
-### System Docs Updates (DocsManager)
+### Component Structure
 
-**Add New Documents:**
+```
+src/components/admin/pilots/
+├── index.ts                      # Barrel exports
+├── PilotProgramsManager.tsx      # CRUD for pilots
+├── PilotAnalyticsDashboard.tsx   # Time-gated metrics + charts
+├── PilotNotesManager.tsx         # Notes/issues journal
+├── PilotTemplatesManager.tsx     # Template CRUD
+└── PilotVCExport.tsx            # VC-ready export generator
+```
 
-| Category | Subcategory | Title |
-|----------|-------------|-------|
-| flow | organization | Organization & Club Join Flow |
-| flow | social_chair | Social Chair Onboarding Flow |
-| rule | organizations | Club Hierarchy & Permissions |
-| security | rbac | Organization Role Matrix (add social_chair, org_admin) |
+### Component 1: `PilotProgramsManager.tsx`
 
-**Update Existing:**
-- "RBAC Permission Matrix" - Add social_chair and org_admin roles
-- "Product Overview" - Add section on enterprise/club model
+Main management interface for pilot programs.
 
-### Operations Playbooks Updates (DocsPlaybookManager)
+**Features:**
+- List all pilots with status badges (Planned/Active/Completed/Cancelled)
+- Create new pilot with date picker, hypothesis, and success criteria
+- Edit pilot details
+- Status transitions with confirmation
+- Progress indicator showing days elapsed vs total duration
+- Quick link to pilot analytics dashboard
+- "Create from Template" action
 
-**Add New Documents:**
+**UI Structure:**
+- Header with "New Pilot" button
+- Card grid showing each pilot with:
+  - Name and date range
+  - Status badge (color-coded)
+  - Progress bar for active pilots
+  - Quick stats preview (if data exists)
+  - Action buttons (Edit, View Analytics, Archive)
 
-| Category | Subcategory | Title |
-|----------|-------------|-------|
-| playbook | club_onboarding | Club Leader Onboarding Runbook |
-| playbook | enterprise_setup | Enterprise Account Setup Guide |
-| process | club_management | Club Code Distribution Process |
-| sla | enterprise | Enterprise Support SLA |
+### Component 2: `PilotAnalyticsDashboard.tsx`
 
-### Export Handoff Pack Updates (DocsExportPanel)
+Time-gated metrics dashboard with VC-ready visualizations.
 
-**Add to CTO sections:**
-- Organization hierarchy documentation
-- Club management flows
+**Header Section:**
+- Pilot selector dropdown (defaults to most recent active)
+- Date range display with calendar icon
+- Days elapsed / Days remaining counter
+- Status badge
+- "Export VC Report" button
 
-**Add to COO sections:**
-- Enterprise setup playbook
-- Club leader onboarding process
+**Key Metrics Cards (4-column grid):**
+| Card | Metric | Icon |
+|------|--------|------|
+| New Users | Users created during pilot | Users |
+| Quest Signups | Signups during pilot | UserCheck |
+| Completion Rate | Completed / Signups % | TrendingUp |
+| Friend Referrals | Redeemed invites | UserPlus |
+
+**Detailed Sections:**
+
+1. **Engagement Panel**
+   - Quest signups chart (daily trend using Recharts)
+   - Squad formation rate
+   - Activity breakdown
+
+2. **Retention Panel**
+   - Repeat user count and percentage
+   - Week-over-week retention (if multi-week pilot)
+   - Clique formation rate
+
+3. **Growth Panel**
+   - Friend invite funnel visualization
+   - K-factor calculation with explanation
+   - Referral rate percentage
+
+4. **Satisfaction Panel**
+   - Average rating with star display
+   - Belonging delta with +/- indicator
+   - Feedback response count
+
+5. **Success Criteria Tracker**
+   - Checklist of defined success criteria
+   - Current value vs target for each
+   - Pass/Fail indicators with color coding
+
+### Component 3: `PilotNotesManager.tsx`
+
+Journal interface for pilot observations.
+
+**Features:**
+- Note type filter tabs: All | Observations | Issues | Decisions | Milestones | Risks
+- Create new note with:
+  - Type selector (dropdown)
+  - Content textarea (rich text not required, plain text is fine)
+  - Tags input (comma-separated)
+  - Optional quest/user link selectors
+- Timeline view sorted by date (newest first)
+- Note cards showing:
+  - Type badge (color-coded)
+  - Content preview
+  - Tags as pills
+  - Created date and author
+  - Linked quest/user if any
+- Search within notes
+- Export notes as Markdown or JSON
+
+### Component 4: `PilotTemplatesManager.tsx`
+
+Template management for future pilots.
+
+**Features:**
+- List templates with name and description
+- Create/Edit template with:
+  - Name and description
+  - Default duration (days)
+  - Hypothesis template text
+  - Success criteria template (repeatable fields)
+  - Suggested metrics checkboxes
+- "Use Template" action to create a new pilot from it
+- Delete template with confirmation
+
+### Component 5: `PilotVCExport.tsx`
+
+Embedded within PilotAnalyticsDashboard as export functionality.
+
+**Export Options:**
+- Format: JSON (structured) or Markdown (readable)
+- Include: Metrics, Notes, Success Criteria tracking
+- Generate shareable report URL (optional future enhancement)
+
+**JSON Export Structure:**
+```json
+{
+  "report": {
+    "title": "OpenClique Pilot Report",
+    "pilot_name": "Pilot 1: Prove Retention & Growth",
+    "period": "February 1-28, 2025",
+    "generated_at": "2025-02-28T23:59:59Z"
+  },
+  "hypothesis": "If we provide structured...",
+  "success_criteria": [
+    {"metric": "Week 1 Retention", "target": "30%", "actual": "35%", "passed": true}
+  ],
+  "metrics": {
+    "engagement": {...},
+    "retention": {...},
+    "growth": {...},
+    "satisfaction": {...}
+  },
+  "notes": [
+    {"date": "2025-02-05", "type": "milestone", "content": "First 50 users"}
+  ]
+}
+```
 
 ---
 
-## Files Summary
+## Part 4: Files Summary
 
 ### Files to Create
 
 | File | Purpose |
 |------|---------|
-| `src/components/profile/OrganizationsTab.tsx` | My Organizations tab for Profile Hub |
-| `src/components/clubs/SocialChairOnboarding.tsx` | Multi-step onboarding wizard |
-| `src/components/admin/EnterpriseOrgsManager.tsx` | Enterprise umbrella analytics |
-| `supabase/migrations/XXXXXX_delete_clique.sql` | Add delete_clique RPC |
+| `src/components/admin/pilots/index.ts` | Barrel exports |
+| `src/components/admin/pilots/PilotProgramsManager.tsx` | Pilot CRUD interface |
+| `src/components/admin/pilots/PilotAnalyticsDashboard.tsx` | Metrics dashboard with charts |
+| `src/components/admin/pilots/PilotNotesManager.tsx` | Notes journal |
+| `src/components/admin/pilots/PilotTemplatesManager.tsx` | Template management |
 
 ### Files to Modify
 
 | File | Changes |
 |------|---------|
-| `src/pages/Profile.tsx` | Add Organizations tab |
-| `src/components/admin/AdminSectionNav.tsx` | Remove squads-directory, rename invite-codes, add enterprise-view |
-| `src/pages/Admin.tsx` | Update routing for new structure |
-| `src/components/admin/OrgsManager.tsx` | Add umbrella toggle, parent_org selector, verified domains, social_chair role |
-| `src/components/admin/CliquesManager.tsx` | Add delete functionality |
-| `src/components/admin/InviteCodesManager.tsx` | Add org_invite_codes tab, rename to Codes & Keys |
-| `src/components/clubs/SocialChairDashboard.tsx` | Add invite codes tab, onboarding check |
+| `src/components/admin/AdminSectionNav.tsx` | Add "Pilots" section with 4 tabs |
+| `src/pages/Admin.tsx` | Add imports and route cases for pilot components |
 
-### Files to Remove from Navigation (Keep Files)
+### Database Migration
 
-| File | Reason |
-|------|--------|
-| `src/components/admin/SquadsDirectory.tsx` | Redundant with CliquesManager, removed from nav |
+Single migration file creating:
+- `pilot_programs` table with RLS
+- `pilot_notes` table with RLS  
+- `pilot_templates` table with RLS
+- `get_pilot_metrics` RPC function
+- Pilot 1 seed data
 
 ---
 
-## Technical Considerations
+## Part 5: VC Metrics Framework
 
-### Database Schema (Already Exists)
-- `organizations.is_umbrella` - Boolean for enterprise umbrellas
-- `organizations.parent_org_id` - FK for club-to-umbrella relationship
-- `organizations.verified_domains` - Text array for email domain verification
-- `org_invite_codes` - Table for organization-specific invite codes
-- `profile_organizations.role` - Includes social_chair, org_admin
+### What VCs Want to See
 
-### Analytics Rollup Query (for Enterprise View)
-```sql
-WITH umbrella_stats AS (
-  SELECT 
-    o.id as umbrella_id,
-    o.name as umbrella_name,
-    COUNT(DISTINCT child.id) as club_count,
-    COUNT(DISTINCT po.profile_id) as total_members,
-    COUNT(DISTINCT q.id) as total_quests
-  FROM organizations o
-  LEFT JOIN organizations child ON child.parent_org_id = o.id
-  LEFT JOIN profile_organizations po ON po.org_id = child.id
-  LEFT JOIN quests q ON q.org_id = child.id AND q.status = 'open'
-  WHERE o.is_umbrella = true
-  GROUP BY o.id, o.name
-)
-SELECT * FROM umbrella_stats;
-```
+Based on consumer social/community investment criteria:
 
-### RLS Considerations
-- Ensure `social_chair` role has proper access to `org_invite_codes` (already in place)
-- Enterprise admins need visibility across child orgs
+**1. Engagement (Activity Proof)**
+- DAU/MAU during pilot
+- Quest signup volume
+- Completion rate
+- Squad formation rate
 
----
+**2. Retention (Stickiness Proof)**
+- Week-over-week return rate
+- Repeat quest participation
+- Clique formation (persistent groups)
 
-## Implementation Order
+**3. Growth (Virality Proof)**
+- K-factor (new users from referrals / total users)
+- Friend invite redemption rate
+- Organic vs referred ratio
 
-1. **Database Migration** - Add delete_clique RPC
-2. **Admin Cleanup** - Remove Squad Directory from nav, rename Invite Codes
-3. **OrgsManager Enhancement** - Add umbrella fields, parent org, verified domains
-4. **Enterprise View** - Create EnterpriseOrgsManager component
-5. **Codes & Keys** - Expand InviteCodesManager with org codes
-6. **CliquesManager** - Add delete functionality
-7. **Profile Organizations Tab** - Create OrganizationsTab component
-8. **Social Chair Onboarding** - Create onboarding wizard
-9. **Documentation** - Update system docs and playbooks
-10. **Testing** - End-to-end flow verification
+**4. Satisfaction (Quality Proof)**
+- Average quest rating (1-5)
+- Belonging delta (pre/post connection feeling)
+- "Would do again" percentage
+
+**5. Cohort Analysis**
+- Weekly signup cohorts
+- Drop-off funnel by stage
+- Retention curves
 
 ---
 
-## User Journey: Club Leader Setup
+## Part 6: Implementation Order
 
-1. Admin creates "GBAT" org under UT Austin umbrella in admin panel
-2. Admin generates creator code with type "organization" for GBAT
-3. GBAT leader receives code, signs up, redeems code
-4. GBAT leader is assigned `social_chair` role by admin
-5. On first visit to `/org/gbat`, Social Chair Onboarding starts
-6. GBAT leader completes onboarding, generates member invite codes
-7. GBAT leader shares codes with club members
-8. Members redeem codes, appear in GBAT's member list
-9. GBAT leader creates quests, members receive notifications
-10. Analytics roll up to UT Austin enterprise view
+1. **Database Migration** - Create tables, RPC, seed Pilot 1
+2. **Admin Navigation** - Add Pilots section to AdminSectionNav
+3. **PilotProgramsManager** - Basic CRUD with status management
+4. **PilotNotesManager** - Notes journal with type filtering
+5. **PilotAnalyticsDashboard** - Metrics cards + charts + export
+6. **PilotTemplatesManager** - Template CRUD
+7. **Admin.tsx Routing** - Connect all components
+8. **Testing** - Verify time-gating works correctly
+
+---
+
+## Technical Notes
+
+### Date Filtering Logic
+
+All metrics queries use inclusive date ranges:
+- `start_date::timestamptz` for the start
+- `(end_date + 1)::timestamptz` for the end (to include the entire end date)
+
+### Chart Library
+
+Using existing Recharts dependency for:
+- Line charts (daily trends)
+- Bar charts (comparisons)
+- Area charts (cohort visualization)
+
+### Export Implementation
+
+Follows the pattern from `DocsExportPanel.tsx`:
+- Generate JSON blob
+- Create download link
+- Support Markdown alternative format
+
+### Status Transitions
+
+Pilots follow this lifecycle:
+- `planned` → `active` (when start_date is reached or manually activated)
+- `active` → `completed` (when end_date passes or manually completed)
+- Any status → `cancelled` (manual action only)
