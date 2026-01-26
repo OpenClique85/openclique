@@ -3504,6 +3504,7 @@ export type Database = {
           city: string | null
           cost_description: string | null
           created_at: string
+          created_via: string | null
           creator_id: string | null
           creator_name: string | null
           creator_notes: string | null
@@ -3588,6 +3589,7 @@ export type Database = {
           city?: string | null
           cost_description?: string | null
           created_at?: string
+          created_via?: string | null
           creator_id?: string | null
           creator_name?: string | null
           creator_notes?: string | null
@@ -3676,6 +3678,7 @@ export type Database = {
           city?: string | null
           cost_description?: string | null
           created_at?: string
+          created_via?: string | null
           creator_id?: string | null
           creator_name?: string | null
           creator_notes?: string | null
