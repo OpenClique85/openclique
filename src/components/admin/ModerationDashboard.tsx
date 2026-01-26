@@ -135,6 +135,37 @@ export function ModerationDashboard() {
     },
   });
 
+  // Recalculate trust scores mutation
+  const recalculateTrust = useMutation({
+    mutationFn: async () => {
+      // Recalculate scores for all entities with trust records
+      const { data: entities, error: fetchError } = await supabase
+        .from('trust_scores')
+        .select('entity_type, entity_id')
+        .limit(100);
+      
+      if (fetchError) throw fetchError;
+      
+      let updated = 0;
+      for (const entity of entities || []) {
+        const { error } = await supabase.rpc('calculate_trust_score', {
+          p_entity_type: entity.entity_type,
+          p_entity_id: entity.entity_id,
+        });
+        if (!error) updated++;
+      }
+      
+      return { updated };
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['trust-stats'] });
+      toast.success(`Recalculated ${data.updated} trust scores`);
+    },
+    onError: () => {
+      toast.error('Failed to recalculate trust scores');
+    },
+  });
+
   const getReasonBadge = (reason: string) => {
     const colors: Record<string, string> = {
       spam: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
@@ -148,6 +179,27 @@ export function ModerationDashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Header with Actions */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold flex items-center gap-2">
+          <Shield className="h-5 w-5 text-primary" />
+          Moderation & Trust
+        </h2>
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => recalculateTrust.mutate()}
+          disabled={recalculateTrust.isPending}
+        >
+          {recalculateTrust.isPending ? (
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          ) : (
+            <TrendingUp className="h-4 w-4 mr-2" />
+          )}
+          Recalculate Scores
+        </Button>
+      </div>
+
       {/* Trust Score Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
