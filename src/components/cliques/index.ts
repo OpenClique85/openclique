@@ -11,3 +11,5 @@ export { CliqueWarmUpRoom } from './CliqueWarmUpRoom';
 export { WarmUpProgressBar } from './WarmUpProgressBar';
 export { SuggestQuestModal } from './SuggestQuestModal';
 export { FormCliqueButton } from './FormCliqueButton';
+export { CliqueRolesManager } from './CliqueRolesManager';
+export { CliqueSettingsModal } from './CliqueSettingsModal';
