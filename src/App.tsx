@@ -95,6 +95,7 @@ import OrgPortal from "./pages/OrgPortal";
 import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { TutorialProvider, TutorialOverlay, TutorialPrompt } from "./components/tutorial";
+import { MobileActionBar } from "./components/MobileActionBar";
 
 // -----------------------------------------------------------------------------
 // SETUP: Initialize data fetching client
@@ -116,6 +117,8 @@ const App = () => (
             {/* Tutorial components must be inside BrowserRouter since they use useNavigate */}
             <TutorialOverlay />
             <TutorialPrompt />
+            {/* Mobile bottom navigation bar */}
+            <MobileActionBar />
             
             <Routes>
               {/* MAIN PAGES */}

@@ -6,6 +6,6 @@
 
 export const QUESTS_PAGE = {
   heroTitle: 'Find Your Quest',
-  heroSubtitle: 'Your squad is waiting. Pick an adventure and show up.',
+  heroSubtitle: 'Your clique is waiting. Pick an adventure and show up.',
   heroExplainer: 'Each quest is a curated adventure for a small group. Come solo, bring friends, or rally your crew.',
 };

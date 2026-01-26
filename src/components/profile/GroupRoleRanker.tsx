@@ -93,7 +93,7 @@ export function GroupRoleRanker({ userId, compact = false }: GroupRoleRankerProp
     <div className="space-y-4">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <span>Rank how you naturally show up in groups</span>
-        <TooltipInfo text="Your primary role is the energy you bring most often. This helps us build balanced squads with complementary styles." />
+        <TooltipInfo text="Your primary role is the energy you bring most often. This helps us build balanced cliques with complementary styles." />
       </div>
 
       <div className="space-y-2">

@@ -267,7 +267,7 @@ export const STATUS_DISPLAY: Record<
 > = {
   draft: { label: 'Waiting for Signups', color: 'bg-muted text-muted-foreground' },
   recruiting: { label: 'Recruiting', color: 'bg-blue-500/20 text-blue-700' },
-  locked: { label: 'Squads Formed', color: 'bg-amber-500/20 text-amber-700' },
+  locked: { label: 'Cliques Formed', color: 'bg-amber-500/20 text-amber-700' },
   live: { label: 'In Progress', color: 'bg-green-500/20 text-green-700' },
   completed: { label: 'Completed', color: 'bg-purple-500/20 text-purple-700' },
   paused: { label: 'Paused', color: 'bg-orange-500/20 text-orange-700' },

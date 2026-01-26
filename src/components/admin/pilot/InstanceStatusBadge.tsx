@@ -31,7 +31,7 @@ const STATUS_CONFIG: Record<InstanceStatus, StatusConfig> = {
     className: 'bg-blue-500/20 text-blue-700 dark:text-blue-400 border-blue-500/30',
   },
   locked: {
-    label: 'Squads Formed',
+    label: 'Cliques Formed',
     icon: Lock,
     className: 'bg-amber-500/20 text-amber-700 dark:text-amber-400 border-amber-500/30',
   },

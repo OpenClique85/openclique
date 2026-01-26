@@ -94,7 +94,7 @@ export function SquadCard({
           </div>
           
           <Button variant="ghost" size="sm" asChild>
-            <Link to={`/squads/${id}`}>
+            <Link to={`/cliques/${id}`}>
               View
               <ChevronRight className="h-4 w-4 ml-1" />
             </Link>
