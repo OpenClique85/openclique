@@ -2514,21 +2514,37 @@ export type Database = {
       }
       organizations: {
         Row: {
+          account_tier: Database["public"]["Enums"]["account_tier"] | null
           admin_notes: string | null
+          annual_commit: number | null
+          billing_contact_email: string | null
+          billing_status: Database["public"]["Enums"]["billing_status"] | null
           category: string | null
+          cohort_cap: number | null
           contact_email: string | null
+          contract_notes: string | null
           created_at: string
           description: string | null
+          enterprise_type: Database["public"]["Enums"]["enterprise_type"] | null
+          estimated_arr: number | null
           id: string
+          intended_plan: string | null
           is_active: boolean
           is_umbrella: boolean
           is_verified: boolean
           logo_url: string | null
           member_limit: number | null
           name: string
+          overage_policy: Database["public"]["Enums"]["overage_policy"] | null
           parent_org_id: string | null
+          pilot_end_date: string | null
+          pilot_signup_date: string | null
+          price_per_cohort: number | null
+          price_per_seat: number | null
+          pricing_model: Database["public"]["Enums"]["pricing_model"] | null
           primary_color: string | null
           school_affiliation: string | null
+          seat_cap: number | null
           seeking: string[] | null
           slug: string
           status: Database["public"]["Enums"]["org_status"]
@@ -2542,21 +2558,39 @@ export type Database = {
           website_url: string | null
         }
         Insert: {
+          account_tier?: Database["public"]["Enums"]["account_tier"] | null
           admin_notes?: string | null
+          annual_commit?: number | null
+          billing_contact_email?: string | null
+          billing_status?: Database["public"]["Enums"]["billing_status"] | null
           category?: string | null
+          cohort_cap?: number | null
           contact_email?: string | null
+          contract_notes?: string | null
           created_at?: string
           description?: string | null
+          enterprise_type?:
+            | Database["public"]["Enums"]["enterprise_type"]
+            | null
+          estimated_arr?: number | null
           id?: string
+          intended_plan?: string | null
           is_active?: boolean
           is_umbrella?: boolean
           is_verified?: boolean
           logo_url?: string | null
           member_limit?: number | null
           name: string
+          overage_policy?: Database["public"]["Enums"]["overage_policy"] | null
           parent_org_id?: string | null
+          pilot_end_date?: string | null
+          pilot_signup_date?: string | null
+          price_per_cohort?: number | null
+          price_per_seat?: number | null
+          pricing_model?: Database["public"]["Enums"]["pricing_model"] | null
           primary_color?: string | null
           school_affiliation?: string | null
+          seat_cap?: number | null
           seeking?: string[] | null
           slug: string
           status?: Database["public"]["Enums"]["org_status"]
@@ -2570,21 +2604,39 @@ export type Database = {
           website_url?: string | null
         }
         Update: {
+          account_tier?: Database["public"]["Enums"]["account_tier"] | null
           admin_notes?: string | null
+          annual_commit?: number | null
+          billing_contact_email?: string | null
+          billing_status?: Database["public"]["Enums"]["billing_status"] | null
           category?: string | null
+          cohort_cap?: number | null
           contact_email?: string | null
+          contract_notes?: string | null
           created_at?: string
           description?: string | null
+          enterprise_type?:
+            | Database["public"]["Enums"]["enterprise_type"]
+            | null
+          estimated_arr?: number | null
           id?: string
+          intended_plan?: string | null
           is_active?: boolean
           is_umbrella?: boolean
           is_verified?: boolean
           logo_url?: string | null
           member_limit?: number | null
           name?: string
+          overage_policy?: Database["public"]["Enums"]["overage_policy"] | null
           parent_org_id?: string | null
+          pilot_end_date?: string | null
+          pilot_signup_date?: string | null
+          price_per_cohort?: number | null
+          price_per_seat?: number | null
+          pricing_model?: Database["public"]["Enums"]["pricing_model"] | null
           primary_color?: string | null
           school_affiliation?: string | null
+          seat_cap?: number | null
           seeking?: string[] | null
           slug?: string
           status?: Database["public"]["Enums"]["org_status"]
@@ -2777,6 +2829,103 @@ export type Database = {
           user_agent?: string | null
         }
         Relationships: []
+      }
+      premium_interest: {
+        Row: {
+          acknowledged_pricing: boolean | null
+          billing_status: Database["public"]["Enums"]["billing_status"] | null
+          created_at: string | null
+          feature_usage: Json | null
+          id: string
+          intended_plan: string | null
+          pilot_opt_in_date: string | null
+          ready_to_convert: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          acknowledged_pricing?: boolean | null
+          billing_status?: Database["public"]["Enums"]["billing_status"] | null
+          created_at?: string | null
+          feature_usage?: Json | null
+          id?: string
+          intended_plan?: string | null
+          pilot_opt_in_date?: string | null
+          ready_to_convert?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          acknowledged_pricing?: boolean | null
+          billing_status?: Database["public"]["Enums"]["billing_status"] | null
+          created_at?: string | null
+          feature_usage?: Json | null
+          id?: string
+          intended_plan?: string | null
+          pilot_opt_in_date?: string | null
+          ready_to_convert?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "premium_interest_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pricing_page_events: {
+        Row: {
+          created_at: string | null
+          cta_label: string | null
+          enterprise_type_clicked:
+            | Database["public"]["Enums"]["enterprise_type"]
+            | null
+          event_type: string
+          id: string
+          metadata: Json | null
+          session_id: string | null
+          tier_clicked: Database["public"]["Enums"]["account_tier"] | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          cta_label?: string | null
+          enterprise_type_clicked?:
+            | Database["public"]["Enums"]["enterprise_type"]
+            | null
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          session_id?: string | null
+          tier_clicked?: Database["public"]["Enums"]["account_tier"] | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          cta_label?: string | null
+          enterprise_type_clicked?:
+            | Database["public"]["Enums"]["enterprise_type"]
+            | null
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          session_id?: string | null
+          tier_clicked?: Database["public"]["Enums"]["account_tier"] | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pricing_page_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profile_organizations: {
         Row: {
@@ -4784,6 +4933,108 @@ export type Database = {
           },
         ]
       }
+      tier_applications: {
+        Row: {
+          applicant_email: string
+          applicant_id: string | null
+          applicant_name: string
+          city_name: string | null
+          city_region: string | null
+          created_at: string | null
+          decline_reason: string | null
+          demo_completed_at: string | null
+          demo_requested: boolean | null
+          demo_scheduled_at: string | null
+          enterprise_type: Database["public"]["Enums"]["enterprise_type"] | null
+          estimated_arr: number | null
+          estimated_headcount: number | null
+          estimated_population: number | null
+          id: string
+          intended_plan: string | null
+          intended_pricing_model:
+            | Database["public"]["Enums"]["pricing_model"]
+            | null
+          notes: string | null
+          organization_name: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
+          tier: Database["public"]["Enums"]["account_tier"]
+          updated_at: string | null
+          use_case_description: string | null
+        }
+        Insert: {
+          applicant_email: string
+          applicant_id?: string | null
+          applicant_name: string
+          city_name?: string | null
+          city_region?: string | null
+          created_at?: string | null
+          decline_reason?: string | null
+          demo_completed_at?: string | null
+          demo_requested?: boolean | null
+          demo_scheduled_at?: string | null
+          enterprise_type?:
+            | Database["public"]["Enums"]["enterprise_type"]
+            | null
+          estimated_arr?: number | null
+          estimated_headcount?: number | null
+          estimated_population?: number | null
+          id?: string
+          intended_plan?: string | null
+          intended_pricing_model?:
+            | Database["public"]["Enums"]["pricing_model"]
+            | null
+          notes?: string | null
+          organization_name: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          tier: Database["public"]["Enums"]["account_tier"]
+          updated_at?: string | null
+          use_case_description?: string | null
+        }
+        Update: {
+          applicant_email?: string
+          applicant_id?: string | null
+          applicant_name?: string
+          city_name?: string | null
+          city_region?: string | null
+          created_at?: string | null
+          decline_reason?: string | null
+          demo_completed_at?: string | null
+          demo_requested?: boolean | null
+          demo_scheduled_at?: string | null
+          enterprise_type?:
+            | Database["public"]["Enums"]["enterprise_type"]
+            | null
+          estimated_arr?: number | null
+          estimated_headcount?: number | null
+          estimated_population?: number | null
+          id?: string
+          intended_plan?: string | null
+          intended_pricing_model?:
+            | Database["public"]["Enums"]["pricing_model"]
+            | null
+          notes?: string | null
+          organization_name?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          tier?: Database["public"]["Enums"]["account_tier"]
+          updated_at?: string | null
+          use_case_description?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tier_applications_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trait_library: {
         Row: {
           category: string
@@ -5012,6 +5263,57 @@ export type Database = {
             columns: ["badge_id"]
             isOneToOne: false
             referencedRelation: "badge_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_entitlements: {
+        Row: {
+          created_at: string | null
+          expires_at: string | null
+          granted_at: string | null
+          id: string
+          is_active: boolean | null
+          scope: Database["public"]["Enums"]["entitlement_scope"]
+          source_org_id: string | null
+          source_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string | null
+          granted_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          scope: Database["public"]["Enums"]["entitlement_scope"]
+          source_org_id?: string | null
+          source_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string | null
+          granted_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          scope?: Database["public"]["Enums"]["entitlement_scope"]
+          source_org_id?: string | null
+          source_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_entitlements_source_org_id_fkey"
+            columns: ["source_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_entitlements_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -5605,6 +5907,14 @@ export type Database = {
           streak_name: string
         }[]
       }
+      check_user_entitlement: {
+        Args: {
+          p_org_id?: string
+          p_scope: Database["public"]["Enums"]["entitlement_scope"]
+          p_user_id: string
+        }
+        Returns: boolean
+      }
       confirm_warm_up_readiness: {
         Args: { p_squad_id: string }
         Returns: undefined
@@ -5767,18 +6077,32 @@ export type Database = {
       update_user_streaks: { Args: { p_user_id: string }; Returns: undefined }
     }
     Enums: {
+      account_tier:
+        | "city"
+        | "enterprise"
+        | "organization"
+        | "individual_free"
+        | "individual_premium"
       admin_message_type:
         | "support"
         | "announcement"
         | "feedback_request"
         | "quest_related"
       app_role: "admin" | "user" | "quest_creator" | "sponsor"
+      billing_status:
+        | "pilot_active"
+        | "negotiating"
+        | "converted"
+        | "past_due"
+        | "churned"
       comms_type:
         | "email_invite"
         | "email_confirm"
         | "email_reminder"
         | "email_followup"
         | "email_whatsapp"
+      enterprise_type: "company" | "university" | "military" | "program"
+      entitlement_scope: "city_scope" | "org_scope" | "personal_scope"
       instance_status:
         | "draft"
         | "recruiting"
@@ -5862,6 +6186,8 @@ export type Database = {
         | "company"
         | "nonprofit"
         | "other"
+      overage_policy: "soft_cap_notify" | "hard_cap_block"
+      pricing_model: "per_cohort" | "per_seat" | "annual_platform" | "hybrid"
       proof_status: "pending" | "approved" | "flagged" | "resubmit_requested"
       quest_event_type:
         | "instance_created"
@@ -6044,6 +6370,13 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      account_tier: [
+        "city",
+        "enterprise",
+        "organization",
+        "individual_free",
+        "individual_premium",
+      ],
       admin_message_type: [
         "support",
         "announcement",
@@ -6051,6 +6384,13 @@ export const Constants = {
         "quest_related",
       ],
       app_role: ["admin", "user", "quest_creator", "sponsor"],
+      billing_status: [
+        "pilot_active",
+        "negotiating",
+        "converted",
+        "past_due",
+        "churned",
+      ],
       comms_type: [
         "email_invite",
         "email_confirm",
@@ -6058,6 +6398,8 @@ export const Constants = {
         "email_followup",
         "email_whatsapp",
       ],
+      enterprise_type: ["company", "university", "military", "program"],
+      entitlement_scope: ["city_scope", "org_scope", "personal_scope"],
       instance_status: [
         "draft",
         "recruiting",
@@ -6147,6 +6489,8 @@ export const Constants = {
         "nonprofit",
         "other",
       ],
+      overage_policy: ["soft_cap_notify", "hard_cap_block"],
+      pricing_model: ["per_cohort", "per_seat", "annual_platform", "hybrid"],
       proof_status: ["pending", "approved", "flagged", "resubmit_requested"],
       quest_event_type: [
         "instance_created",

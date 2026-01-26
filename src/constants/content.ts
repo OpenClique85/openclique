@@ -59,6 +59,7 @@ export const BRAND = {
 export const NAV_LINKS = [
   { label: "Home", href: "/" },                          // Homepage
   { label: "Quests", href: "/quests" },                  // Quest catalog
+  { label: "Pricing", href: "/pricing" },                // Pricing page
   { label: "How It Works", href: "/how-it-works" },      // Process explanation
   { label: "About", href: "/about" },                    // About us
 ];

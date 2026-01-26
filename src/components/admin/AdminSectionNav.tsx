@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { 
   Target, Users, MessageSquare, BarChart3, Gamepad2,
   ChevronDown, ChevronRight, Wrench, FileText,
-  Shield, Library, CheckSquare, HeadphonesIcon, Image, Ticket, Brain
+  Shield, Library, CheckSquare, HeadphonesIcon, Image, Ticket, Brain, CreditCard
 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -98,6 +98,17 @@ export const ADMIN_SECTIONS: AdminSection[] = [
       { id: 'notification-console', label: 'Notification Console' },
       { id: 'whatsapp', label: 'WhatsApp' },
       { id: 'links', label: 'Signup Links' },
+    ],
+  },
+  {
+    id: 'payments',
+    label: 'Payments & Premium',
+    icon: <CreditCard className="h-4 w-4" />,
+    tabs: [
+      { id: 'pilot-demand', label: 'Pilot Demand' },
+      { id: 'tier-accounts', label: 'Tier Accounts' },
+      { id: 'tier-applications', label: 'Applications' },
+      { id: 'arr-forecasting', label: 'ARR Forecasting' },
     ],
   },
   {
