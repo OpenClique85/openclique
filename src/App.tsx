@@ -111,6 +111,7 @@ const CreatorOrgRequests = lazy(() => import("./pages/CreatorOrgRequests"));
 const CreatorInbox = lazy(() => import("./pages/CreatorInbox"));
 const CreatorBrowseListings = lazy(() => import("./pages/CreatorBrowseListings"));
 const QuestBuilder = lazy(() => import("./pages/QuestBuilder"));
+const ImportEventbriteQuest = lazy(() => import("./pages/ImportEventbriteQuest"));
 const OrgPortal = lazy(() => import("./pages/OrgPortal"));
 const OrgPage = lazy(() => import("./pages/OrgPage"));
 const EventbriteCallback = lazy(() => import("./pages/EventbriteCallback"));
@@ -222,6 +223,7 @@ const App = () => (
                 <Route path="/creator/analytics" element={<ProtectedRoute><CreatorAnalyticsPage /></ProtectedRoute>} />
                 <Route path="/creator/profile" element={<ProtectedRoute><CreatorProfile /></ProtectedRoute>} />
                 <Route path="/creator/quests/new" element={<ProtectedRoute><QuestBuilder /></ProtectedRoute>} />
+                <Route path="/creator/quests/import-eventbrite" element={<ProtectedRoute><ImportEventbriteQuest /></ProtectedRoute>} />
                 <Route path="/creator/quests/:questId/edit" element={<ProtectedRoute><QuestBuilder /></ProtectedRoute>} />
                 
                 {/* SPONSOR PAGES */}

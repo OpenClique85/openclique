@@ -31,7 +31,8 @@ import {
   CheckCircle,
   XCircle,
   AlertTriangle,
-  ExternalLink
+  ExternalLink,
+  Upload,
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -43,7 +44,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-
+import { EventbriteImportModal } from '@/components/eventbrite/EventbriteImportModal';
 type Quest = Tables<'quests'>;
 type ReviewStatus = Enums<'review_status'>;
 type QuestStatus = Enums<'quest_status'>;
@@ -63,6 +64,7 @@ export default function CreatorQuests() {
   const [searchQuery, setSearchQuery] = useState('');
   const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
   const [questToSubmit, setQuestToSubmit] = useState<Quest | null>(null);
+  const [eventbriteModalOpen, setEventbriteModalOpen] = useState(false);
 
   // Fetch creator profile
   const { data: creatorProfile, isLoading: profileLoading } = useQuery({
@@ -283,12 +285,22 @@ export default function CreatorQuests() {
                 Manage and track all your quest creations
               </p>
             </div>
-            <Button asChild className="gap-2">
-              <Link to="/creator/quests/new">
-                <Plus className="h-4 w-4" />
-                <span className="hidden sm:inline">New Quest</span>
-              </Link>
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                className="gap-2"
+                onClick={() => setEventbriteModalOpen(true)}
+              >
+                <Upload className="h-4 w-4" />
+                <span className="hidden sm:inline">Import</span>
+              </Button>
+              <Button asChild className="gap-2">
+                <Link to="/creator/quests/new">
+                  <Plus className="h-4 w-4" />
+                  <span className="hidden sm:inline">New Quest</span>
+                </Link>
+              </Button>
+            </div>
           </div>
 
           {/* Filters */}
@@ -493,6 +505,15 @@ export default function CreatorQuests() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Eventbrite Import Modal */}
+      <EventbriteImportModal
+        open={eventbriteModalOpen}
+        onOpenChange={setEventbriteModalOpen}
+        onEventImported={(eventData) => {
+          navigate('/creator/quests/import-eventbrite', { state: { eventData } });
+        }}
+      />
     </div>
   );
 }
