@@ -46,6 +46,7 @@ import { InviteCodesManager } from '@/components/admin/InviteCodesManager';
 import { OnboardingFeedbackManager } from '@/components/admin/OnboardingFeedbackManager';
 import { PlatformStats } from '@/components/admin/PlatformStats';
 import { QuestArchivesManager } from '@/components/admin/QuestArchivesManager';
+import { CliquesManager } from '@/components/admin/CliquesManager';
 import { TraitLibraryManager, UserProfileInspector, AIInferenceLogsViewer, EmergingTraitsReview } from '@/components/admin/identity';
 import { PromptManager } from '@/components/admin/ai/PromptManager';
 
@@ -94,6 +95,7 @@ export default function Admin() {
       // Support
       case 'support-inbox': return <SupportDashboard />;
       case 'support-dm': return <AdminDirectMessages />;
+      case 'cliques-manager': return <CliquesManager />;
       case 'support-analytics': return <SupportAnalytics />;
       case 'support-categories': return <IssueCategoriesManager />;
       // Partners

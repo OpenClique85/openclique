@@ -20,6 +20,7 @@ import { useToast } from '@/hooks/use-toast';
 import { CliqueRolesManager } from '@/components/cliques/CliqueRolesManager';
 import { CliqueSettingsModal } from '@/components/cliques/CliqueSettingsModal';
 import { CliqueApplicationsInbox } from '@/components/cliques/CliqueApplicationsInbox';
+import { GetHelpButton } from '@/components/support';
 import { 
   Loader2, 
   ArrowLeft, 
@@ -566,6 +567,13 @@ export default function CliqueDetail() {
           currentUserId={user?.id || ''}
         />
       )}
+
+      {/* Contextual Help Button */}
+      <GetHelpButton
+        variant="floating"
+        contextSquadId={cliqueId}
+        contextSquadName={clique?.name}
+      />
     </div>
   );
 }
