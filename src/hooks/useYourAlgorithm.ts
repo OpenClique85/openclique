@@ -45,6 +45,8 @@ export const CATEGORY_LABELS: Record<string, string> = {
   group_role: 'Group Role',
 };
 
+export const MAX_ACTIVE_TRAITS = 10;
+
 export function useYourAlgorithm() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -103,6 +105,11 @@ export function useYourAlgorithm() {
   const acceptDraftMutation = useMutation({
     mutationFn: async (draft: DraftTraitWithLibrary) => {
       if (!user?.id) throw new Error('Not authenticated');
+
+      // Check if at max traits limit
+      if (acceptedTraits.length >= MAX_ACTIVE_TRAITS) {
+        throw new Error(`Maximum ${MAX_ACTIVE_TRAITS} active traits allowed. Remove a trait first.`);
+      }
 
       // 1. Update draft status
       const { error: draftError } = await supabase
@@ -233,6 +240,8 @@ export function useYourAlgorithm() {
     // Stats
     totalAccepted: acceptedTraits.length,
     totalPending: pendingDrafts.length,
+    isAtMaxTraits: acceptedTraits.length >= MAX_ACTIVE_TRAITS,
+    maxTraits: MAX_ACTIVE_TRAITS,
     
     // Actions
     acceptDraft: (draft: DraftTraitWithLibrary) => acceptDraftMutation.mutateAsync(draft),

@@ -71,48 +71,91 @@ export function SuggestQuestModal({
   const fetchAvailableQuests = async () => {
     setIsLoading(true);
     
-    // Fetch upcoming quest instances that are recruiting
     const today = new Date().toISOString().split('T')[0];
-    const { data: instances, error } = await supabase
-      .from('quest_instances')
-      .select(`
-        id,
-        scheduled_date,
-        start_time,
-        title,
-        icon,
-        meeting_point_name,
-        progression_tree
-      `)
-      .gte('scheduled_date', today)
-      .eq('status', 'recruiting')
-      .order('scheduled_date', { ascending: true })
-      .limit(20);
-
-    if (!error && instances) {
-      // Filter out quests already invited/proposed to this clique
-      const { data: existingInvites } = await supabase
-        .from('squad_quest_invites')
-        .select('quest_id')
-        .eq('squad_id', cliqueId);
-
-      const existingQuestIds = new Set(existingInvites?.map(i => i.quest_id) || []);
-
-      const availableQuests: Quest[] = instances
-        .filter(inst => !existingQuestIds.has(inst.id))
-        .map(inst => ({
-          id: inst.id,
-          title: inst.title,
-          icon: inst.icon,
-          scheduled_date: inst.scheduled_date,
-          start_time: inst.start_time,
-          meeting_point_name: inst.meeting_point_name,
-          progression_tree: inst.progression_tree
-        }));
-
-      setQuests(availableQuests);
-    }
+    const todayDateTime = new Date().toISOString();
     
+    // Fetch both quest_instances (recruiting) AND quests (open) for broader discovery
+    const [instancesResult, questsResult] = await Promise.all([
+      supabase
+        .from('quest_instances')
+        .select(`
+          id,
+          scheduled_date,
+          start_time,
+          title,
+          icon,
+          meeting_point_name,
+          progression_tree
+        `)
+        .gte('scheduled_date', today)
+        .eq('status', 'recruiting')
+        .order('scheduled_date', { ascending: true })
+        .limit(20),
+      supabase
+        .from('quests')
+        .select(`
+          id,
+          start_datetime,
+          title,
+          icon,
+          meeting_location_name,
+          progression_tree
+        `)
+        .gte('start_datetime', todayDateTime)
+        .eq('status', 'open')
+        .order('start_datetime', { ascending: true })
+        .limit(20)
+    ]);
+
+    const instances = instancesResult.data || [];
+    const quests = questsResult.data || [];
+    
+    // Combine and deduplicate by ID
+    const combined = new Map<string, Quest>();
+    
+    // Add instances first (they take priority)
+    instances.forEach(inst => {
+      combined.set(inst.id, {
+        id: inst.id,
+        title: inst.title,
+        icon: inst.icon,
+        scheduled_date: inst.scheduled_date,
+        start_time: inst.start_time,
+        meeting_point_name: inst.meeting_point_name,
+        progression_tree: inst.progression_tree
+      });
+    });
+    
+    // Add quests that aren't already in the map (convert format)
+    quests.forEach(q => {
+      if (!combined.has(q.id)) {
+        // Parse start_datetime into scheduled_date and start_time
+        const startDate = q.start_datetime ? new Date(q.start_datetime) : null;
+        combined.set(q.id, {
+          id: q.id,
+          title: q.title,
+          icon: q.icon,
+          scheduled_date: startDate ? startDate.toISOString().split('T')[0] : '',
+          start_time: startDate ? startDate.toTimeString().slice(0, 5) : '',
+          meeting_point_name: q.meeting_location_name,
+          progression_tree: q.progression_tree
+        });
+      }
+    });
+
+    // Filter out quests already invited/proposed to this clique
+    const { data: existingInvites } = await supabase
+      .from('squad_quest_invites')
+      .select('quest_id')
+      .eq('squad_id', cliqueId);
+
+    const existingQuestIds = new Set(existingInvites?.map(i => i.quest_id) || []);
+    
+    const availableQuests = Array.from(combined.values())
+      .filter(q => !existingQuestIds.has(q.id))
+      .sort((a, b) => new Date(a.scheduled_date).getTime() - new Date(b.scheduled_date).getTime());
+
+    setQuests(availableQuests);
     setIsLoading(false);
   };
 

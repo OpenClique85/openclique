@@ -136,20 +136,35 @@ export default function CreatorQuests() {
 
   // Submit quest for review mutation
   const submitForReview = useMutation({
-    mutationFn: async (questId: string) => {
+    mutationFn: async (quest: Quest) => {
       const { error } = await supabase
         .from('quests')
         .update({
           review_status: 'pending_review',
           submitted_at: new Date().toISOString()
         })
-        .eq('id', questId)
+        .eq('id', quest.id)
         .eq('creator_id', user?.id);
       
       if (error) throw error;
+
+      // Notify admins about the new quest submission
+      try {
+        await supabase.functions.invoke('notify-quest-approval', {
+          body: {
+            type: 'quest_submitted',
+            quest_id: quest.id,
+            quest_title: quest.title,
+            creator_name: quest.creator_name || creatorProfile?.display_name || 'Unknown Creator',
+          }
+        });
+      } catch (notifyError) {
+        console.error('Failed to notify admins:', notifyError);
+        // Don't throw - the quest was still submitted successfully
+      }
     },
     onSuccess: () => {
-      toast.success('Quest submitted for review!');
+      toast.success('Quest submitted for review! Admins have been notified.');
       queryClient.invalidateQueries({ queryKey: ['creator-quests'] });
       setSubmitDialogOpen(false);
       setQuestToSubmit(null);
@@ -492,7 +507,7 @@ export default function CreatorQuests() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => questToSubmit && submitForReview.mutate(questToSubmit.id)}
+              onClick={() => questToSubmit && submitForReview.mutate(questToSubmit)}
               disabled={submitForReview.isPending}
             >
               {submitForReview.isPending ? (
