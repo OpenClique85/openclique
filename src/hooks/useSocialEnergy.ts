@@ -4,6 +4,7 @@
  * =============================================================================
  */
 
+import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -235,6 +236,18 @@ export function useSocialEnergy(userId?: string) {
     };
   };
 
+  // IMPORTANT: stabilize the returned weights object.
+  // SocialEnergyMap syncs local state from this value; if we return a new object
+  // every render, it will constantly reset user edits.
+  const weights = useMemo(
+    () => getWeights(),
+    [
+      socialEnergy?.energy_weight,
+      socialEnergy?.structure_weight,
+      socialEnergy?.focus_weight,
+    ]
+  );
+
   return {
     socialEnergy: socialEnergy || {
       ...DEFAULT_ENERGY,
@@ -248,7 +261,7 @@ export function useSocialEnergy(userId?: string) {
     hasData: !!socialEnergy,
 
     // Weight helpers
-    weights: getWeights(),
+    weights,
 
     // Actions
     initialize: () => initializeMutation.mutateAsync(),

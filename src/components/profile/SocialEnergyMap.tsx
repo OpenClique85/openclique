@@ -98,7 +98,7 @@ export function SocialEnergyMap({ userId, compact = false }: SocialEnergyMapProp
   useEffect(() => {
     setLocalWeights(weights);
     setHasWeightChanges(false);
-  }, [weights]);
+  }, [weights.energy, weights.structure, weights.focus]);
 
   // Initialize if no data and user is owner
   useEffect(() => {
