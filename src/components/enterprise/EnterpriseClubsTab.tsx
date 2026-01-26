@@ -213,22 +213,24 @@ export function EnterpriseClubsTab() {
   // Assign social chair mutation
   const assignSocialChairMutation = useMutation({
     mutationFn: async ({ clubId, email }: { clubId: string; email: string }) => {
-      // Find user by email
-      const { data: profiles, error: profileError } = await supabase
+      // First, find the user by their email in profiles table
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('id')
-        .ilike('id', email); // Note: In real implementation, we'd need to search by email
+        .select('id, email')
+        .eq('email', email.toLowerCase().trim())
+        .maybeSingle();
 
-      // Since we can't query auth.users directly, we'll need to use a different approach
-      // For now, we'll look for users who have profile_organizations entries
-      const { data: authUsers } = await supabase.auth.admin.listUsers();
+      if (profileError) throw profileError;
       
-      // Fallback: Search by email pattern in display_name or create an admin function
-      // For this implementation, we'll update by inserting with social_chair role
+      if (!profile) {
+        throw new Error(`No user found with email: ${email}. Make sure they have an account first.`);
+      }
+
+      // Now assign the social_chair role using the user's UUID
       const { error } = await supabase
         .from('profile_organizations')
         .upsert({
-          profile_id: email, // This should be the user ID, but we're using email for demo
+          profile_id: profile.id,
           org_id: clubId,
           role: 'social_chair',
         }, {
@@ -241,10 +243,10 @@ export function EnterpriseClubsTab() {
       setShowSocialChairModal(false);
       setSocialChairEmail('');
       setSelectedClub(null);
-      toast.success('Social chair role assigned');
+      toast.success('Social chair role assigned successfully');
     },
-    onError: (error) => {
-      toast.error('Failed to assign social chair: ' + error.message);
+    onError: (error: Error) => {
+      toast.error(error.message);
     },
   });
 
