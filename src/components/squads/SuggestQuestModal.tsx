@@ -151,10 +151,30 @@ export function SuggestQuestModal({
           });
       }
 
-      // TODO: Send notifications to squad members
+      // Send notifications to squad members
+      try {
+        await supabase.functions.invoke('notify-clique-members', {
+          body: {
+            squad_id: squadId,
+            notification_type: 'quest_suggested',
+            title: 'New Quest Suggested',
+            body: `A quest "${selectedQuest.title}" was suggested to ${squadName}`,
+            metadata: {
+              quest_id: selectedQuest.id,
+              quest_title: selectedQuest.title,
+              suggested_by: userId,
+              message,
+            },
+            exclude_user_ids: [userId], // Don't notify the proposer
+          },
+        });
+      } catch (notifyError) {
+        console.error('Failed to send notifications:', notifyError);
+        // Don't fail the whole operation if notifications fail
+      }
 
       toast.success(`Quest suggested to ${squadName}!`, {
-        description: 'Your squad members will be notified to RSVP.'
+        description: 'Your clique members will be notified to RSVP.'
       });
 
       onOpenChange(false);
