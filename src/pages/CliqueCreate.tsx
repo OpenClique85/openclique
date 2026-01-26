@@ -132,7 +132,6 @@ export default function CliqueCreate() {
           commitment_style: commitmentStyle,
           org_code: orgCode.trim() || null,
           visibility: 'private',
-          status: 'active',
           max_members: 6,
         })
         .select('id, name, invite_code')
