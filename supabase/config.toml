@@ -71,3 +71,6 @@ verify_jwt = false
 
 [functions.generate-quest-draft]
 verify_jwt = false
+
+[functions.generate-field-suggestion]
+verify_jwt = false

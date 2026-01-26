@@ -4,15 +4,23 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Check, AlertCircle, Calendar, MapPin, Users, DollarSign, Gift, Sparkles } from 'lucide-react';
+import { CompletenessHelper } from '../CompletenessHelper';
 
 interface ReviewStepProps {
   formData: QuestFormData;
   completedSteps: number[];
   attestationChecked?: boolean;
   onAttestationChange?: (checked: boolean) => void;
+  onNavigateToStep?: (step: number) => void;
 }
 
-export function ReviewStep({ formData, completedSteps, attestationChecked = false, onAttestationChange }: ReviewStepProps) {
+export function ReviewStep({ 
+  formData, 
+  completedSteps, 
+  attestationChecked = false, 
+  onAttestationChange,
+  onNavigateToStep 
+}: ReviewStepProps) {
   const progressionTree = PROGRESSION_TREES.find(t => t.value === formData.progression_tree);
   
   const missingRequired = [];
@@ -20,31 +28,29 @@ export function ReviewStep({ formData, completedSteps, attestationChecked = fals
   if (!formData.progression_tree) missingRequired.push('Progression Path');
   if (!formData.short_description) missingRequired.push('Short Description');
   if (!formData.start_datetime) missingRequired.push('Start Date');
+  if (!formData.meeting_location_name) missingRequired.push('Meeting Location');
+  if (!formData.meeting_address) missingRequired.push('Meeting Address');
+  if (!formData.emergency_contact) missingRequired.push('Emergency Contact');
 
   const isComplete = missingRequired.length === 0;
 
   return (
     <div className="space-y-6">
-      {/* Completion Status */}
-      <div className={`rounded-lg p-4 ${isComplete ? 'bg-green-500/10 border border-green-500/30' : 'bg-amber-500/10 border border-amber-500/30'}`}>
-        <div className="flex items-start gap-3">
-          {isComplete ? (
-            <Check className="w-5 h-5 text-green-500 mt-0.5" />
-          ) : (
-            <AlertCircle className="w-5 h-5 text-amber-500 mt-0.5" />
-          )}
-          <div>
-            <p className="font-medium">
-              {isComplete ? 'Ready to Submit!' : 'Almost There!'}
-            </p>
-            {!isComplete && (
-              <p className="text-sm text-muted-foreground mt-1">
-                Missing required fields: {missingRequired.join(', ')}
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
+      {/* Completeness Helper with Navigation */}
+      {onNavigateToStep && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Quest Completeness</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CompletenessHelper
+              formData={formData}
+              onNavigateToStep={onNavigateToStep}
+              showAll={true}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       {/* Quest Preview */}
       <Card>
@@ -135,7 +141,7 @@ export function ReviewStep({ formData, completedSteps, attestationChecked = fals
           {formData.rewards && (
             <div className="flex items-start gap-2 pt-2 text-sm">
               <Gift className="w-4 h-4 text-amber-500 mt-0.5" />
-              <span className="text-muted-foreground">{formData.rewards}</span>
+              <span className="text-muted-foreground whitespace-pre-wrap">{formData.rewards}</span>
             </div>
           )}
 
@@ -166,12 +172,14 @@ export function ReviewStep({ formData, completedSteps, attestationChecked = fals
         <p className="text-sm font-medium text-muted-foreground">Step Completion</p>
         <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
           {WIZARD_STEPS.slice(0, -1).map((step) => (
-            <div 
+            <button
               key={step.id}
-              className={`flex items-center gap-2 p-2 rounded-lg text-xs ${
+              type="button"
+              onClick={() => onNavigateToStep?.(step.id)}
+              className={`flex items-center gap-2 p-2 rounded-lg text-xs transition-colors ${
                 completedSteps.includes(step.id) 
-                  ? 'bg-green-500/10 text-green-600' 
-                  : 'bg-muted text-muted-foreground'
+                  ? 'bg-green-500/10 text-green-600 hover:bg-green-500/20' 
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
               }`}
             >
               {completedSteps.includes(step.id) ? (
@@ -180,7 +188,7 @@ export function ReviewStep({ formData, completedSteps, attestationChecked = fals
                 <span className="w-3 h-3 rounded-full border border-current" />
               )}
               {step.shortTitle}
-            </div>
+            </button>
           ))}
         </div>
       </div>
@@ -192,13 +200,16 @@ export function ReviewStep({ formData, completedSteps, attestationChecked = fals
             id="attestation"
             checked={attestationChecked}
             onCheckedChange={(checked) => onAttestationChange(checked === true)}
+            disabled={!isComplete}
           />
           <div className="grid gap-1.5 leading-none">
             <Label htmlFor="attestation" className="text-sm font-medium cursor-pointer">
               I reviewed this quest and it reflects my intent.
             </Label>
             <p className="text-xs text-muted-foreground">
-              By checking this, you confirm the information is accurate and ready for admin review.
+              {isComplete 
+                ? 'By checking this, you confirm the information is accurate and ready for admin review.'
+                : 'Complete all required fields above before you can submit for review.'}
             </p>
           </div>
         </div>

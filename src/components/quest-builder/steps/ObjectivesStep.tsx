@@ -2,6 +2,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { QuestFormData } from '../types';
 import { Target } from 'lucide-react';
+import { AIFieldSuggester } from '../AIFieldSuggester';
 
 interface ObjectivesStepProps {
   formData: QuestFormData;
@@ -9,6 +10,17 @@ interface ObjectivesStepProps {
 }
 
 export function ObjectivesStep({ formData, updateFormData }: ObjectivesStepProps) {
+  const questContext = {
+    title: formData.title,
+    theme: formData.theme,
+    progression_tree: formData.progression_tree,
+    short_description: formData.short_description,
+    constraints_physical_intensity: formData.constraints_physical_intensity,
+    constraints_social_intensity: formData.constraints_social_intensity,
+    constraints_indoor_outdoor: formData.constraints_indoor_outdoor,
+    constraints_age_requirement: formData.constraints_age_requirement,
+  };
+
   return (
     <div className="space-y-6">
       <div className="bg-creator/5 border border-creator/20 rounded-lg p-4">
@@ -38,9 +50,18 @@ Example:
           onChange={(e) => updateFormData({ objectives: e.target.value })}
           rows={6}
         />
-        <p className="text-sm text-muted-foreground">
-          These help us understand your vision for the experience.
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            These help us understand your vision for the experience.
+          </p>
+          <AIFieldSuggester
+            fieldName="objectives"
+            fieldLabel="Quest Objectives"
+            currentValue={formData.objectives}
+            onSuggestion={(value) => updateFormData({ objectives: value })}
+            questContext={questContext}
+          />
+        </div>
       </div>
 
       {/* Success Criteria */}
@@ -58,9 +79,18 @@ Example:
           onChange={(e) => updateFormData({ success_criteria: e.target.value })}
           rows={6}
         />
-        <p className="text-sm text-muted-foreground">
-          We'll use these to evaluate and improve future quests.
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            We'll use these to evaluate and improve future quests.
+          </p>
+          <AIFieldSuggester
+            fieldName="success_criteria"
+            fieldLabel="Success Criteria"
+            currentValue={formData.success_criteria}
+            onSuggestion={(value) => updateFormData({ success_criteria: value })}
+            questContext={questContext}
+          />
+        </div>
       </div>
     </div>
   );

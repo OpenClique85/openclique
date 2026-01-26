@@ -366,7 +366,52 @@ export default function QuestBuilder() {
     }
   };
 
+  // Auto-save as draft when navigating away from a step (debounced)
+  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastSavedDataRef = useRef<string>('');
+  
+  const autoSave = useCallback(async () => {
+    // Only auto-save if there's a title and user is authenticated
+    if (!formData.title.trim() || !user) return;
+    
+    // Serialize current form data to check for changes
+    const currentDataString = JSON.stringify({
+      title: formData.title,
+      short_description: formData.short_description,
+      full_description: formData.full_description,
+      progression_tree: formData.progression_tree,
+      objectives: formData.objectives,
+      success_criteria: formData.success_criteria,
+      what_to_bring: formData.what_to_bring,
+      dress_code: formData.dress_code,
+      physical_requirements: formData.physical_requirements,
+      safety_notes: formData.safety_notes,
+      rewards: formData.rewards,
+    });
+    
+    // Skip if no changes
+    if (currentDataString === lastSavedDataRef.current) return;
+    
+    try {
+      await saveMutation.mutateAsync(false);
+      lastSavedDataRef.current = currentDataString;
+    } catch (error) {
+      // Silent fail for auto-save - user can manually save
+      console.warn('Auto-save failed:', error);
+    }
+  }, [formData, user, saveMutation]);
+
   const goToStep = useCallback((step: number) => {
+    // Trigger auto-save when navigating
+    if (formData.title.trim()) {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+      autoSaveTimeoutRef.current = setTimeout(() => {
+        autoSave();
+      }, 1500); // Debounce 1.5 seconds
+    }
+    
     setCurrentStep(prevStep => {
       if (step > prevStep) {
         setCompletedSteps(prev => 
@@ -375,9 +420,19 @@ export default function QuestBuilder() {
       }
       return step;
     });
-  }, []);
+  }, [formData.title, autoSave]);
 
   const nextStep = useCallback(() => {
+    // Trigger auto-save when navigating
+    if (formData.title.trim()) {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+      autoSaveTimeoutRef.current = setTimeout(() => {
+        autoSave();
+      }, 1500);
+    }
+    
     setCurrentStep(prev => {
       if (prev < WIZARD_STEPS.length) {
         setCompletedSteps(completed => 
@@ -387,10 +442,29 @@ export default function QuestBuilder() {
       }
       return prev;
     });
-  }, []);
+  }, [formData.title, autoSave]);
 
   const prevStep = useCallback(() => {
+    // Trigger auto-save when navigating
+    if (formData.title.trim()) {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+      autoSaveTimeoutRef.current = setTimeout(() => {
+        autoSave();
+      }, 1500);
+    }
+    
     setCurrentStep(prev => prev > 1 ? prev - 1 : prev);
+  }, [formData.title, autoSave]);
+  
+  // Cleanup auto-save timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+    };
   }, []);
 
   // Render current step
@@ -417,7 +491,7 @@ export default function QuestBuilder() {
       case 10:
         return <MediaStep formData={formData} updateFormData={updateFormData} />;
       case 11:
-        return <ReviewStep formData={formData} completedSteps={completedSteps} />;
+        return <ReviewStep formData={formData} completedSteps={completedSteps} onNavigateToStep={goToStep} />;
       default:
         return null;
     }
