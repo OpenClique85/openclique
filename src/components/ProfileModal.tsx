@@ -255,7 +255,7 @@ export function ProfileModal({ open, onComplete }: ProfileModalProps) {
         <DialogHeader className="px-6 pt-6 pb-2 shrink-0">
           <DialogTitle className="font-display text-xl">Complete Your Profile</DialogTitle>
           <DialogDescription>
-            Help us match you with the right quests and squads. Takes about a minute!
+            Help us match you with the right quests and cliques. Takes about a minute!
           </DialogDescription>
         </DialogHeader>
         

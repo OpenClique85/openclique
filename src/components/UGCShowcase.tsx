@@ -115,7 +115,7 @@ export function UGCShowcase({ limit = 6, showTitle = true }: UGCShowcaseProps) {
               Real Stories, Real Connections
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              See what happens when strangers become squads. These moments were shared by our community members.
+              See what happens when strangers become cliques. These moments were shared by our community members.
             </p>
           </div>
         )}

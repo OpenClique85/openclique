@@ -241,7 +241,7 @@ export function TestimonialsSection() {
         {/* Header */}
         <div className="text-center mb-12">
           <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Real Stories from Real Squads
+            Real Stories from Real Cliques
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             From nervous first-timers to seasoned adventurers — hear how quests turned strangers into friends.

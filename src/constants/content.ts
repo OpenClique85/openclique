@@ -44,8 +44,8 @@
 
 export const BRAND = {
   name: "OpenClique",                                    // Company/product name
-  tagline: "You've got a squad waiting. You just haven't met them yet.", // Main slogan
-  description: "We plan the adventure. You bring yourself—plus whoever you want. Match with a squad, complete curated quests, and make real friends.",
+  tagline: "You've got a clique waiting. You just haven't met them yet.", // Main slogan
+  description: "We plan the adventure. You bring yourself—plus whoever you want. Match with a clique, complete curated quests, and make real friends.",
   launchCity: "Austin",                                  // Current pilot city
 };
 
@@ -216,7 +216,7 @@ export const WHO_ITS_FOR = {
 
 export const HERO = {
   tagline: "Match. Meet. Return.",
-  headline: "You've got a squad waiting.",
+  headline: "You've got a clique waiting.",
   headlineAccent: "You just haven't met them yet.",
   subheadline: "We plan the adventure. You bring yourself—plus whoever you want.",
   primaryCta: "Find Your Quest",

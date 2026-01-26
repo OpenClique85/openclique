@@ -116,7 +116,7 @@ export function YourAlgorithmDashboard() {
               <div className="text-left flex-1">
                 <span className="font-medium">Your Group Role</span>
                 <p className="text-xs text-muted-foreground font-normal">
-                  The energy you bring to squads
+                  The energy you bring to cliques
                 </p>
               </div>
               {primaryRole && (

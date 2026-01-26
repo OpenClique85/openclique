@@ -65,7 +65,7 @@ export interface Quest {
     date: string;
     cost: string;
     duration: string;
-    squadSize: string;
+    squadSize: string; // Kept for backward compatibility, displays as "Clique Size"
   };
   shortDescription: string;
   sections: QuestSection[];
