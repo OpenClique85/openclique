@@ -9,7 +9,7 @@
  */
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,7 +24,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -47,10 +46,10 @@ import {
   TrendingUp,
   Target,
   Megaphone,
-  MapPin,
   Loader2,
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 
 interface SocialChairDashboardProps {
   clubId: string;
@@ -59,9 +58,11 @@ interface SocialChairDashboardProps {
 
 export function SocialChairDashboard({ clubId, clubName }: SocialChairDashboardProps) {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [selectedInstanceId, setSelectedInstanceId] = useState<string | null>(null);
   const [broadcastTarget, setBroadcastTarget] = useState<'all' | 'leaders' | 'selected'>('all');
   const [broadcastMessage, setBroadcastMessage] = useState('');
+  const [selectedSquadIds, setSelectedSquadIds] = useState<string[]>([]);
 
   // Fetch club's quest instances
   const { data: instances, isLoading: instancesLoading } = useQuery({
@@ -158,6 +159,32 @@ export function SocialChairDashboard({ clubId, clubName }: SocialChairDashboardP
     if (ratio >= 0.5) return 'warning';
     return 'at_risk';
   };
+
+  // Broadcast mutation
+  const sendBroadcast = useMutation({
+    mutationFn: async () => {
+      if (!selectedInstanceId || !user) return;
+      const { data, error } = await supabase.functions.invoke('send-broadcast', {
+        body: {
+          instance_id: selectedInstanceId,
+          target: broadcastTarget,
+          message: broadcastMessage,
+          squad_ids: broadcastTarget === 'selected' ? selectedSquadIds : undefined,
+          sender_id: user.id,
+        },
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      toast.success(`Broadcast sent to ${data?.recipients_count || 0} members`);
+      setBroadcastMessage('');
+      setSelectedSquadIds([]);
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to send broadcast');
+    },
+  });
 
   if (instancesLoading) {
     return (
@@ -438,8 +465,15 @@ export function SocialChairDashboard({ clubId, clubName }: SocialChairDashboardP
                     </p>
                   </div>
 
-                  <Button disabled={!broadcastMessage.trim()}>
-                    <Send className="h-4 w-4 mr-2" />
+                  <Button 
+                    onClick={() => sendBroadcast.mutate()}
+                    disabled={!broadcastMessage.trim() || sendBroadcast.isPending}
+                  >
+                    {sendBroadcast.isPending ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Send className="h-4 w-4 mr-2" />
+                    )}
                     Send Broadcast
                   </Button>
                 </CardContent>
