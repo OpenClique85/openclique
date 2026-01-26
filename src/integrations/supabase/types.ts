@@ -777,6 +777,53 @@ export type Database = {
           },
         ]
       }
+      clique_role_assignments: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          clique_id: string
+          created_at: string
+          declined_at: string | null
+          expires_at: string | null
+          id: string
+          role: string
+          rotation_enabled: boolean | null
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          clique_id: string
+          created_at?: string
+          declined_at?: string | null
+          expires_at?: string | null
+          id?: string
+          role: string
+          rotation_enabled?: boolean | null
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          clique_id?: string
+          created_at?: string
+          declined_at?: string | null
+          expires_at?: string | null
+          id?: string
+          role?: string
+          rotation_enabled?: boolean | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clique_role_assignments_clique_id_fkey"
+            columns: ["clique_id"]
+            isOneToOne: false
+            referencedRelation: "squads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       collaboration_messages: {
         Row: {
           attachments: Json | null
@@ -3920,16 +3967,19 @@ export type Database = {
           ai_vibe_summary: string | null
           application_prompts: Json | null
           archived_at: string | null
+          clique_rules: string | null
           commitment_style: string | null
           created_at: string
           id: string
           invite_code: string | null
           invite_link_enabled: boolean | null
           lfc_enabled: boolean | null
+          lfc_listing_enabled: boolean | null
           max_members: number | null
           name: string
           org_code: string | null
           origin_quest_id: string | null
+          role_rotation_mode: string | null
           theme_tags: string[] | null
           updated_at: string
           visibility: string | null
@@ -3938,16 +3988,19 @@ export type Database = {
           ai_vibe_summary?: string | null
           application_prompts?: Json | null
           archived_at?: string | null
+          clique_rules?: string | null
           commitment_style?: string | null
           created_at?: string
           id?: string
           invite_code?: string | null
           invite_link_enabled?: boolean | null
           lfc_enabled?: boolean | null
+          lfc_listing_enabled?: boolean | null
           max_members?: number | null
           name?: string
           org_code?: string | null
           origin_quest_id?: string | null
+          role_rotation_mode?: string | null
           theme_tags?: string[] | null
           updated_at?: string
           visibility?: string | null
@@ -3956,16 +4009,19 @@ export type Database = {
           ai_vibe_summary?: string | null
           application_prompts?: Json | null
           archived_at?: string | null
+          clique_rules?: string | null
           commitment_style?: string | null
           created_at?: string
           id?: string
           invite_code?: string | null
           invite_link_enabled?: boolean | null
           lfc_enabled?: boolean | null
+          lfc_listing_enabled?: boolean | null
           max_members?: number | null
           name?: string
           org_code?: string | null
           origin_quest_id?: string | null
+          role_rotation_mode?: string | null
           theme_tags?: string[] | null
           updated_at?: string
           visibility?: string | null
@@ -4999,6 +5055,16 @@ export type Database = {
         Args: { p_force?: boolean; p_notes?: string; p_squad_id: string }
         Returns: undefined
       }
+      archive_clique: { Args: { p_clique_id: string }; Returns: undefined }
+      assign_clique_role: {
+        Args: {
+          p_clique_id: string
+          p_expires_at?: string
+          p_role: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       auto_archive_instances: { Args: never; Returns: number }
       auto_archive_squads: { Args: never; Returns: number }
       award_quest_xp: {
@@ -5059,6 +5125,10 @@ export type Database = {
           p_template_id: string
         }
         Returns: string
+      }
+      decline_clique_role: {
+        Args: { p_clique_id: string; p_role: string }
+        Returns: undefined
       }
       generate_invite_code:
         | { Args: never; Returns: string }
@@ -5139,6 +5209,7 @@ export type Database = {
         }
         Returns: string
       }
+      reactivate_clique: { Args: { p_clique_id: string }; Returns: undefined }
       record_referral_signup: {
         Args: { p_referral_code: string; p_user_id: string }
         Returns: undefined
@@ -5158,6 +5229,10 @@ export type Database = {
       }
       track_referral_click: {
         Args: { p_referral_code: string }
+        Returns: undefined
+      }
+      transfer_clique_leadership: {
+        Args: { p_clique_id: string; p_new_leader_id: string }
         Returns: undefined
       }
       update_user_streaks: { Args: { p_user_id: string }; Returns: undefined }
