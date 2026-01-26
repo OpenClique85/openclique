@@ -48,6 +48,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
       { id: 'quests', label: 'Quest Templates' },
       { id: 'quest-archives', label: 'Quest Archives' },
       { id: 'orgs', label: 'Organizations' },
+      { id: 'org-applications', label: 'Org Applications' },
       { id: 'squads-directory', label: 'Squad Directory' },
       { id: 'squad-comparison', label: 'Squad Comparison' },
       { id: 'squad-health', label: 'Squad Health' },

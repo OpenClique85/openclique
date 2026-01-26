@@ -1992,6 +1992,88 @@ export type Database = {
         }
         Relationships: []
       }
+      org_applications: {
+        Row: {
+          agreed_to_terms: boolean
+          applicant_id: string
+          category: string | null
+          created_at: string
+          decline_reason: string | null
+          description: string | null
+          id: string
+          intended_audience: string | null
+          name: string
+          parent_org_id: string | null
+          requested_admins: string[] | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          type: Database["public"]["Enums"]["organization_type"]
+          updated_at: string
+          visibility: string
+        }
+        Insert: {
+          agreed_to_terms?: boolean
+          applicant_id: string
+          category?: string | null
+          created_at?: string
+          decline_reason?: string | null
+          description?: string | null
+          id?: string
+          intended_audience?: string | null
+          name: string
+          parent_org_id?: string | null
+          requested_admins?: string[] | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          type?: Database["public"]["Enums"]["organization_type"]
+          updated_at?: string
+          visibility?: string
+        }
+        Update: {
+          agreed_to_terms?: boolean
+          applicant_id?: string
+          category?: string | null
+          created_at?: string
+          decline_reason?: string | null
+          description?: string | null
+          id?: string
+          intended_audience?: string | null
+          name?: string
+          parent_org_id?: string | null
+          requested_admins?: string[] | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          type?: Database["public"]["Enums"]["organization_type"]
+          updated_at?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_applications_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_applications_parent_org_id_fkey"
+            columns: ["parent_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_applications_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       org_creator_requests: {
         Row: {
           budget_range: string | null
@@ -2057,6 +2139,57 @@ export type Database = {
           },
           {
             foreignKeyName: "org_creator_requests_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_invite_codes: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          max_uses: number | null
+          org_id: string
+          uses_count: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          org_id: string
+          uses_count?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          org_id?: string
+          uses_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_invite_codes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_invite_codes_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -2146,59 +2279,142 @@ export type Database = {
           },
         ]
       }
+      org_verified_emails: {
+        Row: {
+          domain: string
+          email: string
+          id: string
+          org_id: string
+          user_id: string
+          verified_at: string
+        }
+        Insert: {
+          domain: string
+          email: string
+          id?: string
+          org_id: string
+          user_id: string
+          verified_at?: string
+        }
+        Update: {
+          domain?: string
+          email?: string
+          id?: string
+          org_id?: string
+          user_id?: string
+          verified_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_verified_emails_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_verified_emails_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
+          admin_notes: string | null
+          category: string | null
           contact_email: string | null
           created_at: string
           description: string | null
           id: string
           is_active: boolean
+          is_umbrella: boolean
           is_verified: boolean
           logo_url: string | null
+          member_limit: number | null
           name: string
+          parent_org_id: string | null
           primary_color: string | null
           school_affiliation: string | null
           seeking: string[] | null
           slug: string
+          status: Database["public"]["Enums"]["org_status"]
+          suspend_reason: string | null
+          suspended_at: string | null
+          suspended_by: string | null
           type: Database["public"]["Enums"]["organization_type"]
           updated_at: string
+          verified_domains: string[] | null
+          visibility: string
           website_url: string | null
         }
         Insert: {
+          admin_notes?: string | null
+          category?: string | null
           contact_email?: string | null
           created_at?: string
           description?: string | null
           id?: string
           is_active?: boolean
+          is_umbrella?: boolean
           is_verified?: boolean
           logo_url?: string | null
+          member_limit?: number | null
           name: string
+          parent_org_id?: string | null
           primary_color?: string | null
           school_affiliation?: string | null
           seeking?: string[] | null
           slug: string
+          status?: Database["public"]["Enums"]["org_status"]
+          suspend_reason?: string | null
+          suspended_at?: string | null
+          suspended_by?: string | null
           type?: Database["public"]["Enums"]["organization_type"]
           updated_at?: string
+          verified_domains?: string[] | null
+          visibility?: string
           website_url?: string | null
         }
         Update: {
+          admin_notes?: string | null
+          category?: string | null
           contact_email?: string | null
           created_at?: string
           description?: string | null
           id?: string
           is_active?: boolean
+          is_umbrella?: boolean
           is_verified?: boolean
           logo_url?: string | null
+          member_limit?: number | null
           name?: string
+          parent_org_id?: string | null
           primary_color?: string | null
           school_affiliation?: string | null
           seeking?: string[] | null
           slug?: string
+          status?: Database["public"]["Enums"]["org_status"]
+          suspend_reason?: string | null
+          suspended_at?: string | null
+          suspended_by?: string | null
           type?: Database["public"]["Enums"]["organization_type"]
           updated_at?: string
+          verified_domains?: string[] | null
+          visibility?: string
           website_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "organizations_parent_org_id_fkey"
+            columns: ["parent_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       participant_proofs: {
         Row: {
@@ -5176,6 +5392,13 @@ export type Database = {
           next_level_xp: number
         }[]
       }
+      has_org_role: {
+        Args: {
+          p_org_id: string
+          p_roles: Database["public"]["Enums"]["org_member_role"][]
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -5188,6 +5411,10 @@ export type Database = {
         Returns: undefined
       }
       is_admin: { Args: never; Returns: boolean }
+      join_org_via_email: {
+        Args: { p_email: string; p_org_id: string }
+        Returns: Json
+      }
       log_pii_access: {
         Args: {
           p_access_type: string
@@ -5222,6 +5449,7 @@ export type Database = {
         }
         Returns: Json
       }
+      redeem_org_invite: { Args: { p_code: string }; Returns: Json }
       start_squad_warm_up: { Args: { p_squad_id: string }; Returns: undefined }
       submit_warm_up_prompt: {
         Args: { p_response: string; p_squad_id: string }
@@ -5318,7 +5546,13 @@ export type Database = {
         | "feature_flag_changed"
         | "shadow_session_started"
         | "shadow_session_ended"
-      org_member_role: "member" | "admin" | "creator"
+      org_member_role:
+        | "member"
+        | "admin"
+        | "creator"
+        | "social_chair"
+        | "org_admin"
+      org_status: "pending" | "active" | "suspended" | "disabled"
       organization_type:
         | "university"
         | "fraternity"
@@ -5595,7 +5829,14 @@ export const Constants = {
         "shadow_session_started",
         "shadow_session_ended",
       ],
-      org_member_role: ["member", "admin", "creator"],
+      org_member_role: [
+        "member",
+        "admin",
+        "creator",
+        "social_chair",
+        "org_admin",
+      ],
+      org_status: ["pending", "active", "suspended", "disabled"],
       organization_type: [
         "university",
         "fraternity",
