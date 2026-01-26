@@ -5944,18 +5944,17 @@ export type Database = {
         Args: { p_clique_id: string; p_role: string }
         Returns: undefined
       }
-      generate_invite_code:
-        | { Args: never; Returns: string }
-        | {
-            Args: {
-              p_expires_days?: number
-              p_label?: string
-              p_max_uses?: number
-              p_notes?: string
-              p_type?: Database["public"]["Enums"]["invite_code_type"]
-            }
-            Returns: string
-          }
+      generate_invite_code: {
+        Args: {
+          p_expires_days?: number
+          p_label?: string
+          p_max_uses?: number
+          p_notes?: string
+          p_type?: Database["public"]["Enums"]["invite_code_type"]
+        }
+        Returns: string
+      }
+      generate_simple_invite_code: { Args: never; Returns: string }
       get_or_create_instance: {
         Args: { p_quest_id: string }
         Returns: {
