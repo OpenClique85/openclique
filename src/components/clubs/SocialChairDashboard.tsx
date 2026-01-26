@@ -1,11 +1,48 @@
 /**
- * SocialChairDashboard - Club admin dashboard for managing events and cliques
+ * =============================================================================
+ * SocialChairDashboard - Club Management Control Panel
+ * =============================================================================
  * 
- * Features:
- * - Event Command Center (selector, RSVP count, cliques formed)
- * - Clique Operations Table (size, status, ready checks)
- * - Broadcast Composer (message all cliques, leaders, roles)
- * - Ops Summary (AI/rules-based overview)
+ * Primary dashboard for Social Chairs to manage their club's events and cliques.
+ * Accessed via ClubDashboardPage at route `/org/:slug/dashboard`.
+ * 
+ * ## Features
+ * 
+ * - **Event Command Center**: Select events, view RSVP counts, manage cliques
+ * - **Clique Operations**: Monitor clique health, ready checks, member status
+ * - **Invite Codes**: Generate and manage club invite codes
+ * - **Broadcast Messaging**: Send messages to all cliques, leaders, or specific groups
+ * 
+ * ## Tab Structure
+ * 
+ * ```
+ * SocialChairDashboard
+ *   ├── Event Selector (dropdown at top)
+ *   ├── Stats Cards (RSVPs, Confirmed, Cliques, Ready)
+ *   └── Tabs
+ *         ├── Cliques Tab - Clique operations table
+ *         ├── Invite Codes Tab - InviteCodesTab component
+ *         └── Broadcast Tab - Message composer
+ * ```
+ * 
+ * ## Data Flow
+ * 
+ * ```
+ * 1. Load quest_instances for this club (via quests.org_id)
+ * 2. On instance selection:
+ *    - Fetch quest_squads (cliques for this event)
+ *    - Fetch quest_signups (RSVP counts)
+ * 3. Display clique health based on readiness ratio
+ * 4. Broadcast sends via edge function 'send-broadcast'
+ * ```
+ * 
+ * ## Health Indicators
+ * 
+ * - **Healthy** (green): 80%+ members have confirmed readiness
+ * - **Warning** (amber): 50-80% members ready
+ * - **At Risk** (red): <50% members ready
+ * 
+ * @module clubs/SocialChairDashboard
  */
 
 import { useState } from 'react';
@@ -56,10 +93,23 @@ import {
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
+// -----------------------------------------------------------------------------
+// TYPE DEFINITIONS
+// -----------------------------------------------------------------------------
+
+/**
+ * Props for the SocialChairDashboard component
+ */
 interface SocialChairDashboardProps {
+  /** UUID of the club this dashboard manages */
   clubId: string;
+  /** Display name of the club (for headers/labels) */
   clubName: string;
 }
+
+// -----------------------------------------------------------------------------
+// COMPONENT
+// -----------------------------------------------------------------------------
 
 export function SocialChairDashboard({ clubId, clubName }: SocialChairDashboardProps) {
   const { user } = useAuth();

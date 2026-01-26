@@ -1,5 +1,33 @@
 /**
- * InviteCodesTab - Club invite codes management for Social Chair dashboard
+ * =============================================================================
+ * InviteCodesTab - Club Invite Code Management
+ * =============================================================================
+ * 
+ * Allows Social Chairs to generate, manage, and track invite codes for their club.
+ * Codes can be configured with usage limits, expiration, and auto-role assignment.
+ * 
+ * ## Features
+ * 
+ * - **Generate Codes**: Create 8-character alphanumeric codes
+ * - **Usage Tracking**: Monitor how many times each code has been redeemed
+ * - **Expiration**: Set optional expiry dates
+ * - **Role Assignment**: Auto-assign member or social_chair role on redemption
+ * - **Toggle Active**: Enable/disable codes without deletion
+ * 
+ * ## Data Flow
+ * 
+ * ```
+ * InviteCodesTab
+ *   ├── Query: org_invite_codes (fetch existing codes)
+ *   ├── Mutation: insert org_invite_codes (create new)
+ *   └── Mutation: update org_invite_codes (toggle active)
+ * ```
+ * 
+ * ## Related
+ * - `@/pages/Auth` - Code redemption during signup
+ * - `@/components/enterprise/ClubDetailView` - Admin view of codes
+ * 
+ * @module clubs/InviteCodesTab
  */
 
 import { useState } from 'react';
@@ -32,11 +60,23 @@ import { Ticket, Copy, Link2, Plus, Loader2, Users } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
+// -----------------------------------------------------------------------------
+// TYPE DEFINITIONS
+// -----------------------------------------------------------------------------
+
+/**
+ * Props for the InviteCodesTab component
+ */
 interface InviteCodesTabProps {
+  /** UUID of the club/organization */
   clubId: string;
+  /** Display name of the club (for UI labels) */
   clubName: string;
 }
 
+/**
+ * Shape of an invite code record from the org_invite_codes table
+ */
 interface OrgInviteCode {
   id: string;
   org_id: string;
@@ -47,7 +87,9 @@ interface OrgInviteCode {
   max_uses: number | null;
   uses_count: number;
   is_active: boolean;
+  /** Human-readable label (e.g., "Spring 2026 Cohort") */
   label: string | null;
+  /** Role to auto-assign on redemption: 'member' | 'social_chair' */
   auto_assign_role: string | null;
 }
 
