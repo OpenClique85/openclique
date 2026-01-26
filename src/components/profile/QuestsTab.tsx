@@ -79,6 +79,7 @@ export function QuestsTab({ userId }: QuestsTabProps) {
     setIsLoading(true);
     
     // Fetch signups with quest and sponsor info
+    // Filter out quests that have been cancelled, revoked, or soft-deleted by admin
     const { data, error } = await supabase
       .from('quest_signups')
       .select(`
@@ -92,49 +93,61 @@ export function QuestsTab({ userId }: QuestsTabProps) {
       .order('signed_up_at', { ascending: false });
     
     if (!error && data) {
-      const signupData = data as SignupWithQuest[];
+      // Filter out signups for quests that have been cancelled, revoked, or deleted by admin
+      const signupData = (data as SignupWithQuest[]).filter(signup => {
+        const quest = signup.quest;
+        // Remove if quest is cancelled, revoked, or soft-deleted
+        if (quest.status === 'cancelled') return false;
+        if ('deleted_at' in quest && quest.deleted_at) return false;
+        // Check for revoked status (if exists in quest status enum)
+        if ((quest.status as string) === 'revoked') return false;
+        return true;
+      });
       
       // Fetch squad memberships for these signups
       const signupIds = signupData.map(s => s.id);
-      const { data: squadMemberships } = await supabase
-        .from('squad_members')
-        .select(`
-          signup_id,
-          squad_id,
-          quest_squads(
-            id,
-            status,
-            squad_name,
-            quest_instances(quest_card_token)
-          )
-        `)
-        .eq('user_id', userId)
-        .in('signup_id', signupIds)
-        .neq('status', 'dropped');
       
-      const squadBySignup = new Map<string, {
+      let squadBySignup = new Map<string, {
         squadId: string;
         squadStatus: string;
         squadName: string | null;
         questCardToken: string | null;
       }>();
       
-      squadMemberships?.forEach(m => {
-        if (m.quest_squads) {
-          const squad = m.quest_squads as unknown as {
-            id: string;
-            status: string;
-            squad_name: string | null;
-            quest_instances: { quest_card_token: string | null } | null;
-          };
-          squadBySignup.set(m.signup_id, {
-            squadId: squad.id,
-            squadStatus: squad.status,
-            squadName: squad.squad_name,
-            questCardToken: squad.quest_instances?.quest_card_token || null,
-          });
-        }
-      });
+      if (signupIds.length > 0) {
+        const { data: squadMemberships } = await supabase
+          .from('squad_members')
+          .select(`
+            signup_id,
+            squad_id,
+            quest_squads(
+              id,
+              status,
+              squad_name,
+              quest_instances(quest_card_token)
+            )
+          `)
+          .eq('user_id', userId)
+          .in('signup_id', signupIds)
+          .neq('status', 'dropped');
+        
+        squadMemberships?.forEach(m => {
+          if (m.quest_squads) {
+            const squad = m.quest_squads as unknown as {
+              id: string;
+              status: string;
+              squad_name: string | null;
+              quest_instances: { quest_card_token: string | null } | null;
+            };
+            squadBySignup.set(m.signup_id, {
+              squadId: squad.id,
+              squadStatus: squad.status,
+              squadName: squad.squad_name,
+              questCardToken: squad.quest_instances?.quest_card_token || null,
+            });
+          }
+        });
+      }
       
       const enrichedSignups: SignupWithJourney[] = signupData.map(signup => {
         const squadInfo = squadBySignup.get(signup.id);

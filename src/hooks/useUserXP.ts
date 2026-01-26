@@ -155,6 +155,13 @@ export function formatXPSource(source: string): string {
     // Admin/manual
     admin_bonus: 'Bonus Award',
     welcome_bonus: 'Welcome Bonus',
+    
+    // Profile & Tutorial
+    profile_first_update: 'Profile Setup Bonus',
+    profile_update: 'Profile Updated',
+    tutorial_complete: 'Tutorial Complete',
+    squad_chat_first: 'First Squad Message',
+    first_quest_signup: 'First Quest Signup',
   };
   return labels[source] || source.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 }

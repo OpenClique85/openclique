@@ -1,11 +1,14 @@
 /**
  * ProfileEditModal - Allows users to edit their profile preferences
  * Loads existing data and updates on save
+ * Awards XP on profile update (first update = 25 XP, subsequent = 10 XP)
  */
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useAwardXP } from '@/hooks/useUserXP';
+import { useTutorial } from '@/components/tutorial/TutorialProvider';
 import {
   Dialog,
   DialogContent,
@@ -18,7 +21,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Loader2, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
 import {
   MultiSelect,
   SingleSelect,
@@ -76,6 +79,8 @@ const INTEREST_OPTIONS = [
 export function ProfileEditModal({ open, onClose }: ProfileEditModalProps) {
   const { user, profile, refreshProfile } = useAuth();
   const { toast } = useToast();
+  const awardXP = useAwardXP();
+  const { markActionComplete } = useTutorial();
   
   const [displayName, setDisplayName] = useState('');
   const [interests, setInterests] = useState<string[]>([]);
@@ -281,10 +286,40 @@ export function ProfileEditModal({ open, onClose }: ProfileEditModalProps) {
     }
     
     await refreshProfile();
-    toast({
-      title: 'Profile updated!',
-      description: 'Your preferences have been saved.'
-    });
+    
+    // Mark tutorial action complete
+    markActionComplete('profile_update');
+    
+    // Award XP for profile update
+    // First profile update = 25 XP (profile_first_update), subsequent = 10 XP (profile_update)
+    const isFirstUpdate = !profile?.preferences || Object.keys(profile.preferences).length === 0;
+    const xpAmount = isFirstUpdate ? 25 : 10;
+    const xpSource = isFirstUpdate ? 'profile_first_update' : 'profile_update';
+    
+    try {
+      await awardXP.mutateAsync({
+        amount: xpAmount,
+        source: xpSource,
+        sourceId: user.id,
+      });
+      
+      toast({
+        title: (
+          <span className="flex items-center gap-2">
+            Profile updated! <Sparkles className="h-4 w-4 text-sunset" /> +{xpAmount} XP
+          </span>
+        ) as unknown as string,
+        description: isFirstUpdate 
+          ? 'Welcome bonus for setting up your profile!'
+          : 'Your preferences have been saved.',
+      });
+    } catch {
+      // Still show success even if XP fails
+      toast({
+        title: 'Profile updated!',
+        description: 'Your preferences have been saved.',
+      });
+    }
     
     // Trigger AI inference if we have enough preference data
     if (hasEnoughPreferences) {

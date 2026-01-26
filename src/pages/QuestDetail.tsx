@@ -5,6 +5,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useUserLevel } from '@/hooks/useUserLevel';
 import { useUserTreeXP } from '@/hooks/useUserTreeXP';
+import { useAwardXP } from '@/hooks/useUserXP';
+import { useTutorial } from '@/components/tutorial/TutorialProvider';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import ShareQuestButton from '@/components/ShareQuestButton';
@@ -54,6 +56,8 @@ export default function QuestDetail() {
   const { toast } = useToast();
   const { level } = useUserLevel();
   const { treeXP } = useUserTreeXP();
+  const awardXP = useAwardXP();
+  const { markActionComplete, completedActions } = useTutorial();
   
   const [quest, setQuest] = useState<Quest | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -228,6 +232,21 @@ export default function QuestDetail() {
           ? "You've been added to the standby list. We'll notify you if a spot opens up."
           : "You've been added to the waitlist. We'll notify you when you're confirmed.",
       });
+      
+      // Mark tutorial action complete and award XP for first signup
+      if (!completedActions.has('quest_signup')) {
+        markActionComplete('quest_signup');
+        
+        try {
+          await awardXP.mutateAsync({
+            amount: 15,
+            source: 'first_quest_signup',
+            sourceId: quest.id,
+          });
+        } catch {
+          // XP award is non-critical
+        }
+      }
       
       setUserSignup({ status });
       setShowInstancePicker(false);
