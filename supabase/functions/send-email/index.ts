@@ -13,7 +13,7 @@ const corsHeaders = {
 interface SendEmailRequest {
   to: string | string[];
   subject: string;
-  template: "quest_confirmation" | "quest_reminder" | "quest_cancelled" | "quest_approved" | "quest_needs_changes" | "quest_rejected" | "quest_paused" | "quest_revoked" | "quest_resumed" | "support_reply" | "admin_dm" | "custom";
+  template: "quest_confirmation" | "quest_reminder" | "quest_cancelled" | "quest_approved" | "quest_needs_changes" | "quest_rejected" | "quest_paused" | "quest_revoked" | "quest_resumed" | "support_reply" | "admin_dm" | "account_deleted" | "custom";
   variables?: Record<string, string>;
   customHtml?: string;
 }
@@ -281,6 +281,55 @@ const templates: Record<string, (vars: Record<string, string>) => string> = {
     </div>
   `,
   
+  account_deleted: (vars) => `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #6b7280; margin: 0;">Account Deletion Scheduled</h1>
+      </div>
+      <p style="font-size: 16px; color: #333;">Hey ${escapeHtml(vars.display_name || "there")},</p>
+      <p style="font-size: 16px; color: #333;">Your OpenClique account has been scheduled for deletion as requested.</p>
+      
+      <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
+        <p style="margin: 0 0 10px 0; font-weight: bold;">⏰ 7-Day Grace Period</p>
+        <p style="margin: 0; font-size: 14px;">
+          Your account will be permanently deleted on <strong>${escapeHtml(vars.scheduled_date || "in 7 days")}</strong>.
+        </p>
+        <p style="margin: 10px 0 0 0; font-size: 14px;">
+          Changed your mind? Simply log back in to your account and visit Settings to cancel the deletion.
+        </p>
+      </div>
+      
+      <div style="background: #f3f4f6; border-left: 4px solid #6b7280; padding: 15px; margin: 20px 0;">
+        <p style="margin: 0 0 10px 0;"><strong>What will be removed:</strong></p>
+        <ul style="margin: 0; padding-left: 20px; font-size: 14px;">
+          <li>Your profile and preferences</li>
+          <li>Quest signup history</li>
+          <li>Squad memberships</li>
+          <li>XP, badges, and achievements</li>
+          <li>All associated data</li>
+        </ul>
+      </div>
+      
+      ${vars.data_exported === 'true' ? `
+        <p style="font-size: 14px; color: #666;">
+          ✅ You downloaded a copy of your data before deletion.
+        </p>
+      ` : ''}
+      
+      <p style="font-size: 14px; color: #666;">
+        We're sad to see you go. If you ever want to return after deletion, you're always welcome 
+        to create a new account.
+      </p>
+      
+      <p style="font-size: 14px; color: #666;">
+        If you didn't request this deletion, please contact us immediately at 
+        <a href="mailto:hello@openclique.com" style="color: #14b8a6;">hello@openclique.com</a>.
+      </p>
+      
+      <p style="font-size: 14px; color: #666;">— The OpenClique Team</p>
+    </div>
+  `,
+
   custom: (vars) => vars.content || "",
 };
 

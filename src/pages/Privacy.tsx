@@ -127,23 +127,64 @@ export default function Privacy() {
                   </ul>
                 </section>
 
+                {/* ============ SECTION: Self-Service Controls ============ */}
+                <section>
+                  <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
+                    Self-Service Data Controls
+                  </h2>
+                  <p>
+                    We believe you should have full control over your data. Through your{' '}
+                    <a href="/settings?tab=data" className="text-primary hover:underline">
+                      Settings page
+                    </a>, you can:
+                  </p>
+                  <ul className="list-disc pl-6 space-y-2 mt-4">
+                    <li>
+                      <strong>Export your data:</strong> Download a complete copy of all your OpenClique data in JSON format
+                    </li>
+                    <li>
+                      <strong>Manage privacy settings:</strong> Control who can see your profile, activity, and whether you appear in matching
+                    </li>
+                    <li>
+                      <strong>Manage notifications:</strong> Choose which emails and in-app notifications you receive
+                    </li>
+                    <li>
+                      <strong>Delete your account:</strong> Initiate account deletion with a 7-day grace period to change your mind
+                    </li>
+                  </ul>
+                </section>
+
                 {/* ============ SECTION: Data Deletion ============ */}
                 <section>
                   <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
-                    Data Deletion Requests
+                    Account Deletion
                   </h2>
                   <p>
-                    You may request deletion of your personal data at any time by emailing{' '}
-                    <a href="mailto:hello@openclique.com" className="text-primary hover:underline">
-                      hello@openclique.com
-                    </a> with the subject line "Data Deletion Request."
+                    You can delete your account at any time through your{' '}
+                    <a href="/settings?tab=account" className="text-primary hover:underline">
+                      Settings page
+                    </a>. When you request deletion:
                   </p>
                   <ul className="list-disc pl-6 space-y-2 mt-4">
-                    <li>We will acknowledge your request within 48 hours</li>
-                    <li>Deletion will be completed within 30 days</li>
-                    <li>You will receive confirmation once your data has been removed</li>
-                    <li>Some data may be retained if required by law or for legitimate business purposes (e.g., fraud prevention)</li>
+                    <li>
+                      <strong>7-day grace period:</strong> You have 7 days to cancel your deletion request by logging back in
+                    </li>
+                    <li>
+                      <strong>Confirmation email:</strong> We'll send you an email confirming your deletion request
+                    </li>
+                    <li>
+                      <strong>Data export option:</strong> You can download your data before deletion completes
+                    </li>
+                    <li>
+                      <strong>Complete removal:</strong> After the grace period, all your personal data is permanently deleted
+                    </li>
                   </ul>
+                  <p className="mt-4">
+                    Alternatively, you may email{' '}
+                    <a href="mailto:hello@openclique.com" className="text-primary hover:underline">
+                      hello@openclique.com
+                    </a> with the subject line "Data Deletion Request" and we will process it within 48 hours.
+                  </p>
                 </section>
 
                 {/* ============ SECTION: Data Retention ============ */}
@@ -154,10 +195,13 @@ export default function Privacy() {
                   <p>We retain your information only as long as necessary:</p>
                   <ul className="list-disc pl-6 space-y-2 mt-4">
                     <li>
-                      <strong>Pilot program data:</strong> Retained during the pilot and up to 12 months after your last activity, unless you request earlier deletion
+                      <strong>Active accounts:</strong> Data is retained while your account is active
                     </li>
                     <li>
-                      <strong>Email subscriptions:</strong> Until you unsubscribe or request removal
+                      <strong>After deletion request:</strong> Data is permanently removed 7 days after your deletion request (unless cancelled)
+                    </li>
+                    <li>
+                      <strong>Exit feedback:</strong> Anonymous feedback you provide during deletion is retained to help us improve
                     </li>
                     <li>
                       <strong>Analytics data:</strong> Anonymized and aggregated — contains no personal identifiers

@@ -14,6 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_deletion_feedback: {
+        Row: {
+          data_exported: boolean | null
+          deleted_at: string
+          display_name: string | null
+          feedback: string | null
+          id: string
+          other_reason: string | null
+          reasons: string[] | null
+          user_email: string
+          would_return: boolean | null
+        }
+        Insert: {
+          data_exported?: boolean | null
+          deleted_at?: string
+          display_name?: string | null
+          feedback?: string | null
+          id?: string
+          other_reason?: string | null
+          reasons?: string[] | null
+          user_email: string
+          would_return?: boolean | null
+        }
+        Update: {
+          data_exported?: boolean | null
+          deleted_at?: string
+          display_name?: string | null
+          feedback?: string | null
+          id?: string
+          other_reason?: string | null
+          reasons?: string[] | null
+          user_email?: string
+          would_return?: boolean | null
+        }
+        Relationships: []
+      }
+      account_deletion_requests: {
+        Row: {
+          cancellation_reason: string | null
+          created_at: string
+          id: string
+          processed_at: string | null
+          scheduled_at: string
+          status: string
+          user_email: string
+          user_id: string
+        }
+        Insert: {
+          cancellation_reason?: string | null
+          created_at?: string
+          id?: string
+          processed_at?: string | null
+          scheduled_at?: string
+          status?: string
+          user_email: string
+          user_id: string
+        }
+        Update: {
+          cancellation_reason?: string | null
+          created_at?: string
+          id?: string
+          processed_at?: string | null
+          scheduled_at?: string
+          status?: string
+          user_email?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       achievement_templates: {
         Row: {
           badge_id: string | null
@@ -2971,7 +3040,9 @@ export type Database = {
           display_name: string
           email: string | null
           id: string
+          notification_preferences: Json | null
           preferences: Json | null
+          privacy_settings: Json | null
           tutorial_completed_at: string | null
           tutorial_steps_completed: Json | null
           updated_at: string
@@ -2983,7 +3054,9 @@ export type Database = {
           display_name: string
           email?: string | null
           id: string
+          notification_preferences?: Json | null
           preferences?: Json | null
+          privacy_settings?: Json | null
           tutorial_completed_at?: string | null
           tutorial_steps_completed?: Json | null
           updated_at?: string
@@ -2995,7 +3068,9 @@ export type Database = {
           display_name?: string
           email?: string | null
           id?: string
+          notification_preferences?: Json | null
           preferences?: Json | null
+          privacy_settings?: Json | null
           tutorial_completed_at?: string | null
           tutorial_steps_completed?: Json | null
           updated_at?: string
