@@ -38,8 +38,31 @@ import {
   ExternalLink,
   Bell,
   Send,
-  CalendarPlus
+  CalendarPlus,
+  MoreHorizontal,
+  XCircle,
+  Pause,
+  Archive,
+  Play,
+  Trash2
 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { ScheduleInstanceDialog } from './ScheduleInstanceDialog';
 import { format, differenceInDays, differenceInWeeks } from 'date-fns';
 import type { Tables, Enums } from '@/integrations/supabase/types';
@@ -163,6 +186,45 @@ export function QuestsManager() {
   // Schedule instance modal state
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [scheduleQuest, setScheduleQuest] = useState<Quest | null>(null);
+  
+  // Quick status change state
+  const [statusChangeQuest, setStatusChangeQuest] = useState<Quest | null>(null);
+  const [pendingStatus, setPendingStatus] = useState<QuestStatus | null>(null);
+  const [isChangingStatus, setIsChangingStatus] = useState(false);
+
+  // Quick status change handler
+  const handleQuickStatusChange = async (quest: Quest, newStatus: QuestStatus) => {
+    setStatusChangeQuest(quest);
+    setPendingStatus(newStatus);
+  };
+
+  const confirmStatusChange = async () => {
+    if (!statusChangeQuest || !pendingStatus) return;
+    
+    setIsChangingStatus(true);
+    
+    const { error } = await supabase
+      .from('quests')
+      .update({ status: pendingStatus })
+      .eq('id', statusChangeQuest.id);
+    
+    setIsChangingStatus(false);
+    setStatusChangeQuest(null);
+    setPendingStatus(null);
+    
+    if (error) {
+      toast({ variant: 'destructive', title: 'Failed to update status', description: error.message });
+      return;
+    }
+    
+    toast({ title: `Quest ${pendingStatus === 'cancelled' ? 'cancelled' : pendingStatus === 'paused' ? 'paused' : 'updated'}` });
+    fetchQuests();
+  };
+
+  const handleDeleteQuest = async (quest: Quest) => {
+    setStatusChangeQuest(quest);
+    setPendingStatus('cancelled' as QuestStatus); // We'll handle delete specially
+  };
 
   const fetchQuests = async () => {
     setIsLoading(true);
@@ -575,28 +637,61 @@ export function QuestsManager() {
                     >
                       <ExternalLink className="h-4 w-4" />
                     </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      onClick={() => handleOpenNotifyModal(quest)}
-                      title="Notify matching users"
-                    >
-                      <Bell className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      onClick={() => {
-                        setScheduleQuest(quest);
-                        setShowScheduleModal(true);
-                      }}
-                      title="Schedule instance"
-                    >
-                      <CalendarPlus className="h-4 w-4" />
-                    </Button>
                     <Button variant="ghost" size="icon" onClick={() => handleOpenModal(quest)}>
                       <Pencil className="h-4 w-4" />
                     </Button>
+                    
+                    {/* Quick Actions Dropdown */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleOpenNotifyModal(quest)}>
+                          <Bell className="mr-2 h-4 w-4" />
+                          Notify Users
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => {
+                          setScheduleQuest(quest);
+                          setShowScheduleModal(true);
+                        }}>
+                          <CalendarPlus className="mr-2 h-4 w-4" />
+                          Schedule Instance
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        
+                        {/* Status change options */}
+                        {quest.status !== 'open' && (
+                          <DropdownMenuItem onClick={() => handleQuickStatusChange(quest, 'open')}>
+                            <Play className="mr-2 h-4 w-4 text-emerald-600" />
+                            Set Open
+                          </DropdownMenuItem>
+                        )}
+                        {quest.status !== 'paused' && quest.status !== 'cancelled' && (
+                          <DropdownMenuItem onClick={() => handleQuickStatusChange(quest, 'paused')}>
+                            <Pause className="mr-2 h-4 w-4 text-amber-600" />
+                            Pause Quest
+                          </DropdownMenuItem>
+                        )}
+                        {quest.status !== 'cancelled' && (
+                          <DropdownMenuItem 
+                            onClick={() => handleQuickStatusChange(quest, 'cancelled')}
+                            className="text-red-600"
+                          >
+                            <XCircle className="mr-2 h-4 w-4" />
+                            Cancel Quest
+                          </DropdownMenuItem>
+                        )}
+                        {quest.status !== 'draft' && (
+                          <DropdownMenuItem onClick={() => handleQuickStatusChange(quest, 'draft')}>
+                            <Archive className="mr-2 h-4 w-4" />
+                            Move to Draft
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
               </CardHeader>
@@ -1179,6 +1274,52 @@ export function QuestsManager() {
         open={showScheduleModal}
         onOpenChange={setShowScheduleModal}
       />
+      
+      {/* Status Change Confirmation Dialog */}
+      <AlertDialog open={!!statusChangeQuest} onOpenChange={(open) => {
+        if (!open) {
+          setStatusChangeQuest(null);
+          setPendingStatus(null);
+        }
+      }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {pendingStatus === 'cancelled' ? 'Cancel Quest' : 
+               pendingStatus === 'paused' ? 'Pause Quest' :
+               pendingStatus === 'draft' ? 'Move to Draft' :
+               'Change Quest Status'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingStatus === 'cancelled' 
+                ? `This will cancel "${statusChangeQuest?.title}" and remove it from the public quests page. Users who signed up will need to be notified separately.`
+                : pendingStatus === 'paused'
+                ? `This will pause "${statusChangeQuest?.title}" and temporarily hide it from the quests page.`
+                : pendingStatus === 'draft'
+                ? `This will move "${statusChangeQuest?.title}" back to draft status.`
+                : `Change status of "${statusChangeQuest?.title}" to ${pendingStatus}?`
+              }
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isChangingStatus}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmStatusChange}
+              disabled={isChangingStatus}
+              className={pendingStatus === 'cancelled' ? 'bg-red-600 hover:bg-red-700' : ''}
+            >
+              {isChangingStatus ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                'Confirm'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
