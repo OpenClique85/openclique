@@ -93,7 +93,8 @@ export function OrgsManager() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showMembersModal, setShowMembersModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'verified'>('all');
+  const [filter, setFilter] = useState<'all' | 'pending' | 'verified' | 'umbrellas' | 'clubs'>('all');
+  const [umbrellaOrgs, setUmbrellaOrgs] = useState<OrgWithMembers[]>([]);
 
   // Form state for create/edit
   const [formData, setFormData] = useState({
@@ -107,6 +108,9 @@ export function OrgsManager() {
     primary_color: '#14B8A6',
     is_verified: false,
     is_active: true,
+    is_umbrella: false,
+    parent_org_id: '' as string,
+    verified_domains: [] as string[],
   });
 
   const fetchOrgs = async () => {
@@ -137,6 +141,7 @@ export function OrgsManager() {
     );
 
     setOrgs(orgsWithCounts);
+    setUmbrellaOrgs(orgsWithCounts.filter(o => o.is_umbrella));
     setIsLoading(false);
   };
 
@@ -180,6 +185,9 @@ export function OrgsManager() {
       primary_color: org.primary_color || '#14B8A6',
       is_verified: org.is_verified,
       is_active: org.is_active,
+      is_umbrella: org.is_umbrella || false,
+      parent_org_id: org.parent_org_id || '',
+      verified_domains: (org.verified_domains as string[]) || [],
     });
     setShowEditModal(true);
   };
@@ -197,6 +205,9 @@ export function OrgsManager() {
       primary_color: '#14B8A6',
       is_verified: false,
       is_active: true,
+      is_umbrella: false,
+      parent_org_id: '',
+      verified_domains: [],
     });
     setShowCreateModal(true);
   };
@@ -231,6 +242,9 @@ export function OrgsManager() {
           primary_color: formData.primary_color,
           is_verified: formData.is_verified,
           is_active: formData.is_active,
+          is_umbrella: formData.is_umbrella,
+          parent_org_id: formData.parent_org_id || null,
+          verified_domains: formData.verified_domains.length > 0 ? formData.verified_domains : null,
         })
         .eq('id', selectedOrg.id);
 
@@ -262,6 +276,9 @@ export function OrgsManager() {
           primary_color: formData.primary_color,
           is_verified: formData.is_verified,
           is_active: formData.is_active,
+          is_umbrella: formData.is_umbrella,
+          parent_org_id: formData.parent_org_id || null,
+          verified_domains: formData.verified_domains.length > 0 ? formData.verified_domains : null,
         });
 
       if (error) {
@@ -371,8 +388,17 @@ export function OrgsManager() {
   const filteredOrgs = orgs.filter(org => {
     if (filter === 'verified') return org.is_verified;
     if (filter === 'pending') return !org.is_verified;
+    if (filter === 'umbrellas') return org.is_umbrella;
+    if (filter === 'clubs') return !!org.parent_org_id;
     return true;
   });
+
+  // Get parent org name helper
+  const getParentOrgName = (parentOrgId: string | null) => {
+    if (!parentOrgId) return null;
+    const parent = orgs.find(o => o.id === parentOrgId);
+    return parent?.name || 'Unknown';
+  };
 
   if (isLoading) {
     return (
@@ -451,13 +477,27 @@ export function OrgsManager() {
       </div>
 
       {/* Filter */}
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <Button
           variant={filter === 'all' ? 'default' : 'outline'}
           size="sm"
           onClick={() => setFilter('all')}
         >
           All
+        </Button>
+        <Button
+          variant={filter === 'umbrellas' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setFilter('umbrellas')}
+        >
+          🏛️ Umbrellas
+        </Button>
+        <Button
+          variant={filter === 'clubs' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setFilter('clubs')}
+        >
+          🎯 Clubs
         </Button>
         <Button
           variant={filter === 'verified' ? 'default' : 'outline'}
@@ -471,7 +511,7 @@ export function OrgsManager() {
           size="sm"
           onClick={() => setFilter('pending')}
         >
-          Pending Verification
+          Pending
         </Button>
       </div>
 
@@ -483,7 +523,7 @@ export function OrgsManager() {
               <TableRow>
                 <TableHead>Organization</TableHead>
                 <TableHead>Type</TableHead>
-                <TableHead>School</TableHead>
+                <TableHead>Parent</TableHead>
                 <TableHead>Members</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -499,7 +539,12 @@ export function OrgsManager() {
                         style={{ backgroundColor: org.primary_color || '#14B8A6' }}
                       />
                       <div>
-                        <p className="font-medium">{org.name}</p>
+                        <div className="flex items-center gap-1">
+                          <p className="font-medium">{org.name}</p>
+                          {org.is_umbrella && (
+                            <Badge variant="outline" className="text-xs">🏛️</Badge>
+                          )}
+                        </div>
                         <p className="text-xs text-muted-foreground">/{org.slug}</p>
                       </div>
                     </div>
@@ -510,15 +555,14 @@ export function OrgsManager() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {org.school_affiliation ? (
-                      <Badge 
-                        variant="outline"
-                        className={org.school_affiliation === 'ut_austin' ? 'border-[#BF5700] text-[#BF5700]' : ''}
-                      >
-                        {org.school_affiliation === 'ut_austin' ? '🤘 UT Austin' : org.school_affiliation}
+                    {org.parent_org_id ? (
+                      <Badge variant="secondary" className="text-xs">
+                        {getParentOrgName(org.parent_org_id)}
                       </Badge>
+                    ) : org.is_umbrella ? (
+                      <span className="text-xs text-muted-foreground">—</span>
                     ) : (
-                      <span className="text-muted-foreground">—</span>
+                      <span className="text-xs text-muted-foreground">Independent</span>
                     )}
                   </TableCell>
                   <TableCell>
@@ -687,7 +731,68 @@ export function OrgsManager() {
                     <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
+            </div>
+
+            {/* Umbrella & Parent Org */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={formData.is_umbrella}
+                    onCheckedChange={(v) => setFormData(prev => ({ 
+                      ...prev, 
+                      is_umbrella: v,
+                      parent_org_id: v ? '' : prev.parent_org_id 
+                    }))}
+                  />
+                  <Label>Umbrella Organization</Label>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Umbrellas have child clubs and rollup analytics
+                </p>
               </div>
+              {!formData.is_umbrella && (
+                <div className="space-y-2">
+                  <Label>Parent Organization</Label>
+                  <Select
+                    value={formData.parent_org_id || 'none'}
+                    onValueChange={(v) => setFormData(prev => ({ 
+                      ...prev, 
+                      parent_org_id: v === 'none' ? '' : v 
+                    }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select parent..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None (Independent)</SelectItem>
+                      {umbrellaOrgs.map((uo) => (
+                        <SelectItem key={uo.id} value={uo.id}>
+                          🏛️ {uo.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+
+            {/* Verified Domains */}
+            <div className="space-y-2">
+              <Label>Verified Domains (one per line)</Label>
+              <Textarea
+                value={formData.verified_domains.join('\n')}
+                onChange={(e) => setFormData(prev => ({ 
+                  ...prev, 
+                  verified_domains: e.target.value.split('\n').filter(d => d.trim()) 
+                }))}
+                placeholder="utexas.edu&#10;mba.utexas.edu"
+                rows={2}
+              />
+              <p className="text-xs text-muted-foreground">
+                Users with these email domains can auto-join
+              </p>
+            </div>
             </div>
 
             <div className="space-y-2">
@@ -806,6 +911,7 @@ export function OrgsManager() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="member">Member</SelectItem>
+                          <SelectItem value="social_chair">Social Chair</SelectItem>
                           <SelectItem value="admin">Admin</SelectItem>
                           <SelectItem value="creator">Creator</SelectItem>
                         </SelectContent>
