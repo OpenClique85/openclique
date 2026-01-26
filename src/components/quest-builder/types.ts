@@ -1,8 +1,43 @@
 /**
  * Quest Builder Types
  * 
- * Form data structure and step configuration for the 9-step wizard.
+ * Form data structure and step configuration for the quest creation wizard.
  */
+
+// Constraint type definitions matching database enums
+export type AlcoholLevel = 'none' | 'optional' | 'primary';
+export type AgeRequirement = 'all_ages' | '18_plus' | '21_plus';
+export type IntensityLevel = 'low' | 'medium' | 'high';
+export type SocialIntensity = 'chill' | 'moderate' | 'high';
+export type NoiseLevel = 'quiet' | 'moderate' | 'loud';
+export type IndoorOutdoor = 'indoor' | 'outdoor' | 'mixed';
+export type AccessibilityLevel = 'unknown' | 'wheelchair_friendly' | 'not_wheelchair_friendly' | 'mixed';
+export type BudgetLevel = 'free' | 'low' | 'medium' | 'high' | 'mixed';
+export type SafetyLevel = 'public_only' | 'mixed' | 'private_ok_with_host';
+
+// AI Draft types
+export interface QuestObjectiveDraft {
+  objective_text: string;
+  objective_type: string;
+  proof_type: string;
+  completion_rule: string;
+  is_required: boolean;
+  ai_generated: boolean;
+  objective_order?: number;
+}
+
+export interface QuestRoleDraft {
+  role_name: string;
+  role_description: string;
+  ai_generated: boolean;
+}
+
+export interface PersonalityAffinityDraft {
+  trait_key: string;
+  trait_weight: number;
+  explanation: string;
+  ai_generated: boolean;
+}
 
 export interface QuestFormData {
   // Step 1: Basics
@@ -19,32 +54,52 @@ export interface QuestFormData {
   duration_notes: string;
   default_duration_minutes: number;
   
-  // Step 3: Experience
+  // Step 3: Constraints (Hard Filters)
+  constraints_alcohol: AlcoholLevel;
+  constraints_age_requirement: AgeRequirement;
+  constraints_physical_intensity: IntensityLevel;
+  constraints_social_intensity: SocialIntensity;
+  constraints_noise_level: NoiseLevel;
+  constraints_indoor_outdoor: IndoorOutdoor;
+  constraints_accessibility_level: AccessibilityLevel;
+  constraints_budget_level: BudgetLevel;
+  safety_level: SafetyLevel;
+  
+  // Step 4: AI Draft (stored temporarily, saved to separate tables on submit)
+  ai_draft_objectives: QuestObjectiveDraft[];
+  ai_draft_roles: QuestRoleDraft[];
+  ai_draft_personality_affinities: PersonalityAffinityDraft[];
+  ai_draft_suggested_tags: string[];
+  ai_generated: boolean;
+  ai_version: string;
+  ai_skipped: boolean;
+  
+  // Step 5: Experience
   full_description: string;
   highlights: string[];
   
-  // Step 4: Objectives
+  // Step 6: Objectives (manual entry, merged with AI draft)
   objectives: string;
   success_criteria: string;
   
-  // Step 5: Expectations
+  // Step 7: Expectations
   what_to_bring: string;
   dress_code: string;
   physical_requirements: string;
   
-  // Step 6: Safety
+  // Step 8: Safety
   safety_notes: string;
   emergency_contact: string;
   age_restriction: string;
   
-  // Step 7: Capacity & Settings
+  // Step 9: Capacity & Settings
   capacity_total: number;
   default_squad_size: number;
   cost_description: string;
   rewards: string;
   is_repeatable: boolean;
   
-  // Step 8: Media
+  // Step 10: Media
   image_url: string;
   meeting_location_name: string;
   meeting_address: string;
@@ -70,6 +125,26 @@ export const defaultFormData: QuestFormData = {
   end_datetime: '',
   duration_notes: '',
   default_duration_minutes: 120,
+  
+  // Constraints
+  constraints_alcohol: 'none',
+  constraints_age_requirement: 'all_ages',
+  constraints_physical_intensity: 'medium',
+  constraints_social_intensity: 'moderate',
+  constraints_noise_level: 'moderate',
+  constraints_indoor_outdoor: 'mixed',
+  constraints_accessibility_level: 'unknown',
+  constraints_budget_level: 'free',
+  safety_level: 'public_only',
+  
+  // AI Draft
+  ai_draft_objectives: [],
+  ai_draft_roles: [],
+  ai_draft_personality_affinities: [],
+  ai_draft_suggested_tags: [],
+  ai_generated: false,
+  ai_version: '',
+  ai_skipped: false,
   
   // Experience
   full_description: '',
@@ -114,13 +189,15 @@ export interface WizardStep {
 export const WIZARD_STEPS: WizardStep[] = [
   { id: 1, title: 'Quest Basics', shortTitle: 'Basics', description: 'Name and categorize your quest', icon: '📋' },
   { id: 2, title: 'Timing', shortTitle: 'Timing', description: 'When does your quest take place?', icon: '📅' },
-  { id: 3, title: 'Experience', shortTitle: 'Experience', description: 'Describe the adventure', icon: '✨' },
-  { id: 4, title: 'Objectives', shortTitle: 'Objectives', description: 'Define goals and success criteria', icon: '🎯' },
-  { id: 5, title: 'Expectations', shortTitle: 'Expectations', description: 'What should participants know?', icon: '📝' },
-  { id: 6, title: 'Safety', shortTitle: 'Safety', description: 'Important safety information', icon: '🛡️' },
-  { id: 7, title: 'Capacity & Cost', shortTitle: 'Capacity', description: 'Size, pricing, and rewards', icon: '💰' },
-  { id: 8, title: 'Media & Location', shortTitle: 'Media', description: 'Photos and meeting details', icon: '📍' },
-  { id: 9, title: 'Review', shortTitle: 'Review', description: 'Review and submit your quest', icon: '🚀' },
+  { id: 3, title: 'Constraints', shortTitle: 'Constraints', description: 'Set matching filters', icon: '🎚️' },
+  { id: 4, title: 'AI Draft', shortTitle: 'AI Draft', description: 'Generate content with AI', icon: '✨' },
+  { id: 5, title: 'Experience', shortTitle: 'Experience', description: 'Describe the adventure', icon: '🎭' },
+  { id: 6, title: 'Objectives', shortTitle: 'Objectives', description: 'Define goals and success criteria', icon: '🎯' },
+  { id: 7, title: 'Expectations', shortTitle: 'Expectations', description: 'What should participants know?', icon: '📝' },
+  { id: 8, title: 'Safety', shortTitle: 'Safety', description: 'Important safety information', icon: '🛡️' },
+  { id: 9, title: 'Capacity & Cost', shortTitle: 'Capacity', description: 'Size, pricing, and rewards', icon: '💰' },
+  { id: 10, title: 'Media & Location', shortTitle: 'Media', description: 'Photos and meeting details', icon: '📍' },
+  { id: 11, title: 'Review', shortTitle: 'Review', description: 'Review and submit your quest', icon: '🚀' },
 ];
 
 export const PROGRESSION_TREES = [

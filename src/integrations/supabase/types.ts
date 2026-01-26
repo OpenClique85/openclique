@@ -3002,6 +3002,62 @@ export type Database = {
         }
         Relationships: []
       }
+      quest_constraints: {
+        Row: {
+          accessibility_level: Database["public"]["Enums"]["quest_accessibility_level"]
+          age_requirement: Database["public"]["Enums"]["quest_age_requirement"]
+          alcohol: Database["public"]["Enums"]["quest_alcohol_level"]
+          budget_level: Database["public"]["Enums"]["quest_budget_level"]
+          created_at: string
+          id: string
+          indoor_outdoor: Database["public"]["Enums"]["quest_indoor_outdoor"]
+          noise_level: Database["public"]["Enums"]["quest_noise_level"]
+          physical_intensity: Database["public"]["Enums"]["quest_intensity_level"]
+          quest_id: string
+          social_intensity: Database["public"]["Enums"]["quest_social_intensity"]
+          time_of_day: Database["public"]["Enums"]["quest_time_of_day"]
+          updated_at: string
+        }
+        Insert: {
+          accessibility_level?: Database["public"]["Enums"]["quest_accessibility_level"]
+          age_requirement?: Database["public"]["Enums"]["quest_age_requirement"]
+          alcohol?: Database["public"]["Enums"]["quest_alcohol_level"]
+          budget_level?: Database["public"]["Enums"]["quest_budget_level"]
+          created_at?: string
+          id?: string
+          indoor_outdoor?: Database["public"]["Enums"]["quest_indoor_outdoor"]
+          noise_level?: Database["public"]["Enums"]["quest_noise_level"]
+          physical_intensity?: Database["public"]["Enums"]["quest_intensity_level"]
+          quest_id: string
+          social_intensity?: Database["public"]["Enums"]["quest_social_intensity"]
+          time_of_day?: Database["public"]["Enums"]["quest_time_of_day"]
+          updated_at?: string
+        }
+        Update: {
+          accessibility_level?: Database["public"]["Enums"]["quest_accessibility_level"]
+          age_requirement?: Database["public"]["Enums"]["quest_age_requirement"]
+          alcohol?: Database["public"]["Enums"]["quest_alcohol_level"]
+          budget_level?: Database["public"]["Enums"]["quest_budget_level"]
+          created_at?: string
+          id?: string
+          indoor_outdoor?: Database["public"]["Enums"]["quest_indoor_outdoor"]
+          noise_level?: Database["public"]["Enums"]["quest_noise_level"]
+          physical_intensity?: Database["public"]["Enums"]["quest_intensity_level"]
+          quest_id?: string
+          social_intensity?: Database["public"]["Enums"]["quest_social_intensity"]
+          time_of_day?: Database["public"]["Enums"]["quest_time_of_day"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_constraints_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: true
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quest_event_log: {
         Row: {
           actor_id: string | null
@@ -3175,6 +3231,129 @@ export type Database = {
           },
         ]
       }
+      quest_objectives: {
+        Row: {
+          ai_generated: boolean
+          completion_rule: Database["public"]["Enums"]["quest_completion_rule"]
+          created_at: string
+          id: string
+          is_required: boolean
+          objective_order: number
+          objective_text: string
+          objective_type: Database["public"]["Enums"]["quest_objective_type"]
+          proof_type: Database["public"]["Enums"]["quest_proof_type"]
+          quest_id: string
+          updated_at: string
+        }
+        Insert: {
+          ai_generated?: boolean
+          completion_rule?: Database["public"]["Enums"]["quest_completion_rule"]
+          created_at?: string
+          id?: string
+          is_required?: boolean
+          objective_order?: number
+          objective_text: string
+          objective_type?: Database["public"]["Enums"]["quest_objective_type"]
+          proof_type?: Database["public"]["Enums"]["quest_proof_type"]
+          quest_id: string
+          updated_at?: string
+        }
+        Update: {
+          ai_generated?: boolean
+          completion_rule?: Database["public"]["Enums"]["quest_completion_rule"]
+          created_at?: string
+          id?: string
+          is_required?: boolean
+          objective_order?: number
+          objective_text?: string
+          objective_type?: Database["public"]["Enums"]["quest_objective_type"]
+          proof_type?: Database["public"]["Enums"]["quest_proof_type"]
+          quest_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_objectives_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quest_personality_affinity: {
+        Row: {
+          ai_generated: boolean
+          created_at: string
+          explanation: string | null
+          id: string
+          quest_id: string
+          trait_key: string
+          trait_weight: number
+        }
+        Insert: {
+          ai_generated?: boolean
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          quest_id: string
+          trait_key: string
+          trait_weight?: number
+        }
+        Update: {
+          ai_generated?: boolean
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          quest_id?: string
+          trait_key?: string
+          trait_weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_personality_affinity_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quest_roles: {
+        Row: {
+          ai_generated: boolean
+          created_at: string
+          id: string
+          quest_id: string
+          role_description: string | null
+          role_name: Database["public"]["Enums"]["quest_role_name"]
+        }
+        Insert: {
+          ai_generated?: boolean
+          created_at?: string
+          id?: string
+          quest_id: string
+          role_description?: string | null
+          role_name: Database["public"]["Enums"]["quest_role_name"]
+        }
+        Update: {
+          ai_generated?: boolean
+          created_at?: string
+          id?: string
+          quest_id?: string
+          role_description?: string | null
+          role_name?: Database["public"]["Enums"]["quest_role_name"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_roles_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quest_signups: {
         Row: {
           cancellation_reason: string | null
@@ -3316,6 +3495,9 @@ export type Database = {
         Row: {
           admin_notes: string | null
           age_restriction: string | null
+          ai_draft_applied_at: string | null
+          ai_generated: boolean | null
+          ai_version: string | null
           base_xp: number | null
           briefing_html: string | null
           capacity_total: number | null
@@ -3324,6 +3506,7 @@ export type Database = {
           created_at: string
           creator_id: string | null
           creator_name: string | null
+          creator_notes: string | null
           creator_social_url: string | null
           creator_type: string | null
           default_capacity: number | null
@@ -3334,6 +3517,9 @@ export type Database = {
           duration_notes: string | null
           emergency_contact: string | null
           end_datetime: string | null
+          estimated_cost_max: number | null
+          estimated_cost_min: number | null
+          event_source: Database["public"]["Enums"]["quest_event_source"] | null
           eventbrite_event_id: string | null
           external_ticket_url: string | null
           full_description: string | null
@@ -3356,6 +3542,7 @@ export type Database = {
           paused_reason: string | null
           physical_requirements: string | null
           previous_status: Database["public"]["Enums"]["quest_status"] | null
+          price_type: Database["public"]["Enums"]["quest_price_type"] | null
           priority_flag: boolean | null
           progression_tree: string | null
           published_at: string | null
@@ -3367,8 +3554,10 @@ export type Database = {
           revoked_by: string | null
           revoked_reason: string | null
           rewards: string | null
+          safety_level: Database["public"]["Enums"]["quest_safety_level"] | null
           safety_notes: string | null
           short_description: string | null
+          short_teaser: string | null
           slug: string
           sponsor_id: string | null
           sponsor_offering: Json | null
@@ -3390,6 +3579,9 @@ export type Database = {
         Insert: {
           admin_notes?: string | null
           age_restriction?: string | null
+          ai_draft_applied_at?: string | null
+          ai_generated?: boolean | null
+          ai_version?: string | null
           base_xp?: number | null
           briefing_html?: string | null
           capacity_total?: number | null
@@ -3398,6 +3590,7 @@ export type Database = {
           created_at?: string
           creator_id?: string | null
           creator_name?: string | null
+          creator_notes?: string | null
           creator_social_url?: string | null
           creator_type?: string | null
           default_capacity?: number | null
@@ -3408,6 +3601,11 @@ export type Database = {
           duration_notes?: string | null
           emergency_contact?: string | null
           end_datetime?: string | null
+          estimated_cost_max?: number | null
+          estimated_cost_min?: number | null
+          event_source?:
+            | Database["public"]["Enums"]["quest_event_source"]
+            | null
           eventbrite_event_id?: string | null
           external_ticket_url?: string | null
           full_description?: string | null
@@ -3430,6 +3628,7 @@ export type Database = {
           paused_reason?: string | null
           physical_requirements?: string | null
           previous_status?: Database["public"]["Enums"]["quest_status"] | null
+          price_type?: Database["public"]["Enums"]["quest_price_type"] | null
           priority_flag?: boolean | null
           progression_tree?: string | null
           published_at?: string | null
@@ -3441,8 +3640,12 @@ export type Database = {
           revoked_by?: string | null
           revoked_reason?: string | null
           rewards?: string | null
+          safety_level?:
+            | Database["public"]["Enums"]["quest_safety_level"]
+            | null
           safety_notes?: string | null
           short_description?: string | null
+          short_teaser?: string | null
           slug: string
           sponsor_id?: string | null
           sponsor_offering?: Json | null
@@ -3464,6 +3667,9 @@ export type Database = {
         Update: {
           admin_notes?: string | null
           age_restriction?: string | null
+          ai_draft_applied_at?: string | null
+          ai_generated?: boolean | null
+          ai_version?: string | null
           base_xp?: number | null
           briefing_html?: string | null
           capacity_total?: number | null
@@ -3472,6 +3678,7 @@ export type Database = {
           created_at?: string
           creator_id?: string | null
           creator_name?: string | null
+          creator_notes?: string | null
           creator_social_url?: string | null
           creator_type?: string | null
           default_capacity?: number | null
@@ -3482,6 +3689,11 @@ export type Database = {
           duration_notes?: string | null
           emergency_contact?: string | null
           end_datetime?: string | null
+          estimated_cost_max?: number | null
+          estimated_cost_min?: number | null
+          event_source?:
+            | Database["public"]["Enums"]["quest_event_source"]
+            | null
           eventbrite_event_id?: string | null
           external_ticket_url?: string | null
           full_description?: string | null
@@ -3504,6 +3716,7 @@ export type Database = {
           paused_reason?: string | null
           physical_requirements?: string | null
           previous_status?: Database["public"]["Enums"]["quest_status"] | null
+          price_type?: Database["public"]["Enums"]["quest_price_type"] | null
           priority_flag?: boolean | null
           progression_tree?: string | null
           published_at?: string | null
@@ -3515,8 +3728,12 @@ export type Database = {
           revoked_by?: string | null
           revoked_reason?: string | null
           rewards?: string | null
+          safety_level?:
+            | Database["public"]["Enums"]["quest_safety_level"]
+            | null
           safety_notes?: string | null
           short_description?: string | null
+          short_teaser?: string | null
           slug?: string
           sponsor_id?: string | null
           sponsor_offering?: Json | null
@@ -6190,6 +6407,20 @@ export type Database = {
       overage_policy: "soft_cap_notify" | "hard_cap_block"
       pricing_model: "per_cohort" | "per_seat" | "annual_platform" | "hybrid"
       proof_status: "pending" | "approved" | "flagged" | "resubmit_requested"
+      quest_accessibility_level:
+        | "unknown"
+        | "wheelchair_friendly"
+        | "not_wheelchair_friendly"
+        | "mixed"
+      quest_age_requirement: "all_ages" | "18_plus" | "21_plus"
+      quest_alcohol_level: "none" | "optional" | "primary"
+      quest_budget_level: "free" | "low" | "medium" | "high" | "mixed"
+      quest_completion_rule:
+        | "all_members"
+        | "majority"
+        | "any_member"
+        | "per_member"
+      quest_event_source: "manual" | "eventbrite"
       quest_event_type:
         | "instance_created"
         | "status_change"
@@ -6214,6 +6445,28 @@ export type Database = {
         | "squad_ready_for_review"
         | "squad_approved"
         | "squad_force_approved"
+      quest_indoor_outdoor: "indoor" | "outdoor" | "mixed"
+      quest_intensity_level: "low" | "medium" | "high"
+      quest_noise_level: "quiet" | "moderate" | "loud"
+      quest_objective_type:
+        | "checkin"
+        | "photo"
+        | "qr"
+        | "task"
+        | "discussion"
+        | "purchase_optional"
+        | "travel"
+      quest_price_type: "free" | "paid" | "mixed"
+      quest_proof_type: "none" | "photo" | "qr" | "geo" | "text_confirmation"
+      quest_role_name:
+        | "Navigator"
+        | "Timekeeper"
+        | "Vibe Curator"
+        | "Photographer"
+        | "Connector"
+        | "Wildcard"
+      quest_safety_level: "public_only" | "mixed" | "private_ok_with_host"
+      quest_social_intensity: "chill" | "moderate" | "high"
       quest_status:
         | "draft"
         | "open"
@@ -6222,6 +6475,12 @@ export type Database = {
         | "cancelled"
         | "paused"
         | "revoked"
+      quest_time_of_day:
+        | "morning"
+        | "afternoon"
+        | "evening"
+        | "late_night"
+        | "flex"
       quest_visibility: "public" | "org_only" | "invite_only"
       review_status:
         | "draft"
@@ -6493,6 +6752,22 @@ export const Constants = {
       overage_policy: ["soft_cap_notify", "hard_cap_block"],
       pricing_model: ["per_cohort", "per_seat", "annual_platform", "hybrid"],
       proof_status: ["pending", "approved", "flagged", "resubmit_requested"],
+      quest_accessibility_level: [
+        "unknown",
+        "wheelchair_friendly",
+        "not_wheelchair_friendly",
+        "mixed",
+      ],
+      quest_age_requirement: ["all_ages", "18_plus", "21_plus"],
+      quest_alcohol_level: ["none", "optional", "primary"],
+      quest_budget_level: ["free", "low", "medium", "high", "mixed"],
+      quest_completion_rule: [
+        "all_members",
+        "majority",
+        "any_member",
+        "per_member",
+      ],
+      quest_event_source: ["manual", "eventbrite"],
       quest_event_type: [
         "instance_created",
         "status_change",
@@ -6518,6 +6793,30 @@ export const Constants = {
         "squad_approved",
         "squad_force_approved",
       ],
+      quest_indoor_outdoor: ["indoor", "outdoor", "mixed"],
+      quest_intensity_level: ["low", "medium", "high"],
+      quest_noise_level: ["quiet", "moderate", "loud"],
+      quest_objective_type: [
+        "checkin",
+        "photo",
+        "qr",
+        "task",
+        "discussion",
+        "purchase_optional",
+        "travel",
+      ],
+      quest_price_type: ["free", "paid", "mixed"],
+      quest_proof_type: ["none", "photo", "qr", "geo", "text_confirmation"],
+      quest_role_name: [
+        "Navigator",
+        "Timekeeper",
+        "Vibe Curator",
+        "Photographer",
+        "Connector",
+        "Wildcard",
+      ],
+      quest_safety_level: ["public_only", "mixed", "private_ok_with_host"],
+      quest_social_intensity: ["chill", "moderate", "high"],
       quest_status: [
         "draft",
         "open",
@@ -6526,6 +6825,13 @@ export const Constants = {
         "cancelled",
         "paused",
         "revoked",
+      ],
+      quest_time_of_day: [
+        "morning",
+        "afternoon",
+        "evening",
+        "late_night",
+        "flex",
       ],
       quest_visibility: ["public", "org_only", "invite_only"],
       review_status: [

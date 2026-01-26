@@ -68,3 +68,6 @@ verify_jwt = false
 
 [functions.eventbrite-search]
 verify_jwt = false
+
+[functions.generate-quest-draft]
+verify_jwt = false
