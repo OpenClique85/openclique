@@ -42,6 +42,7 @@ import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { TutorialProvider, TutorialOverlay, TutorialPrompt } from "./components/tutorial";
 import { MobileActionBar } from "./components/MobileActionBar";
+import { FloatingHelpButton } from "./components/support/FloatingHelpButton";
 
 // -----------------------------------------------------------------------------
 // LOADING FALLBACK: Displayed while lazy components load
@@ -168,6 +169,8 @@ const App = () => (
             <TutorialPrompt />
             {/* Mobile bottom navigation bar */}
             <MobileActionBar />
+            {/* Floating help button */}
+            <FloatingHelpButton />
             
             <Suspense fallback={<PageLoader />}>
               <Routes>

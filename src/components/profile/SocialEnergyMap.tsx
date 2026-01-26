@@ -120,62 +120,30 @@ export function SocialEnergyMap({ userId, compact = false }: SocialEnergyMapProp
     }
   };
 
-  // Redistribute points among other axes when one changes
-  const redistributeWeights = useCallback(
-    (changedAxis: AxisKey, newValue: number): AxisWeights => {
+  // Handle direct weight changes WITHOUT auto-redistribution
+  // Users can go into deficit or surplus until they reach exactly 100
+  const handleWeightChange = useCallback(
+    (axis: AxisKey, newValue: number): AxisWeights => {
       const clampedValue = Math.max(0, Math.min(100, newValue));
-      const otherAxes = (['energy', 'structure', 'focus'] as AxisKey[]).filter(
-        (a) => a !== changedAxis
-      );
-
-      const remaining = 100 - clampedValue;
-      const currentOthersTotal = otherAxes.reduce((sum, a) => sum + localWeights[a], 0);
-
-      let newWeights: AxisWeights;
-
-      if (currentOthersTotal === 0) {
-        // Distribute evenly
-        newWeights = {
-          ...localWeights,
-          [changedAxis]: clampedValue,
-          [otherAxes[0]]: Math.floor(remaining / 2),
-          [otherAxes[1]]: Math.ceil(remaining / 2),
-        };
-      } else {
-        // Proportional distribution
-        const ratio0 = localWeights[otherAxes[0]] / currentOthersTotal;
-        const ratio1 = localWeights[otherAxes[1]] / currentOthersTotal;
-
-        newWeights = {
-          ...localWeights,
-          [changedAxis]: clampedValue,
-          [otherAxes[0]]: Math.round(remaining * ratio0),
-          [otherAxes[1]]: Math.round(remaining * ratio1),
-        };
-
-        // Fix rounding
-        const sum = Object.values(newWeights).reduce((a, b) => a + b, 0);
-        if (sum !== 100) {
-          newWeights[otherAxes[0]] += 100 - sum;
-        }
-      }
-
-      return newWeights;
+      return {
+        ...localWeights,
+        [axis]: clampedValue,
+      };
     },
     [localWeights]
   );
 
-  // Handle +/- button clicks (immediate redistribution)
+  // Handle +/- button clicks (direct change, no redistribution)
   const handleWeightAdjust = useCallback(
     (axis: AxisKey, delta: number) => {
       const newValue = localWeights[axis] + delta;
       if (newValue < 0 || newValue > 100) return;
       
-      const newWeights = redistributeWeights(axis, newValue);
+      const newWeights = handleWeightChange(axis, newValue);
       setLocalWeights(newWeights);
       setHasWeightChanges(true);
     },
-    [localWeights, redistributeWeights]
+    [localWeights, handleWeightChange]
   );
 
   // Handle manual input focus
@@ -184,13 +152,13 @@ export function SocialEnergyMap({ userId, compact = false }: SocialEnergyMapProp
     setEditingValue(String(localWeights[axis]));
   };
 
-  // Handle manual input change (just store value, don't redistribute yet)
+  // Handle manual input change (direct change, no redistribution)
   const handleInputChange = (value: string) => {
     // Only allow numeric input
     if (value === '' || /^\d+$/.test(value)) {
       setEditingValue(value);
       
-      // Debounce the redistribution
+      // Debounce for smooth typing experience
       if (debounceRef.current) {
         clearTimeout(debounceRef.current);
       }
@@ -199,12 +167,12 @@ export function SocialEnergyMap({ userId, compact = false }: SocialEnergyMapProp
         if (editingAxis && value !== '') {
           const numValue = parseInt(value, 10);
           if (!isNaN(numValue) && numValue >= 0 && numValue <= 100) {
-            const newWeights = redistributeWeights(editingAxis, numValue);
+            const newWeights = handleWeightChange(editingAxis, numValue);
             setLocalWeights(newWeights);
             setHasWeightChanges(true);
           }
         }
-      }, 500);
+      }, 300);
     }
   };
 
@@ -217,7 +185,7 @@ export function SocialEnergyMap({ userId, compact = false }: SocialEnergyMapProp
     if (editingAxis && editingValue !== '') {
       const numValue = parseInt(editingValue, 10);
       if (!isNaN(numValue) && numValue >= 0 && numValue <= 100) {
-        const newWeights = redistributeWeights(editingAxis, numValue);
+        const newWeights = handleWeightChange(editingAxis, numValue);
         setLocalWeights(newWeights);
         setHasWeightChanges(true);
       }

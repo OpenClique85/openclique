@@ -43,6 +43,8 @@ export function YourAlgorithmDashboard() {
     topTraits,
     totalAccepted,
     totalPending,
+    isAtMaxTraits,
+    maxTraits,
     acceptDraft,
     rejectDraft,
     updateImportance,
@@ -176,10 +178,17 @@ export function YourAlgorithmDashboard() {
                     Traits you've confirmed about yourself
                   </p>
                 </div>
-                <Badge variant="outline">{totalAccepted} traits</Badge>
+                <Badge variant={isAtMaxTraits ? "destructive" : "outline"}>
+                  {totalAccepted}/{maxTraits} traits
+                </Badge>
               </div>
             </AccordionTrigger>
             <AccordionContent className="pb-4 space-y-4">
+              {isAtMaxTraits && (
+                <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-sm text-destructive">
+                  ⚠️ Maximum {maxTraits} traits reached. Remove a trait to add new ones.
+                </div>
+              )}
               {Object.entries(traitsByCategory).map(([category, traits]) => (
                 <div key={category} className="space-y-2">
                   <h4 className="text-sm font-medium text-muted-foreground">
