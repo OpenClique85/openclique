@@ -3,6 +3,7 @@
  * 
  * Full admin control panel for quest review and lifecycle management.
  * Supports: approve, reject, request changes, pause, resume, cancel, revoke, delete.
+ * Enhanced to show quest constraints, objectives, roles, and personality affinities.
  */
 
 import { useState } from 'react';
@@ -15,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
   DialogContent,
@@ -35,10 +37,14 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   Check, X, FileEdit, Pause, Play, Ban, XOctagon, Trash2, 
   Flag, FlagOff, Loader2, Calendar, MapPin, Users, Clock,
-  ArrowRight, History
+  ArrowRight, History, Sparkles, Target, Brain, Filter
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { QuestStatusBadge } from '@/components/QuestStatusBadge';
+import { QuestConstraintsDisplay } from '@/components/admin/QuestConstraintsDisplay';
+import { QuestAffinitiesDisplay } from '@/components/admin/QuestAffinitiesDisplay';
+import { QuestObjectivesDisplay } from '@/components/admin/QuestObjectivesDisplay';
+import { QuestRolesDisplay } from '@/components/admin/QuestRolesDisplay';
 import { 
   transitionQuestStatus, 
   performReviewAction, 
@@ -48,6 +54,10 @@ import {
 import type { Enums, Tables } from '@/integrations/supabase/types';
 
 type Quest = Tables<'quests'>;
+type QuestConstraints = Tables<'quest_constraints'>;
+type QuestObjective = Tables<'quest_objectives'>;
+type QuestRole = Tables<'quest_roles'>;
+type QuestPersonalityAffinity = Tables<'quest_personality_affinity'>;
 type QuestStatus = Enums<'quest_status'>;
 
 interface QuestWithCreator extends Quest {
@@ -113,6 +123,82 @@ export function QuestLifecycleModal({ quest, open, onOpenChange }: QuestLifecycl
     },
     enabled: !!quest?.id,
   });
+
+  // Fetch quest constraints
+  const { data: constraints } = useQuery({
+    queryKey: ['quest-constraints', quest?.id],
+    queryFn: async () => {
+      if (!quest?.id) return null;
+      
+      const { data, error } = await supabase
+        .from('quest_constraints')
+        .select('*')
+        .eq('quest_id', quest.id)
+        .maybeSingle();
+      
+      if (error) return null;
+      return data as QuestConstraints | null;
+    },
+    enabled: !!quest?.id,
+  });
+
+  // Fetch quest objectives
+  const { data: objectives } = useQuery({
+    queryKey: ['quest-objectives', quest?.id],
+    queryFn: async () => {
+      if (!quest?.id) return null;
+      
+      const { data, error } = await supabase
+        .from('quest_objectives')
+        .select('*')
+        .eq('quest_id', quest.id)
+        .order('objective_order', { ascending: true });
+      
+      if (error) return null;
+      return data as QuestObjective[];
+    },
+    enabled: !!quest?.id,
+  });
+
+  // Fetch quest roles
+  const { data: roles } = useQuery({
+    queryKey: ['quest-roles', quest?.id],
+    queryFn: async () => {
+      if (!quest?.id) return null;
+      
+      const { data, error } = await supabase
+        .from('quest_roles')
+        .select('*')
+        .eq('quest_id', quest.id);
+      
+      if (error) return null;
+      return data as QuestRole[];
+    },
+    enabled: !!quest?.id,
+  });
+
+  // Fetch quest personality affinities
+  const { data: affinities } = useQuery({
+    queryKey: ['quest-affinities', quest?.id],
+    queryFn: async () => {
+      if (!quest?.id) return null;
+      
+      const { data, error } = await supabase
+        .from('quest_personality_affinity')
+        .select('*')
+        .eq('quest_id', quest.id);
+      
+      if (error) return null;
+      return data as QuestPersonalityAffinity[];
+    },
+    enabled: !!quest?.id,
+  });
+
+  // Check if quest has AI-generated content
+  const hasAiContent = quest?.ai_generated || 
+    objectives?.some(o => o.ai_generated) || 
+    roles?.some(r => r.ai_generated) || 
+    affinities?.some(a => a.ai_generated);
 
   if (!quest) return null;
 
@@ -259,12 +345,18 @@ export function QuestLifecycleModal({ quest, open, onOpenChange }: QuestLifecycl
                 <div className="flex gap-2 flex-wrap">
                   <QuestStatusBadge status={quest.status} type="quest" />
                   <QuestStatusBadge status={quest.review_status} type="review" />
+                  {hasAiContent && (
+                    <Badge variant="secondary" className="gap-1">
+                      <Sparkles className="h-3 w-3" />
+                      AI-Generated
+                    </Badge>
+                  )}
                 </div>
 
                 <p className="text-muted-foreground">{quest.short_description}</p>
 
                 {quest.full_description && (
-                  <div className="text-sm whitespace-pre-wrap bg-muted/50 p-3 rounded-lg">
+                  <div className="text-sm whitespace-pre-wrap bg-muted/50 p-3 rounded-lg max-h-32 overflow-y-auto">
                     {quest.full_description}
                   </div>
                 )}
@@ -301,6 +393,40 @@ export function QuestLifecycleModal({ quest, open, onOpenChange }: QuestLifecycl
                     <span className="font-medium">🎁 Rewards:</span> {quest.rewards}
                   </div>
                 )}
+
+                {/* Constraints, Objectives, Roles, Affinities Tabs */}
+                <Tabs defaultValue="constraints" className="mt-4">
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="constraints" className="text-xs gap-1">
+                      <Filter className="h-3 w-3" />
+                      Filters
+                    </TabsTrigger>
+                    <TabsTrigger value="objectives" className="text-xs gap-1">
+                      <Target className="h-3 w-3" />
+                      Objectives
+                    </TabsTrigger>
+                    <TabsTrigger value="roles" className="text-xs gap-1">
+                      <Users className="h-3 w-3" />
+                      Roles
+                    </TabsTrigger>
+                    <TabsTrigger value="affinities" className="text-xs gap-1">
+                      <Brain className="h-3 w-3" />
+                      Matching
+                    </TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="constraints" className="mt-3">
+                    <QuestConstraintsDisplay constraints={constraints || null} />
+                  </TabsContent>
+                  <TabsContent value="objectives" className="mt-3">
+                    <QuestObjectivesDisplay objectives={objectives || null} />
+                  </TabsContent>
+                  <TabsContent value="roles" className="mt-3">
+                    <QuestRolesDisplay roles={roles || null} />
+                  </TabsContent>
+                  <TabsContent value="affinities" className="mt-3">
+                    <QuestAffinitiesDisplay affinities={affinities || null} />
+                  </TabsContent>
+                </Tabs>
               </div>
 
               {/* Right Panel - Admin Controls */}
