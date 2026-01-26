@@ -139,11 +139,10 @@ export default function CliqueCreate() {
 
       if (cliqueError) throw cliqueError;
 
-      // Add creator as Clique Leader
+      // Add creator as Clique Leader (persistent_squad_id only - squad_id is for quest_squads)
       const { error: memberError } = await supabase
         .from('squad_members')
         .insert({
-          squad_id: clique.id,
           persistent_squad_id: clique.id,
           user_id: user.id,
           role: 'leader',
