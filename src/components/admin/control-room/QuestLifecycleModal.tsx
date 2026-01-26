@@ -37,7 +37,7 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   Check, X, FileEdit, Pause, Play, Ban, XOctagon, Trash2, 
   Flag, FlagOff, Loader2, Calendar, MapPin, Users, Clock,
-  ArrowRight, History, Sparkles, Target, Brain, Filter
+  ArrowRight, History, Sparkles, Target, Brain, Filter, Eye
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { QuestStatusBadge } from '@/components/QuestStatusBadge';
@@ -45,6 +45,8 @@ import { QuestConstraintsDisplay } from '@/components/admin/QuestConstraintsDisp
 import { QuestAffinitiesDisplay } from '@/components/admin/QuestAffinitiesDisplay';
 import { QuestObjectivesDisplay } from '@/components/admin/QuestObjectivesDisplay';
 import { QuestRolesDisplay } from '@/components/admin/QuestRolesDisplay';
+import { QuestUserPreview } from '@/components/admin/QuestUserPreview';
+import { QuestDataCompleteness } from '@/components/admin/QuestDataCompleteness';
 import { 
   transitionQuestStatus, 
   performReviewAction, 
@@ -330,101 +332,80 @@ export function QuestLifecycleModal({ quest, open, onOpenChange }: QuestLifecycl
 
           <ScrollArea className="max-h-[calc(90vh-100px)]">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
-              {/* Left Panel - Quest Preview */}
+              {/* Left Panel - Tabbed Preview */}
               <div className="space-y-4">
-                <h3 className="font-semibold text-lg">Quest Preview</h3>
-                
-                {quest.image_url && (
-                  <img 
-                    src={quest.image_url} 
-                    alt={quest.title}
-                    className="w-full h-48 object-cover rounded-lg"
-                  />
-                )}
-
-                <div className="flex gap-2 flex-wrap">
-                  <QuestStatusBadge status={quest.status} type="quest" />
-                  <QuestStatusBadge status={quest.review_status} type="review" />
-                  {hasAiContent && (
-                    <Badge variant="secondary" className="gap-1">
-                      <Sparkles className="h-3 w-3" />
-                      AI-Generated
-                    </Badge>
-                  )}
-                </div>
-
-                <p className="text-muted-foreground">{quest.short_description}</p>
-
-                {quest.full_description && (
-                  <div className="text-sm whitespace-pre-wrap bg-muted/50 p-3 rounded-lg max-h-32 overflow-y-auto">
-                    {quest.full_description}
-                  </div>
-                )}
-
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  {quest.start_datetime && (
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      {format(new Date(quest.start_datetime), 'PPp')}
-                    </div>
-                  )}
-                  {quest.meeting_location_name && (
-                    <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-muted-foreground" />
-                      {quest.meeting_location_name}
-                    </div>
-                  )}
-                  {quest.capacity_total && (
-                    <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4 text-muted-foreground" />
-                      {quest.capacity_total} spots
-                    </div>
-                  )}
-                  {quest.default_duration_minutes && (
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      {quest.default_duration_minutes} min
-                    </div>
-                  )}
-                </div>
-
-                {quest.rewards && (
-                  <div className="bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg">
-                    <span className="font-medium">🎁 Rewards:</span> {quest.rewards}
-                  </div>
-                )}
-
-                {/* Constraints, Objectives, Roles, Affinities Tabs */}
-                <Tabs defaultValue="constraints" className="mt-4">
-                  <TabsList className="grid w-full grid-cols-4">
-                    <TabsTrigger value="constraints" className="text-xs gap-1">
+                <Tabs defaultValue="user-preview" className="w-full">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="user-preview" className="text-xs gap-1">
+                      <Eye className="h-3 w-3" />
+                      User View
+                    </TabsTrigger>
+                    <TabsTrigger value="data" className="text-xs gap-1">
                       <Filter className="h-3 w-3" />
-                      Filters
+                      Quest Data
                     </TabsTrigger>
-                    <TabsTrigger value="objectives" className="text-xs gap-1">
+                    <TabsTrigger value="completeness" className="text-xs gap-1">
                       <Target className="h-3 w-3" />
-                      Objectives
-                    </TabsTrigger>
-                    <TabsTrigger value="roles" className="text-xs gap-1">
-                      <Users className="h-3 w-3" />
-                      Roles
-                    </TabsTrigger>
-                    <TabsTrigger value="affinities" className="text-xs gap-1">
-                      <Brain className="h-3 w-3" />
-                      Matching
+                      Checklist
                     </TabsTrigger>
                   </TabsList>
-                  <TabsContent value="constraints" className="mt-3">
-                    <QuestConstraintsDisplay constraints={constraints || null} />
+                  
+                  {/* User Preview Tab */}
+                  <TabsContent value="user-preview" className="mt-3">
+                    <QuestUserPreview
+                      quest={quest}
+                      objectives={objectives || null}
+                      roles={roles || null}
+                      constraints={constraints || null}
+                      affinities={affinities || null}
+                    />
                   </TabsContent>
-                  <TabsContent value="objectives" className="mt-3">
-                    <QuestObjectivesDisplay objectives={objectives || null} />
+                  
+                  {/* Quest Data Tab - Constraints, Objectives, Roles, Affinities */}
+                  <TabsContent value="data" className="mt-3 space-y-4">
+                    <Tabs defaultValue="constraints" className="w-full">
+                      <TabsList className="grid w-full grid-cols-4">
+                        <TabsTrigger value="constraints" className="text-xs gap-1">
+                          <Filter className="h-3 w-3" />
+                          Filters
+                        </TabsTrigger>
+                        <TabsTrigger value="objectives" className="text-xs gap-1">
+                          <Target className="h-3 w-3" />
+                          Objectives
+                        </TabsTrigger>
+                        <TabsTrigger value="roles" className="text-xs gap-1">
+                          <Users className="h-3 w-3" />
+                          Roles
+                        </TabsTrigger>
+                        <TabsTrigger value="affinities" className="text-xs gap-1">
+                          <Brain className="h-3 w-3" />
+                          Matching
+                        </TabsTrigger>
+                      </TabsList>
+                      <TabsContent value="constraints" className="mt-3">
+                        <QuestConstraintsDisplay constraints={constraints || null} />
+                      </TabsContent>
+                      <TabsContent value="objectives" className="mt-3">
+                        <QuestObjectivesDisplay objectives={objectives || null} />
+                      </TabsContent>
+                      <TabsContent value="roles" className="mt-3">
+                        <QuestRolesDisplay roles={roles || null} />
+                      </TabsContent>
+                      <TabsContent value="affinities" className="mt-3">
+                        <QuestAffinitiesDisplay affinities={affinities || null} />
+                      </TabsContent>
+                    </Tabs>
                   </TabsContent>
-                  <TabsContent value="roles" className="mt-3">
-                    <QuestRolesDisplay roles={roles || null} />
-                  </TabsContent>
-                  <TabsContent value="affinities" className="mt-3">
-                    <QuestAffinitiesDisplay affinities={affinities || null} />
+                  
+                  {/* Completeness Checklist Tab */}
+                  <TabsContent value="completeness" className="mt-3">
+                    <QuestDataCompleteness
+                      quest={quest}
+                      objectives={objectives || null}
+                      roles={roles || null}
+                      constraints={constraints || null}
+                      affinities={affinities || null}
+                    />
                   </TabsContent>
                 </Tabs>
               </div>
