@@ -96,6 +96,7 @@ const WorkWithUs = lazy(() => import("./pages/WorkWithUs"));
 // Admin pages (heavy, rarely accessed by most users)
 const Admin = lazy(() => import("./pages/Admin"));
 const PilotControlRoom = lazy(() => import("./pages/admin/PilotControlRoom"));
+const EnterprisePortal = lazy(() => import("./pages/EnterprisePortal"));
 
 // Creator pages (separate chunk for creator portal)
 const CreatorsHub = lazy(() => import("./pages/CreatorsHub"));
@@ -204,6 +205,7 @@ const App = () => (
                 <Route path="/support/:ticketId" element={<ProtectedRoute><SupportTicketDetail /></ProtectedRoute>} />
                 <Route path="/admin" element={<ProtectedRoute requireAdmin><Admin /></ProtectedRoute>} />
                 <Route path="/admin/pilot/:instanceId" element={<ProtectedRoute requireAdmin><PilotControlRoom /></ProtectedRoute>} />
+                <Route path="/enterprise" element={<ProtectedRoute requireAdmin><EnterprisePortal /></ProtectedRoute>} />
                 <Route path="/feedback/:questId" element={<ProtectedRoute><FeedbackFlow /></ProtectedRoute>} />
                 
                 {/* SIGNUP/FUNNEL PAGES */}

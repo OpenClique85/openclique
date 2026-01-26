@@ -43,7 +43,7 @@
 
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
-import { Menu, X, ChevronDown, LogIn, LogOut, User, ClipboardList, Sparkles, Building2, Users, Search, Plus } from "lucide-react";
+import { Menu, X, ChevronDown, LogIn, LogOut, User, ClipboardList, Sparkles, Building2, Users, Search, Plus, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -198,6 +198,12 @@ export function Navbar() {
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
+                        <Link to="/enterprise" className="flex items-center gap-2 cursor-pointer">
+                          <GraduationCap className="h-4 w-4 text-primary" />
+                          Enterprise Portal
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
                         <Link to="/admin" className="flex items-center gap-2 cursor-pointer">
                           <span className="w-2 h-2 rounded-full bg-primary" />
                           Admin
@@ -337,14 +343,24 @@ export function Navbar() {
                       </Link>
                     )}
                     {isAdmin && (
-                      <Link
-                        to="/admin"
-                        className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md text-muted-foreground hover:bg-muted"
-                        onClick={() => setIsOpen(false)}
-                      >
-                        <span className="w-2 h-2 rounded-full bg-primary" />
-                        Admin
-                      </Link>
+                      <>
+                        <Link
+                          to="/enterprise"
+                          className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md text-muted-foreground hover:bg-muted"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          <GraduationCap className="h-4 w-4 text-primary" />
+                          Enterprise Portal
+                        </Link>
+                        <Link
+                          to="/admin"
+                          className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md text-muted-foreground hover:bg-muted"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          <span className="w-2 h-2 rounded-full bg-primary" />
+                          Admin
+                        </Link>
+                      </>
                     )}
                     <button
                       onClick={() => {
