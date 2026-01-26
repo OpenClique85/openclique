@@ -1,13 +1,13 @@
 /**
  * =============================================================================
- * CliquesTab - Hero squad cards for the unified Profile page
+ * CliquesTab - Hero clique cards for the unified Profile page
  * =============================================================================
  * 
  * Features:
- * - Rich hero cards for each active squad
- * - Squad chat preview
+ * - Rich hero cards for each active clique
+ * - Clique chat preview
  * - Suggest Quest functionality
- * - Navigate to squad detail page
+ * - Navigate to clique detail page
  */
 
 import { useState, useEffect } from 'react';
@@ -28,19 +28,19 @@ import {
   Sparkles
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { SuggestQuestModal } from '@/components/squads/SuggestQuestModal';
+import { SuggestQuestModal } from '@/components/cliques/SuggestQuestModal';
 
-interface SquadMember {
+interface CliqueMember {
   user_id: string;
   display_name: string;
   role: 'leader' | 'member';
 }
 
-interface Squad {
+interface Clique {
   id: string;
   name: string;
   created_at: string;
-  members: SquadMember[];
+  members: CliqueMember[];
   quest_count: number;
   next_quest?: {
     id: string;
@@ -61,19 +61,19 @@ interface CliquesTabProps {
 
 export function CliquesTab({ userId }: CliquesTabProps) {
   const navigate = useNavigate();
-  const [squads, setSquads] = useState<Squad[]>([]);
+  const [cliques, setCliques] = useState<Clique[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [suggestModal, setSuggestModal] = useState<{
     open: boolean;
-    squadId: string;
-    squadName: string;
-  }>({ open: false, squadId: '', squadName: '' });
+    cliqueId: string;
+    cliqueName: string;
+  }>({ open: false, cliqueId: '', cliqueName: '' });
 
   useEffect(() => {
-    const fetchSquads = async () => {
+    const fetchCliques = async () => {
       setIsLoading(true);
       
-      // Get all squad memberships for the current user
+      // Get all clique memberships for the current user
       const { data: memberships } = await supabase
         .from('squad_members')
         .select('persistent_squad_id')
@@ -86,34 +86,34 @@ export function CliquesTab({ userId }: CliquesTabProps) {
         return;
       }
 
-      const squadIds = memberships
+      const cliqueIds = memberships
         .map(m => m.persistent_squad_id)
         .filter((id): id is string => id !== null);
 
-      if (squadIds.length === 0) {
+      if (cliqueIds.length === 0) {
         setIsLoading(false);
         return;
       }
 
-      // Fetch squad details
-      const { data: squadData } = await supabase
+      // Fetch clique details
+      const { data: cliqueData } = await supabase
         .from('squads')
         .select('id, name, created_at')
-        .in('id', squadIds);
+        .in('id', cliqueIds);
 
-      if (!squadData) {
+      if (!cliqueData) {
         setIsLoading(false);
         return;
       }
 
-      // For each squad, fetch members, next quest, and last message
-      const squadsWithDetails: Squad[] = await Promise.all(
-        squadData.map(async (squad) => {
+      // For each clique, fetch members, next quest, and last message
+      const cliquesWithDetails: Clique[] = await Promise.all(
+        cliqueData.map(async (clique) => {
           // Get members with profiles
           const { data: members } = await supabase
             .from('squad_members')
             .select('user_id, role')
-            .eq('persistent_squad_id', squad.id)
+            .eq('persistent_squad_id', clique.id)
             .eq('status', 'active');
 
           const memberUserIds = members?.map(m => m.user_id) || [];
@@ -122,7 +122,7 @@ export function CliquesTab({ userId }: CliquesTabProps) {
             .select('id, display_name')
             .in('id', memberUserIds);
 
-          const membersWithNames: SquadMember[] = (members || []).map(m => {
+          const membersWithNames: CliqueMember[] = (members || []).map(m => {
             const profile = profiles?.find(p => p.id === m.user_id);
             return {
               user_id: m.user_id,
@@ -135,7 +135,7 @@ export function CliquesTab({ userId }: CliquesTabProps) {
           const { count: questCount } = await supabase
             .from('squad_quest_invites')
             .select('id', { count: 'exact', head: true })
-            .eq('squad_id', squad.id)
+            .eq('squad_id', clique.id)
             .eq('status', 'accepted');
 
           // Get next upcoming quest
@@ -149,7 +149,7 @@ export function CliquesTab({ userId }: CliquesTabProps) {
                 quests(id, title, icon)
               )
             `)
-            .eq('squad_id', squad.id)
+            .eq('squad_id', clique.id)
             .eq('status', 'accepted')
             .gte('quest_instances.start_datetime', new Date().toISOString())
             .order('quest_instances(start_datetime)', { ascending: true })
@@ -172,7 +172,7 @@ export function CliquesTab({ userId }: CliquesTabProps) {
           const { data: lastMessageData } = await supabase
             .from('squad_chat_messages')
             .select('message, sender_id, created_at')
-            .eq('squad_id', squad.id)
+            .eq('squad_id', clique.id)
             .is('hidden_at', null)
             .order('created_at', { ascending: false })
             .limit(1);
@@ -189,9 +189,9 @@ export function CliquesTab({ userId }: CliquesTabProps) {
           }
 
           return {
-            id: squad.id,
-            name: squad.name,
-            created_at: squad.created_at,
+            id: clique.id,
+            name: clique.name,
+            created_at: clique.created_at,
             members: membersWithNames,
             quest_count: questCount || 0,
             next_quest: nextQuest,
@@ -200,18 +200,18 @@ export function CliquesTab({ userId }: CliquesTabProps) {
         })
       );
 
-      setSquads(squadsWithDetails);
+      setCliques(cliquesWithDetails);
       setIsLoading(false);
     };
 
-    fetchSquads();
+    fetchCliques();
   }, [userId]);
 
-  const handleSuggestQuest = (squad: Squad) => {
+  const handleSuggestQuest = (clique: Clique) => {
     setSuggestModal({
       open: true,
-      squadId: squad.id,
-      squadName: squad.name
+      cliqueId: clique.id,
+      cliqueName: clique.name
     });
   };
 
@@ -223,14 +223,14 @@ export function CliquesTab({ userId }: CliquesTabProps) {
     );
   }
 
-  if (squads.length === 0) {
+  if (cliques.length === 0) {
     return (
       <Card className="border-dashed">
         <CardContent className="py-16 text-center">
           <Users className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
           <h3 className="text-lg font-display font-semibold mb-2">No Cliques Yet</h3>
           <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-            Complete your first quest to be matched with a squad. Your clique will appear here with group chat, upcoming adventures, and more.
+            Complete your first quest to be matched with a clique. Your clique will appear here with group chat, upcoming adventures, and more.
           </p>
           <Button asChild>
             <Link to="/quests">
@@ -245,17 +245,17 @@ export function CliquesTab({ userId }: CliquesTabProps) {
 
   return (
     <div className="space-y-4">
-      {squads.map((squad) => {
-        const leader = squad.members.find(m => m.role === 'leader');
+      {cliques.map((clique) => {
+        const leader = clique.members.find(m => m.role === 'leader');
         const isCurrentUserLeader = leader?.user_id === userId;
 
         return (
           <Card 
-            key={squad.id} 
+            key={clique.id} 
             className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer group"
           >
             <CardContent className="p-0">
-              {/* Header with squad name */}
+              {/* Header with clique name */}
               <div className="p-4 pb-3 border-b bg-gradient-to-r from-primary/5 to-transparent">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -265,17 +265,17 @@ export function CliquesTab({ userId }: CliquesTabProps) {
                     <div>
                       <div className="flex items-center gap-2">
                         <h3 className="font-display font-semibold text-lg">
-                          {squad.name}
+                          {clique.name}
                         </h3>
                         {isCurrentUserLeader && (
                           <Badge variant="outline" className="text-xs">
                             <Crown className="h-3 w-3 mr-1 text-amber-500" />
-                            Leader
+                            Clique Leader
                           </Badge>
                         )}
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {squad.members.length} members • Formed {format(new Date(squad.created_at), 'MMM yyyy')}
+                        {clique.members.length} members • Formed {format(new Date(clique.created_at), 'MMM yyyy')}
                       </p>
                     </div>
                   </div>
@@ -287,16 +287,16 @@ export function CliquesTab({ userId }: CliquesTabProps) {
               <div className="px-4 py-3 border-b">
                 <div className="flex items-center gap-2">
                   <div className="flex -space-x-2">
-                    {squad.members.slice(0, 5).map((member) => (
+                    {clique.members.slice(0, 5).map((member) => (
                       <Avatar key={member.user_id} className="h-8 w-8 border-2 border-background">
                         <AvatarFallback className="text-xs bg-primary/10 text-primary">
                           {member.display_name.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                     ))}
-                    {squad.members.length > 5 && (
+                    {clique.members.length > 5 && (
                       <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium border-2 border-background">
-                        +{squad.members.length - 5}
+                        +{clique.members.length - 5}
                       </div>
                     )}
                   </div>
@@ -312,17 +312,17 @@ export function CliquesTab({ userId }: CliquesTabProps) {
               </div>
 
               {/* Next Quest */}
-              {squad.next_quest && (
+              {clique.next_quest && (
                 <div className="px-4 py-3 border-b bg-muted/30">
                   <div className="flex items-center gap-2 text-sm">
                     <Calendar className="h-4 w-4 text-primary" />
                     <span className="font-medium">Next:</span>
                     <span className="text-muted-foreground">
-                      {squad.next_quest.icon} {squad.next_quest.title}
+                      {clique.next_quest.icon} {clique.next_quest.title}
                     </span>
-                    {squad.next_quest.start_datetime && (
+                    {clique.next_quest.start_datetime && (
                       <Badge variant="secondary" className="ml-auto text-xs">
-                        {format(new Date(squad.next_quest.start_datetime), 'MMM d')}
+                        {format(new Date(clique.next_quest.start_datetime), 'MMM d')}
                       </Badge>
                     )}
                   </div>
@@ -330,14 +330,14 @@ export function CliquesTab({ userId }: CliquesTabProps) {
               )}
 
               {/* Last Message */}
-              {squad.last_message && (
+              {clique.last_message && (
                 <div className="px-4 py-3 border-b">
                   <div className="flex items-start gap-2 text-sm">
                     <MessageCircle className="h-4 w-4 text-muted-foreground mt-0.5" />
                     <div className="flex-1 min-w-0">
                       <p className="text-muted-foreground truncate">
-                        <span className="font-medium text-foreground">{squad.last_message.sender_name}:</span>{' '}
-                        "{squad.last_message.message}"
+                        <span className="font-medium text-foreground">{clique.last_message.sender_name}:</span>{' '}
+                        "{clique.last_message.message}"
                       </p>
                     </div>
                   </div>
@@ -352,11 +352,11 @@ export function CliquesTab({ userId }: CliquesTabProps) {
                   className="flex-1"
                   onClick={(e) => {
                     e.stopPropagation();
-                    navigate(`/squads/${squad.id}`);
+                    navigate(`/cliques/${clique.id}`);
                   }}
                 >
                   <MessageCircle className="h-4 w-4 mr-2" />
-                  View Squad
+                  View Clique
                 </Button>
                 <Button 
                   variant="outline" 
@@ -364,7 +364,7 @@ export function CliquesTab({ userId }: CliquesTabProps) {
                   className="flex-1"
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleSuggestQuest(squad);
+                    handleSuggestQuest(clique);
                   }}
                 >
                   <Sparkles className="h-4 w-4 mr-2" />
@@ -380,8 +380,8 @@ export function CliquesTab({ userId }: CliquesTabProps) {
       <SuggestQuestModal
         open={suggestModal.open}
         onOpenChange={(open) => setSuggestModal(prev => ({ ...prev, open }))}
-        squadId={suggestModal.squadId}
-        squadName={suggestModal.squadName}
+        cliqueId={suggestModal.cliqueId}
+        cliqueName={suggestModal.cliqueName}
         userId={userId}
       />
     </div>

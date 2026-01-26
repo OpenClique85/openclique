@@ -479,6 +479,304 @@ export type Database = {
         }
         Relationships: []
       }
+      clique_applications: {
+        Row: {
+          answers: Json | null
+          created_at: string | null
+          decline_reason: string | null
+          id: string
+          intro_message: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          squad_id: string
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          answers?: Json | null
+          created_at?: string | null
+          decline_reason?: string | null
+          id?: string
+          intro_message?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          squad_id: string
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          answers?: Json | null
+          created_at?: string | null
+          decline_reason?: string | null
+          id?: string
+          intro_message?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          squad_id?: string
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clique_applications_squad_id_fkey"
+            columns: ["squad_id"]
+            isOneToOne: false
+            referencedRelation: "squads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clique_lore_entries: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          created_by: string | null
+          entry_type: string
+          id: string
+          is_ai_generated: boolean | null
+          is_pinned: boolean | null
+          media_url: string | null
+          quest_id: string | null
+          squad_id: string
+          title: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          entry_type: string
+          id?: string
+          is_ai_generated?: boolean | null
+          is_pinned?: boolean | null
+          media_url?: string | null
+          quest_id?: string | null
+          squad_id: string
+          title?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          entry_type?: string
+          id?: string
+          is_ai_generated?: boolean | null
+          is_pinned?: boolean | null
+          media_url?: string | null
+          quest_id?: string | null
+          squad_id?: string
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clique_lore_entries_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clique_lore_entries_squad_id_fkey"
+            columns: ["squad_id"]
+            isOneToOne: false
+            referencedRelation: "squads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clique_poll_votes: {
+        Row: {
+          id: string
+          option_index: number
+          poll_id: string
+          user_id: string
+          voted_at: string | null
+        }
+        Insert: {
+          id?: string
+          option_index: number
+          poll_id: string
+          user_id: string
+          voted_at?: string | null
+        }
+        Update: {
+          id?: string
+          option_index?: number
+          poll_id?: string
+          user_id?: string
+          voted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clique_poll_votes_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "clique_polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clique_polls: {
+        Row: {
+          closed_at: string | null
+          created_at: string | null
+          created_by: string
+          expires_at: string | null
+          id: string
+          is_anonymous: boolean | null
+          options: Json
+          poll_type: string | null
+          question: string
+          squad_id: string
+        }
+        Insert: {
+          closed_at?: string | null
+          created_at?: string | null
+          created_by: string
+          expires_at?: string | null
+          id?: string
+          is_anonymous?: boolean | null
+          options?: Json
+          poll_type?: string | null
+          question: string
+          squad_id: string
+        }
+        Update: {
+          closed_at?: string | null
+          created_at?: string | null
+          created_by?: string
+          expires_at?: string | null
+          id?: string
+          is_anonymous?: boolean | null
+          options?: Json
+          poll_type?: string | null
+          question?: string
+          squad_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clique_polls_squad_id_fkey"
+            columns: ["squad_id"]
+            isOneToOne: false
+            referencedRelation: "squads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clique_ready_check_responses: {
+        Row: {
+          id: string
+          ready_check_id: string
+          responded_at: string | null
+          response: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          ready_check_id: string
+          responded_at?: string | null
+          response: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          ready_check_id?: string
+          responded_at?: string | null
+          response?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clique_ready_check_responses_ready_check_id_fkey"
+            columns: ["ready_check_id"]
+            isOneToOne: false
+            referencedRelation: "clique_ready_checks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clique_ready_checks: {
+        Row: {
+          context_quest_id: string | null
+          created_at: string | null
+          expires_at: string
+          id: string
+          squad_id: string
+          title: string
+          triggered_by: string
+        }
+        Insert: {
+          context_quest_id?: string | null
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          squad_id: string
+          title: string
+          triggered_by: string
+        }
+        Update: {
+          context_quest_id?: string | null
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          squad_id?: string
+          title?: string
+          triggered_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clique_ready_checks_context_quest_id_fkey"
+            columns: ["context_quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clique_ready_checks_squad_id_fkey"
+            columns: ["squad_id"]
+            isOneToOne: false
+            referencedRelation: "squads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clique_removal_votes: {
+        Row: {
+          created_at: string | null
+          id: string
+          reason: string | null
+          squad_id: string
+          target_user_id: string
+          vote: string
+          voter_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          reason?: string | null
+          squad_id: string
+          target_user_id: string
+          vote: string
+          voter_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          reason?: string | null
+          squad_id?: string
+          target_user_id?: string
+          vote?: string
+          voter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clique_removal_votes_squad_id_fkey"
+            columns: ["squad_id"]
+            isOneToOne: false
+            referencedRelation: "squads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       collaboration_messages: {
         Row: {
           attachments: Json | null
@@ -3329,10 +3627,13 @@ export type Database = {
           hidden_by: string | null
           hide_reason: string | null
           id: string
+          is_pinned: boolean | null
           message: string
+          reactions: Json | null
           sender_id: string
           sender_type: string | null
           squad_id: string
+          thread_id: string | null
         }
         Insert: {
           created_at?: string | null
@@ -3340,10 +3641,13 @@ export type Database = {
           hidden_by?: string | null
           hide_reason?: string | null
           id?: string
+          is_pinned?: boolean | null
           message: string
+          reactions?: Json | null
           sender_id: string
           sender_type?: string | null
           squad_id: string
+          thread_id?: string | null
         }
         Update: {
           created_at?: string | null
@@ -3351,10 +3655,13 @@ export type Database = {
           hidden_by?: string | null
           hide_reason?: string | null
           id?: string
+          is_pinned?: boolean | null
           message?: string
+          reactions?: Json | null
           sender_id?: string
           sender_type?: string | null
           squad_id?: string
+          thread_id?: string | null
         }
         Relationships: [
           {
@@ -3376,6 +3683,13 @@ export type Database = {
             columns: ["squad_id"]
             isOneToOne: false
             referencedRelation: "squads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "squad_chat_messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "squad_chat_messages"
             referencedColumns: ["id"]
           },
         ]
@@ -3454,9 +3768,13 @@ export type Database = {
       squad_members: {
         Row: {
           added_at: string
+          clique_role: string | null
           id: string
           persistent_squad_id: string | null
           role: string | null
+          role_assigned_at: string | null
+          role_assigned_by: string | null
+          role_declined_at: string | null
           signup_id: string | null
           squad_id: string
           status: string | null
@@ -3464,9 +3782,13 @@ export type Database = {
         }
         Insert: {
           added_at?: string
+          clique_role?: string | null
           id?: string
           persistent_squad_id?: string | null
           role?: string | null
+          role_assigned_at?: string | null
+          role_assigned_by?: string | null
+          role_declined_at?: string | null
           signup_id?: string | null
           squad_id: string
           status?: string | null
@@ -3474,9 +3796,13 @@ export type Database = {
         }
         Update: {
           added_at?: string
+          clique_role?: string | null
           id?: string
           persistent_squad_id?: string | null
           role?: string | null
+          role_assigned_at?: string | null
+          role_assigned_by?: string | null
+          role_declined_at?: string | null
           signup_id?: string | null
           squad_id?: string
           status?: string | null
@@ -3591,25 +3917,58 @@ export type Database = {
       }
       squads: {
         Row: {
+          ai_vibe_summary: string | null
+          application_prompts: Json | null
+          archived_at: string | null
+          commitment_style: string | null
           created_at: string
           id: string
+          invite_code: string | null
+          invite_link_enabled: boolean | null
+          lfc_enabled: boolean | null
+          max_members: number | null
           name: string
+          org_code: string | null
           origin_quest_id: string | null
+          theme_tags: string[] | null
           updated_at: string
+          visibility: string | null
         }
         Insert: {
+          ai_vibe_summary?: string | null
+          application_prompts?: Json | null
+          archived_at?: string | null
+          commitment_style?: string | null
           created_at?: string
           id?: string
+          invite_code?: string | null
+          invite_link_enabled?: boolean | null
+          lfc_enabled?: boolean | null
+          max_members?: number | null
           name?: string
+          org_code?: string | null
           origin_quest_id?: string | null
+          theme_tags?: string[] | null
           updated_at?: string
+          visibility?: string | null
         }
         Update: {
+          ai_vibe_summary?: string | null
+          application_prompts?: Json | null
+          archived_at?: string | null
+          commitment_style?: string | null
           created_at?: string
           id?: string
+          invite_code?: string | null
+          invite_link_enabled?: boolean | null
+          lfc_enabled?: boolean | null
+          max_members?: number | null
           name?: string
+          org_code?: string | null
           origin_quest_id?: string | null
+          theme_tags?: string[] | null
           updated_at?: string
+          visibility?: string | null
         }
         Relationships: [
           {
@@ -4701,16 +5060,18 @@ export type Database = {
         }
         Returns: string
       }
-      generate_invite_code: {
-        Args: {
-          p_expires_days?: number
-          p_label?: string
-          p_max_uses?: number
-          p_notes?: string
-          p_type?: Database["public"]["Enums"]["invite_code_type"]
-        }
-        Returns: string
-      }
+      generate_invite_code:
+        | { Args: never; Returns: string }
+        | {
+            Args: {
+              p_expires_days?: number
+              p_label?: string
+              p_max_uses?: number
+              p_notes?: string
+              p_type?: Database["public"]["Enums"]["invite_code_type"]
+            }
+            Returns: string
+          }
       get_or_create_instance: {
         Args: { p_quest_id: string }
         Returns: {

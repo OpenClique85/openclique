@@ -51,8 +51,8 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Quests from "./pages/Quests";
 import QuestDetail from "./pages/QuestDetail";
-import SquadDetail from "./pages/SquadDetail";
-import SquadWarmUp from "./pages/SquadWarmUp";
+import CliqueDetail from "./pages/CliqueDetail";
+import CliqueWarmUp from "./pages/CliqueWarmUp";
 import QuestCard from "./pages/QuestCard";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
@@ -128,8 +128,11 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/my-quests" element={<ProtectedRoute><MyQuests /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-              <Route path="/squads/:squadId" element={<ProtectedRoute><SquadDetail /></ProtectedRoute>} />
-              <Route path="/warmup/:squadId" element={<ProtectedRoute><SquadWarmUp /></ProtectedRoute>} />
+              <Route path="/cliques/:cliqueId" element={<ProtectedRoute><CliqueDetail /></ProtectedRoute>} />
+              <Route path="/cliques/:cliqueId/warmup" element={<ProtectedRoute><CliqueWarmUp /></ProtectedRoute>} />
+              {/* Legacy routes for backward compatibility */}
+              <Route path="/squads/:squadId" element={<ProtectedRoute><CliqueDetail /></ProtectedRoute>} />
+              <Route path="/warmup/:squadId" element={<ProtectedRoute><CliqueWarmUp /></ProtectedRoute>} />
               <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
               <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
               <Route path="/support/:ticketId" element={<ProtectedRoute><SupportTicketDetail /></ProtectedRoute>} />
