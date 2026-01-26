@@ -18,12 +18,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
-import { Loader2, Settings, Users, Compass, User } from 'lucide-react';
+import { Loader2, Settings, Users, Compass, User, Building2 } from 'lucide-react';
 import { ProfileEditModal } from '@/components/ProfileEditModal';
 import { ProfileModal } from '@/components/ProfileModal';
 import { CliquesTab } from '@/components/profile/CliquesTab';
 import { QuestsTab } from '@/components/profile/QuestsTab';
 import { MeTab } from '@/components/profile/MeTab';
+import { OrganizationsTab } from '@/components/profile/OrganizationsTab';
 
 export default function Profile() {
   const { user, profile, isLoading: authLoading, isProfileLoaded } = useAuth();
@@ -110,7 +111,7 @@ export default function Profile() {
 
           {/* Tabbed Content: Cliques | Quests | Me */}
           <Tabs value={activeTab} onValueChange={handleTabChange}>
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="cliques" className="flex items-center gap-2">
                 <Users className="h-4 w-4" />
                 <span className="hidden sm:inline">My</span> Cliques
@@ -118,6 +119,10 @@ export default function Profile() {
               <TabsTrigger value="quests" className="flex items-center gap-2">
                 <Compass className="h-4 w-4" />
                 Quests
+              </TabsTrigger>
+              <TabsTrigger value="orgs" className="flex items-center gap-2">
+                <Building2 className="h-4 w-4" />
+                <span className="hidden sm:inline">My</span> Orgs
               </TabsTrigger>
               <TabsTrigger value="me" className="flex items-center gap-2">
                 <User className="h-4 w-4" />
@@ -135,7 +140,15 @@ export default function Profile() {
               <QuestsTab userId={user.id} />
             </TabsContent>
 
+            {/* Organizations Tab */}
+            <TabsContent value="orgs" className="mt-6">
+              <OrganizationsTab userId={user.id} />
+            </TabsContent>
+
             {/* Me Tab */}
+            <TabsContent value="me" className="mt-6">
+              <MeTab userId={user.id} />
+            </TabsContent>
             <TabsContent value="me" className="mt-6">
               <MeTab userId={user.id} />
             </TabsContent>

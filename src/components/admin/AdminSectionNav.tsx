@@ -47,7 +47,6 @@ export const ADMIN_SECTIONS: AdminSection[] = [
     label: 'Squads & Cliques',
     icon: <Library className="h-4 w-4" />,
     tabs: [
-      { id: 'squads-directory', label: 'Squad Directory' },
       { id: 'cliques-manager', label: 'Cliques' },
       { id: 'squad-comparison', label: 'Comparison' },
       { id: 'squad-health', label: 'Health' },
@@ -59,7 +58,8 @@ export const ADMIN_SECTIONS: AdminSection[] = [
     label: 'Organizations',
     icon: <Users className="h-4 w-4" />,
     tabs: [
-      { id: 'orgs', label: 'All Organizations' },
+      { id: 'orgs', label: 'Clubs & Orgs' },
+      { id: 'enterprise-view', label: 'Enterprise View' },
       { id: 'org-applications', label: 'Applications' },
     ],
   },
@@ -123,7 +123,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
     label: 'Growth',
     icon: <Ticket className="h-4 w-4" />,
     tabs: [
-      { id: 'invite-codes', label: 'Invite Codes' },
+      { id: 'invite-codes', label: 'Codes & Keys' },
       { id: 'friend-referrals', label: 'Friend Referrals' },
       { id: 'onboarding-feedback', label: 'Onboarding Feedback' },
       { id: 'analytics', label: 'Analytics' },
