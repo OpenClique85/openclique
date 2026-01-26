@@ -49,6 +49,7 @@ import { QuestArchivesManager } from '@/components/admin/QuestArchivesManager';
 import { CliquesManager } from '@/components/admin/CliquesManager';
 import { TraitLibraryManager, UserProfileInspector, AIInferenceLogsViewer, EmergingTraitsReview } from '@/components/admin/identity';
 import { PromptManager } from '@/components/admin/ai/PromptManager';
+import { OrgApplicationsManager } from '@/components/admin/OrgApplicationsManager';
 
 export default function Admin() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
@@ -92,6 +93,7 @@ export default function Admin() {
       case 'squad-health': return <SquadHealthDashboard />;
       case 'squad-archival': return <SquadArchivalManager />;
       case 'orgs': return <OrgsManager />;
+      case 'org-applications': return <OrgApplicationsManager />;
       // Support
       case 'support-inbox': return <SupportDashboard />;
       case 'support-dm': return <AdminDirectMessages />;
