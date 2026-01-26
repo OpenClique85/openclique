@@ -2466,24 +2466,33 @@ export type Database = {
           domain: string
           email: string
           id: string
+          is_verified: boolean | null
           org_id: string
+          token_expires_at: string | null
           user_id: string
+          verification_token: string | null
           verified_at: string
         }
         Insert: {
           domain: string
           email: string
           id?: string
+          is_verified?: boolean | null
           org_id: string
+          token_expires_at?: string | null
           user_id: string
+          verification_token?: string | null
           verified_at?: string
         }
         Update: {
           domain?: string
           email?: string
           id?: string
+          is_verified?: boolean | null
           org_id?: string
+          token_expires_at?: string | null
           user_id?: string
+          verification_token?: string | null
           verified_at?: string
         }
         Relationships: [

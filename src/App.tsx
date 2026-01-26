@@ -112,6 +112,8 @@ const CreatorBrowseListings = lazy(() => import("./pages/CreatorBrowseListings")
 const QuestBuilder = lazy(() => import("./pages/QuestBuilder"));
 const OrgPortal = lazy(() => import("./pages/OrgPortal"));
 const OrgPage = lazy(() => import("./pages/OrgPage"));
+const EventbriteCallback = lazy(() => import("./pages/EventbriteCallback"));
+const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 
 // Sponsor pages (separate chunk for sponsor portal)
 const SponsorOnboarding = lazy(() => import("./pages/SponsorOnboarding"));
@@ -173,6 +175,10 @@ const App = () => (
                 <Route path="/quests" element={<Quests />} />
                 <Route path="/quests/:slug" element={<QuestDetail />} />
                 <Route path="/quest-card/:token" element={<QuestCard />} />
+                
+                {/* CALLBACKS & VERIFICATION */}
+                <Route path="/auth/eventbrite/callback" element={<EventbriteCallback />} />
+                <Route path="/verify-email" element={<VerifyEmail />} />
                 
                 {/* AUTH */}
                 <Route path="/auth" element={<Auth />} />
