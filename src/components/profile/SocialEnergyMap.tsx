@@ -329,7 +329,7 @@ export function SocialEnergyMap({ userId, compact = false }: SocialEnergyMapProp
                     variant="outline"
                     size="icon"
                     className="h-7 w-7"
-                    onClick={() => handleWeightAdjust(key, -5)}
+                    onClick={() => handleWeightAdjust(key, -1)}
                     disabled={socialEnergy.is_locked || localWeights[key] <= 0}
                   >
                     <Minus className="h-3 w-3" />
@@ -357,7 +357,7 @@ export function SocialEnergyMap({ userId, compact = false }: SocialEnergyMapProp
                     variant="outline"
                     size="icon"
                     className="h-7 w-7"
-                    onClick={() => handleWeightAdjust(key, 5)}
+                    onClick={() => handleWeightAdjust(key, 1)}
                     disabled={socialEnergy.is_locked || localWeights[key] >= 100}
                   >
                     <Plus className="h-3 w-3" />
