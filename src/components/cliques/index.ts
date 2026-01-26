@@ -10,3 +10,4 @@ export { MyCliquesSection } from './MyCliquesSection';
 export { CliqueWarmUpRoom } from './CliqueWarmUpRoom';
 export { WarmUpProgressBar } from './WarmUpProgressBar';
 export { SuggestQuestModal } from './SuggestQuestModal';
+export { FormCliqueButton } from './FormCliqueButton';
