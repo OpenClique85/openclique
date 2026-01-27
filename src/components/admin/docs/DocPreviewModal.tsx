@@ -21,11 +21,11 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import mermaid from 'mermaid';
 
-// Initialize mermaid with dark mode support
+// Initialize mermaid with strict security (no JS execution in diagrams)
 mermaid.initialize({
   startOnLoad: false,
   theme: 'neutral',
-  securityLevel: 'loose',
+  securityLevel: 'strict', // Sandboxed - prevents XSS via diagram definitions
   fontFamily: 'inherit',
 });
 
