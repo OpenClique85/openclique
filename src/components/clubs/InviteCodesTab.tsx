@@ -59,6 +59,7 @@ import {
 import { Ticket, Copy, Link2, Plus, Loader2, Users } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { PUBLISHED_URL } from '@/lib/config';
 
 // -----------------------------------------------------------------------------
 // TYPE DEFINITIONS
@@ -182,7 +183,7 @@ export function InviteCodesTab({ clubId, clubName }: InviteCodesTabProps) {
   });
 
   const getInviteUrl = (code: string) => {
-    return `${window.location.origin}/auth?club=${code}`;
+    return `${PUBLISHED_URL}/auth?club=${code}`;
   };
 
   const copyToClipboard = (code: string) => {

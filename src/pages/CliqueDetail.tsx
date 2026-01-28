@@ -37,6 +37,7 @@ import {
   Archive
 } from 'lucide-react';
 import { toast as sonnerToast } from 'sonner';
+import { PUBLISHED_URL } from '@/lib/config';
 
 interface CliqueMember {
   id: string;
@@ -229,7 +230,7 @@ export default function CliqueDetail() {
 
   const handleCopyInviteLink = () => {
     if (!clique?.invite_code) return;
-    const link = `${window.location.origin}/join/${clique.invite_code}`;
+    const link = `${PUBLISHED_URL}/join/${clique.invite_code}`;
     navigator.clipboard.writeText(link);
     sonnerToast.success('Invite link copied!');
   };

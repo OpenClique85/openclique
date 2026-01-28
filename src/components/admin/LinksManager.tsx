@@ -18,6 +18,7 @@ import {
   ExternalLink,
   QrCode
 } from 'lucide-react';
+import { PUBLISHED_URL } from '@/lib/config';
 
 interface LinkItem {
   id: string;
@@ -27,8 +28,6 @@ interface LinkItem {
   icon: React.ReactNode;
   color: string;
 }
-
-const PUBLISHED_URL = 'https://openclique.lovable.app';
 
 const SIGNUP_LINKS: LinkItem[] = [
   {
