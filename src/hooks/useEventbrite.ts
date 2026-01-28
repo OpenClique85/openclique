@@ -41,10 +41,10 @@ export function useEventbrite() {
   // Check if user has an active Eventbrite connection
   const { data: connection, isLoading: connectionLoading } = useQuery({
     queryKey: ['eventbrite-connection', user?.id],
-    queryFn: async () => {
+    queryFn: async (): Promise<EventbriteConnection | null> => {
       if (!user) return null;
       const { data, error } = await supabase
-        .from('eventbrite_connections')
+        .from('eventbrite_connections_safe' as any)
         .select('id, eventbrite_user_id, eventbrite_email, connected_at, last_sync_at, is_active')
         .eq('user_id', user.id)
         .eq('is_active', true)
@@ -54,7 +54,7 @@ export function useEventbrite() {
         console.error('Error fetching Eventbrite connection:', error);
         return null;
       }
-      return data as EventbriteConnection | null;
+      return data as unknown as EventbriteConnection | null;
     },
     enabled: !!user,
   });
