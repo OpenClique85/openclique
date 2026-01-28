@@ -6343,6 +6343,57 @@ export type Database = {
       }
     }
     Views: {
+      eventbrite_connections_safe: {
+        Row: {
+          connected_at: string | null
+          eventbrite_email: string | null
+          eventbrite_user_id: string | null
+          id: string | null
+          is_active: boolean | null
+          last_sync_at: string | null
+          org_id: string | null
+          token_expires_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          connected_at?: string | null
+          eventbrite_email?: string | null
+          eventbrite_user_id?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          org_id?: string | null
+          token_expires_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          connected_at?: string | null
+          eventbrite_email?: string | null
+          eventbrite_user_id?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          org_id?: string | null
+          token_expires_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "eventbrite_connections_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "eventbrite_connections_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quest_ratings: {
         Row: {
           avg_rating: number | null
