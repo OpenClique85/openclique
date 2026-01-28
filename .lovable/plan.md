@@ -1,109 +1,152 @@
 
-# Eventbrite OAuth Token Security Fix
+# Fix Invite Code URLs and Admin Access
 
-## Problem
+## Problem Summary
 
-The `eventbrite_connections` table stores sensitive OAuth tokens (`access_token`, `refresh_token`) in plaintext. While RLS restricts access to only the owning user, these tokens are still exposed in SELECT queries and could leak through:
-- SQL injection vulnerabilities
-- Database backup exposure
-- Admin access abuse
+1. **Invite links point to wrong domain**: When copying invite links from the admin panel (or anywhere), they use `window.location.origin` which returns the current domain (e.g., Lovable preview URL) instead of the production URL `https://openclique.lovable.app`
 
-## Solution Overview
+2. **Anthony's access**: Anthony (anthony.cami@openclique.net) already has the `admin` role in the database. When he visits the Creator Dashboard, the auto-provisioning logic will create his creator profile automatically.
 
-Create a secure view that excludes token columns and restrict direct table SELECT access to service-role only (edge functions).
+---
 
-## Implementation
+## Root Cause
 
-### 1. Database Migration
+Multiple components generate invite links using `window.location.origin`:
 
-Create a security-hardened view and update RLS policies:
+| File | Line | Current Code |
+|------|------|--------------|
+| `InviteCodesManager.tsx` | 63 | `${window.location.origin}/auth?club=${code}` |
+| `InviteCodesManager.tsx` | 346 | `const origin = window.location.origin` |
+| `InviteCodesTab.tsx` | 185 | `${window.location.origin}/auth?club=${code}` |
+| `SocialChairOnboarding.tsx` | 118 | `${window.location.origin}/auth?org_invite=...` |
+| `CliqueSettingsModal.tsx` | 147 | `${window.location.origin}/join/...` |
+| `CliqueDetail.tsx` | 232 | `${window.location.origin}/join/...` |
+| `CliqueCreate.tsx` | 166, 181 | `${window.location.origin}/join/...` |
+| `useFriendInvite.ts` | 84 | `${window.location.origin}/auth?invite=...` |
 
-```sql
--- Create a safe view that excludes sensitive token columns
-CREATE VIEW public.eventbrite_connections_safe 
-WITH (security_invoker = on) AS
-SELECT 
-  id,
-  user_id,
-  org_id,
-  eventbrite_user_id,
-  eventbrite_email,
-  connected_at,
-  last_sync_at,
-  is_active,
-  token_expires_at
-FROM public.eventbrite_connections;
+Only `LinksManager.tsx` correctly uses a hardcoded `PUBLISHED_URL`.
 
--- Enable RLS on the view (inherits from base table via security_invoker)
-ALTER VIEW public.eventbrite_connections_safe SET (security_invoker = true);
+---
 
--- Drop the existing user SELECT policy on base table
-DROP POLICY IF EXISTS "Users can view their own Eventbrite connections" 
-  ON public.eventbrite_connections;
+## Solution
 
--- Create SELECT policy on the SAFE VIEW for users
-CREATE POLICY "Users can view their own Eventbrite connections"
-ON public.eventbrite_connections_safe
-FOR SELECT
-TO authenticated
-USING (auth.uid() = user_id);
+### Phase 1: Create Centralized URL Config
+
+Create a shared utility that provides the correct production URL:
+
+```text
+File: src/lib/config.ts
+
+- Export PUBLISHED_URL constant: 'https://openclique.lovable.app'
+- Export helper function: getPublishedUrl(path: string) => full URL
 ```
 
-**Note**: The edge functions use `SUPABASE_SERVICE_ROLE_KEY` which bypasses RLS, so they retain full access to tokens for OAuth operations.
+### Phase 2: Update All Invite Link Generators
 
-### 2. Update Client Hook
+Update 8 files to import and use the centralized config:
 
-Modify `src/hooks/useEventbrite.ts` to query the safe view:
+1. `src/components/admin/InviteCodesManager.tsx`
+   - Replace `window.location.origin` with `PUBLISHED_URL`
+   - Update `getInviteUrl()` function
+   - Update `OrgCodesSection` copy function
+   
+2. `src/components/clubs/InviteCodesTab.tsx`
+   - Update `getInviteUrl()` function
 
-| Change | Description |
-|--------|-------------|
-| Line 47 | Change `from('eventbrite_connections')` to `from('eventbrite_connections_safe')` |
-| Lines 105-108 | Keep using base table for UPDATE (disconnect) - RLS still allows this |
+3. `src/components/clubs/SocialChairOnboarding.tsx`
+   - Update `copyInviteLink()` function
 
-The UPDATE operation still works on the base table because the existing "Users can update their own Eventbrite connections" policy remains in place.
+4. `src/components/cliques/CliqueSettingsModal.tsx`
+   - Update invite link generation
 
-### 3. Security Marking
+5. `src/pages/CliqueDetail.tsx`
+   - Update `handleCopyInviteLink()`
 
-Delete the security finding after implementation:
-- `eventbrite_oauth_tokens` (Internal ID)
+6. `src/pages/CliqueCreate.tsx`
+   - Update invite link display and copy
 
-## Files Changed
+7. `src/hooks/useFriendInvite.ts`
+   - Update `shareLink` generation
 
-| File | Action | Description |
-|------|--------|-------------|
-| `supabase/migrations/XXXXX.sql` | Create | View creation and RLS policy updates |
-| `src/hooks/useEventbrite.ts` | Edit | Query safe view instead of base table |
+8. `src/components/admin/LinksManager.tsx`
+   - Import from centralized config (remove local constant)
+
+### Phase 3: Verify Anthony's Access
+
+Anthony already has the `admin` role. The existing auto-provisioning logic in `CreatorDashboard.tsx` will:
+- Detect he's an admin without a creator profile
+- Auto-create his creator profile with status `active`
+- Add `quest_creator` role
+
+No database changes needed - he just needs to visit `/creator` once.
+
+---
 
 ## Technical Details
 
-### Why a View Instead of Column-Level Security?
+### New File: src/lib/config.ts
 
-PostgreSQL doesn't support column-level RLS. Options considered:
+```typescript
+export const PUBLISHED_URL = 'https://openclique.lovable.app';
 
-1. **Secure View (chosen)**: Simple, no schema changes, client code change is minimal
-2. **Encrypt tokens**: Adds complexity, still need decryption for edge functions
-3. **Move tokens to separate table**: More invasive schema change
+export function getPublishedUrl(path: string): string {
+  return `${PUBLISHED_URL}${path.startsWith('/') ? path : '/' + path}`;
+}
+```
 
-### Edge Function Access
+### Example Update: InviteCodesManager.tsx
 
-Edge functions (`eventbrite-oauth-callback`, `import-eventbrite-event`) use the service role key which bypasses RLS entirely. They continue to have full access to:
-- Write tokens during OAuth callback
-- Read tokens for API calls (currently using `EVENTBRITE_PRIVATE_TOKEN` env var instead)
+```typescript
+// Before
+const getInviteUrl = (code: string, type: InviteCodeType) => {
+  const origin = window.location.origin;
+  switch (type) {
+    case 'creator':
+      return `${origin}/creators/onboard?token=${code}`;
+    // ...
+  }
+};
 
-### Client Access Pattern
+// After
+import { PUBLISHED_URL } from '@/lib/config';
 
-| Operation | Table/View | Allowed |
-|-----------|-----------|---------|
-| SELECT connection status | `eventbrite_connections_safe` | Yes (no tokens) |
-| UPDATE to disconnect | `eventbrite_connections` | Yes (RLS allows) |
-| INSERT | `eventbrite_connections` | Yes (RLS allows) |
-| DELETE | `eventbrite_connections` | Yes (RLS allows) |
-| SELECT tokens | `eventbrite_connections` | No (policy removed) |
+const getInviteUrl = (code: string, type: InviteCodeType) => {
+  switch (type) {
+    case 'creator':
+      return `${PUBLISHED_URL}/creators/onboard?token=${code}`;
+    // ...
+  }
+};
+```
 
-## Verification
+---
+
+## Files to Create
+
+| File | Purpose |
+|------|---------|
+| `src/lib/config.ts` | Centralized app configuration |
+
+## Files to Modify
+
+| File | Changes |
+|------|---------|
+| `InviteCodesManager.tsx` | Use `PUBLISHED_URL` for all invite links |
+| `InviteCodesTab.tsx` | Use `PUBLISHED_URL` |
+| `SocialChairOnboarding.tsx` | Use `PUBLISHED_URL` |
+| `CliqueSettingsModal.tsx` | Use `PUBLISHED_URL` |
+| `CliqueDetail.tsx` | Use `PUBLISHED_URL` |
+| `CliqueCreate.tsx` | Use `PUBLISHED_URL` |
+| `useFriendInvite.ts` | Use `PUBLISHED_URL` |
+| `LinksManager.tsx` | Import from config (DRY) |
+
+---
+
+## Verification Steps
 
 After implementation:
-1. Client queries return connection status without exposing tokens
-2. Disconnect functionality continues to work
-3. Edge functions can still store/read tokens
-4. Security scan should show finding resolved
+1. Go to Admin > Codes & Keys
+2. Create a new invite code
+3. Click copy link - should be `https://openclique.lovable.app/...`
+4. Test from preview environment to confirm it still uses production URL
+5. Have Anthony visit `/creator` to auto-provision his creator profile
