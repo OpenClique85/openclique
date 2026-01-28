@@ -4,6 +4,7 @@
  * =============================================================================
  */
 
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
@@ -19,6 +20,7 @@ import {
   UserPlus
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { StatDetailDrawer, StatType } from './StatDetailDrawer';
 
 interface StatCardProps {
   label: string;
@@ -26,11 +28,15 @@ interface StatCardProps {
   icon: React.ReactNode;
   trend?: string;
   loading?: boolean;
+  onClick?: () => void;
 }
 
-function StatCard({ label, value, icon, trend, loading }: StatCardProps) {
+function StatCard({ label, value, icon, trend, loading, onClick }: StatCardProps) {
   return (
-    <Card>
+    <Card 
+      className={onClick ? 'cursor-pointer hover:bg-muted/50 transition-colors' : ''}
+      onClick={onClick}
+    >
       <CardContent className="pt-4 pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -59,6 +65,8 @@ function StatCard({ label, value, icon, trend, loading }: StatCardProps) {
 }
 
 export function PlatformStats() {
+  const [selectedStat, setSelectedStat] = useState<{ type: StatType; label: string } | null>(null);
+
   const { data: stats, isLoading } = useQuery({
     queryKey: ['platform-stats'],
     queryFn: async () => {
@@ -101,68 +109,88 @@ export function PlatformStats() {
     refetchInterval: 120000, // Refresh every 2 minutes
   });
 
+  const openDrawer = (type: StatType, label: string) => {
+    setSelectedStat({ type, label });
+  };
+
   return (
     <div className="mb-8">
       <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
         <Target className="h-5 w-5 text-primary" />
         Key Stats
       </h2>
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-3">
         <StatCard
           label="Total Users"
           value={stats?.totalUsers || 0}
           icon={<Users className="h-4 w-4" />}
           loading={isLoading}
+          onClick={() => openDrawer('totalUsers', 'Total Users')}
         />
         <StatCard
           label="Total Signups"
           value={stats?.totalSignups || 0}
           icon={<UserCheck className="h-4 w-4" />}
           loading={isLoading}
+          onClick={() => openDrawer('totalSignups', 'Total Signups')}
         />
         <StatCard
           label="Quest Templates"
           value={stats?.totalQuests || 0}
           icon={<Calendar className="h-4 w-4" />}
           loading={isLoading}
+          onClick={() => openDrawer('totalQuests', 'Quest Templates')}
         />
         <StatCard
           label="Active Instances"
           value={stats?.activeInstances || 0}
           icon={<Target className="h-4 w-4" />}
           loading={isLoading}
+          onClick={() => openDrawer('activeInstances', 'Active Instances')}
         />
         <StatCard
           label="Active Squads"
           value={stats?.activeSquads || 0}
           icon={<Trophy className="h-4 w-4" />}
           loading={isLoading}
+          onClick={() => openDrawer('activeSquads', 'Active Squads')}
         />
         <StatCard
           label="Creators"
           value={stats?.activeCreators || 0}
           icon={<Sparkles className="h-4 w-4" />}
           loading={isLoading}
+          onClick={() => openDrawer('activeCreators', 'Active Creators')}
         />
         <StatCard
           label="Sponsors"
           value={stats?.activeSponsors || 0}
           icon={<Building2 className="h-4 w-4" />}
           loading={isLoading}
+          onClick={() => openDrawer('activeSponsors', 'Active Sponsors')}
         />
         <StatCard
           label="Organizations"
           value={stats?.activeOrgs || 0}
           icon={<Building2 className="h-4 w-4" />}
           loading={isLoading}
+          onClick={() => openDrawer('activeOrgs', 'Active Organizations')}
         />
         <StatCard
           label="Friends Recruited"
           value={stats?.friendsRecruited || 0}
           icon={<UserPlus className="h-4 w-4" />}
           loading={isLoading}
+          onClick={() => openDrawer('friendsRecruited', 'Friends Recruited')}
         />
       </div>
+
+      <StatDetailDrawer
+        open={!!selectedStat}
+        onOpenChange={(open) => !open && setSelectedStat(null)}
+        statType={selectedStat?.type || null}
+        statLabel={selectedStat?.label || ''}
+      />
     </div>
   );
 }

@@ -22,7 +22,6 @@ import { AchievementsManager } from '@/components/admin/AchievementsManager';
 import { BadgesManager } from '@/components/admin/BadgesManager';
 import { StreaksManager } from '@/components/admin/StreaksManager';
 import { AdminSectionNav } from '@/components/admin/AdminSectionNav';
-import { LinksManager } from '@/components/admin/LinksManager';
 import { SupportDashboard } from '@/components/admin/SupportDashboard';
 import { IssueCategoriesManager } from '@/components/admin/IssueCategoriesManager';
 import { AdminDirectMessages } from '@/components/admin/AdminDirectMessages';
@@ -121,7 +120,6 @@ export default function Admin() {
       // Communications
       case 'messaging': return <MessagingCenter />;
       case 'whatsapp': return <WhatsAppManager />;
-      case 'links': return <LinksManager />;
       case 'notification-console': return <NotificationConsole />;
       // Growth
       case 'invite-codes': return <InviteCodesManager />;
