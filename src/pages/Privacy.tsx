@@ -62,68 +62,104 @@ export default function Privacy() {
                   <p>
                     At {BRAND.name}, we believe in transparency and respect for your personal information. 
                     This policy explains what data we collect, how we use it, and your rights regarding your information.
+                    We're committed to giving you control over your data while enabling meaningful real-world connections.
+                  </p>
+                </section>
+
+                {/* ============ SECTION: Profile Visibility ============ */}
+                <section>
+                  <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
+                    Profile Visibility & Your Control
+                  </h2>
+                  <p>
+                    You decide who sees your profile information. Through your{' '}
+                    <a href="/settings?tab=privacy" className="text-primary hover:underline">
+                      Privacy Settings
+                    </a>, you can set your profile visibility to:
+                  </p>
+                  <ul className="list-disc pl-6 space-y-2 mt-4">
+                    <li>
+                      <strong>Public:</strong> Your display name and city are visible to other {BRAND.name} members
+                    </li>
+                    <li>
+                      <strong>Squad Only:</strong> Only members of your squads and cliques can see your profile
+                    </li>
+                    <li>
+                      <strong>Private:</strong> Your profile appears as "Private User" to others
+                    </li>
+                  </ul>
+                  <p className="mt-4">
+                    <strong>What's never publicly exposed:</strong> Your email address, notification preferences, 
+                    and detailed settings are never visible to other users — only to you and our admin team when 
+                    providing support.
                   </p>
                 </section>
 
                 {/* ============ SECTION: What We Collect ============ */}
                 <section>
                   <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
-                    What We Collect on This Website
+                    What We Collect & Why
                   </h2>
-                  <p>
-                    <strong>This marketing website does not collect personal information directly.</strong> We use:
-                  </p>
+                  <p>We collect only what's necessary to help you find your people:</p>
                   <ul className="list-disc pl-6 space-y-2 mt-4">
                     <li>
-                      <strong>Analytics cookies:</strong> We may use privacy-respecting analytics to understand how 
-                      visitors use our site (pages visited, time on site). This data is anonymized and aggregated.
+                      <strong>Account information:</strong> Email (for authentication and important updates), 
+                      display name, and city (to show local quests)
                     </li>
                     <li>
-                      <strong>Non-identifying tracking:</strong> When you click certain buttons, we track the action 
-                      (not your identity) to understand which features interest our visitors.
+                      <strong>Quest activity:</strong> Which quests you join, your feedback, and completion status 
+                      — used to suggest relevant future quests
+                    </li>
+                    <li>
+                      <strong>Privacy-respecting analytics:</strong> Anonymized and aggregated usage data to 
+                      improve the platform (pages visited, feature usage)
                     </li>
                   </ul>
                 </section>
 
-                {/* ============ SECTION: Google Forms ============ */}
+                {/* ============ SECTION: How We Use Your Data ============ */}
                 <section>
                   <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
-                    When You Sign Up (via Google Forms)
+                    How We Use Your Data
                   </h2>
-                  <p>
-                    If you choose to join our pilot, partner with us, or work with us, you'll be redirected to 
-                    Google Forms. Information you provide there is:
-                  </p>
+                  <p>Your data helps us create better experiences:</p>
                   <ul className="list-disc pl-6 space-y-2 mt-4">
-                    <li>Stored securely in our Google Workspace account</li>
-                    <li>Used only to coordinate pilots, partnerships, and collaborations</li>
-                    <li>Never sold to third parties</li>
-                    <li>Retained only as long as necessary for our relationship</li>
+                    <li>
+                      <strong>Matching & suggestions:</strong> We use your activity patterns (not your personal details) 
+                      to suggest quests and squads that might interest you
+                    </li>
+                    <li>
+                      <strong>Community features:</strong> Display names are shown to squad members so you can 
+                      recognize who you're meeting up with
+                    </li>
+                    <li>
+                      <strong>Communications:</strong> Email for essential updates about your quests and account
+                    </li>
                   </ul>
-                </section>
-
-                {/* ============ SECTION: Email ============ */}
-                <section>
-                  <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
-                    Email Subscriptions
-                  </h2>
-                  <p>
-                    If you subscribe to our email list, we store your email address to send you updates about 
-                    {BRAND.name}. You can unsubscribe at any time by clicking the link in any email or contacting us.
+                  <p className="mt-4">
+                    <strong>What we don't do:</strong> We never sell your data. We don't share your information 
+                    with advertisers. We don't use manipulative algorithms designed to keep you scrolling.
                   </p>
                 </section>
 
-                {/* ============ SECTION: Your Rights ============ */}
+                {/* ============ SECTION: Creator & Sponsor Profiles ============ */}
                 <section>
                   <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
-                    Your Rights
+                    Creator & Sponsor Profiles
                   </h2>
-                  <p>You have the right to:</p>
+                  <p>
+                    If you become a verified quest creator or sponsor, some information becomes publicly visible 
+                    by design to help members discover your offerings:
+                  </p>
                   <ul className="list-disc pl-6 space-y-2 mt-4">
-                    <li>Request a copy of any personal data we hold about you</li>
-                    <li>Request deletion of your personal data</li>
-                    <li>Opt out of marketing communications</li>
-                    <li>Withdraw consent for data processing</li>
+                    <li>
+                      <strong>Creators:</strong> Display name, bio, city, social links, and what you're looking for 
+                      are visible when your profile is active. Payout and internal details remain private.
+                    </li>
+                    <li>
+                      <strong>Sponsors:</strong> Company name, description, website, and logo are visible when approved. 
+                      Contact information, budget details, and internal notes remain private.
+                    </li>
                   </ul>
                 </section>
 
@@ -140,7 +176,7 @@ export default function Privacy() {
                   </p>
                   <ul className="list-disc pl-6 space-y-2 mt-4">
                     <li>
-                      <strong>Export your data:</strong> Download a complete copy of all your OpenClique data in JSON format
+                      <strong>Export your data:</strong> Download a complete copy of all your {BRAND.name} data in JSON format
                     </li>
                     <li>
                       <strong>Manage privacy settings:</strong> Control who can see your profile, activity, and whether you appear in matching
@@ -152,6 +188,26 @@ export default function Privacy() {
                       <strong>Delete your account:</strong> Initiate account deletion with a 7-day grace period to change your mind
                     </li>
                   </ul>
+                </section>
+
+                {/* ============ SECTION: Your Rights ============ */}
+                <section>
+                  <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
+                    Your Rights
+                  </h2>
+                  <p>You have the right to:</p>
+                  <ul className="list-disc pl-6 space-y-2 mt-4">
+                    <li>Request a copy of any personal data we hold about you</li>
+                    <li>Request correction of inaccurate personal data</li>
+                    <li>Request deletion of your personal data</li>
+                    <li>Opt out of marketing communications</li>
+                    <li>Withdraw consent for data processing</li>
+                    <li>Know what data we use to make suggestions (we log this)</li>
+                  </ul>
+                  <p className="mt-4">
+                    We maintain records of your consent decisions for transparency. You can review your consent 
+                    history through your account settings.
+                  </p>
                 </section>
 
                 {/* ============ SECTION: Data Deletion ============ */}
@@ -220,18 +276,44 @@ export default function Privacy() {
                   <p>We use the following third-party services that may process your data:</p>
                   <ul className="list-disc pl-6 space-y-2 mt-4">
                     <li>
-                      <strong>Google Forms & Workspace:</strong> For collecting and storing form submissions (pilot signups, partnerships, etc.)
+                      <strong>Authentication provider:</strong> For secure account login and management
                     </li>
                     <li>
-                      <strong>Hosting provider:</strong> For serving this website
+                      <strong>Cloud infrastructure:</strong> For securely storing and serving your data
                     </li>
                     <li>
                       <strong>Analytics:</strong> Privacy-respecting analytics that collect only anonymized, aggregated data
                     </li>
+                    <li>
+                      <strong>Email services:</strong> For sending transactional and notification emails
+                    </li>
                   </ul>
                   <p className="mt-4">
-                    Each of these services has their own privacy policies. We choose partners who prioritize data protection.
+                    Each of these services has their own privacy policies. We choose partners who prioritize data protection 
+                    and comply with applicable data protection regulations.
                   </p>
+                </section>
+
+                {/* ============ SECTION: Security ============ */}
+                <section>
+                  <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
+                    How We Protect Your Data
+                  </h2>
+                  <p>We implement multiple layers of protection:</p>
+                  <ul className="list-disc pl-6 space-y-2 mt-4">
+                    <li>
+                      <strong>Row-level security:</strong> Database policies ensure you can only access your own data
+                    </li>
+                    <li>
+                      <strong>Encrypted connections:</strong> All data transmitted uses industry-standard encryption
+                    </li>
+                    <li>
+                      <strong>Access controls:</strong> Admin access is logged and auditable
+                    </li>
+                    <li>
+                      <strong>Regular reviews:</strong> We conduct security assessments to identify and address vulnerabilities
+                    </li>
+                  </ul>
                 </section>
 
                 {/* ============ SECTION: Contact ============ */}
@@ -244,6 +326,9 @@ export default function Privacy() {
                     <a href="mailto:hello@openclique.com" className="text-primary hover:underline">
                       hello@openclique.com
                     </a>
+                  </p>
+                  <p className="mt-4">
+                    For data protection inquiries, include "Privacy Request" in your subject line for priority handling.
                   </p>
                 </section>
               </div>
