@@ -37,6 +37,7 @@ import {
 import { useCliqueGovernance } from '@/hooks/useCliqueGovernance';
 import { Loader2, Copy, RefreshCw, Archive, UserMinus, Crown } from 'lucide-react';
 import { toast } from 'sonner';
+import { PUBLISHED_URL } from '@/lib/config';
 
 interface CliqueMember {
   user_id: string;
@@ -144,7 +145,7 @@ export function CliqueSettingsModal({
   };
 
   const handleCopyInviteLink = () => {
-    const link = `${window.location.origin}/join/${settings.invite_code}`;
+    const link = `${PUBLISHED_URL}/join/${settings.invite_code}`;
     navigator.clipboard.writeText(link);
     toast.success('Invite link copied!');
   };

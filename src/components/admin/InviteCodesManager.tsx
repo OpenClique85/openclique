@@ -16,6 +16,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { Copy, Plus, Link2, Users, Shield, Sparkles, BarChart3, Download, ExternalLink, Palette, Building2, Store, UserPlus, Ticket } from 'lucide-react';
+import { PUBLISHED_URL } from '@/lib/config';
 
 type InviteCodeType = 'admin' | 'tester' | 'early_access' | 'creator' | 'organization' | 'sponsor';
 
@@ -60,7 +61,7 @@ function OrgCodesSection() {
   });
 
   const copyToClipboard = (code: string) => {
-    navigator.clipboard.writeText(`${window.location.origin}/auth?club=${code}`);
+    navigator.clipboard.writeText(`${PUBLISHED_URL}/auth?club=${code}`);
     toast.success('Invite link copied!');
   };
 
@@ -170,7 +171,7 @@ function FriendInvitesSection() {
   });
 
   const copyToClipboard = (code: string, questId: string) => {
-    navigator.clipboard.writeText(`${window.location.origin}/quest/${questId}?ref=${code}`);
+    navigator.clipboard.writeText(`${PUBLISHED_URL}/quest/${questId}?ref=${code}`);
     toast.success('Friend invite link copied!');
   };
 
@@ -343,16 +344,15 @@ export function InviteCodesManager() {
   });
 
   const getInviteUrl = (code: string, type: InviteCodeType) => {
-    const origin = window.location.origin;
     switch (type) {
       case 'creator':
-        return `${origin}/creators/onboard?token=${code}`;
+        return `${PUBLISHED_URL}/creators/onboard?token=${code}`;
       case 'sponsor':
-        return `${origin}/sponsors/onboard?token=${code}`;
+        return `${PUBLISHED_URL}/sponsors/onboard?token=${code}`;
       case 'organization':
-        return `${origin}/auth?invite=${code}&redirect=/org-portal`;
+        return `${PUBLISHED_URL}/auth?invite=${code}&redirect=/org-portal`;
       default:
-        return `${origin}/auth?invite=${code}`;
+        return `${PUBLISHED_URL}/auth?invite=${code}`;
     }
   };
 

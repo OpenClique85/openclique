@@ -37,6 +37,7 @@ import {
   Link as LinkIcon,
   Copy
 } from 'lucide-react';
+import { PUBLISHED_URL } from '@/lib/config';
 
 // Available theme tags with emojis
 const THEME_TAGS = [
@@ -163,7 +164,7 @@ export default function CliqueCreate() {
 
   const copyInviteLink = () => {
     if (createdClique?.invite_code) {
-      const link = `${window.location.origin}/join/${createdClique.invite_code}`;
+      const link = `${PUBLISHED_URL}/join/${createdClique.invite_code}`;
       navigator.clipboard.writeText(link);
       toast.success('Invite link copied!');
     }
@@ -178,7 +179,7 @@ export default function CliqueCreate() {
 
   // Success state
   if (createdClique) {
-    const inviteLink = `${window.location.origin}/join/${createdClique.invite_code}`;
+    const inviteLink = `${PUBLISHED_URL}/join/${createdClique.invite_code}`;
     
     return (
       <div className="min-h-dvh bg-background flex flex-col">

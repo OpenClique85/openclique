@@ -40,6 +40,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
+import { PUBLISHED_URL } from '@/lib/config';
 
 interface SocialChairOnboardingProps {
   clubId: string;
@@ -115,7 +116,7 @@ export function SocialChairOnboarding({
 
   const copyInviteLink = () => {
     if (!generatedCode) return;
-    const link = `${window.location.origin}/auth?org_invite=${generatedCode}`;
+    const link = `${PUBLISHED_URL}/auth?org_invite=${generatedCode}`;
     navigator.clipboard.writeText(link);
     toast.success('Invite link copied!');
   };

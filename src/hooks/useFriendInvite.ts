@@ -24,6 +24,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import { PUBLISHED_URL } from '@/lib/config';
 
 export interface FriendInvite {
   id: string;
@@ -81,7 +82,7 @@ export function useFriendInvite(questId: string) {
   });
 
   const code = inviteData?.code || '';
-  const shareLink = code ? `${window.location.origin}/auth?invite=${code}` : '';
+  const shareLink = code ? `${PUBLISHED_URL}/auth?invite=${code}` : '';
 
   const copyCode = async () => {
     if (!code) return;
