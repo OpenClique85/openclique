@@ -33,6 +33,7 @@ import {
   AlertTriangle,
   ExternalLink,
   Upload,
+  Play,
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -232,13 +233,19 @@ export default function CreatorQuests() {
   }
 
   function canEdit(quest: Quest) {
-    // Can edit draft or needs_changes quests
-    return quest.review_status === 'draft' || quest.review_status === 'needs_changes';
+    // Can edit draft, needs_changes, OR live quests (with restrictions)
+    return quest.review_status === 'draft' 
+      || quest.review_status === 'needs_changes'
+      || ['open', 'closed'].includes(quest.status || '');
   }
 
   function canSubmit(quest: Quest) {
     // Can submit only drafts or needs_changes
     return quest.review_status === 'draft' || quest.review_status === 'needs_changes';
+  }
+
+  function isLiveQuest(quest: Quest) {
+    return ['open', 'closed'].includes(quest.status || '');
   }
 
   function handleSubmitClick(quest: Quest) {
@@ -448,7 +455,7 @@ export default function CreatorQuests() {
                             onClick={() => navigate(`/creator/quests/${quest.id}/edit`)}
                           >
                             <Edit className="h-4 w-4 mr-1" />
-                            Edit
+                            {isLiveQuest(quest) ? 'Edit Details' : 'Edit'}
                           </Button>
                         )}
                         
@@ -463,17 +470,29 @@ export default function CreatorQuests() {
                         )}
 
                         {['open', 'closed', 'completed'].includes(quest.status || '') && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            asChild
-                          >
-                            <Link to={`/quests/${quest.slug}`}>
-                              <Eye className="h-4 w-4 mr-1" />
-                              View Live
-                              <ExternalLink className="h-3 w-3 ml-1" />
-                            </Link>
-                          </Button>
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              asChild
+                            >
+                              <Link to={`/creator/quests/${quest.id}/run`}>
+                                <Play className="h-4 w-4 mr-1" />
+                                Run
+                              </Link>
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              asChild
+                            >
+                              <Link to={`/quests/${quest.slug}`}>
+                                <Eye className="h-4 w-4 mr-1" />
+                                View Live
+                                <ExternalLink className="h-3 w-3 ml-1" />
+                              </Link>
+                            </Button>
+                          </>
                         )}
 
                         {quest.review_status === 'pending_review' && (

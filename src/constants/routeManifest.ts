@@ -72,6 +72,7 @@ export const ROUTE_MANIFEST: RouteDefinition[] = [
   { path: '/creator/profile', page: 'CreatorProfile', protection: 'auth', description: 'Creator profile editor', category: 'creator' },
   { path: '/creator/quests/new', page: 'QuestBuilder', protection: 'auth', description: 'Quest creation wizard', category: 'creator' },
   { path: '/creator/quests/:questId/edit', page: 'QuestBuilder', protection: 'auth', description: 'Quest edit wizard', category: 'creator' },
+  { path: '/creator/quests/:questId/run', page: 'CreatorQuestRuntime', protection: 'auth', description: 'Quest runtime management dashboard', category: 'creator' },
   { path: '/creator/browse-listings', page: 'CreatorBrowseListings', protection: 'auth', description: 'Browse sponsor listings', category: 'creator' },
   
   // ==========================================================================

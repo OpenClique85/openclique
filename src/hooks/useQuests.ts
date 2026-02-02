@@ -75,13 +75,17 @@ const formatDateRange = (start: string | null, end: string | null): string => {
   if (!end) return startStr;
   
   const endDate = new Date(end);
-  const endStr = endDate.toLocaleDateString('en-US', options);
+  
+  // Timezone-safe local date comparison using en-CA format (YYYY-MM-DD)
+  const startLocalDate = startDate.toLocaleDateString('en-CA');
+  const endLocalDate = endDate.toLocaleDateString('en-CA');
   
   // Same day
-  if (startDate.toDateString() === endDate.toDateString()) {
+  if (startLocalDate === endLocalDate) {
     return startStr;
   }
   
+  const endStr = endDate.toLocaleDateString('en-US', options);
   return `${startStr} - ${endStr}`;
 };
 
@@ -107,6 +111,35 @@ const calculateDuration = (start: string | null, end: string | null): string => 
   const diffWeeks = Math.round(diffDays / 7);
   return `${diffWeeks} week${diffWeeks !== 1 ? 's' : ''}`;
 };
+
+// Get temporal status of a quest (upcoming, today, live, past)
+export function getQuestTemporalStatus(quest: Quest): 'upcoming' | 'today' | 'live' | 'past' {
+  if (!quest.startDatetime) return 'upcoming';
+  
+  const now = new Date();
+  const startDate = new Date(quest.startDatetime);
+  const endDate = quest.metadata?.duration ? null : null; // We don't have endDatetime in Quest type directly
+  
+  // Use timezone-safe local date comparison
+  const todayStr = now.toLocaleDateString('en-CA');
+  const startStr = startDate.toLocaleDateString('en-CA');
+  
+  // If start is in the past and quest is completed, it's past
+  if (quest.status === 'completed') return 'past';
+  
+  // Check if quest started today
+  if (startStr === todayStr) {
+    // If it's started already, it's live
+    if (now >= startDate) return 'live';
+    return 'today';
+  }
+  
+  // If start is in the future
+  if (startDate > now) return 'upcoming';
+  
+  // Start is in the past but quest is still open/closed (ongoing)
+  return 'live';
+}
 
 // Transform database quest to UI quest format
 export const transformQuest = (dbQuest: DbQuest & { sponsor_profiles?: { name: string } | null }): Quest => {

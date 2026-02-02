@@ -572,6 +572,23 @@ export default function QuestBuilder() {
           <p className="text-muted-foreground mt-1">
             Design an adventure that brings people together.
           </p>
+          
+          {/* Live Quest Warning Banner */}
+          {existingQuest && ['open', 'closed'].includes(existingQuest.status || '') && (
+            <div className="mt-4 bg-amber-500/10 border border-amber-500/30 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <span className="text-amber-500 text-xl">⚠️</span>
+                <div>
+                  <p className="font-medium text-amber-600 dark:text-amber-400">Editing a Live Quest</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Some fields are locked to protect participants who have already signed up.
+                    You can still update descriptions, images, meeting details, and what to bring.
+                    For date or capacity changes, please contact support.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Progress */}
