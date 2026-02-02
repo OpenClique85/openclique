@@ -101,11 +101,21 @@ export function MediaStep({ formData, updateFormData }: MediaStepProps) {
         
         {formData.image_url ? (
           <div className="relative">
-            <img 
-              src={formData.image_url} 
-              alt="Quest preview" 
-              className="w-full h-48 object-cover rounded-lg border"
-            />
+            {/* Preview container with 16:9 aspect ratio guides */}
+            <div className="relative bg-muted rounded-lg border overflow-hidden" style={{ aspectRatio: '16/9' }}>
+              <img 
+                src={formData.image_url} 
+                alt="Quest preview" 
+                className="w-full h-full object-cover"
+              />
+              {/* Aspect ratio indicator */}
+              <div className="absolute bottom-2 left-2 bg-background/80 backdrop-blur-sm text-xs px-2 py-1 rounded">
+                16:9 preview
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              This is how your image will appear on quest cards. Use 1200×675px for best quality.
+            </p>
             <Button
               type="button"
               variant="outline"
@@ -119,7 +129,12 @@ export function MediaStep({ formData, updateFormData }: MediaStepProps) {
         ) : (
           <div className="border-2 border-dashed border-border rounded-lg p-6 text-center space-y-4">
             <Image className="w-12 h-12 mx-auto text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">Upload an image or let AI generate one</p>
+            <div>
+              <p className="text-sm text-muted-foreground">Upload an image or let AI generate one</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Recommended: 1200×675 pixels (16:9 aspect ratio) for best display on cards
+              </p>
+            </div>
             
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button
