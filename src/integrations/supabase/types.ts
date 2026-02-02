@@ -6568,6 +6568,36 @@ export type Database = {
       }
     }
     Views: {
+      account_deletion_requests_safe: {
+        Row: {
+          cancellation_reason: string | null
+          created_at: string | null
+          id: string | null
+          processed_at: string | null
+          scheduled_at: string | null
+          status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          cancellation_reason?: string | null
+          created_at?: string | null
+          id?: string | null
+          processed_at?: string | null
+          scheduled_at?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          cancellation_reason?: string | null
+          created_at?: string | null
+          id?: string | null
+          processed_at?: string | null
+          scheduled_at?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       eventbrite_connections_safe: {
         Row: {
           connected_at: string | null
@@ -6845,6 +6875,10 @@ export type Database = {
         Returns: string
       }
       generate_simple_invite_code: { Args: never; Returns: string }
+      get_deletion_request_email: {
+        Args: { target_request_id: string }
+        Returns: string
+      }
       get_or_create_friend_invite: {
         Args: { p_quest_id: string }
         Returns: {
