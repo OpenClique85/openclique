@@ -1042,6 +1042,64 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_announcements: {
+        Row: {
+          body: string
+          creator_id: string
+          id: string
+          message_type: string
+          quest_id: string
+          recipient_count: number | null
+          sent_at: string | null
+          squad_id: string | null
+          subject: string | null
+        }
+        Insert: {
+          body: string
+          creator_id: string
+          id?: string
+          message_type?: string
+          quest_id: string
+          recipient_count?: number | null
+          sent_at?: string | null
+          squad_id?: string | null
+          subject?: string | null
+        }
+        Update: {
+          body?: string
+          creator_id?: string
+          id?: string
+          message_type?: string
+          quest_id?: string
+          recipient_count?: number | null
+          sent_at?: string | null
+          squad_id?: string | null
+          subject?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_announcements_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creator_announcements_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creator_announcements_squad_id_fkey"
+            columns: ["squad_id"]
+            isOneToOne: false
+            referencedRelation: "quest_squads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       creator_applications: {
         Row: {
           created_at: string | null
@@ -4244,6 +4302,8 @@ export type Database = {
           title: string
           updated_at: string
           visibility: Database["public"]["Enums"]["quest_visibility"]
+          warm_up_prompt_custom: string | null
+          warm_up_prompt_id: string | null
           what_to_bring: string | null
           whatsapp_invite_link: string | null
           xp_rules: Json | null
@@ -4333,6 +4393,8 @@ export type Database = {
           title: string
           updated_at?: string
           visibility?: Database["public"]["Enums"]["quest_visibility"]
+          warm_up_prompt_custom?: string | null
+          warm_up_prompt_id?: string | null
           what_to_bring?: string | null
           whatsapp_invite_link?: string | null
           xp_rules?: Json | null
@@ -4422,6 +4484,8 @@ export type Database = {
           title?: string
           updated_at?: string
           visibility?: Database["public"]["Enums"]["quest_visibility"]
+          warm_up_prompt_custom?: string | null
+          warm_up_prompt_id?: string | null
           what_to_bring?: string | null
           whatsapp_invite_link?: string | null
           xp_rules?: Json | null
@@ -4474,6 +4538,13 @@ export type Database = {
             columns: ["sponsor_id"]
             isOneToOne: false
             referencedRelation: "sponsor_profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quests_warm_up_prompt_id_fkey"
+            columns: ["warm_up_prompt_id"]
+            isOneToOne: false
+            referencedRelation: "message_templates"
             referencedColumns: ["id"]
           },
         ]
@@ -5452,6 +5523,8 @@ export type Database = {
           clique_role: string | null
           id: string
           persistent_squad_id: string | null
+          prompt_response: string | null
+          readiness_confirmed_at: string | null
           role: string | null
           role_assigned_at: string | null
           role_assigned_by: string | null
@@ -5466,6 +5539,8 @@ export type Database = {
           clique_role?: string | null
           id?: string
           persistent_squad_id?: string | null
+          prompt_response?: string | null
+          readiness_confirmed_at?: string | null
           role?: string | null
           role_assigned_at?: string | null
           role_assigned_by?: string | null
@@ -5480,6 +5555,8 @@ export type Database = {
           clique_role?: string | null
           id?: string
           persistent_squad_id?: string | null
+          prompt_response?: string | null
+          readiness_confirmed_at?: string | null
           role?: string | null
           role_assigned_at?: string | null
           role_assigned_by?: string | null
@@ -8329,7 +8406,9 @@ export type Database = {
       }
       is_admin: { Args: never; Returns: boolean }
       is_clique_member: { Args: { p_clique_id: string }; Returns: boolean }
+      is_quest_creator: { Args: { quest_uuid: string }; Returns: boolean }
       is_squad_member: { Args: { p_squad_id: string }; Returns: boolean }
+      is_squad_quest_creator: { Args: { squad_uuid: string }; Returns: boolean }
       join_org_via_email: {
         Args: { p_email: string; p_org_id: string }
         Returns: Json
@@ -8599,7 +8678,16 @@ export type Database = {
         | "dropped"
         | "no_show"
         | "completed"
-      squad_status: "draft" | "confirmed" | "active" | "completed"
+      squad_status:
+        | "draft"
+        | "confirmed"
+        | "active"
+        | "completed"
+        | "warming_up"
+        | "ready_for_review"
+        | "approved"
+        | "cancelled"
+        | "archived"
       ticket_status:
         | "open"
         | "investigating"
@@ -8953,7 +9041,17 @@ export const Constants = {
         "no_show",
         "completed",
       ],
-      squad_status: ["draft", "confirmed", "active", "completed"],
+      squad_status: [
+        "draft",
+        "confirmed",
+        "active",
+        "completed",
+        "warming_up",
+        "ready_for_review",
+        "approved",
+        "cancelled",
+        "archived",
+      ],
       ticket_status: [
         "open",
         "investigating",
