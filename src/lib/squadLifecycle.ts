@@ -110,15 +110,15 @@ export interface WarmUpProgress {
 
 export function calculateWarmUpProgress(
   members: Array<{ 
-    prompt_response: string | null; 
-    readiness_confirmed_at: string | null;
-    status: string;
+    prompt_response?: string | null; 
+    readiness_confirmed_at?: string | null;
+    status?: string;
   }>,
   minReadyPct: number = 100
 ): WarmUpProgress {
   const activeMembers = members.filter(m => m.status !== 'dropped');
   const readyMembers = activeMembers.filter(
-    m => m.prompt_response && m.readiness_confirmed_at
+    m => m.prompt_response || m.readiness_confirmed_at
   );
   
   const percentage = activeMembers.length > 0

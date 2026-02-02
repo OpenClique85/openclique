@@ -29,6 +29,9 @@ import {
 
 import { CreatorSignupsTab } from '@/components/creators/runtime/CreatorSignupsTab';
 import { CreatorSquadsTab } from '@/components/creators/runtime/CreatorSquadsTab';
+import { CreatorSquadApproval } from '@/components/creators/runtime/CreatorSquadApproval';
+import { CreatorMemberAssignment } from '@/components/creators/runtime/CreatorMemberAssignment';
+import { IcebreakerPromptPicker } from '@/components/creators/runtime/IcebreakerPromptPicker';
 import { CreatorCommsTab } from '@/components/creators/runtime/CreatorCommsTab';
 import { CreatorLogisticsTab } from '@/components/creators/runtime/CreatorLogisticsTab';
 import { EscalateToAdmin } from '@/components/creators/EscalateToAdmin';
@@ -239,7 +242,7 @@ export default function CreatorQuestRuntime() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="w-full grid grid-cols-4 h-auto p-1">
+          <TabsList className="w-full grid grid-cols-5 h-auto p-1">
             <TabsTrigger value="signups" className="flex items-center gap-2 py-2.5">
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Signups</span>
@@ -247,6 +250,10 @@ export default function CreatorQuestRuntime() {
             <TabsTrigger value="squads" className="flex items-center gap-2 py-2.5">
               <UserPlus className="h-4 w-4" />
               <span className="hidden sm:inline">Squads</span>
+            </TabsTrigger>
+            <TabsTrigger value="approval" className="flex items-center gap-2 py-2.5">
+              <CheckCircle className="h-4 w-4" />
+              <span className="hidden sm:inline">Approval</span>
             </TabsTrigger>
             <TabsTrigger value="comms" className="flex items-center gap-2 py-2.5">
               <Megaphone className="h-4 w-4" />
@@ -263,7 +270,19 @@ export default function CreatorQuestRuntime() {
           </TabsContent>
 
           <TabsContent value="squads">
-            <CreatorSquadsTab questId={questId!} />
+            <div className="grid gap-6 lg:grid-cols-2">
+              <div className="space-y-6">
+                <CreatorSquadsTab questId={questId!} />
+              </div>
+              <div className="space-y-6">
+                <CreatorMemberAssignment questId={questId!} />
+                <IcebreakerPromptPicker questId={questId!} />
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="approval">
+            <CreatorSquadApproval questId={questId!} />
           </TabsContent>
 
           <TabsContent value="comms">

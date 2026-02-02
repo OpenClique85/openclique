@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, ClipboardList, BarChart3, User, Inbox, Sparkles } from 'lucide-react';
+import { LayoutDashboard, ClipboardList, BarChart3, User, Inbox, Sparkles, PlayCircle } from 'lucide-react';
 
 const navItems = [
   { href: '/creator', label: 'Dashboard', icon: LayoutDashboard },
