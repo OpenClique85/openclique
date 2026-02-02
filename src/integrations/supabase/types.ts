@@ -224,6 +224,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "admin_direct_messages_context_quest_id_fkey"
+            columns: ["context_quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "admin_direct_messages_context_squad_id_fkey"
             columns: ["context_squad_id"]
             isOneToOne: false
@@ -658,6 +665,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "clique_lore_entries_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "clique_lore_entries_squad_id_fkey"
             columns: ["squad_id"]
             isOneToOne: false
@@ -811,6 +825,13 @@ export type Database = {
             columns: ["context_quest_id"]
             isOneToOne: false
             referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clique_ready_checks_context_quest_id_fkey"
+            columns: ["context_quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
             referencedColumns: ["id"]
           },
           {
@@ -988,7 +1009,38 @@ export type Database = {
             referencedRelation: "quests"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "comms_log_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      consent_types: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          is_required: boolean | null
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id: string
+          is_required?: boolean | null
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_required?: boolean | null
+          name?: string
+        }
+        Relationships: []
       }
       creator_applications: {
         Row: {
@@ -1486,6 +1538,13 @@ export type Database = {
             referencedRelation: "quests"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "eventbrite_events_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       feature_flag_audit: {
@@ -1631,6 +1690,13 @@ export type Database = {
             referencedRelation: "quests"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "feedback_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       feedback_pricing: {
@@ -1675,6 +1741,13 @@ export type Database = {
             referencedRelation: "feedback"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "feedback_pricing_feedback_id_fkey"
+            columns: ["feedback_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       feedback_pulses: {
@@ -1714,6 +1787,13 @@ export type Database = {
             columns: ["context_quest_id"]
             isOneToOne: false
             referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_pulses_context_quest_id_fkey"
+            columns: ["context_quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
             referencedColumns: ["id"]
           },
           {
@@ -1770,6 +1850,13 @@ export type Database = {
             referencedRelation: "feedback"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "feedback_quest_design_feedback_id_fkey"
+            columns: ["feedback_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       feedback_requests: {
@@ -1820,6 +1907,13 @@ export type Database = {
             referencedRelation: "quests"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "feedback_requests_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       friend_invites: {
@@ -1856,6 +1950,13 @@ export type Database = {
             columns: ["quest_id"]
             isOneToOne: false
             referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "friend_invites_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
             referencedColumns: ["id"]
           },
         ]
@@ -2213,6 +2314,13 @@ export type Database = {
             columns: ["quest_id"]
             isOneToOne: false
             referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
             referencedColumns: ["id"]
           },
         ]
@@ -2671,6 +2779,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "org_sponsor_requests_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "org_sponsor_requests_sponsor_id_fkey"
             columns: ["sponsor_id"]
             isOneToOne: false
@@ -2963,6 +3078,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "participant_proofs_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "quest_instances_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "participant_proofs_signup_id_fkey"
             columns: ["signup_id"]
             isOneToOne: false
@@ -3132,6 +3254,13 @@ export type Database = {
             referencedRelation: "quests"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "pilot_notes_related_quest_id_fkey"
+            columns: ["related_quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       pilot_programs: {
@@ -3261,6 +3390,13 @@ export type Database = {
             columns: ["quest_id"]
             isOneToOne: false
             referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pinned_quests_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
             referencedColumns: ["id"]
           },
         ]
@@ -3528,6 +3664,13 @@ export type Database = {
             referencedRelation: "quests"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "quest_constraints_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: true
+            referencedRelation: "quests_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       quest_event_log: {
@@ -3567,6 +3710,13 @@ export type Database = {
             columns: ["instance_id"]
             isOneToOne: false
             referencedRelation: "quest_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quest_event_log_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "quest_instances_public"
             referencedColumns: ["id"]
           },
         ]
@@ -3701,6 +3851,13 @@ export type Database = {
             referencedRelation: "quests"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "quest_instances_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       quest_objectives: {
@@ -3751,6 +3908,13 @@ export type Database = {
             referencedRelation: "quests"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "quest_objectives_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       quest_personality_affinity: {
@@ -3789,6 +3953,13 @@ export type Database = {
             referencedRelation: "quests"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "quest_personality_affinity_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       quest_roles: {
@@ -3822,6 +3993,13 @@ export type Database = {
             columns: ["quest_id"]
             isOneToOne: false
             referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quest_roles_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
             referencedColumns: ["id"]
           },
         ]
@@ -3896,10 +4074,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "quest_signups_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "quest_instances_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "quest_signups_quest_id_fkey"
             columns: ["quest_id"]
             isOneToOne: false
             referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quest_signups_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
             referencedColumns: ["id"]
           },
         ]
@@ -3959,6 +4151,13 @@ export type Database = {
             columns: ["quest_id"]
             isOneToOne: false
             referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quest_squads_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
             referencedColumns: ["id"]
           },
         ]
@@ -4342,6 +4541,13 @@ export type Database = {
             referencedRelation: "quests"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "referrals_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       reward_redemptions: {
@@ -4372,6 +4578,13 @@ export type Database = {
             columns: ["quest_id"]
             isOneToOne: false
             referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reward_redemptions_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
             referencedColumns: ["id"]
           },
           {
@@ -4622,6 +4835,13 @@ export type Database = {
             referencedRelation: "venue_offerings"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "sponsor_listings_venue_offered_fkey"
+            columns: ["venue_offered"]
+            isOneToOne: false
+            referencedRelation: "venue_offerings_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       sponsor_org_requests: {
@@ -4820,6 +5040,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "sponsored_quests_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "sponsored_quests_sponsor_id_fkey"
             columns: ["sponsor_id"]
             isOneToOne: false
@@ -4896,6 +5123,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "sponsorship_proposals_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "sponsorship_proposals_sponsor_id_fkey"
             columns: ["sponsor_id"]
             isOneToOne: false
@@ -4914,6 +5148,13 @@ export type Database = {
             columns: ["venue_offering_id"]
             isOneToOne: false
             referencedRelation: "venue_offerings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsorship_proposals_venue_offering_id_fkey"
+            columns: ["venue_offering_id"]
+            isOneToOne: false
+            referencedRelation: "venue_offerings_public"
             referencedColumns: ["id"]
           },
         ]
@@ -4969,6 +5210,13 @@ export type Database = {
             columns: ["quest_id"]
             isOneToOne: false
             referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "squad_appreciations_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
             referencedColumns: ["id"]
           },
           {
@@ -5315,6 +5563,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "squad_quest_invites_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "squad_quest_invites_squad_id_fkey"
             columns: ["squad_id"]
             isOneToOne: false
@@ -5434,6 +5689,13 @@ export type Database = {
             columns: ["origin_quest_id"]
             isOneToOne: false
             referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "squads_origin_quest_id_fkey"
+            columns: ["origin_quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
             referencedColumns: ["id"]
           },
         ]
@@ -5558,6 +5820,13 @@ export type Database = {
             columns: ["related_quest_id"]
             isOneToOne: false
             referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_related_quest_id_fkey"
+            columns: ["related_quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
             referencedColumns: ["id"]
           },
           {
@@ -6003,10 +6272,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "ugc_submissions_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "quest_instances_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "ugc_submissions_quest_id_fkey"
             columns: ["quest_id"]
             isOneToOne: false
             referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ugc_submissions_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
             referencedColumns: ["id"]
           },
         ]
@@ -6950,6 +7233,60 @@ export type Database = {
           },
         ]
       }
+      feedback_public: {
+        Row: {
+          belonging_delta: number | null
+          feelings: string[] | null
+          id: string | null
+          is_testimonial_approved: boolean | null
+          quest_id: string | null
+          rating_1_5: number | null
+          submitted_at: string | null
+          testimonial_text: string | null
+          user_id: string | null
+          would_do_again: boolean | null
+        }
+        Insert: {
+          belonging_delta?: number | null
+          feelings?: string[] | null
+          id?: string | null
+          is_testimonial_approved?: boolean | null
+          quest_id?: string | null
+          rating_1_5?: number | null
+          submitted_at?: string | null
+          testimonial_text?: never
+          user_id?: never
+          would_do_again?: boolean | null
+        }
+        Update: {
+          belonging_delta?: number | null
+          feelings?: string[] | null
+          id?: string | null
+          is_testimonial_approved?: boolean | null
+          quest_id?: string | null
+          rating_1_5?: number | null
+          submitted_at?: string | null
+          testimonial_text?: never
+          user_id?: never
+          would_do_again?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations_public: {
         Row: {
           category: string | null
@@ -7082,6 +7419,99 @@ export type Database = {
         }
         Relationships: []
       }
+      quest_instances_public: {
+        Row: {
+          capacity: number | null
+          check_in_closes_at: string | null
+          check_in_opens_at: string | null
+          created_at: string | null
+          current_signup_count: number | null
+          description: string | null
+          end_time: string | null
+          icon: string | null
+          id: string | null
+          instance_slug: string | null
+          meeting_point_name: string | null
+          objectives: Json | null
+          quest_id: string | null
+          safety_notes: string | null
+          scheduled_date: string | null
+          squads_locked: boolean | null
+          start_time: string | null
+          status: Database["public"]["Enums"]["instance_status"] | null
+          target_squad_size: number | null
+          timezone: string | null
+          title: string | null
+          updated_at: string | null
+          what_to_bring: string | null
+        }
+        Insert: {
+          capacity?: number | null
+          check_in_closes_at?: string | null
+          check_in_opens_at?: string | null
+          created_at?: string | null
+          current_signup_count?: number | null
+          description?: string | null
+          end_time?: string | null
+          icon?: string | null
+          id?: string | null
+          instance_slug?: string | null
+          meeting_point_name?: string | null
+          objectives?: Json | null
+          quest_id?: string | null
+          safety_notes?: string | null
+          scheduled_date?: string | null
+          squads_locked?: boolean | null
+          start_time?: string | null
+          status?: Database["public"]["Enums"]["instance_status"] | null
+          target_squad_size?: number | null
+          timezone?: string | null
+          title?: string | null
+          updated_at?: string | null
+          what_to_bring?: string | null
+        }
+        Update: {
+          capacity?: number | null
+          check_in_closes_at?: string | null
+          check_in_opens_at?: string | null
+          created_at?: string | null
+          current_signup_count?: number | null
+          description?: string | null
+          end_time?: string | null
+          icon?: string | null
+          id?: string | null
+          instance_slug?: string | null
+          meeting_point_name?: string | null
+          objectives?: Json | null
+          quest_id?: string | null
+          safety_notes?: string | null
+          scheduled_date?: string | null
+          squads_locked?: boolean | null
+          start_time?: string | null
+          status?: Database["public"]["Enums"]["instance_status"] | null
+          target_squad_size?: number | null
+          timezone?: string | null
+          title?: string | null
+          updated_at?: string | null
+          what_to_bring?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_instances_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quest_instances_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quest_ratings: {
         Row: {
           avg_rating: number | null
@@ -7094,6 +7524,13 @@ export type Database = {
             columns: ["quest_id"]
             isOneToOne: false
             referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
             referencedColumns: ["id"]
           },
         ]
@@ -7150,10 +7587,239 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "quest_signups_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "quest_instances_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "quest_signups_quest_id_fkey"
             columns: ["quest_id"]
             isOneToOne: false
             referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quest_signups_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quests_public: {
+        Row: {
+          age_restriction: string | null
+          base_xp: number | null
+          briefing_html: string | null
+          capacity_total: number | null
+          city: string | null
+          cost_description: string | null
+          created_at: string | null
+          creator_id: string | null
+          creator_name: string | null
+          creator_type: string | null
+          default_capacity: number | null
+          default_duration_minutes: number | null
+          default_squad_size: number | null
+          dress_code: string | null
+          duration_notes: string | null
+          end_datetime: string | null
+          estimated_cost_max: number | null
+          estimated_cost_min: number | null
+          external_ticket_url: string | null
+          full_description: string | null
+          highlights: Json | null
+          icon: string | null
+          id: string | null
+          image_url: string | null
+          is_active: boolean | null
+          is_repeatable: boolean | null
+          is_sponsored: boolean | null
+          is_ticketed: boolean | null
+          meeting_address: string | null
+          meeting_location_name: string | null
+          min_level: number | null
+          min_tree_xp: number | null
+          objectives: string | null
+          org_id: string | null
+          physical_requirements: string | null
+          price_type: Database["public"]["Enums"]["quest_price_type"] | null
+          published_at: string | null
+          rewards: string | null
+          safety_level: Database["public"]["Enums"]["quest_safety_level"] | null
+          safety_notes: string | null
+          short_description: string | null
+          slug: string | null
+          sponsor_id: string | null
+          start_datetime: string | null
+          status: Database["public"]["Enums"]["quest_status"] | null
+          success_criteria: string | null
+          tags: string[] | null
+          theme: string | null
+          theme_color: string | null
+          title: string | null
+          updated_at: string | null
+          visibility: Database["public"]["Enums"]["quest_visibility"] | null
+          what_to_bring: string | null
+        }
+        Insert: {
+          age_restriction?: string | null
+          base_xp?: number | null
+          briefing_html?: string | null
+          capacity_total?: number | null
+          city?: string | null
+          cost_description?: string | null
+          created_at?: string | null
+          creator_id?: string | null
+          creator_name?: string | null
+          creator_type?: string | null
+          default_capacity?: number | null
+          default_duration_minutes?: number | null
+          default_squad_size?: number | null
+          dress_code?: string | null
+          duration_notes?: string | null
+          end_datetime?: string | null
+          estimated_cost_max?: number | null
+          estimated_cost_min?: number | null
+          external_ticket_url?: string | null
+          full_description?: string | null
+          highlights?: Json | null
+          icon?: string | null
+          id?: string | null
+          image_url?: string | null
+          is_active?: boolean | null
+          is_repeatable?: boolean | null
+          is_sponsored?: boolean | null
+          is_ticketed?: boolean | null
+          meeting_address?: string | null
+          meeting_location_name?: string | null
+          min_level?: number | null
+          min_tree_xp?: number | null
+          objectives?: string | null
+          org_id?: string | null
+          physical_requirements?: string | null
+          price_type?: Database["public"]["Enums"]["quest_price_type"] | null
+          published_at?: string | null
+          rewards?: string | null
+          safety_level?:
+            | Database["public"]["Enums"]["quest_safety_level"]
+            | null
+          safety_notes?: string | null
+          short_description?: string | null
+          slug?: string | null
+          sponsor_id?: string | null
+          start_datetime?: string | null
+          status?: Database["public"]["Enums"]["quest_status"] | null
+          success_criteria?: string | null
+          tags?: string[] | null
+          theme?: string | null
+          theme_color?: string | null
+          title?: string | null
+          updated_at?: string | null
+          visibility?: Database["public"]["Enums"]["quest_visibility"] | null
+          what_to_bring?: string | null
+        }
+        Update: {
+          age_restriction?: string | null
+          base_xp?: number | null
+          briefing_html?: string | null
+          capacity_total?: number | null
+          city?: string | null
+          cost_description?: string | null
+          created_at?: string | null
+          creator_id?: string | null
+          creator_name?: string | null
+          creator_type?: string | null
+          default_capacity?: number | null
+          default_duration_minutes?: number | null
+          default_squad_size?: number | null
+          dress_code?: string | null
+          duration_notes?: string | null
+          end_datetime?: string | null
+          estimated_cost_max?: number | null
+          estimated_cost_min?: number | null
+          external_ticket_url?: string | null
+          full_description?: string | null
+          highlights?: Json | null
+          icon?: string | null
+          id?: string | null
+          image_url?: string | null
+          is_active?: boolean | null
+          is_repeatable?: boolean | null
+          is_sponsored?: boolean | null
+          is_ticketed?: boolean | null
+          meeting_address?: string | null
+          meeting_location_name?: string | null
+          min_level?: number | null
+          min_tree_xp?: number | null
+          objectives?: string | null
+          org_id?: string | null
+          physical_requirements?: string | null
+          price_type?: Database["public"]["Enums"]["quest_price_type"] | null
+          published_at?: string | null
+          rewards?: string | null
+          safety_level?:
+            | Database["public"]["Enums"]["quest_safety_level"]
+            | null
+          safety_notes?: string | null
+          short_description?: string | null
+          slug?: string | null
+          sponsor_id?: string | null
+          start_datetime?: string | null
+          status?: Database["public"]["Enums"]["quest_status"] | null
+          success_criteria?: string | null
+          tags?: string[] | null
+          theme?: string | null
+          theme_color?: string | null
+          title?: string | null
+          updated_at?: string | null
+          visibility?: Database["public"]["Enums"]["quest_visibility"] | null
+          what_to_bring?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quests_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quests_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quests_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quests_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quests_sponsor_id_fkey"
+            columns: ["sponsor_id"]
+            isOneToOne: false
+            referencedRelation: "sponsor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quests_sponsor_id_fkey"
+            columns: ["sponsor_id"]
+            isOneToOne: false
+            referencedRelation: "sponsor_profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -7341,6 +8007,66 @@ export type Database = {
           },
         ]
       }
+      venue_offerings_public: {
+        Row: {
+          amenities: string[] | null
+          approval_required: boolean | null
+          available_days: string[] | null
+          available_time_blocks: Json | null
+          capacity: number | null
+          created_at: string | null
+          id: string | null
+          ideal_quest_types: string[] | null
+          sponsor_id: string | null
+          status: string | null
+          venue_name: string | null
+          venue_rules: string | null
+        }
+        Insert: {
+          amenities?: string[] | null
+          approval_required?: boolean | null
+          available_days?: string[] | null
+          available_time_blocks?: Json | null
+          capacity?: number | null
+          created_at?: string | null
+          id?: string | null
+          ideal_quest_types?: string[] | null
+          sponsor_id?: string | null
+          status?: string | null
+          venue_name?: string | null
+          venue_rules?: string | null
+        }
+        Update: {
+          amenities?: string[] | null
+          approval_required?: boolean | null
+          available_days?: string[] | null
+          available_time_blocks?: Json | null
+          capacity?: number | null
+          created_at?: string | null
+          id?: string | null
+          ideal_quest_types?: string[] | null
+          sponsor_id?: string | null
+          status?: string | null
+          venue_name?: string | null
+          venue_rules?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venue_offerings_sponsor_id_fkey"
+            columns: ["sponsor_id"]
+            isOneToOne: false
+            referencedRelation: "sponsor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "venue_offerings_sponsor_id_fkey"
+            columns: ["sponsor_id"]
+            isOneToOne: false
+            referencedRelation: "sponsor_profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       volunteer_applications_safe: {
         Row: {
           created_at: string | null
@@ -7403,6 +8129,10 @@ export type Database = {
       calculate_trust_score: {
         Args: { p_entity_id: string; p_entity_type: string }
         Returns: number
+      }
+      can_use_lore_content: {
+        Args: { target_lore_id: string; usage_type: string }
+        Returns: boolean
       }
       can_view_profile: {
         Args: { _target_id: string; _viewer_id: string }
@@ -7500,6 +8230,14 @@ export type Database = {
         Args: { target_request_id: string }
         Returns: string
       }
+      get_feedback_for_admin: {
+        Args: { target_feedback_id: string }
+        Returns: Json
+      }
+      get_instance_meeting_address: {
+        Args: { target_instance_id: string }
+        Returns: string
+      }
       get_or_create_friend_invite: {
         Args: { p_quest_id: string }
         Returns: {
@@ -7517,6 +8255,10 @@ export type Database = {
       }
       get_org_contact_emails: { Args: { target_org_id: string }; Returns: Json }
       get_pilot_metrics: { Args: { p_pilot_id: string }; Returns: Json }
+      get_quest_emergency_contact: {
+        Args: { target_quest_id: string }
+        Returns: string
+      }
       get_ranked_quests: {
         Args: {
           p_limit?: number
@@ -7562,6 +8304,7 @@ export type Database = {
           next_level_xp: number
         }[]
       }
+      get_venue_address: { Args: { target_venue_id: string }; Returns: string }
       has_org_role: {
         Args: {
           p_org_id: string
@@ -7576,6 +8319,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_user_consent: {
+        Args: { target_consent_type: string; target_user_id: string }
+        Returns: boolean
+      }
       increment_reward_redemptions: {
         Args: { p_reward_id: string }
         Returns: undefined
@@ -7587,16 +8334,26 @@ export type Database = {
         Args: { p_email: string; p_org_id: string }
         Returns: Json
       }
-      log_pii_access: {
-        Args: {
-          p_access_type: string
-          p_accessed_fields?: string[]
-          p_reason?: string
-          p_target_table?: string
-          p_target_user_id?: string
-        }
-        Returns: string
-      }
+      log_pii_access:
+        | {
+            Args: {
+              access_type: string
+              fields_accessed: string[]
+              target_id: string
+              target_table: string
+            }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              p_access_type: string
+              p_accessed_fields?: string[]
+              p_reason?: string
+              p_target_table?: string
+              p_target_user_id?: string
+            }
+            Returns: string
+          }
       log_quest_event: {
         Args: {
           p_actor_id?: string
