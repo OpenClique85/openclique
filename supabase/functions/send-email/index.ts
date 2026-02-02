@@ -333,6 +333,9 @@ const templates: Record<string, (vars: Record<string, string>) => string> = {
   custom: (vars) => vars.content || "",
 };
 
+// Import rate limiting
+import { checkRateLimit, rateLimitResponse, addRateLimitHeaders, RATE_LIMITS, sanitizeEmail, sanitizeString, INPUT_LIMITS } from "../_shared/rate-limit.ts";
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {

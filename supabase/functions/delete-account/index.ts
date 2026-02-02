@@ -28,6 +28,9 @@ interface DeletionRequest {
   feedback: DeletionFeedback;
 }
 
+// Import rate limiting
+import { checkRateLimit, rateLimitResponse, RATE_LIMITS, sanitizeEmail, sanitizeString, sanitizeStringArray } from "../_shared/rate-limit.ts";
+
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -54,11 +57,24 @@ serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
+    // Rate limit account deletion attempts (prevent abuse)
+    const rateCheck = checkRateLimit(user.id, RATE_LIMITS.ACCOUNT_OPS);
+    if (!rateCheck.allowed) {
+      return rateLimitResponse(rateCheck, corsHeaders);
+    }
+
     const body: DeletionRequest = await req.json();
     
     // Verify the request is for the authenticated user
     if (body.userId !== user.id) {
       throw new Error('Unauthorized: User ID mismatch');
+    }
+
+    // Sanitize feedback inputs
+    if (body.feedback) {
+      body.feedback.reasons = sanitizeStringArray(body.feedback.reasons, 10, 100);
+      body.feedback.other_reason = sanitizeString(body.feedback.other_reason, 500) || undefined;
+      body.feedback.feedback = sanitizeString(body.feedback.feedback, 2000) || undefined;
     }
 
     console.log(`Processing deletion request for user: ${user.id}`);
@@ -143,13 +159,14 @@ serve(async (req) => {
         status: 200,
       }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Deletion error:', error);
+    const message = error instanceof Error ? error.message : 'An error occurred';
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: message }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: error.message.includes('Unauthorized') ? 401 : 500,
+        status: message.includes('Unauthorized') ? 401 : 500,
       }
     );
   }

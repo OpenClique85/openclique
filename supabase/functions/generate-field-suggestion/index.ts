@@ -72,15 +72,58 @@ Format as bullet points.`,
 Suggest a format like: "Your phone number (e.g., 512-555-0123) for day-of emergencies"`,
 };
 
+// Import rate limiting
+import { checkRateLimit, rateLimitResponse, RATE_LIMITS, sanitizeString } from "../_shared/rate-limit.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { field_name, field_label, quest_context, current_value } = await req.json() as FieldSuggestionRequest;
+    // Verify authentication
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
-    if (!field_name || !quest_context?.title) {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnon = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const token = authHeader.replace('Bearer ', '');
+    
+    const supabase = createClient(supabaseUrl, supabaseAnon, {
+      auth: { persistSession: false },
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    });
+
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Rate limit AI generation per user (stricter limits)
+    const rateCheck = checkRateLimit(user.id, { 
+      windowMs: 60 * 1000, // 1 minute
+      maxRequests: 10,     // 10 suggestions per minute
+      keyPrefix: 'field-suggest' 
+    });
+    if (!rateCheck.allowed) {
+      return rateLimitResponse(rateCheck, corsHeaders);
+    }
+
+    const body = await req.json() as FieldSuggestionRequest;
+    const { field_name, field_label, quest_context, current_value } = body;
+
+    // Validate and sanitize inputs
+    const cleanFieldName = sanitizeString(field_name, 50);
+    if (!cleanFieldName || !quest_context?.title) {
       return new Response(
         JSON.stringify({ error: 'Missing required fields: field_name and quest_context.title' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

@@ -34,6 +34,9 @@ function getSchoolFromEmail(email: string): string | null {
   return VALID_SCHOOL_DOMAINS[domain] || null;
 }
 
+// Import rate limiting
+import { checkRateLimit, rateLimitResponse, RATE_LIMITS, sanitizeEmail, sanitizeString } from "../_shared/rate-limit.ts";
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
@@ -62,8 +65,29 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Unauthorized");
     }
 
+    // Rate limit verification attempts per user
+    const rateCheck = checkRateLimit(user.id, RATE_LIMITS.VERIFICATION);
+    if (!rateCheck.allowed) {
+      return rateLimitResponse(rateCheck, corsHeaders);
+    }
+
     const body = await req.json();
-    const { action, email, code } = body;
+    const { action } = body;
+    
+    // Sanitize inputs
+    const email = sanitizeEmail(body.email);
+    const code = sanitizeString(body.code, 10);
+
+    // Validate email is provided
+    if (!email) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: "Valid email address is required." 
+        }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
