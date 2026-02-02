@@ -1062,6 +1062,13 @@ export type Database = {
             referencedRelation: "creator_applications"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "creator_invites_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "creator_applications_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       creator_profiles: {
@@ -1373,6 +1380,13 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "eventbrite_connections_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public"
             referencedColumns: ["id"]
           },
           {
@@ -2397,6 +2411,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "org_applications_parent_org_id_fkey"
+            columns: ["parent_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "org_applications_reviewed_by_fkey"
             columns: ["reviewed_by"]
             isOneToOne: false
@@ -2476,10 +2497,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "org_creator_requests_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "creator_profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "org_creator_requests_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_creator_requests_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public"
             referencedColumns: ["id"]
           },
         ]
@@ -2544,6 +2579,13 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_invite_codes_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public"
             referencedColumns: ["id"]
           },
         ]
@@ -2615,6 +2657,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "org_sponsor_requests_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "org_sponsor_requests_quest_id_fkey"
             columns: ["quest_id"]
             isOneToOne: false
@@ -2626,6 +2675,13 @@ export type Database = {
             columns: ["sponsor_id"]
             isOneToOne: false
             referencedRelation: "sponsor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_sponsor_requests_sponsor_id_fkey"
+            columns: ["sponsor_id"]
+            isOneToOne: false
+            referencedRelation: "sponsor_profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -2670,6 +2726,13 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_verified_emails_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public"
             referencedColumns: ["id"]
           },
           {
@@ -2831,6 +2894,13 @@ export type Database = {
             columns: ["parent_org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organizations_parent_org_id_fkey"
+            columns: ["parent_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public"
             referencedColumns: ["id"]
           },
         ]
@@ -3118,6 +3188,13 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "pilot_programs_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       pilot_templates: {
@@ -3327,6 +3404,13 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_organizations_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public"
             referencedColumns: ["id"]
           },
           {
@@ -4166,6 +4250,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "quests_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "quests_required_achievement_id_fkey"
             columns: ["required_achievement_id"]
             isOneToOne: false
@@ -4177,6 +4268,13 @@ export type Database = {
             columns: ["sponsor_id"]
             isOneToOne: false
             referencedRelation: "sponsor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quests_sponsor_id_fkey"
+            columns: ["sponsor_id"]
+            isOneToOne: false
+            referencedRelation: "sponsor_profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -4336,6 +4434,13 @@ export type Database = {
             referencedRelation: "sponsor_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "rewards_sponsor_id_fkey"
+            columns: ["sponsor_id"]
+            isOneToOne: false
+            referencedRelation: "sponsor_profiles_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       sponsor_applications: {
@@ -4425,6 +4530,13 @@ export type Database = {
             referencedRelation: "sponsor_applications"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "sponsor_invites_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "sponsor_applications_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       sponsor_listings: {
@@ -4497,6 +4609,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "sponsor_listings_sponsor_id_fkey"
+            columns: ["sponsor_id"]
+            isOneToOne: false
+            referencedRelation: "sponsor_profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "sponsor_listings_venue_offered_fkey"
             columns: ["venue_offered"]
             isOneToOne: false
@@ -4563,10 +4682,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "sponsor_org_requests_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "sponsor_org_requests_sponsor_id_fkey"
             columns: ["sponsor_id"]
             isOneToOne: false
             referencedRelation: "sponsor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsor_org_requests_sponsor_id_fkey"
+            columns: ["sponsor_id"]
+            isOneToOne: false
+            referencedRelation: "sponsor_profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -4693,6 +4826,13 @@ export type Database = {
             referencedRelation: "sponsor_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "sponsored_quests_sponsor_id_fkey"
+            columns: ["sponsor_id"]
+            isOneToOne: false
+            referencedRelation: "sponsor_profiles_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       sponsorship_proposals: {
@@ -4760,6 +4900,13 @@ export type Database = {
             columns: ["sponsor_id"]
             isOneToOne: false
             referencedRelation: "sponsor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsorship_proposals_sponsor_id_fkey"
+            columns: ["sponsor_id"]
+            isOneToOne: false
+            referencedRelation: "sponsor_profiles_public"
             referencedColumns: ["id"]
           },
           {
@@ -6010,6 +6157,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "user_entitlements_source_org_id_fkey"
+            columns: ["source_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "user_entitlements_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -6450,6 +6604,13 @@ export type Database = {
             referencedRelation: "sponsor_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "venue_offerings_sponsor_id_fkey"
+            columns: ["sponsor_id"]
+            isOneToOne: false
+            referencedRelation: "sponsor_profiles_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       volunteer_applications: {
@@ -6598,6 +6759,132 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_applications_safe: {
+        Row: {
+          created_at: string | null
+          creator_type: string | null
+          id: string | null
+          name: string | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          creator_type?: string | null
+          id?: string | null
+          name?: string | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          creator_type?: string | null
+          id?: string | null
+          name?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
+      creator_invites_safe: {
+        Row: {
+          application_id: string | null
+          created_at: string | null
+          expires_at: string | null
+          id: string | null
+          invited_by: string | null
+          redeemed_at: string | null
+        }
+        Insert: {
+          application_id?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string | null
+          invited_by?: string | null
+          redeemed_at?: string | null
+        }
+        Update: {
+          application_id?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string | null
+          invited_by?: string | null
+          redeemed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_invites_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "creator_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creator_invites_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "creator_applications_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      creator_profiles_public: {
+        Row: {
+          bio: string | null
+          city: string | null
+          created_at: string | null
+          display_name: string | null
+          id: string | null
+          onboarded_at: string | null
+          photo_url: string | null
+          seeking: string[] | null
+          slug: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          bio?: string | null
+          city?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string | null
+          onboarded_at?: string | null
+          photo_url?: string | null
+          seeking?: string[] | null
+          slug?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          bio?: string | null
+          city?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string | null
+          onboarded_at?: string | null
+          photo_url?: string | null
+          seeking?: string[] | null
+          slug?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creator_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       eventbrite_connections_safe: {
         Row: {
           connected_at: string | null
@@ -6641,6 +6928,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "eventbrite_connections_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "eventbrite_connections_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -6655,6 +6949,114 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      organizations_public: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          is_active: boolean | null
+          is_umbrella: boolean | null
+          is_verified: boolean | null
+          logo_url: string | null
+          name: string | null
+          parent_org_id: string | null
+          primary_color: string | null
+          school_affiliation: string | null
+          seeking: string[] | null
+          slug: string | null
+          status: Database["public"]["Enums"]["org_status"] | null
+          type: Database["public"]["Enums"]["organization_type"] | null
+          updated_at: string | null
+          visibility: string | null
+          website_url: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          is_umbrella?: boolean | null
+          is_verified?: boolean | null
+          logo_url?: string | null
+          name?: string | null
+          parent_org_id?: string | null
+          primary_color?: string | null
+          school_affiliation?: string | null
+          seeking?: string[] | null
+          slug?: string | null
+          status?: Database["public"]["Enums"]["org_status"] | null
+          type?: Database["public"]["Enums"]["organization_type"] | null
+          updated_at?: string | null
+          visibility?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          is_umbrella?: boolean | null
+          is_verified?: boolean | null
+          logo_url?: string | null
+          name?: string | null
+          parent_org_id?: string | null
+          primary_color?: string | null
+          school_affiliation?: string | null
+          seeking?: string[] | null
+          slug?: string | null
+          status?: Database["public"]["Enums"]["org_status"] | null
+          type?: Database["public"]["Enums"]["organization_type"] | null
+          updated_at?: string | null
+          visibility?: string | null
+          website_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organizations_parent_org_id_fkey"
+            columns: ["parent_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organizations_parent_org_id_fkey"
+            columns: ["parent_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_applications_safe: {
+        Row: {
+          business_name: string | null
+          category: string | null
+          contact_name: string | null
+          created_at: string | null
+          id: string | null
+          status: string | null
+        }
+        Insert: {
+          business_name?: string | null
+          category?: string | null
+          contact_name?: string | null
+          created_at?: string | null
+          id?: string | null
+          status?: string | null
+        }
+        Update: {
+          business_name?: string | null
+          category?: string | null
+          contact_name?: string | null
+          created_at?: string | null
+          id?: string | null
+          status?: string | null
+        }
+        Relationships: []
       }
       profiles_public: {
         Row: {
@@ -6755,6 +7157,213 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sponsor_applications_safe: {
+        Row: {
+          business_name: string | null
+          contact_name: string | null
+          created_at: string | null
+          id: string | null
+          sponsor_type: string | null
+          status: string | null
+        }
+        Insert: {
+          business_name?: string | null
+          contact_name?: string | null
+          created_at?: string | null
+          id?: string | null
+          sponsor_type?: string | null
+          status?: string | null
+        }
+        Update: {
+          business_name?: string | null
+          contact_name?: string | null
+          created_at?: string | null
+          id?: string | null
+          sponsor_type?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
+      sponsor_invites_safe: {
+        Row: {
+          application_id: string | null
+          created_at: string | null
+          expires_at: string | null
+          id: string | null
+          invited_by: string | null
+          redeemed_at: string | null
+        }
+        Insert: {
+          application_id?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string | null
+          invited_by?: string | null
+          redeemed_at?: string | null
+        }
+        Update: {
+          application_id?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string | null
+          invited_by?: string | null
+          redeemed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsor_invites_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "sponsor_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsor_invites_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "sponsor_applications_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sponsor_profiles_public: {
+        Row: {
+          brand_tone: string | null
+          budget_range: string | null
+          city: string | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          logo_url: string | null
+          name: string | null
+          preferred_quest_types: string[] | null
+          seeking: string[] | null
+          slug: string | null
+          sponsor_type: string | null
+          status: string | null
+          target_audience: Json | null
+          updated_at: string | null
+          user_id: string | null
+          website: string | null
+        }
+        Insert: {
+          brand_tone?: string | null
+          budget_range?: string | null
+          city?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          logo_url?: string | null
+          name?: string | null
+          preferred_quest_types?: string[] | null
+          seeking?: string[] | null
+          slug?: string | null
+          sponsor_type?: string | null
+          status?: string | null
+          target_audience?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
+          website?: string | null
+        }
+        Update: {
+          brand_tone?: string | null
+          budget_range?: string | null
+          city?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          logo_url?: string | null
+          name?: string | null
+          preferred_quest_types?: string[] | null
+          seeking?: string[] | null
+          slug?: string | null
+          sponsor_type?: string | null
+          status?: string | null
+          target_audience?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
+      tier_applications_safe: {
+        Row: {
+          applicant_id: string | null
+          applicant_name: string | null
+          created_at: string | null
+          id: string | null
+          organization_name: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
+          tier: Database["public"]["Enums"]["account_tier"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          applicant_id?: string | null
+          applicant_name?: string | null
+          created_at?: string | null
+          id?: string | null
+          organization_name?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          tier?: Database["public"]["Enums"]["account_tier"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          applicant_id?: string | null
+          applicant_name?: string | null
+          created_at?: string | null
+          id?: string | null
+          organization_name?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          tier?: Database["public"]["Enums"]["account_tier"] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tier_applications_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tier_applications_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      volunteer_applications_safe: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          name: string | null
+          role_interest: string | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          name?: string | null
+          role_interest?: string | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          name?: string | null
+          role_interest?: string | null
+          status?: string | null
+        }
+        Relationships: []
       }
     }
     Functions: {
@@ -6879,6 +7488,14 @@ export type Database = {
         Returns: string
       }
       generate_simple_invite_code: { Args: never; Returns: string }
+      get_application_email: {
+        Args: { table_name: string; target_id: string }
+        Returns: string
+      }
+      get_creator_socials: {
+        Args: { target_creator_id: string }
+        Returns: Json
+      }
       get_deletion_request_email: {
         Args: { target_request_id: string }
         Returns: string
@@ -6898,6 +7515,7 @@ export type Database = {
           needs_picker: boolean
         }[]
       }
+      get_org_contact_emails: { Args: { target_org_id: string }; Returns: Json }
       get_pilot_metrics: { Args: { p_pilot_id: string }; Returns: Json }
       get_ranked_quests: {
         Args: {
@@ -6913,6 +7531,10 @@ export type Database = {
         }[]
       }
       get_signup_phone: { Args: { target_signup_id: string }; Returns: string }
+      get_sponsor_contact_email: {
+        Args: { target_sponsor_id: string }
+        Returns: string
+      }
       get_upcoming_instances: {
         Args: { p_quest_id: string }
         Returns: {
