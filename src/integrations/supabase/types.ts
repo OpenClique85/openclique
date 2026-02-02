@@ -3625,9 +3625,11 @@ export type Database = {
       }
       profiles: {
         Row: {
+          age_verified_at: string | null
           city: string | null
           consent_given_at: string | null
           created_at: string
+          date_of_birth: string | null
           display_name: string
           email: string | null
           id: string
@@ -3639,9 +3641,11 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          age_verified_at?: string | null
           city?: string | null
           consent_given_at?: string | null
           created_at?: string
+          date_of_birth?: string | null
           display_name: string
           email?: string | null
           id: string
@@ -3653,9 +3657,11 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          age_verified_at?: string | null
           city?: string | null
           consent_given_at?: string | null
           created_at?: string
+          date_of_birth?: string | null
           display_name?: string
           email?: string | null
           id?: string
@@ -4065,11 +4071,17 @@ export type Database = {
       quest_signups: {
         Row: {
           cancellation_reason: string | null
+          check_in_lat: number | null
+          check_in_lng: number | null
+          check_in_method: string | null
+          check_in_photo_url: string | null
+          check_in_verified: boolean | null
           checked_in_at: string | null
           completed_at: string | null
           id: string
           instance_id: string | null
           last_activity_at: string | null
+          location_consent_given: boolean | null
           notes_private: string | null
           participant_token: string | null
           phone: string | null
@@ -4082,14 +4094,21 @@ export type Database = {
           user_id: string
           wants_reenlist: boolean | null
           whatsapp_joined: boolean | null
+          xp_awarded_at: string | null
         }
         Insert: {
           cancellation_reason?: string | null
+          check_in_lat?: number | null
+          check_in_lng?: number | null
+          check_in_method?: string | null
+          check_in_photo_url?: string | null
+          check_in_verified?: boolean | null
           checked_in_at?: string | null
           completed_at?: string | null
           id?: string
           instance_id?: string | null
           last_activity_at?: string | null
+          location_consent_given?: boolean | null
           notes_private?: string | null
           participant_token?: string | null
           phone?: string | null
@@ -4102,14 +4121,21 @@ export type Database = {
           user_id: string
           wants_reenlist?: boolean | null
           whatsapp_joined?: boolean | null
+          xp_awarded_at?: string | null
         }
         Update: {
           cancellation_reason?: string | null
+          check_in_lat?: number | null
+          check_in_lng?: number | null
+          check_in_method?: string | null
+          check_in_photo_url?: string | null
+          check_in_verified?: boolean | null
           checked_in_at?: string | null
           completed_at?: string | null
           id?: string
           instance_id?: string | null
           last_activity_at?: string | null
+          location_consent_given?: boolean | null
           notes_private?: string | null
           participant_token?: string | null
           phone?: string | null
@@ -4122,6 +4148,7 @@ export type Database = {
           user_id?: string
           wants_reenlist?: boolean | null
           whatsapp_joined?: boolean | null
+          xp_awarded_at?: string | null
         }
         Relationships: [
           {
@@ -4723,6 +4750,90 @@ export type Database = {
             columns: ["sponsor_id"]
             isOneToOne: false
             referencedRelation: "sponsor_profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sos_alerts: {
+        Row: {
+          admin_notified_at: string | null
+          created_at: string
+          false_alarm: boolean | null
+          id: string
+          location_lat: number | null
+          location_lng: number | null
+          quest_id: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          squad_id: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          admin_notified_at?: string | null
+          created_at?: string
+          false_alarm?: boolean | null
+          id?: string
+          location_lat?: number | null
+          location_lng?: number | null
+          quest_id?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          squad_id?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          admin_notified_at?: string | null
+          created_at?: string
+          false_alarm?: boolean | null
+          id?: string
+          location_lat?: number | null
+          location_lng?: number | null
+          quest_id?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          squad_id?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sos_alerts_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sos_alerts_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sos_alerts_squad_id_fkey"
+            columns: ["squad_id"]
+            isOneToOne: false
+            referencedRelation: "quest_squads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sos_alerts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sos_alerts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -6438,6 +6549,59 @@ export type Database = {
           },
         ]
       }
+      user_blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+          id: string
+          reason: string | null
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_blocks_blocked_id_fkey"
+            columns: ["blocked_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_blocks_blocked_id_fkey"
+            columns: ["blocked_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_blocks_blocker_id_fkey"
+            columns: ["blocker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_blocks_blocker_id_fkey"
+            columns: ["blocker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_consent_log: {
         Row: {
           consent_given: boolean
@@ -6578,6 +6742,100 @@ export type Database = {
           {
             foreignKeyName: "user_personality_types_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_reports: {
+        Row: {
+          action_taken: string | null
+          created_at: string
+          description: string | null
+          id: string
+          priority: string | null
+          reason: string
+          reported_message_id: string | null
+          reported_quest_id: string | null
+          reported_user_id: string | null
+          reporter_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_notes: string | null
+          status: string
+        }
+        Insert: {
+          action_taken?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          priority?: string | null
+          reason: string
+          reported_message_id?: string | null
+          reported_quest_id?: string | null
+          reported_user_id?: string | null
+          reporter_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+        }
+        Update: {
+          action_taken?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          priority?: string | null
+          reason?: string
+          reported_message_id?: string | null
+          reported_quest_id?: string | null
+          reported_user_id?: string | null
+          reporter_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_reports_reported_quest_id_fkey"
+            columns: ["reported_quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_reports_reported_quest_id_fkey"
+            columns: ["reported_quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_reports_reported_user_id_fkey"
+            columns: ["reported_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_reports_reported_user_id_fkey"
+            columns: ["reported_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_reports_reporter_id_fkey"
+            columns: ["reporter_id"]
             isOneToOne: false
             referencedRelation: "profiles_public"
             referencedColumns: ["id"]
@@ -8203,6 +8461,7 @@ export type Database = {
         }
         Returns: number
       }
+      calculate_age: { Args: { dob: string }; Returns: number }
       calculate_trust_score: {
         Args: { p_entity_id: string; p_entity_type: string }
         Returns: number
@@ -8253,6 +8512,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      cleanup_old_location_data: { Args: never; Returns: number }
       confirm_warm_up_readiness: {
         Args: { p_squad_id: string }
         Returns: undefined
@@ -8405,6 +8665,8 @@ export type Database = {
         Returns: undefined
       }
       is_admin: { Args: never; Returns: boolean }
+      is_adult: { Args: { target_user_id: string }; Returns: boolean }
+      is_blocked: { Args: { user_a: string; user_b: string }; Returns: boolean }
       is_clique_member: { Args: { p_clique_id: string }; Returns: boolean }
       is_quest_creator: { Args: { quest_uuid: string }; Returns: boolean }
       is_squad_member: { Args: { p_squad_id: string }; Returns: boolean }
@@ -8462,6 +8724,13 @@ export type Database = {
         Returns: Json
       }
       redeem_org_invite: { Args: { p_code: string }; Returns: Json }
+      round_coordinates: {
+        Args: { lat: number; lng: number }
+        Returns: {
+          rounded_lat: number
+          rounded_lng: number
+        }[]
+      }
       start_squad_warm_up: { Args: { p_squad_id: string }; Returns: undefined }
       submit_warm_up_prompt: {
         Args: { p_response: string; p_squad_id: string }

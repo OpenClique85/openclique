@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Shield, Eye, Users, Sparkles, Trophy } from 'lucide-react';
 import { useSettings } from '@/hooks/useSettings';
 import { DEFAULT_PRIVACY_SETTINGS, type PrivacySettings as PrivacySettingsType } from '@/types/settings';
+import { BlockedUsersSettings } from './BlockedUsersSettings';
 
 export function PrivacySettings() {
   const { settings, updatePrivacy, isUpdating } = useSettings();
@@ -153,6 +154,9 @@ export function PrivacySettings() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Blocked Users */}
+      <BlockedUsersSettings />
     </div>
   );
 }

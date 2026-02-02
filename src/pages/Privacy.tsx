@@ -64,6 +64,32 @@ export default function Privacy() {
                     This policy explains what data we collect, how we use it, and your rights regarding your information.
                     We're committed to giving you control over your data while enabling meaningful real-world connections.
                   </p>
+                  <div className="mt-4 p-4 bg-accent/50 rounded-lg">
+                    <h3 className="font-semibold text-foreground mb-2">Our Core Principles:</h3>
+                    <ul className="list-disc pl-4 space-y-1 text-sm">
+                      <li><strong>Opt-In, Never Opt-Out:</strong> You must actively choose to share data</li>
+                      <li><strong>Clear Language:</strong> No legal jargon — we explain in plain English</li>
+                      <li><strong>Minimal Collection:</strong> We only collect what we actually need</li>
+                      <li><strong>User Control:</strong> View, export, and delete your data anytime</li>
+                      <li><strong>Transparency:</strong> We always explain WHY before asking</li>
+                    </ul>
+                  </div>
+                </section>
+
+                {/* ============ SECTION: Eligibility ============ */}
+                <section>
+                  <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
+                    Eligibility (18+ Requirement)
+                  </h2>
+                  <p>
+                    {BRAND.name} is intended for adults aged 18 and older. During signup, we collect 
+                    your date of birth to verify your age. If you are under 18, you cannot create an account.
+                  </p>
+                  <p className="mt-4">
+                    <strong>We do not knowingly collect data from minors.</strong> If we learn that we have 
+                    collected personal information from someone under 18, we will delete that information 
+                    and terminate the account.
+                  </p>
                 </section>
 
                 {/* ============ SECTION: Profile Visibility ============ */}
@@ -89,9 +115,9 @@ export default function Privacy() {
                     </li>
                   </ul>
                   <p className="mt-4">
-                    <strong>What's never publicly exposed:</strong> Your email address, notification preferences, 
-                    and detailed settings are never visible to other users — only to you and our admin team when 
-                    providing support.
+                    <strong>What's never publicly exposed:</strong> Your email address, date of birth, notification 
+                    preferences, and detailed settings are never visible to other users — only to you and our admin 
+                    team when providing support.
                   </p>
                 </section>
 
@@ -101,19 +127,36 @@ export default function Privacy() {
                     What We Collect & Why
                   </h2>
                   <p>We collect only what's necessary to help you find your people:</p>
-                  <ul className="list-disc pl-6 space-y-2 mt-4">
-                    <li>
-                      <strong>Account information:</strong> Email (for authentication and important updates), 
-                      display name, and city (to show local quests)
-                    </li>
-                    <li>
-                      <strong>Quest activity:</strong> Which quests you join, your feedback, and completion status 
-                      — used to suggest relevant future quests
-                    </li>
-                    <li>
-                      <strong>Privacy-respecting analytics:</strong> Anonymized and aggregated usage data to 
-                      improve the platform (pages visited, feature usage)
-                    </li>
+                  
+                  <h3 className="font-semibold text-foreground mt-4 mb-2">Account Information:</h3>
+                  <ul className="list-disc pl-6 space-y-2">
+                    <li><strong>Email address</strong> (required for login and important updates)</li>
+                    <li><strong>Display name</strong> (public, visible to squad members)</li>
+                    <li><strong>Date of birth</strong> (required for age verification, never shared)</li>
+                    <li><strong>City</strong> (to show local quests)</li>
+                    <li><strong>Profile photo</strong> (optional)</li>
+                  </ul>
+
+                  <h3 className="font-semibold text-foreground mt-4 mb-2">Quest Participation:</h3>
+                  <ul className="list-disc pl-6 space-y-2">
+                    <li>Quests you sign up for</li>
+                    <li>Attendance records (check-in timestamps)</li>
+                    <li>Approximate location IF you opt-in to location-verified check-in</li>
+                    <li>XP and achievement progress</li>
+                  </ul>
+
+                  <h3 className="font-semibold text-foreground mt-4 mb-2">Communications:</h3>
+                  <ul className="list-disc pl-6 space-y-2">
+                    <li>Messages you send in quest group chats</li>
+                    <li>Reports you submit about other users</li>
+                    <li>Feedback you provide after quests</li>
+                  </ul>
+
+                  <h3 className="font-semibold text-foreground mt-4 mb-2">Technical Data:</h3>
+                  <ul className="list-disc pl-6 space-y-2">
+                    <li>Device type and browser</li>
+                    <li>IP address (for security and fraud prevention)</li>
+                    <li>Usage analytics (anonymized)</li>
                   </ul>
                 </section>
 
@@ -285,6 +328,9 @@ export default function Privacy() {
                       <strong>Active accounts:</strong> Data is retained while your account is active
                     </li>
                     <li>
+                      <strong>Location data:</strong> Automatically deleted after 90 days regardless of account status
+                    </li>
+                    <li>
                       <strong>After deletion request:</strong> Data is permanently removed 7 days after your deletion request (unless cancelled)
                     </li>
                     <li>
@@ -292,6 +338,9 @@ export default function Privacy() {
                     </li>
                     <li>
                       <strong>Analytics data:</strong> Anonymized and aggregated — contains no personal identifiers
+                    </li>
+                    <li>
+                      <strong>Safety records:</strong> Ban records and moderation history retained for 7 years for legal/safety purposes
                     </li>
                   </ul>
                   <p className="mt-4">
