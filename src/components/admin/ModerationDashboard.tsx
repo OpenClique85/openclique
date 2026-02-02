@@ -1,5 +1,5 @@
 /**
- * ModerationDashboard - Admin panel for reviewing flags and trust scores
+ * ModerationDashboard - Admin panel for reviewing flags, reports, SOS alerts, and trust scores
  */
 
 import { useState } from 'react';
@@ -40,6 +40,8 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { AdminSOSAlertsPanel } from './AdminSOSAlertsPanel';
+import { AdminReportsQueuePanel } from './AdminReportsQueuePanel';
 
 interface ModerationFlag {
   id: string;
@@ -178,13 +180,20 @@ export function ModerationDashboard() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header with Actions */}
+    <Tabs defaultValue="overview" className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold flex items-center gap-2">
-          <Shield className="h-5 w-5 text-primary" />
-          Moderation & Trust
-        </h2>
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="sos-alerts" className="gap-1">
+            <AlertTriangle className="h-3 w-3" />
+            SOS Alerts
+          </TabsTrigger>
+          <TabsTrigger value="user-reports" className="gap-1">
+            <Flag className="h-3 w-3" />
+            User Reports
+          </TabsTrigger>
+          <TabsTrigger value="flags">Legacy Flags</TabsTrigger>
+        </TabsList>
         <Button 
           variant="outline" 
           size="sm"
@@ -200,7 +209,68 @@ export function ModerationDashboard() {
         </Button>
       </div>
 
-      {/* Trust Score Overview */}
+      {/* Overview Tab */}
+      <TabsContent value="overview" className="space-y-6">
+        {/* Trust Score Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card>
+            <CardContent className="pt-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
+                  <User className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{trustStats?.users.avgScore.toFixed(1) || '—'}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Avg User Trust ({trustStats?.users.count || 0} tracked)
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-green-500/10 text-green-500">
+                  <Shield className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{trustStats?.orgs.avgScore.toFixed(1) || '—'}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Avg Org Trust ({trustStats?.orgs.count || 0} tracked)
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-amber-500/10 text-amber-500">
+                  <Flag className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{pendingFlags?.length || 0}</p>
+                  <p className="text-sm text-muted-foreground">Pending Reviews</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </TabsContent>
+
+      {/* SOS Alerts Tab */}
+      <TabsContent value="sos-alerts">
+        <AdminSOSAlertsPanel />
+      </TabsContent>
+
+      {/* User Reports Tab */}
+      <TabsContent value="user-reports">
+        <AdminReportsQueuePanel />
+      </TabsContent>
+
+      {/* Legacy Flags Tab */}
+      <TabsContent value="flags" className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardContent className="pt-4">
@@ -388,6 +458,7 @@ export function ModerationDashboard() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+      </TabsContent>
+    </Tabs>
   );
 }

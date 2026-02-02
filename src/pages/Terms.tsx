@@ -186,43 +186,85 @@ export default function Terms() {
                 {/* This section has an anchor: #safety */}
                 <section id="safety">
                   <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
-                    Safety & Trust
+                    Safety & Assumption of Risk
                   </h2>
                   <p className="mb-4">
-                    Safety is our top priority. While we design quests with safety in mind, {BRAND.name} facilitates 
-                    real-world meetups, and you are responsible for your own safety.
+                    {BRAND.name} facilitates real-world meetups with other users. By participating in quests, 
+                    you acknowledge and agree to the following:
                   </p>
                   
+                  {/* Safety Responsibilities */}
+                  <h3 className="font-display text-lg font-semibold text-foreground mt-6 mb-3">
+                    Your Safety Responsibilities
+                  </h3>
+                  <ul className="list-disc pl-6 space-y-2">
+                    <li><strong>YOU</strong> are responsible for your own safety and well-being</li>
+                    <li><strong>YOU</strong> should meet in public places and trust your instincts</li>
+                    <li><strong>YOU</strong> should tell a friend where you're going</li>
+                    <li><strong>YOU</strong> should never share sensitive personal information immediately</li>
+                    <li><strong>YOU</strong> should report concerning behavior to {BRAND.name} immediately</li>
+                  </ul>
+
+                  {/* What We Don't Do */}
+                  <h3 className="font-display text-lg font-semibold text-foreground mt-6 mb-3">
+                    What We Do NOT Do
+                  </h3>
+                  <ul className="list-disc pl-6 space-y-2">
+                    <li>We do NOT conduct background checks on users</li>
+                    <li>We do NOT verify identities beyond email confirmation</li>
+                    <li>We do NOT supervise or monitor quests in-person</li>
+                    <li>We do NOT guarantee the safety of any interaction</li>
+                  </ul>
+
+                  <div className="mt-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+                    <p className="text-sm font-medium text-destructive">
+                      <strong>Assumption of Risk:</strong> You assume all risks associated with meeting strangers 
+                      through {BRAND.name}, including but not limited to personal injury, property damage, or 
+                      emotional distress.
+                    </p>
+                  </div>
+
                   {/* What We Do */}
                   <h3 className="font-display text-lg font-semibold text-foreground mt-6 mb-3">
                     What We Do
                   </h3>
                   <ul className="list-disc pl-6 space-y-2">
-                    <li>All participants go through a verification process</li>
+                    <li>All participants go through age verification (18+)</li>
                     <li>Quests happen in public spaces with clear meetup points</li>
-                    <li>BUGGS provides real-time coordination and check-ins</li>
                     <li>Community Guidelines that everyone agrees to before joining</li>
                     <li>Rating and feedback system after each quest</li>
-                    <li>Dedicated reporting channel for concerns</li>
+                    <li>24-hour report review and moderation</li>
+                    <li>Emergency SOS button for urgent situations</li>
                   </ul>
-                  
-                  {/* What You Should Do */}
-                  <h3 className="font-display text-lg font-semibold text-foreground mt-6 mb-3">
-                    What You Should Do
-                  </h3>
-                  <ul className="list-disc pl-6 space-y-2">
-                    <li>Meet in public spaces for your first interactions</li>
-                    <li>Share your plans with someone you trust</li>
-                    <li>Trust your instincts. If something feels wrong, leave</li>
-                    <li>Keep your phone charged and accessible</li>
-                    <li>Report any concerning behavior immediately</li>
-                  </ul>
+
                   <p className="mt-4">
                     <strong>Reporting concerns:</strong> Email us at{' '}
                     <a href="mailto:hello@openclique.com" className="text-primary hover:underline">
                       hello@openclique.com
                     </a>{' '}
                     or use the in-app reporting feature. We review every report within 24 hours.
+                  </p>
+                </section>
+
+                {/* ============ SECTION: Prohibited Conduct ============ */}
+                <section>
+                  <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
+                    Prohibited Conduct
+                  </h2>
+                  <p className="mb-4">You agree NOT to use {BRAND.name} to:</p>
+                  <ul className="list-disc pl-6 space-y-2">
+                    <li>Harass, threaten, intimidate, or harm others</li>
+                    <li>Share explicit, violent, or illegal content</li>
+                    <li>Impersonate others or provide false information (including false age)</li>
+                    <li>Spam, advertise, or solicit other users</li>
+                    <li>Coordinate illegal activities</li>
+                    <li>Circumvent safety features or reporting mechanisms</li>
+                    <li>Access other users' accounts or data</li>
+                    <li>Share other users' personal information without consent</li>
+                  </ul>
+                  <p className="mt-4">
+                    Violations may result in account suspension or permanent ban. We cooperate with 
+                    law enforcement when required by law.
                   </p>
                 </section>
 
@@ -242,10 +284,52 @@ export default function Terms() {
                   <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
                     Limitation of Liability
                   </h2>
+                  <p className="mb-4">To the maximum extent permitted by law:</p>
+                  <p className="mb-4">
+                    {BRAND.name} is provided "as is" without warranties of any kind. We do not guarantee 
+                    that the service will be uninterrupted, secure, or error-free.
+                  </p>
+                  <p className="mb-4">
+                    {BRAND.name} and its founders, employees, and partners <strong>SHALL NOT BE LIABLE</strong> for:
+                  </p>
+                  <ul className="list-disc pl-6 space-y-2">
+                    <li>Personal injury, assault, or harm occurring during quests</li>
+                    <li>Property damage or theft</li>
+                    <li>Emotional distress or psychological harm</li>
+                    <li>Lost data or service interruptions</li>
+                    <li>Actions or conduct of other users</li>
+                    <li>Any indirect, incidental, special, or consequential damages</li>
+                  </ul>
+                  <p className="mt-4">
+                    Your sole remedy for dissatisfaction is to stop using {BRAND.name}.
+                  </p>
+                  <p className="mt-4">
+                    <strong>Maximum Liability:</strong> If we are found liable despite these limitations, our 
+                    total liability shall not exceed $100 or the amount you paid us in the past 12 months, 
+                    whichever is greater.
+                  </p>
+                  <p className="mt-4 text-sm text-muted-foreground">
+                    Some states do not allow these limitations, so they may not apply to you.
+                  </p>
+                </section>
+
+                {/* ============ SECTION: Dispute Resolution ============ */}
+                <section>
+                  <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
+                    Governing Law & Disputes
+                  </h2>
+                  <p className="mb-4">
+                    These Terms are governed by the laws of the State of Texas, without regard to 
+                    conflict of law principles.
+                  </p>
+                  <p className="mb-4">
+                    Any disputes shall be resolved through binding arbitration in Austin, Texas, rather 
+                    than in court. You and {BRAND.name} both waive the right to a jury trial or class 
+                    action lawsuit.
+                  </p>
                   <p>
-                    To the maximum extent permitted by law, {BRAND.name} and its founders, employees, and 
-                    partners shall not be liable for any indirect, incidental, special, consequential, or 
-                    punitive damages resulting from your use of the Service.
+                    <strong>Exception:</strong> Either party may seek injunctive relief in court if 
+                    necessary to protect intellectual property or confidential information.
                   </p>
                 </section>
 
