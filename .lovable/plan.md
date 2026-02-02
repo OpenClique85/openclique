@@ -1,152 +1,98 @@
 
-# Fix Invite Code URLs and Admin Access ✅ COMPLETED
+# Fix Google OAuth "Access Denied" Error
 
-## Status: Implemented on 2026-01-28
+## Problem Summary
 
-1. **Invite links point to wrong domain**: When copying invite links from the admin panel (or anywhere), they use `window.location.origin` which returns the current domain (e.g., Lovable preview URL) instead of the production URL `https://openclique.lovable.app`
-
-2. **Anthony's access**: Anthony (anthony.cami@openclique.net) already has the `admin` role in the database. When he visits the Creator Dashboard, the auto-provisioning logic will create his creator profile automatically.
-
----
+A user experienced an "access denied" error when trying to create an account using their Gmail. This is happening because the Google OAuth implementation is incorrectly configured for Lovable Cloud.
 
 ## Root Cause
 
-Multiple components generate invite links using `window.location.origin`:
+The current implementation uses:
+```typescript
+// In src/hooks/useAuth.tsx (line 161-168)
+const signInWithGoogle = async () => {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: `${window.location.origin}/my-quests`
+    }
+  });
+  return { error: error as Error | null };
+};
+```
 
-| File | Line | Current Code |
-|------|------|--------------|
-| `InviteCodesManager.tsx` | 63 | `${window.location.origin}/auth?club=${code}` |
-| `InviteCodesManager.tsx` | 346 | `const origin = window.location.origin` |
-| `InviteCodesTab.tsx` | 185 | `${window.location.origin}/auth?club=${code}` |
-| `SocialChairOnboarding.tsx` | 118 | `${window.location.origin}/auth?org_invite=...` |
-| `CliqueSettingsModal.tsx` | 147 | `${window.location.origin}/join/...` |
-| `CliqueDetail.tsx` | 232 | `${window.location.origin}/join/...` |
-| `CliqueCreate.tsx` | 166, 181 | `${window.location.origin}/join/...` |
-| `useFriendInvite.ts` | 84 | `${window.location.origin}/auth?invite=...` |
-
-Only `LinksManager.tsx` correctly uses a hardcoded `PUBLISHED_URL`.
+This directly calls the Supabase OAuth flow, but since the project is on **Lovable Cloud**, it must use the managed OAuth solution instead.
 
 ---
 
 ## Solution
 
-### Phase 1: Create Centralized URL Config
+### Step 1: Configure Lovable Cloud Social Auth
 
-Create a shared utility that provides the correct production URL:
+Use the `supabase--configure-social-auth` tool to:
+- Generate the `src/integrations/lovable/index.ts` module
+- Install the `@lovable.dev/cloud-auth-js` package
+- Set up managed Google OAuth
 
-```text
-File: src/lib/config.ts
+### Step 2: Update the Auth Hook
 
-- Export PUBLISHED_URL constant: 'https://openclique.lovable.app'
-- Export helper function: getPublishedUrl(path: string) => full URL
-```
-
-### Phase 2: Update All Invite Link Generators
-
-Update 8 files to import and use the centralized config:
-
-1. `src/components/admin/InviteCodesManager.tsx`
-   - Replace `window.location.origin` with `PUBLISHED_URL`
-   - Update `getInviteUrl()` function
-   - Update `OrgCodesSection` copy function
-   
-2. `src/components/clubs/InviteCodesTab.tsx`
-   - Update `getInviteUrl()` function
-
-3. `src/components/clubs/SocialChairOnboarding.tsx`
-   - Update `copyInviteLink()` function
-
-4. `src/components/cliques/CliqueSettingsModal.tsx`
-   - Update invite link generation
-
-5. `src/pages/CliqueDetail.tsx`
-   - Update `handleCopyInviteLink()`
-
-6. `src/pages/CliqueCreate.tsx`
-   - Update invite link display and copy
-
-7. `src/hooks/useFriendInvite.ts`
-   - Update `shareLink` generation
-
-8. `src/components/admin/LinksManager.tsx`
-   - Import from centralized config (remove local constant)
-
-### Phase 3: Verify Anthony's Access
-
-Anthony already has the `admin` role. The existing auto-provisioning logic in `CreatorDashboard.tsx` will:
-- Detect he's an admin without a creator profile
-- Auto-create his creator profile with status `active`
-- Add `quest_creator` role
-
-No database changes needed - he just needs to visit `/creator` once.
-
----
-
-## Technical Details
-
-### New File: src/lib/config.ts
+Modify `src/hooks/useAuth.tsx` to use the Lovable Cloud auth:
 
 ```typescript
-export const PUBLISHED_URL = 'https://openclique.lovable.app';
+// Add import
+import { lovable } from "@/integrations/lovable/index";
 
-export function getPublishedUrl(path: string): string {
-  return `${PUBLISHED_URL}${path.startsWith('/') ? path : '/' + path}`;
-}
-```
-
-### Example Update: InviteCodesManager.tsx
-
-```typescript
-// Before
-const getInviteUrl = (code: string, type: InviteCodeType) => {
-  const origin = window.location.origin;
-  switch (type) {
-    case 'creator':
-      return `${origin}/creators/onboard?token=${code}`;
-    // ...
-  }
-};
-
-// After
-import { PUBLISHED_URL } from '@/lib/config';
-
-const getInviteUrl = (code: string, type: InviteCodeType) => {
-  switch (type) {
-    case 'creator':
-      return `${PUBLISHED_URL}/creators/onboard?token=${code}`;
-    // ...
-  }
+// Update signInWithGoogle function
+const signInWithGoogle = async () => {
+  const { error } = await lovable.auth.signInWithOAuth("google", {
+    redirect_uri: window.location.origin,
+  });
+  return { error: error as Error | null };
 };
 ```
 
 ---
-
-## Files to Create
-
-| File | Purpose |
-|------|---------|
-| `src/lib/config.ts` | Centralized app configuration |
 
 ## Files to Modify
 
 | File | Changes |
 |------|---------|
-| `InviteCodesManager.tsx` | Use `PUBLISHED_URL` for all invite links |
-| `InviteCodesTab.tsx` | Use `PUBLISHED_URL` |
-| `SocialChairOnboarding.tsx` | Use `PUBLISHED_URL` |
-| `CliqueSettingsModal.tsx` | Use `PUBLISHED_URL` |
-| `CliqueDetail.tsx` | Use `PUBLISHED_URL` |
-| `CliqueCreate.tsx` | Use `PUBLISHED_URL` |
-| `useFriendInvite.ts` | Use `PUBLISHED_URL` |
-| `LinksManager.tsx` | Import from config (DRY) |
+| `src/hooks/useAuth.tsx` | Import lovable module, update `signInWithGoogle()` to use `lovable.auth.signInWithOAuth()` |
+
+## Files to Generate (via tool)
+
+| File | Generated By |
+|------|--------------|
+| `src/integrations/lovable/index.ts` | `configure-social-auth` tool |
+
+---
+
+## Technical Details
+
+### Why Lovable Cloud Managed OAuth?
+
+Lovable Cloud automatically manages Google OAuth credentials:
+- No need to create a Google Cloud project
+- No need to configure OAuth consent screen
+- No need to manage client IDs/secrets
+- Redirect URLs are automatically configured
+
+### Key Differences
+
+| Aspect | Current (Broken) | Fixed |
+|--------|------------------|-------|
+| Import | `supabase` client | `lovable` module |
+| Method | `supabase.auth.signInWithOAuth()` | `lovable.auth.signInWithOAuth()` |
+| Options | `redirectTo` | `redirect_uri` |
+| Provider | `{ provider: 'google' }` | `"google"` as first arg |
 
 ---
 
 ## Verification Steps
 
 After implementation:
-1. Go to Admin > Codes & Keys
-2. Create a new invite code
-3. Click copy link - should be `https://openclique.lovable.app/...`
-4. Test from preview environment to confirm it still uses production URL
-5. Have Anthony visit `/creator` to auto-provision his creator profile
+1. Go to the Auth page (`/auth`)
+2. Click "Continue with Google"
+3. Should redirect to Google OAuth consent screen
+4. After authenticating, should redirect back to `/my-quests`
+5. User should be logged in with their Google account
