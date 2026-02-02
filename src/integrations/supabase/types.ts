@@ -6817,6 +6817,7 @@ export type Database = {
           title: string
         }[]
       }
+      get_user_email: { Args: { target_user_id: string }; Returns: string }
       get_user_level: {
         Args: { p_user_id: string }
         Returns: {
