@@ -103,6 +103,48 @@ export default function Terms() {
                   </ul>
                 </section>
 
+                {/* ============ SECTION: Location Data & Check-In ============ */}
+                <section>
+                  <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
+                    Location Data & Check-In
+                  </h2>
+                  <p className="mb-4">
+                    {BRAND.name} offers optional location-based features to enhance your quest experience:
+                  </p>
+                  <ul className="list-disc pl-6 space-y-2 mt-4">
+                    <li>
+                      <strong>Quest Discovery:</strong> We use your city to show relevant local quests
+                    </li>
+                    <li>
+                      <strong>Check-In Verification:</strong> When you arrive at a quest, you may check in using various methods:
+                      <ul className="list-disc pl-6 space-y-1 mt-2">
+                        <li>Manual check-in (tap a button)</li>
+                        <li>QR code scan (scan host's code)</li>
+                        <li>Photo upload (share proof of attendance)</li>
+                        <li>Geolocation check-in (share your approximate location)</li>
+                      </ul>
+                    </li>
+                  </ul>
+                  <p className="mt-4">
+                    By using geolocation check-in, you consent to {BRAND.name} temporarily accessing your device's 
+                    location to verify you are at or near the quest venue. This location data:
+                  </p>
+                  <ul className="list-disc pl-6 space-y-2 mt-4">
+                    <li>Is used only to confirm attendance</li>
+                    <li>Is immediately converted to approximate coordinates</li>
+                    <li>Is not stored in precise form</li>
+                    <li>Is not shared with other users</li>
+                  </ul>
+                  <p className="mt-4">
+                    You are never required to use geolocation. Alternative check-in methods are always available. 
+                    If you deny location permission on your device, you can still participate in all quests using other check-in methods.
+                  </p>
+                  <p className="mt-4">
+                    For details on how we handle your location data, see our{' '}
+                    <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a>.
+                  </p>
+                </section>
+
                 {/* ============ SECTION: Community Guidelines ============ */}
                 {/* This section has an anchor: #community-guidelines */}
                 <section id="community-guidelines">

@@ -117,6 +117,37 @@ export default function Privacy() {
                   </ul>
                 </section>
 
+                {/* ============ SECTION: Location Data ============ */}
+                <section>
+                  <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
+                    Location Data
+                  </h2>
+                  <p>We collect location information to help you discover and attend local quests:</p>
+                  <ul className="list-disc pl-6 space-y-2 mt-4">
+                    <li>
+                      <strong>City-level location:</strong> When you sign up, you provide your city so we can 
+                      show quests happening near you. This is visible on your profile based on your visibility settings.
+                    </li>
+                    <li>
+                      <strong>Approximate check-in location (optional):</strong> If you choose to use geolocation 
+                      check-in when arriving at a quest, we may collect your approximate location to verify attendance. 
+                      This is entirely optional — you can always check in using manual confirmation, QR code, or photo upload instead.
+                    </li>
+                  </ul>
+                  <p className="mt-4"><strong>How we handle your location data:</strong></p>
+                  <ul className="list-disc pl-6 space-y-2 mt-4">
+                    <li>We never share your precise location with other users</li>
+                    <li>Precise GPS coordinates (if collected during check-in) are converted to approximate location and the precise data is discarded</li>
+                    <li>Your city is the only location information visible to other members (based on your privacy settings)</li>
+                    <li>We do not track your location in the background or when you're not actively checking in</li>
+                    <li>You can update your city at any time in your profile settings</li>
+                  </ul>
+                  <p className="mt-4">
+                    You can manage your location preferences through your device's permissions. 
+                    Denying location access will not prevent you from using {BRAND.name} — alternative check-in methods are always available.
+                  </p>
+                </section>
+
                 {/* ============ SECTION: How We Use Your Data ============ */}
                 <section>
                   <h2 className="font-display text-2xl font-semibold text-foreground mb-4">
