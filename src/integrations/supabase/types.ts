@@ -2899,6 +2899,13 @@ export type Database = {
             referencedRelation: "quest_signups"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "participant_proofs_signup_id_fkey"
+            columns: ["signup_id"]
+            isOneToOne: false
+            referencedRelation: "quest_signups_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       partner_applications: {
@@ -5103,6 +5110,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "squad_members_signup_id_fkey"
+            columns: ["signup_id"]
+            isOneToOne: false
+            referencedRelation: "quest_signups_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "squad_members_squad_id_fkey"
             columns: ["squad_id"]
             isOneToOne: false
@@ -6652,6 +6666,66 @@ export type Database = {
           },
         ]
       }
+      quest_signups_public: {
+        Row: {
+          checked_in_at: string | null
+          completed_at: string | null
+          id: string | null
+          instance_id: string | null
+          last_activity_at: string | null
+          proof_submitted_at: string | null
+          quest_id: string | null
+          signed_up_at: string | null
+          status: Database["public"]["Enums"]["signup_status"] | null
+          updated_at: string | null
+          user_id: string | null
+          whatsapp_joined: boolean | null
+        }
+        Insert: {
+          checked_in_at?: string | null
+          completed_at?: string | null
+          id?: string | null
+          instance_id?: string | null
+          last_activity_at?: string | null
+          proof_submitted_at?: string | null
+          quest_id?: string | null
+          signed_up_at?: string | null
+          status?: Database["public"]["Enums"]["signup_status"] | null
+          updated_at?: string | null
+          user_id?: string | null
+          whatsapp_joined?: boolean | null
+        }
+        Update: {
+          checked_in_at?: string | null
+          completed_at?: string | null
+          id?: string | null
+          instance_id?: string | null
+          last_activity_at?: string | null
+          proof_submitted_at?: string | null
+          quest_id?: string | null
+          signed_up_at?: string | null
+          status?: Database["public"]["Enums"]["signup_status"] | null
+          updated_at?: string | null
+          user_id?: string | null
+          whatsapp_joined?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_signups_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "quest_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quest_signups_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       approve_squad: {
@@ -6800,6 +6874,7 @@ export type Database = {
           title: string
         }[]
       }
+      get_signup_phone: { Args: { target_signup_id: string }; Returns: string }
       get_upcoming_instances: {
         Args: { p_quest_id: string }
         Returns: {
