@@ -12,17 +12,45 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Import rate limiting
+import { checkRateLimit, rateLimitResponse, RATE_LIMITS, sanitizeString, isValidUUID, INPUT_LIMITS } from "../_shared/rate-limit.ts";
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { instance_id, target, message, squad_ids, sender_id } = await req.json();
+    const body = await req.json();
+    const { instance_id, target, message, squad_ids, sender_id } = body;
 
+    // Validate required fields and types
     if (!instance_id || !target || !message || !sender_id) {
       return new Response(
         JSON.stringify({ error: "instance_id, target, message, and sender_id are required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate UUIDs
+    if (!isValidUUID(instance_id) || !isValidUUID(sender_id)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid UUID format" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Rate limit broadcasts per sender
+    const rateCheck = checkRateLimit(sender_id, RATE_LIMITS.BROADCAST);
+    if (!rateCheck.allowed) {
+      return rateLimitResponse(rateCheck, corsHeaders);
+    }
+
+    // Sanitize message
+    const sanitizedMessage = sanitizeString(message, INPUT_LIMITS.MESSAGE);
+    if (!sanitizedMessage) {
+      return new Response(
+        JSON.stringify({ error: "Message cannot be empty" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -91,11 +119,11 @@ serve(async (req) => {
       user_id: userId,
       type: "broadcast",
       title: "Message from Social Chair",
-      body: message.slice(0, 200),
+      body: sanitizedMessage.slice(0, 200),
       metadata: {
         instance_id,
         sender_id,
-        full_message: message,
+        full_message: sanitizedMessage,
       },
     }));
 
@@ -119,10 +147,11 @@ serve(async (req) => {
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error in send-broadcast:", error);
+    const message = error instanceof Error ? error.message : "Internal server error";
     return new Response(
-      JSON.stringify({ error: error.message || "Internal server error" }),
+      JSON.stringify({ error: message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

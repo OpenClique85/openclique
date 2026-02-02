@@ -74,3 +74,24 @@ verify_jwt = false
 
 [functions.generate-field-suggestion]
 verify_jwt = false
+
+[functions.delete-account]
+verify_jwt = false
+
+[functions.export-user-data]
+verify_jwt = false
+
+[functions.notify-clique-members]
+verify_jwt = false
+
+[functions.notify-quest-approval]
+verify_jwt = false
+
+[functions.send-broadcast]
+verify_jwt = false
+
+[functions.generate-retroactive-drafts]
+verify_jwt = false
+
+[functions.eventbrite-oauth-callback]
+verify_jwt = false

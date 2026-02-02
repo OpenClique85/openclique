@@ -12,20 +12,46 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Import rate limiting
+import { checkRateLimit, rateLimitResponse, sanitizeString, isValidUUID, INPUT_LIMITS } from "../_shared/rate-limit.ts";
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { squad_id, notification_type, title, body, metadata, exclude_user_ids } = await req.json();
+    const body = await req.json();
+    const { squad_id, notification_type, title, body: notifBody, metadata, exclude_user_ids } = body;
 
-    if (!squad_id || !notification_type || !title || !body) {
+    if (!squad_id || !notification_type || !title || !notifBody) {
       return new Response(
         JSON.stringify({ error: "squad_id, notification_type, title, and body are required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // Validate UUID
+    if (!isValidUUID(squad_id)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid squad_id format" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Rate limit notifications per squad
+    const rateCheck = checkRateLimit(squad_id, { 
+      windowMs: 60 * 1000, // 1 minute
+      maxRequests: 10,      // 10 notifications per minute per squad
+      keyPrefix: 'notify-clique'
+    });
+    if (!rateCheck.allowed) {
+      return rateLimitResponse(rateCheck, corsHeaders);
+    }
+
+    // Sanitize inputs
+    const sanitizedTitle = sanitizeString(title, INPUT_LIMITS.TITLE);
+    const sanitizedBody = sanitizeString(notifBody, INPUT_LIMITS.MESSAGE);
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -72,8 +98,8 @@ serve(async (req) => {
     const notifications = recipientIds.map((userId) => ({
       user_id: userId,
       type: notification_type,
-      title,
-      body: body.slice(0, 200),
+      title: sanitizedTitle,
+      body: (sanitizedBody || "").slice(0, 200),
       metadata: {
         ...metadata,
         squad_id,
@@ -98,10 +124,11 @@ serve(async (req) => {
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error in notify-clique-members:", error);
+    const message = error instanceof Error ? error.message : "Internal server error";
     return new Response(
-      JSON.stringify({ error: error.message || "Internal server error" }),
+      JSON.stringify({ error: message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
