@@ -121,7 +121,7 @@ export function useSettings() {
       if (!user?.id) return null;
       
       const { data, error } = await supabase
-        .from('account_deletion_requests')
+        .from('account_deletion_requests_safe')
         .select('*')
         .eq('user_id', user.id)
         .eq('status', 'pending')
