@@ -6799,6 +6799,10 @@ export type Database = {
         Args: { _target_id: string; _viewer_id: string }
         Returns: boolean
       }
+      can_view_user_email: {
+        Args: { target_user_id: string }
+        Returns: boolean
+      }
       check_and_unlock_achievements: {
         Args: { p_user_id: string }
         Returns: {
