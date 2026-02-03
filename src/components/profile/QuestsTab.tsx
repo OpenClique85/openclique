@@ -15,16 +15,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { ContinueYourJourney } from '@/components/progression/ContinueYourJourney';
 import { RewardClaimCard, RewardClaimModal } from '@/components/rewards';
-import { QuestJourneyTimeline } from '@/components/quests';
-import { RecruitFriendButton } from '@/components/quests/RecruitFriendButton';
+import { ActiveQuestCard } from './ActiveQuestCard';
 import { CancelModal } from '@/components/CancelModal';
 import { usePinnedQuests, useUnpinQuest } from '@/hooks/usePinnedQuests';
 import { useQuests } from '@/hooks/useQuests';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, MapPin, Calendar, MessageCircle, ExternalLink, Star, CheckCircle, Gift, Sparkles, Search, Bookmark, X } from 'lucide-react';
-import { format } from 'date-fns';
+import { Loader2, Calendar, Star, CheckCircle, Gift, Sparkles, Search, Bookmark, X, Zap } from 'lucide-react';
+import { format, isToday as checkIsToday } from 'date-fns';
 import type { Tables } from '@/integrations/supabase/types';
 
 type QuestSignup = Tables<'quest_signups'>;
@@ -238,16 +237,37 @@ export function QuestsTab({ userId }: QuestsTabProps) {
   }, [userId]);
 
   const now = new Date();
-  const upcomingSignups = signups.filter(s => {
-    if (!s.quest.start_datetime) return false;
-    if (s.status === 'dropped' || s.status === 'no_show') return false;
-    return new Date(s.quest.start_datetime) >= now;
-  });
   
-  const pastSignups = signups.filter(s => {
-    if (!s.quest.start_datetime) return true;
-    return new Date(s.quest.start_datetime) < now || s.status === 'completed';
-  });
+  // Temporal classification helper
+  const classifySignup = (signup: SignupWithJourney): 'today' | 'upcoming' | 'past' => {
+    const startDate = signup.quest.start_datetime 
+      ? new Date(signup.quest.start_datetime) 
+      : null;
+    const endDate = signup.quest.end_datetime 
+      ? new Date(signup.quest.end_datetime) 
+      : startDate; // Fallback to start if no end specified
+    
+    // Dropped/no-show always past
+    if (signup.status === 'dropped' || signup.status === 'no_show') return 'past';
+    
+    // No date = treat as upcoming
+    if (!startDate) return 'upcoming';
+    
+    // Quest has ended (end_datetime passed)
+    if (endDate && endDate < now) return 'past';
+    
+    // Check if quest is "today" (starts today OR currently running)
+    const startsToday = checkIsToday(startDate);
+    const isOngoing = startDate <= now && endDate && endDate >= now;
+    
+    if (startsToday || isOngoing) return 'today';
+    
+    return 'upcoming';
+  };
+
+  const todaySignups = signups.filter(s => classifySignup(s) === 'today');
+  const upcomingSignups = signups.filter(s => classifySignup(s) === 'upcoming');
+  const pastSignups = signups.filter(s => classifySignup(s) === 'past');
 
   const handleCancelClick = (signup: SignupWithQuest) => {
     setCancelModal({
@@ -381,6 +401,26 @@ export function QuestsTab({ userId }: QuestsTabProps) {
       {/* Continue Your Journey */}
       <ContinueYourJourney userId={userId} />
       
+      {/* Today / Happening Now */}
+      {todaySignups.length > 0 && (
+        <section>
+          <h3 className="text-lg font-display font-semibold mb-3 flex items-center gap-2">
+            <Zap className="h-5 w-5 text-primary" />
+            Today / Happening Now ({todaySignups.length})
+          </h3>
+          <div className="space-y-4">
+            {todaySignups.map((signup) => (
+              <ActiveQuestCard 
+                key={signup.id}
+                signup={signup}
+                isLive
+                onCancelClick={handleCancelClick}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+      
       {/* Upcoming Quests */}
       <section>
         <h3 className="text-lg font-display font-semibold mb-3 flex items-center gap-2">
@@ -388,7 +428,7 @@ export function QuestsTab({ userId }: QuestsTabProps) {
           Upcoming ({upcomingSignups.length})
         </h3>
         
-        {upcomingSignups.length === 0 ? (
+        {upcomingSignups.length === 0 && todaySignups.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="py-8 text-center">
               <p className="text-muted-foreground mb-4">
@@ -399,85 +439,16 @@ export function QuestsTab({ userId }: QuestsTabProps) {
               </Button>
             </CardContent>
           </Card>
+        ) : upcomingSignups.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No upcoming quests scheduled.</p>
         ) : (
           <div className="space-y-4">
             {upcomingSignups.map((signup) => (
-              <Card key={signup.id} className="overflow-hidden">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="text-3xl">{signup.quest.icon || '🎯'}</span>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <CardTitle className="font-display text-lg">
-                            {signup.quest.title}
-                          </CardTitle>
-                          {signup.quest.is_sponsored && (
-                            <Badge variant="outline" className="text-sunset border-sunset text-xs">
-                              <Sparkles className="h-3 w-3 mr-1" />
-                              Sponsored
-                            </Badge>
-                          )}
-                        </div>
-                        {signup.quest.start_datetime && (
-                          <p className="text-sm text-muted-foreground">
-                            {format(new Date(signup.quest.start_datetime), 'EEEE, MMMM d @ h:mm a')}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <Badge variant={STATUS_BADGES[signup.status || 'pending'].variant}>
-                      {STATUS_BADGES[signup.status || 'pending'].label}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="py-4 border-t bg-muted/20">
-                  <QuestJourneyTimeline
-                    signupStatus={signup.status as 'pending' | 'confirmed' | 'standby' | 'dropped' | 'no_show' | 'completed'}
-                    squadId={signup.squadId}
-                    squadStatus={signup.squadStatus}
-                    questCardToken={signup.questCardToken}
-                    questStartDate={signup.quest.start_datetime ? new Date(signup.quest.start_datetime) : null}
-                  />
-                </CardContent>
-                
-                <CardContent className="pt-0">
-                  {signup.status === 'confirmed' && (
-                    <>
-                      {signup.quest.meeting_location_name && (
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-                          <MapPin className="h-4 w-4" />
-                          <span>{signup.quest.meeting_location_name}</span>
-                        </div>
-                      )}
-                      
-                    </>
-                  )}
-                  
-                  <div className="flex flex-wrap gap-2 pt-2">
-                    <Button variant="outline" size="sm" asChild>
-                      <Link to={`/quests`}>View Details</Link>
-                    </Button>
-                    {(signup.status === 'pending' || signup.status === 'confirmed' || signup.status === 'standby') && (
-                      <>
-                        <RecruitFriendButton 
-                          questId={signup.quest.id} 
-                          questTitle={signup.quest.title}
-                        />
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => handleCancelClick(signup)}
-                        >
-                          I Can't Go
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+              <ActiveQuestCard 
+                key={signup.id}
+                signup={signup}
+                onCancelClick={handleCancelClick}
+              />
             ))}
           </div>
         )}
