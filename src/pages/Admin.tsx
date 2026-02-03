@@ -15,7 +15,7 @@ import { SponsorsManager } from '@/components/admin/SponsorsManager';
 import { OrgsManager } from '@/components/admin/OrgsManager';
 import { CreatorPreviewTab } from '@/components/admin/CreatorPreviewTab';
 import { SponsorPreviewTab } from '@/components/admin/SponsorPreviewTab';
-import { DevToolsSection } from '@/components/admin/DevToolsSection';
+
 import { TestimonialsManager } from '@/components/admin/TestimonialsManager';
 import { XPLevelsManager } from '@/components/admin/XPLevelsManager';
 import { AchievementsManager } from '@/components/admin/AchievementsManager';
@@ -151,7 +151,7 @@ export default function Admin() {
       case 'manual-overrides': return <ManualOverrides />;
       case 'feature-flags': return <FeatureFlagsManager />;
       case 'security-tools': return <SecurityTools />;
-      case 'devtools': return <DevToolsSection />;
+      case 'devtools': return <div className="p-8 text-muted-foreground text-center">Dev Tools section removed</div>;
       // Documentation
       case 'docs-manager': return <DocsManager />;
       case 'docs-playbooks': return <DocsPlaybookManager />;
