@@ -14,7 +14,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
-import { Loader2, Sparkles, Camera, Instagram, Twitter, Globe, ExternalLink, Save, Trash2, Handshake } from 'lucide-react';
+import { Loader2, Sparkles, Camera, Instagram, Twitter, Globe, ExternalLink, Save, Trash2, Handshake, Shield, Eye, EyeOff } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   AlertDialog,
@@ -36,6 +36,20 @@ interface Socials {
   website?: string;
 }
 
+interface CreatorPrivacySettings {
+  show_bio: boolean;
+  show_city: boolean;
+  show_seeking: boolean;
+  show_socials: boolean;
+}
+
+const DEFAULT_PRIVACY_SETTINGS: CreatorPrivacySettings = {
+  show_bio: true,
+  show_city: true,
+  show_seeking: true,
+  show_socials: true,
+};
+
 const SEEKING_OPTIONS = [
   { id: 'org_partnerships', label: 'Organization Partnerships', description: 'Available to create quests for clubs, orgs, and student groups' },
   { id: 'sponsorships', label: 'Brand Sponsorships', description: 'Looking for sponsors to fund or partner on quests' },
@@ -52,6 +66,7 @@ export default function CreatorProfile() {
   const [city, setCity] = useState('Austin');
   const [socials, setSocials] = useState<Socials>({});
   const [seeking, setSeeking] = useState<string[]>([]);
+  const [privacySettings, setPrivacySettings] = useState<CreatorPrivacySettings>(DEFAULT_PRIVACY_SETTINGS);
   const [hasChanges, setHasChanges] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [removePhotoDialogOpen, setRemovePhotoDialogOpen] = useState(false);
@@ -79,6 +94,7 @@ export default function CreatorProfile() {
         setCity(data.city || 'Austin');
         setSocials((data.socials as Socials) || {});
         setSeeking(data.seeking || []);
+        setPrivacySettings({ ...DEFAULT_PRIVACY_SETTINGS, ...(data.privacy_settings as Partial<CreatorPrivacySettings>) });
         setHasChanges(false);
       }
       
@@ -134,6 +150,11 @@ export default function CreatorProfile() {
     setSeeking(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
   };
 
+  const togglePrivacy = (key: keyof CreatorPrivacySettings) => {
+    setHasChanges(true);
+    setPrivacySettings(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
   const handleSave = () => {
     updateProfile.mutate({
       display_name: displayName,
@@ -141,6 +162,7 @@ export default function CreatorProfile() {
       city,
       socials: socials as unknown as CreatorProfile['socials'],
       seeking,
+      privacy_settings: privacySettings as unknown as CreatorProfile['privacy_settings'],
     });
   };
 
@@ -442,7 +464,74 @@ export default function CreatorProfile() {
               </CardContent>
             </Card>
 
-            {/* Save Button */}
+            {/* Privacy Settings */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  Privacy Settings
+                </CardTitle>
+                <CardDescription>Control what information is visible on your public profile</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <label className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    {privacySettings.show_bio ? <Eye className="h-4 w-4 text-primary" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
+                    <div>
+                      <p className="font-medium">Show Bio</p>
+                      <p className="text-sm text-muted-foreground">Display your bio on public profile</p>
+                    </div>
+                  </div>
+                  <Checkbox
+                    checked={privacySettings.show_bio}
+                    onCheckedChange={() => togglePrivacy('show_bio')}
+                  />
+                </label>
+
+                <label className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    {privacySettings.show_city ? <Eye className="h-4 w-4 text-primary" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
+                    <div>
+                      <p className="font-medium">Show City</p>
+                      <p className="text-sm text-muted-foreground">Display your city location</p>
+                    </div>
+                  </div>
+                  <Checkbox
+                    checked={privacySettings.show_city}
+                    onCheckedChange={() => togglePrivacy('show_city')}
+                  />
+                </label>
+
+                <label className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    {privacySettings.show_seeking ? <Eye className="h-4 w-4 text-primary" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
+                    <div>
+                      <p className="font-medium">Show Marketplace Availability</p>
+                      <p className="text-sm text-muted-foreground">Let sponsors and orgs see what you're seeking</p>
+                    </div>
+                  </div>
+                  <Checkbox
+                    checked={privacySettings.show_seeking}
+                    onCheckedChange={() => togglePrivacy('show_seeking')}
+                  />
+                </label>
+
+                <label className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    {privacySettings.show_socials ? <Eye className="h-4 w-4 text-primary" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
+                    <div>
+                      <p className="font-medium">Show Social Links</p>
+                      <p className="text-sm text-muted-foreground">Display your Instagram, Twitter, and website</p>
+                    </div>
+                  </div>
+                  <Checkbox
+                    checked={privacySettings.show_socials}
+                    onCheckedChange={() => togglePrivacy('show_socials')}
+                  />
+                </label>
+              </CardContent>
+            </Card>
+
             <div className="flex justify-end">
               <Button
                 size="lg"
