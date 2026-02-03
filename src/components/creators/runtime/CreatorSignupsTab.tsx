@@ -23,14 +23,30 @@ export function CreatorSignupsTab({ questId, capacity }: CreatorSignupsTabProps)
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
-  // Fetch signups with profile info
+  // Fetch signups via secure view (excludes phone numbers and sensitive data)
   const { data: signups, isLoading } = useQuery({
     queryKey: ['creator-quest-signups', questId],
     queryFn: async () => {
+      // Use the secure view that excludes phone, location data, and private notes
       const { data, error } = await supabase
-        .from('quest_signups')
+        .from('quest_signups_for_creators')
         .select(`
-          *,
+          id,
+          quest_id,
+          user_id,
+          status,
+          signed_up_at,
+          updated_at,
+          wants_reenlist,
+          reenlist_answered_at,
+          instance_id,
+          whatsapp_joined,
+          checked_in_at,
+          proof_submitted_at,
+          completed_at,
+          last_activity_at,
+          check_in_verified,
+          xp_awarded_at,
           profiles:user_id (
             id,
             display_name,
@@ -38,7 +54,7 @@ export function CreatorSignupsTab({ questId, capacity }: CreatorSignupsTabProps)
           )
         `)
         .eq('quest_id', questId)
-        .order('created_at', { ascending: false });
+        .order('signed_up_at', { ascending: false });
       
       if (error) throw error;
       return data || [];

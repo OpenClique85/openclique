@@ -3394,6 +3394,13 @@ export type Database = {
             foreignKeyName: "participant_proofs_signup_id_fkey"
             columns: ["signup_id"]
             isOneToOne: false
+            referencedRelation: "quest_signups_for_creators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "participant_proofs_signup_id_fkey"
+            columns: ["signup_id"]
+            isOneToOne: false
             referencedRelation: "quest_signups_public"
             referencedColumns: ["id"]
           },
@@ -5943,6 +5950,13 @@ export type Database = {
             foreignKeyName: "squad_members_signup_id_fkey"
             columns: ["signup_id"]
             isOneToOne: false
+            referencedRelation: "quest_signups_for_creators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "squad_members_signup_id_fkey"
+            columns: ["signup_id"]
+            isOneToOne: false
             referencedRelation: "quest_signups_public"
             referencedColumns: ["id"]
           },
@@ -8344,6 +8358,92 @@ export type Database = {
           },
           {
             foreignKeyName: "feedback_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quest_signups_for_creators: {
+        Row: {
+          check_in_verified: boolean | null
+          checked_in_at: string | null
+          completed_at: string | null
+          id: string | null
+          instance_id: string | null
+          last_activity_at: string | null
+          proof_submitted_at: string | null
+          quest_id: string | null
+          reenlist_answered_at: string | null
+          signed_up_at: string | null
+          status: Database["public"]["Enums"]["signup_status"] | null
+          updated_at: string | null
+          user_id: string | null
+          wants_reenlist: boolean | null
+          whatsapp_joined: boolean | null
+          xp_awarded_at: string | null
+        }
+        Insert: {
+          check_in_verified?: boolean | null
+          checked_in_at?: string | null
+          completed_at?: string | null
+          id?: string | null
+          instance_id?: string | null
+          last_activity_at?: string | null
+          proof_submitted_at?: string | null
+          quest_id?: string | null
+          reenlist_answered_at?: string | null
+          signed_up_at?: string | null
+          status?: Database["public"]["Enums"]["signup_status"] | null
+          updated_at?: string | null
+          user_id?: string | null
+          wants_reenlist?: boolean | null
+          whatsapp_joined?: boolean | null
+          xp_awarded_at?: string | null
+        }
+        Update: {
+          check_in_verified?: boolean | null
+          checked_in_at?: string | null
+          completed_at?: string | null
+          id?: string | null
+          instance_id?: string | null
+          last_activity_at?: string | null
+          proof_submitted_at?: string | null
+          quest_id?: string | null
+          reenlist_answered_at?: string | null
+          signed_up_at?: string | null
+          status?: Database["public"]["Enums"]["signup_status"] | null
+          updated_at?: string | null
+          user_id?: string | null
+          wants_reenlist?: boolean | null
+          whatsapp_joined?: boolean | null
+          xp_awarded_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_signups_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "quest_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quest_signups_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "quest_instances_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quest_signups_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quest_signups_quest_id_fkey"
             columns: ["quest_id"]
             isOneToOne: false
             referencedRelation: "quests_public"
