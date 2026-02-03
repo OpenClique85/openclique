@@ -3882,6 +3882,7 @@ export type Database = {
           email: string | null
           friend_code: string | null
           id: string
+          is_synthetic: boolean | null
           notification_preferences: Json | null
           preferences: Json | null
           privacy_settings: Json | null
@@ -3900,6 +3901,7 @@ export type Database = {
           email?: string | null
           friend_code?: string | null
           id: string
+          is_synthetic?: boolean | null
           notification_preferences?: Json | null
           preferences?: Json | null
           privacy_settings?: Json | null
@@ -3918,6 +3920,7 @@ export type Database = {
           email?: string | null
           friend_code?: string | null
           id?: string
+          is_synthetic?: boolean | null
           notification_preferences?: Json | null
           preferences?: Json | null
           privacy_settings?: Json | null
@@ -4444,6 +4447,7 @@ export type Database = {
           created_at: string
           formation_reason: Json | null
           id: string
+          is_simulation: boolean | null
           locked_at: string | null
           locked_by: string | null
           quest_id: string
@@ -4460,6 +4464,7 @@ export type Database = {
           created_at?: string
           formation_reason?: Json | null
           id?: string
+          is_simulation?: boolean | null
           locked_at?: string | null
           locked_by?: string | null
           quest_id: string
@@ -4476,6 +4481,7 @@ export type Database = {
           created_at?: string
           formation_reason?: Json | null
           id?: string
+          is_simulation?: boolean | null
           locked_at?: string | null
           locked_by?: string | null
           quest_id?: string

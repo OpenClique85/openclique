@@ -19,6 +19,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { SoloSquadSimulator } from './SoloSquadSimulator';
 
 interface ScenarioResult {
   scenario: string;
@@ -134,6 +135,9 @@ export function DevToolsSection() {
 
   return (
     <div className="space-y-6">
+      {/* Solo Squad Simulator */}
+      <SoloSquadSimulator />
+
       {/* Scenario Generators */}
       <Card className="border-dashed border-amber-500/50 bg-amber-500/5">
         <CardHeader>
