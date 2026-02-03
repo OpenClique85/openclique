@@ -67,24 +67,37 @@ export function ActiveQuestCard({ signup, isLive = false, onCancelClick }: Activ
   const startDate = signup.quest.start_datetime ? new Date(signup.quest.start_datetime) : null;
   const endDate = signup.quest.end_datetime ? new Date(signup.quest.end_datetime) : null;
   
+  // Format time from ISO string directly to avoid timezone conversion issues
+  // Database stores times that should be displayed as-is (e.g., "7 PM" means 7 PM local display)
+  const formatTimeFromISO = (isoString: string) => {
+    // Extract hours/minutes from ISO string directly (format: YYYY-MM-DDTHH:MM:SS)
+    const timePart = isoString.includes('T') ? isoString.split('T')[1] : isoString.split(' ')[1];
+    if (!timePart) return '';
+    const [hours, minutes] = timePart.split(':').map(Number);
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours % 12 || 12;
+    return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
+  };
+  
   // Format date display
   const getDateDisplay = () => {
     if (!startDate) return 'Date TBD';
     
     const isSameDay = endDate && startDate.toDateString() === endDate.toDateString();
+    const startIso = signup.quest.start_datetime!;
     
     if (isToday(startDate)) {
       if (endDate && !isSameDay) {
         return `Today → ${format(endDate, 'MMM d')}`;
       }
-      return `Today @ ${format(startDate, 'h:mm a')}`;
+      return `Today @ ${formatTimeFromISO(startIso)}`;
     }
     
     if (endDate && !isSameDay) {
       return `${format(startDate, 'MMM d')} → ${format(endDate, 'MMM d')}`;
     }
     
-    return format(startDate, 'EEEE, MMMM d @ h:mm a');
+    return `${format(startDate, 'EEEE, MMMM d')} @ ${formatTimeFromISO(startIso)}`;
   };
 
   // Time until quest starts
