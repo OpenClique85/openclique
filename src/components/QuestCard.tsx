@@ -60,11 +60,11 @@ const QuestCard = ({ quest, onClick }: QuestCardProps) => {
   return (
     <button
       onClick={onClick}
-      className="w-full text-left bg-card border border-border rounded-xl overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+      className="w-full h-full text-left bg-card border border-border rounded-xl overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 flex flex-col"
       aria-label={`View details for ${quest.title}`}
     >
       {/* Hero Image */}
-      <div className="relative h-40 w-full overflow-hidden">
+      <div className="relative h-40 w-full overflow-hidden flex-shrink-0">
         <img 
           src={quest.image} 
           alt={quest.imageAlt}
@@ -90,7 +90,7 @@ const QuestCard = ({ quest, onClick }: QuestCardProps) => {
         </span>
       </div>
 
-      <div className="p-5">
+      <div className="p-5 flex flex-col flex-1">
         {/* Header */}
         <div className="flex items-center gap-3 mb-3">
           <span className="text-3xl" role="img" aria-hidden="true">
@@ -142,19 +142,19 @@ const QuestCard = ({ quest, onClick }: QuestCardProps) => {
           )}
         </div>
 
-        {/* Description */}
-        <p className="text-muted-foreground text-sm mb-3">
+        {/* Description - fixed height with line clamp */}
+        <p className="text-muted-foreground text-sm mb-3 line-clamp-2 min-h-[2.5rem]">
           {quest.shortDescription}
         </p>
 
-        {/* Rewards Preview */}
-        <div className={`flex items-start gap-2 text-sm font-medium mb-3 rounded-lg p-2.5 ${
+        {/* Rewards Preview - fixed height */}
+        <div className={`flex items-start gap-2 text-sm font-medium mb-3 rounded-lg p-2.5 min-h-[3.5rem] ${
           quest.isSponsored 
             ? 'bg-sunset/10 text-sunset' 
             : 'bg-primary/5 text-primary'
         }`}>
           <Gift className="w-4 h-4 shrink-0 mt-0.5" />
-          <div className="flex-1">
+          <div className="flex-1 line-clamp-2">
             <span>{quest.rewards}</span>
             {quest.isSponsored && quest.sponsorName && (
               <span className="block text-xs opacity-75 mt-0.5">
@@ -164,8 +164,8 @@ const QuestCard = ({ quest, onClick }: QuestCardProps) => {
           </div>
         </div>
 
-        {/* Rating + Creator Attribution Row */}
-        <div className="flex items-center justify-between">
+        {/* Rating + Creator Attribution Row - pushed to bottom */}
+        <div className="flex items-center justify-between mt-auto pt-2">
           <div className="flex items-center gap-3">
             {/* Star Rating - only show if there are reviews */}
             {reviewCount > 0 && rating !== null && (
