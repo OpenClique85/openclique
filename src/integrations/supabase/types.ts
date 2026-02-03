@@ -6885,6 +6885,62 @@ export type Database = {
           },
         ]
       }
+      user_follows: {
+        Row: {
+          created_at: string | null
+          creator_id: string | null
+          follower_id: string
+          id: string
+          notify_new_quests: boolean | null
+          sponsor_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          creator_id?: string | null
+          follower_id: string
+          id?: string
+          notify_new_quests?: boolean | null
+          sponsor_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          creator_id?: string | null
+          follower_id?: string
+          id?: string
+          notify_new_quests?: boolean | null
+          sponsor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_follows_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "creator_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_follows_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "creator_profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_follows_sponsor_id_fkey"
+            columns: ["sponsor_id"]
+            isOneToOne: false
+            referencedRelation: "sponsor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_follows_sponsor_id_fkey"
+            columns: ["sponsor_id"]
+            isOneToOne: false
+            referencedRelation: "sponsor_profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_interactions: {
         Row: {
           created_at: string
@@ -8779,6 +8835,10 @@ export type Database = {
         Args: { table_name: string; target_id: string }
         Returns: string
       }
+      get_creator_follower_count: {
+        Args: { p_creator_id: string }
+        Returns: number
+      }
       get_creator_socials: {
         Args: { target_creator_id: string }
         Returns: Json
@@ -8845,6 +8905,10 @@ export type Database = {
       get_sponsor_contact_email: {
         Args: { target_sponsor_id: string }
         Returns: string
+      }
+      get_sponsor_follower_count: {
+        Args: { p_sponsor_id: string }
+        Returns: number
       }
       get_upcoming_instances: {
         Args: { p_quest_id: string }

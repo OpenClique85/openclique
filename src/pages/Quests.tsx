@@ -10,6 +10,7 @@ import { CTASection } from '@/components/CTASection';
 import { UserWeekCalendarView } from '@/components/quests';
 import { useQuests, type Quest } from '@/hooks/useQuests';
 import { useCreatorSlugs } from '@/hooks/useCreatorSlugs';
+import { useFollowedIds } from '@/hooks/useFollows';
 import { Loader2, Inbox, CalendarDays, LayoutGrid } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
@@ -26,6 +27,7 @@ const CATEGORY_CONFIG = {
 const Quests = () => {
   const navigate = useNavigate();
   const { data: quests = [], isLoading, error } = useQuests();
+  const { creatorIds: followedCreatorIds, sponsorIds: followedSponsorIds, hasFollows } = useFollowedIds();
   
   const [selectedQuest, setSelectedQuest] = useState<Quest | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -39,6 +41,7 @@ const Quests = () => {
     interests: [],
     creatorId: null,
     sortBy: 'date',
+    followingOnly: false,
   });
 
   const handleQuestClick = (quest: Quest) => {
@@ -53,6 +56,13 @@ const Quests = () => {
   // Apply filters and sorting
   const filteredQuests = useMemo(() => {
     let result = quests.filter((quest) => {
+      // Following filter - check if quest creator or sponsor is followed
+      if (filters.followingOnly) {
+        const creatorFollowed = quest.creatorId && followedCreatorIds.has(quest.creatorId);
+        const sponsorFollowed = quest.sponsorId && followedSponsorIds.has(quest.sponsorId);
+        if (!creatorFollowed && !sponsorFollowed) return false;
+      }
+
       // Search filter
       if (filters.search.trim()) {
         const searchLower = filters.search.toLowerCase();
@@ -128,7 +138,7 @@ const Quests = () => {
     });
 
     return result;
-  }, [quests, filters]);
+  }, [quests, filters, followedCreatorIds, followedSponsorIds]);
 
   // Get unique creator IDs for fetching slugs
   const creatorIds = useMemo(() => {
@@ -185,12 +195,20 @@ const Quests = () => {
         quests: data.quests,
       }));
 
+    // Quests from followed creators/sponsors (for "From People You Follow" row)
+    const followingQuests = hasFollows ? filteredQuests.filter(quest => {
+      const creatorFollowed = quest.creatorId && followedCreatorIds.has(quest.creatorId);
+      const sponsorFollowed = quest.sponsorId && followedSponsorIds.has(quest.sponsorId);
+      return creatorFollowed || sponsorFollowed;
+    }) : [];
+
     return {
       thisWeek,
       byCategory,
       creatorRows,
+      followingQuests,
     };
-  }, [filteredQuests, creatorSlugs]);
+  }, [filteredQuests, creatorSlugs, hasFollows, followedCreatorIds, followedSponsorIds]);
 
   const hasActiveFilters = 
     filters.search.length > 0 ||
@@ -198,7 +216,8 @@ const Quests = () => {
     filters.days.length > 0 || 
     filters.statuses.length > 0 ||
     filters.interests.length > 0 ||
-    filters.creatorId !== null;
+    filters.creatorId !== null ||
+    filters.followingOnly;
 
   // Determine if we should use Netflix layout or filtered grid
   const useNetflixLayout = !hasActiveFilters && filteredQuests.length > 0;
@@ -315,6 +334,16 @@ const Quests = () => {
                 /* Netflix-Style Browse Layout */
                 <section className="pb-16 space-y-10">
                   <div className="max-w-[1400px] mx-auto px-4 space-y-10">
+                    {/* From People You Follow */}
+                    {questGroups.followingQuests.length > 0 && (
+                      <QuestRow
+                        title="From People You Follow"
+                        icon="❤️"
+                        quests={questGroups.followingQuests}
+                        onQuestClick={handleQuestClick}
+                      />
+                    )}
+
                     {/* Happening This Week */}
                     {questGroups.thisWeek.length > 0 && (
                       <QuestRow
@@ -430,6 +459,7 @@ const Quests = () => {
                       interests: [],
                       creatorId: null,
                       sortBy: 'date',
+                      followingOnly: false,
                     })}
                   >
                     Clear All Filters

@@ -11,6 +11,8 @@ import { Tables } from '@/integrations/supabase/types';
 import QuestCard from '@/components/QuestCard';
 import { transformQuest, type Quest } from '@/hooks/useQuests';
 import { Loader2, MapPin, Instagram, Twitter, Globe, Sparkles, ClipboardList, Users, Star } from 'lucide-react';
+import { FollowButton } from '@/components/social/FollowButton';
+import { FollowerCountBadge } from '@/components/social/FollowerCountBadge';
 
 type CreatorProfile = Tables<'creator_profiles'>;
 type DbQuest = Tables<'quests'>;
@@ -183,6 +185,12 @@ export default function CreatorPublicProfile() {
                     {creator.city}
                   </p>
                 )}
+
+                {/* Follower Count & Follow Button */}
+                <div className="flex items-center justify-center md:justify-start gap-4 mt-4">
+                  <FollowerCountBadge type="creator" targetId={creator.id} />
+                  <FollowButton type="creator" targetId={creator.id} />
+                </div>
                 
                 {creator.bio && (
                   <p className="text-muted-foreground mt-4 max-w-2xl">
