@@ -1236,6 +1236,7 @@ export type Database = {
           onboarded_at: string | null
           payout_placeholder: Json | null
           photo_url: string | null
+          privacy_settings: Json | null
           seeking: string[] | null
           slug: string | null
           socials: Json | null
@@ -1253,6 +1254,7 @@ export type Database = {
           onboarded_at?: string | null
           payout_placeholder?: Json | null
           photo_url?: string | null
+          privacy_settings?: Json | null
           seeking?: string[] | null
           slug?: string | null
           socials?: Json | null
@@ -1270,6 +1272,7 @@ export type Database = {
           onboarded_at?: string | null
           payout_placeholder?: Json | null
           photo_url?: string | null
+          privacy_settings?: Json | null
           seeking?: string[] | null
           slug?: string | null
           socials?: Json | null
@@ -7943,34 +7946,37 @@ export type Database = {
           photo_url: string | null
           seeking: string[] | null
           slug: string | null
+          socials: Json | null
           status: string | null
           updated_at: string | null
           user_id: string | null
         }
         Insert: {
-          bio?: string | null
-          city?: string | null
+          bio?: never
+          city?: never
           created_at?: string | null
           display_name?: string | null
           id?: string | null
           onboarded_at?: string | null
           photo_url?: string | null
-          seeking?: string[] | null
+          seeking?: never
           slug?: string | null
+          socials?: never
           status?: string | null
           updated_at?: string | null
           user_id?: string | null
         }
         Update: {
-          bio?: string | null
-          city?: string | null
+          bio?: never
+          city?: never
           created_at?: string | null
           display_name?: string | null
           id?: string | null
           onboarded_at?: string | null
           photo_url?: string | null
-          seeking?: string[] | null
+          seeking?: never
           slug?: string | null
+          socials?: never
           status?: string | null
           updated_at?: string | null
           user_id?: string | null
