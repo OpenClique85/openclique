@@ -1,11 +1,13 @@
 /**
  * =============================================================================
- * UNIFIED PROFILE PAGE - Cliques | Quests | Me tabs
+ * UNIFIED PROFILE PAGE - Cliques | Quests | Contacts | Orgs | Me tabs
  * =============================================================================
  * 
  * This is the central hub for user activity, combining:
  * - My Cliques (squads with hero cards)
  * - My Quests (journey, rewards, history)
+ * - Contacts & LFG (personal roster and group finding)
+ * - Organizations (org memberships)
  * - Me (algorithm, progress, settings)
  */
 
@@ -18,7 +20,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
-import { Loader2, Settings, Users, Compass, User, Building2, AtSign, Copy } from 'lucide-react';
+import { Loader2, Settings, Users, Compass, User, Building2, AtSign, Copy, Contact } from 'lucide-react';
 import { ProfileEditModal } from '@/components/ProfileEditModal';
 import { ProfileModal } from '@/components/ProfileModal';
 import { UsernameRequiredModal } from '@/components/profile/UsernameRequiredModal';
@@ -26,6 +28,7 @@ import { CliquesTab } from '@/components/profile/CliquesTab';
 import { QuestsTab } from '@/components/profile/QuestsTab';
 import { MeTab } from '@/components/profile/MeTab';
 import { OrganizationsTab } from '@/components/profile/OrganizationsTab';
+import { ContactsTab } from '@/components/contacts/ContactsTab';
 import { FriendCodeCard } from '@/components/profile/FriendCodeCard';
 import { useToast } from '@/hooks/use-toast';
 
@@ -131,7 +134,7 @@ export default function Profile() {
 
           {/* Tabbed Content: Cliques | Quests | Me */}
           <Tabs value={activeTab} onValueChange={handleTabChange}>
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="cliques" className="flex items-center gap-2">
                 <Users className="h-4 w-4" />
                 <span className="hidden sm:inline">My</span> Cliques
@@ -139,6 +142,10 @@ export default function Profile() {
               <TabsTrigger value="quests" className="flex items-center gap-2">
                 <Compass className="h-4 w-4" />
                 Quests
+              </TabsTrigger>
+              <TabsTrigger value="contacts" className="flex items-center gap-2">
+                <Contact className="h-4 w-4" />
+                <span className="hidden sm:inline">Contacts</span>
               </TabsTrigger>
               <TabsTrigger value="orgs" className="flex items-center gap-2">
                 <Building2 className="h-4 w-4" />
@@ -158,6 +165,11 @@ export default function Profile() {
             {/* Quests Tab */}
             <TabsContent value="quests" className="mt-6">
               <QuestsTab userId={user.id} />
+            </TabsContent>
+
+            {/* Contacts Tab */}
+            <TabsContent value="contacts" className="mt-6">
+              <ContactsTab userId={user.id} />
             </TabsContent>
 
             {/* Organizations Tab */}
