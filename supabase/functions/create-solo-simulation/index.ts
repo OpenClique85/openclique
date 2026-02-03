@@ -185,7 +185,9 @@ Deno.serve(async (req) => {
           default_squad_size: 4,
           default_capacity: 10,
           meeting_location_name: 'Test Location',
-          visibility: 'unlisted',
+          // quest_visibility enum: public | org_only | invite_only
+          // For a test/simulation quest, keep it out of general listings.
+          visibility: 'invite_only',
         })
         .select('id')
         .single();
