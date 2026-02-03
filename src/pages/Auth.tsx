@@ -36,8 +36,9 @@ export default function Auth() {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   
-  // Get invite code from URL
+  // Get invite code and quest slug from URL
   const urlInviteCode = searchParams.get('invite');
+  const questSlug = searchParams.get('quest');
   
   useEffect(() => {
     if (urlInviteCode) {
@@ -46,10 +47,13 @@ export default function Auth() {
   }, [urlInviteCode]);
   
   // Support both location.state.from and ?redirect= query param
+  // If ?quest=slug is provided, redirect to that quest after signup
   const redirectParam = searchParams.get('redirect');
-  const from = redirectParam 
-    || (location.state as { from?: { pathname: string } })?.from?.pathname 
-    || '/my-quests';
+  const from = questSlug 
+    ? `/quests/${questSlug}`
+    : redirectParam 
+      || (location.state as { from?: { pathname: string } })?.from?.pathname 
+      || '/profile';
 
   // After sign up with invite code, show feedback modal
   useEffect(() => {
@@ -361,12 +365,19 @@ export default function Auth() {
             <div>
               <CardTitle className="text-2xl font-display">Welcome</CardTitle>
               <CardDescription>
-                {inviteCode 
-                  ? "You've been invited! Create an account to join."
-                  : "Sign in to join quests and connect with your community"
+                {questSlug 
+                  ? "Create an account to join this quest!"
+                  : inviteCode 
+                    ? "You've been invited! Create an account to join."
+                    : "Sign in to join quests and connect with your community"
                 }
               </CardDescription>
-              {inviteCode && (
+              {questSlug && (
+                <Badge variant="outline" className="mt-2 text-primary border-primary">
+                  🎯 You'll be redirected to the quest after signing up
+                </Badge>
+              )}
+              {inviteCode && !questSlug && (
                 <Badge variant="secondary" className="mt-2">
                   <CheckCircle className="h-3 w-3 mr-1" />
                   Invite code: {inviteCode}

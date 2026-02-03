@@ -9,7 +9,8 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Input } from '@/components/ui/input';
-import { Share2, Copy, Check, Loader2 } from 'lucide-react';
+import { Share2, Copy, Check, Loader2, ExternalLink } from 'lucide-react';
+import { getPublishedUrl } from '@/lib/config';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Quest = Tables<'quests'>;
@@ -17,53 +18,62 @@ type Quest = Tables<'quests'>;
 interface ShareQuestButtonProps {
   quest: Quest;
   variant?: 'default' | 'outline' | 'ghost';
+  size?: 'default' | 'sm' | 'lg' | 'icon';
 }
 
-export default function ShareQuestButton({ quest, variant = 'outline' }: ShareQuestButtonProps) {
+export default function ShareQuestButton({ quest, variant = 'outline', size = 'sm' }: ShareQuestButtonProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [referralLink, setReferralLink] = useState('');
+  const [shareLink, setShareLink] = useState('');
   const [copied, setCopied] = useState(false);
 
-  const generateReferralLink = async () => {
-    if (!user) {
-      toast({ variant: 'destructive', title: 'Please sign in to share' });
-      return;
-    }
+  // Check if native share is available (mobile)
+  const canNativeShare = typeof navigator !== 'undefined' && !!navigator.share;
 
+  const generateShareLink = async () => {
     setIsLoading(true);
 
     try {
-      // Generate a unique referral code
-      const referralCode = `${user.id.slice(0, 8)}-${quest.id.slice(0, 8)}`;
+      let refCode = '';
       
-      // Check if referral already exists
-      const { data: existing } = await supabase
-        .from('referrals')
-        .select('referral_code')
-        .eq('referrer_user_id', user.id)
-        .eq('quest_id', quest.id)
-        .maybeSingle();
+      // Only generate referral code if user is logged in
+      if (user) {
+        // Generate a unique referral code
+        const referralCode = `${user.id.slice(0, 8)}-${quest.id.slice(0, 8)}`;
+        
+        // Check if referral already exists
+        const { data: existing } = await supabase
+          .from('referrals')
+          .select('referral_code')
+          .eq('referrer_user_id', user.id)
+          .eq('quest_id', quest.id)
+          .maybeSingle();
 
-      if (!existing) {
-        // Create new referral entry
-        const { error } = await supabase.from('referrals').insert({
-          referrer_user_id: user.id,
-          quest_id: quest.id,
-          referral_code: referralCode,
-        });
+        if (!existing) {
+          // Create new referral entry
+          await supabase.from('referrals').insert({
+            referrer_user_id: user.id,
+            quest_id: quest.id,
+            referral_code: referralCode,
+          });
+        }
 
-        if (error) throw error;
+        refCode = existing?.referral_code || referralCode;
       }
 
-      const link = `${window.location.origin}/quests/${quest.slug}?ref=${existing?.referral_code || referralCode}`;
-      setReferralLink(link);
+      // Use PUBLISHED_URL for consistent links across all environments
+      const questPath = `/quests/${quest.slug || quest.id}`;
+      const link = refCode 
+        ? getPublishedUrl(`${questPath}?ref=${refCode}`)
+        : getPublishedUrl(questPath);
+      
+      setShareLink(link);
     } catch (error: any) {
-      console.error('Error generating referral link:', error);
+      console.error('Error generating share link:', error);
       // Still generate a non-tracked link if referral creation fails
-      setReferralLink(`${window.location.origin}/quests/${quest.slug}`);
+      setShareLink(getPublishedUrl(`/quests/${quest.slug || quest.id}`));
     } finally {
       setIsLoading(false);
     }
@@ -71,7 +81,7 @@ export default function ShareQuestButton({ quest, variant = 'outline' }: ShareQu
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(referralLink);
+      await navigator.clipboard.writeText(shareLink);
       setCopied(true);
       toast({ title: 'Link copied to clipboard!' });
       setTimeout(() => setCopied(false), 2000);
@@ -80,19 +90,38 @@ export default function ShareQuestButton({ quest, variant = 'outline' }: ShareQu
     }
   };
 
+  const handleNativeShare = async () => {
+    if (!shareLink) return;
+    
+    try {
+      await navigator.share({
+        title: quest.title,
+        text: `Check out "${quest.title}" on OpenClique!`,
+        url: shareLink,
+      });
+      toast({ title: 'Shared successfully!' });
+      setIsOpen(false);
+    } catch (error: any) {
+      // User cancelled share - don't show error
+      if (error.name !== 'AbortError') {
+        console.error('Share failed:', error);
+      }
+    }
+  };
+
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
-    if (open && !referralLink) {
-      generateReferralLink();
+    if (open && !shareLink) {
+      generateShareLink();
     }
   };
 
   return (
     <Popover open={isOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
-        <Button variant={variant}>
-          <Share2 className="mr-2 h-4 w-4" />
-          Share with a Friend
+        <Button variant={variant} size={size}>
+          <Share2 className="h-4 w-4 mr-1" />
+          Share
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80">
@@ -100,7 +129,10 @@ export default function ShareQuestButton({ quest, variant = 'outline' }: ShareQu
           <div>
             <h4 className="font-medium mb-1">Share this quest</h4>
             <p className="text-sm text-muted-foreground">
-              When your friend signs up using this link, you'll both be grouped together!
+              {user 
+                ? "When your friend signs up using this link, you'll both be grouped together!"
+                : "Share this quest with friends - they can sign up even without an account!"
+              }
             </p>
           </div>
           
@@ -109,29 +141,44 @@ export default function ShareQuestButton({ quest, variant = 'outline' }: ShareQu
               <Loader2 className="h-5 w-5 animate-spin text-primary" />
             </div>
           ) : (
-            <div className="flex gap-2">
-              <Input 
-                value={referralLink} 
-                readOnly 
-                className="text-sm"
-              />
-              <Button 
-                size="icon" 
-                variant="outline"
-                onClick={handleCopy}
-              >
-                {copied ? (
-                  <Check className="h-4 w-4 text-green-600" />
-                ) : (
-                  <Copy className="h-4 w-4" />
-                )}
-              </Button>
+            <div className="space-y-3">
+              <div className="flex gap-2">
+                <Input 
+                  value={shareLink} 
+                  readOnly 
+                  className="text-sm"
+                />
+                <Button 
+                  size="icon" 
+                  variant="outline"
+                  onClick={handleCopy}
+                >
+                  {copied ? (
+                    <Check className="h-4 w-4 text-green-600" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+              
+              {canNativeShare && (
+                <Button 
+                  className="w-full" 
+                  onClick={handleNativeShare}
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Share with Friends
+                </Button>
+              )}
             </div>
           )}
           
           <div className="pt-2 border-t">
             <p className="text-xs text-muted-foreground">
-              🎯 Bring friends and we'll try to group you in the same squad!
+              🎯 {user 
+                ? "Bring friends and we'll try to group you in the same squad!"
+                : "Anyone with this link can view and join the quest!"
+              }
             </p>
           </div>
         </div>
