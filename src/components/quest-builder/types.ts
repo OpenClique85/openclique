@@ -103,7 +103,6 @@ export interface QuestFormData {
   image_url: string;
   meeting_location_name: string;
   meeting_address: string;
-  whatsapp_invite_link: string;
   
   // Internal
   id?: string;
@@ -175,7 +174,6 @@ export const defaultFormData: QuestFormData = {
   image_url: '',
   meeting_location_name: '',
   meeting_address: '',
-  whatsapp_invite_link: '',
 };
 
 export interface WizardStep {
