@@ -153,7 +153,7 @@ Deno.serve(async (req) => {
     const { data: existingQuest } = await supabase
       .from('quests')
       .select('id')
-      .eq('status', 'published')
+      .eq('status', 'open')
       .ilike('slug', 'sim-test-%')
       .order('created_at', { ascending: false })
       .limit(1)
@@ -171,7 +171,7 @@ Deno.serve(async (req) => {
           slug: `sim-test-${Date.now()}`,
           short_description: 'A test quest for solo squad simulation',
           full_description: 'This is a simulation quest created for admin testing purposes.',
-          status: 'published',
+          status: 'open',
           start_datetime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
           end_datetime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000).toISOString(),
           default_squad_size: 4,
