@@ -42,11 +42,29 @@ export function SoloSquadSimulator() {
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const [simulation, setSimulation] = useState<SimulationData | null>(null);
 
+  const getAuthHeaders = async (): Promise<Record<string, string> | null> => {
+    const { data: sessionData, error } = await supabase.auth.getSession();
+    if (error) {
+      console.error('Failed to get session:', error);
+      return null;
+    }
+    const token = sessionData.session?.access_token;
+    if (!token) return null;
+    return { Authorization: `Bearer ${token}` };
+  };
+
   const createSimulation = async () => {
     setIsCreating(true);
     try {
+      const headers = await getAuthHeaders();
+      if (!headers) {
+        toast.error('Please sign in to use Solo Simulator');
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke('create-solo-simulation', {
         body: { botCount: parseInt(botCount) },
+        headers,
       });
 
       if (error) {
@@ -76,11 +94,18 @@ export function SoloSquadSimulator() {
     
     setIsLoading('reply');
     try {
+      const headers = await getAuthHeaders();
+      if (!headers) {
+        toast.error('Please sign in to use Solo Simulator');
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke('simulate-bot-reply', {
         body: { 
           squadId: simulation.squadId,
           triggerMessage: 'Hey everyone!',
         },
+        headers,
       });
 
       if (error) {
@@ -121,11 +146,14 @@ export function SoloSquadSimulator() {
       toast.success('All members checked in!');
       
       // Trigger a bot message about checking in
+      const headers = await getAuthHeaders();
+      if (!headers) return;
       await supabase.functions.invoke('simulate-bot-reply', {
         body: { 
           squadId: simulation.squadId,
           triggerMessage: 'Just checked in!',
         },
+        headers,
       });
     } catch (err) {
       console.error('Unexpected error:', err);
@@ -195,11 +223,14 @@ export function SoloSquadSimulator() {
       toast.success('Quest completed!');
       
       // Trigger farewell messages
+      const headers = await getAuthHeaders();
+      if (!headers) return;
       await supabase.functions.invoke('simulate-bot-reply', {
         body: { 
           squadId: simulation.squadId,
           triggerMessage: 'That was great!',
         },
+        headers,
       });
     } catch (err) {
       console.error('Unexpected error:', err);
