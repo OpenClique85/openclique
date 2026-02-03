@@ -266,7 +266,7 @@ export default function QuestDetail() {
       
       setUserSignup({ status });
       setShowInstancePicker(false);
-      navigate('/my-quests');
+      navigate('/profile?tab=quests');
     } catch (error: any) {
       console.error('Error joining quest:', error);
       toast({

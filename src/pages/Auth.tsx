@@ -36,9 +36,10 @@ export default function Auth() {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   
-  // Get invite code and quest slug from URL
+  // Get invite code, quest slug, and signup flag from URL
   const urlInviteCode = searchParams.get('invite');
   const questSlug = searchParams.get('quest');
+  const signupFlag = searchParams.get('signup') === 'true';
   
   useEffect(() => {
     if (urlInviteCode) {
@@ -407,10 +408,10 @@ export default function Auth() {
               </div>
             )}
 
-            <Tabs defaultValue={inviteCode ? "signup" : "signin"} className="space-y-6">
+            <Tabs defaultValue={signupFlag || inviteCode || questSlug ? "signup" : "signin"} className="space-y-6">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="signin">Sign In</TabsTrigger>
                 <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                <TabsTrigger value="signin">Sign In</TabsTrigger>
               </TabsList>
               
               <TabsContent value="signin">

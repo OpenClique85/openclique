@@ -132,26 +132,26 @@ export default function Profile() {
 
           {/* Tabbed Content: Cliques | Quests | Me */}
           <Tabs value={activeTab} onValueChange={handleTabChange}>
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="cliques" className="flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                <span className="hidden sm:inline">My</span> Cliques
+            <TabsList className="grid w-full grid-cols-5 h-auto">
+              <TabsTrigger value="cliques" className="flex items-center gap-1 px-2 py-2 sm:gap-2 sm:px-3">
+                <Users className="h-4 w-4 shrink-0" />
+                <span className="hidden sm:inline text-xs sm:text-sm">Cliques</span>
               </TabsTrigger>
-              <TabsTrigger value="quests" className="flex items-center gap-2">
-                <Compass className="h-4 w-4" />
-                Quests
+              <TabsTrigger value="quests" className="flex items-center gap-1 px-2 py-2 sm:gap-2 sm:px-3">
+                <Compass className="h-4 w-4 shrink-0" />
+                <span className="hidden sm:inline text-xs sm:text-sm">Quests</span>
               </TabsTrigger>
-              <TabsTrigger value="contacts" className="flex items-center gap-2">
-                <Contact className="h-4 w-4" />
-                <span className="hidden sm:inline">Contacts</span>
+              <TabsTrigger value="contacts" className="flex items-center gap-1 px-2 py-2 sm:gap-2 sm:px-3">
+                <Contact className="h-4 w-4 shrink-0" />
+                <span className="hidden sm:inline text-xs sm:text-sm">Contacts</span>
               </TabsTrigger>
-              <TabsTrigger value="orgs" className="flex items-center gap-2">
-                <Building2 className="h-4 w-4" />
-                <span className="hidden sm:inline">My</span> Orgs
+              <TabsTrigger value="orgs" className="flex items-center gap-1 px-2 py-2 sm:gap-2 sm:px-3">
+                <Building2 className="h-4 w-4 shrink-0" />
+                <span className="hidden sm:inline text-xs sm:text-sm">Orgs</span>
               </TabsTrigger>
-              <TabsTrigger value="me" className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                Me
+              <TabsTrigger value="me" className="flex items-center gap-1 px-2 py-2 sm:gap-2 sm:px-3">
+                <User className="h-4 w-4 shrink-0" />
+                <span className="hidden sm:inline text-xs sm:text-sm">Me</span>
               </TabsTrigger>
             </TabsList>
 

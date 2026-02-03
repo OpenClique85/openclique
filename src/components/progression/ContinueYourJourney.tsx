@@ -169,7 +169,7 @@ export function ContinueYourJourney({ userId }: ContinueYourJourneyProps) {
       </h2>
 
       {/* Tree Progress Cards */}
-      <div className="grid gap-4 md:grid-cols-3 mb-6">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mb-6">
         {trees.map(([treeId, tree]) => {
           const xp = treeXP[treeId] || 0;
           const tier = getTreeTier(xp);

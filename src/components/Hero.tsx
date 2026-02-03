@@ -119,7 +119,7 @@ export function Hero() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in [animation-delay:350ms]">
             {/* Primary CTA - Main conversion goal */}
             <Button size="lg" asChild className="w-full sm:w-auto text-base px-10 py-6 text-lg font-semibold">
-              <Link to="/quests">{HERO.primaryCta}</Link>
+              <Link to="/auth?signup=true">{HERO.primaryCta}</Link>
             </Button>
             
             {/* Secondary CTA - Dropdown for other user types */}
