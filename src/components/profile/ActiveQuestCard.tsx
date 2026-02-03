@@ -184,7 +184,7 @@ export function ActiveQuestCard({ signup, isLive = false, onCancelClick }: Activ
         
         <div className="flex flex-wrap gap-2 pt-2">
           <Button variant="outline" size="sm" asChild>
-            <Link to={`/quests/${signup.quest.slug || signup.quest.id}`}>
+            <Link to={`/quests/${signup.quest.slug ?? signup.quest.id}`}>
               <ExternalLink className="h-4 w-4 mr-1" />
               View Details
             </Link>

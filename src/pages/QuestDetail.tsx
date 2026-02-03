@@ -86,11 +86,26 @@ export default function QuestDetail() {
     const fetchQuest = async () => {
       if (!slug) return;
       
-      const { data, error } = await supabase
+      // Try to find by slug first
+      let { data, error } = await supabase
         .from('quests')
         .select('*')
         .eq('slug', slug)
         .maybeSingle();
+      
+      // If not found by slug, try by ID (UUID format)
+      if (!data && !error) {
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (uuidRegex.test(slug)) {
+          const result = await supabase
+            .from('quests')
+            .select('*')
+            .eq('id', slug)
+            .maybeSingle();
+          data = result.data;
+          error = result.error;
+        }
+      }
       
       if (error || !data) {
         toast({ variant: 'destructive', title: 'Quest not found' });
