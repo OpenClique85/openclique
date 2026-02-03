@@ -77,32 +77,70 @@ export function TimingStep({ formData, updateFormData }: TimingStepProps) {
       {formData.start_datetime && (
         <div className="bg-muted/50 rounded-lg p-4 space-y-2">
           <p className="text-sm font-medium text-muted-foreground">Preview:</p>
-          <div className="flex items-center gap-2">
-            <CalendarDays className="w-4 h-4 text-creator" />
-            <span className="font-medium">
-              {new Date(formData.start_datetime).toLocaleDateString('en-US', {
-                weekday: 'long',
-                month: 'long',
-                day: 'numeric',
-                year: 'numeric',
-              })}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-creator" />
-            <span>
-              {new Date(formData.start_datetime).toLocaleTimeString('en-US', {
-                hour: 'numeric',
-                minute: '2-digit',
-              })}
-              {formData.end_datetime && (
-                <> - {new Date(formData.end_datetime).toLocaleTimeString('en-US', {
-                  hour: 'numeric',
-                  minute: '2-digit',
-                })}</>
-              )}
-            </span>
-          </div>
+          {(() => {
+            const startDate = new Date(formData.start_datetime);
+            const endDate = formData.end_datetime ? new Date(formData.end_datetime) : null;
+            
+            // Check if dates are on different days using local date components
+            const isSameDay = endDate && 
+              startDate.getFullYear() === endDate.getFullYear() &&
+              startDate.getMonth() === endDate.getMonth() &&
+              startDate.getDate() === endDate.getDate();
+            
+            const formatDate = (date: Date) => date.toLocaleDateString('en-US', {
+              weekday: 'long',
+              month: 'long',
+              day: 'numeric',
+              year: 'numeric',
+            });
+            
+            const formatTime = (date: Date) => date.toLocaleTimeString('en-US', {
+              hour: 'numeric',
+              minute: '2-digit',
+            });
+            
+            const formatDateShort = (date: Date) => date.toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+            });
+
+            if (!endDate || isSameDay) {
+              // Same day or no end date - show single date with time range
+              return (
+                <>
+                  <div className="flex items-center gap-2">
+                    <CalendarDays className="w-4 h-4 text-creator" />
+                    <span className="font-medium">{formatDate(startDate)}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-creator" />
+                    <span>
+                      {formatTime(startDate)}
+                      {endDate && <> - {formatTime(endDate)}</>}
+                    </span>
+                  </div>
+                </>
+              );
+            } else {
+              // Multi-day event - show full date range
+              return (
+                <>
+                  <div className="flex items-center gap-2">
+                    <CalendarDays className="w-4 h-4 text-creator" />
+                    <span className="font-medium">
+                      {formatDateShort(startDate)} - {formatDateShort(endDate)}, {endDate.getFullYear()}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-creator" />
+                    <span>
+                      {formatDateShort(startDate)} at {formatTime(startDate)} → {formatDateShort(endDate)} at {formatTime(endDate)}
+                    </span>
+                  </div>
+                </>
+              );
+            }
+          })()}
         </div>
       )}
     </div>
