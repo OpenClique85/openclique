@@ -95,3 +95,9 @@ verify_jwt = false
 
 [functions.eventbrite-oauth-callback]
 verify_jwt = false
+
+[functions.create-solo-simulation]
+verify_jwt = false
+
+[functions.simulate-bot-reply]
+verify_jwt = false
