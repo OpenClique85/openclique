@@ -32,7 +32,7 @@ export function TutorialPrompt() {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 animate-in slide-in-from-bottom-5 duration-500">
+    <div className="fixed bottom-20 md:bottom-4 right-4 z-[60] animate-in slide-in-from-bottom-5 duration-500">
       <Card className="max-w-sm shadow-xl border-primary/20">
         <CardContent className="p-0">
           <div className="flex items-start gap-3 p-4">

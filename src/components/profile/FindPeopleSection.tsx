@@ -145,8 +145,8 @@ export function FindPeopleSection({ friendCode }: FindPeopleSectionProps) {
                 <Search className="h-4 w-4" />
                 Find People
               </span>
-              <span className="text-xs text-muted-foreground">
-                {searchOpen ? 'Close' : 'Search by @username or friend code'}
+              <span className="text-xs text-muted-foreground hidden sm:inline">
+                {searchOpen ? 'Close' : 'Search by @username or code'}
               </span>
             </Button>
           </CollapsibleTrigger>

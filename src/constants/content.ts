@@ -220,7 +220,7 @@ export const HERO = {
   headline: "You've got a clique waiting.",
   headlineAccent: "You just haven't met them yet.",
   subheadline: "We plan the adventure. You bring yourself—plus whoever you want.",
-  primaryCta: "Find Your Quest",
+  primaryCta: "Join Now — It's Free",
   secondaryCta: "Partner With Us",
   tertiaryCta: "Work With Us",
 };
