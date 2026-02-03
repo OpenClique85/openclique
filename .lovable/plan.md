@@ -1,440 +1,315 @@
 
-# Follow Function for Quest Creators and Brands
+# Consolidated Help Center & FAQ System
 
 ## Overview
 
-This plan implements a "Follow" system allowing users to subscribe to quest creators and brand (sponsor) accounts. Followers can discover new quests through a dedicated "Following" feed without push notifications, while creators and brands gain social proof through follower counts.
+This plan addresses FAQ redundancy, creates a searchable Help Center with glossary, and improves navigation to keep the ribbon clean and focused.
 
 ---
 
-## Part 1: Database Schema
+## Part 1: Audit & Consolidation
 
-### 1.1 New Table: `user_follows`
+### Current FAQ Redundancy
 
-```sql
-CREATE TABLE user_follows (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  follower_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  
-  -- Polymorphic target: either a creator OR a sponsor (not both)
-  creator_id UUID REFERENCES creator_profiles(id) ON DELETE CASCADE,
-  sponsor_id UUID REFERENCES sponsor_profiles(id) ON DELETE CASCADE,
-  
-  -- Notification preferences (future opt-in)
-  notify_new_quests BOOLEAN DEFAULT false,
-  
-  created_at TIMESTAMPTZ DEFAULT now(),
-  
-  -- Constraints
-  CONSTRAINT follow_has_target CHECK (
-    (creator_id IS NOT NULL AND sponsor_id IS NULL) OR
-    (creator_id IS NULL AND sponsor_id IS NOT NULL)
-  ),
-  CONSTRAINT unique_creator_follow UNIQUE (follower_id, creator_id),
-  CONSTRAINT unique_sponsor_follow UNIQUE (follower_id, sponsor_id)
-);
+| Location | Content Source | Status |
+|----------|---------------|--------|
+| Homepage | `FAQ` array (5 generic) | Keep as teaser, link to full Help |
+| About page | Same `FAQ` component | **Remove** - redirect to Help Center |
+| How It Works | None | **Add consolidated FAQ section** |
+| Work With Us | `WORK_WITH_US_PAGE.faq` | Keep - role-specific |
+| Creators | `CREATORS_PAGE.faq` | Keep - creator-specific |
 
--- Indexes for fast lookups
-CREATE INDEX idx_user_follows_follower ON user_follows(follower_id);
-CREATE INDEX idx_user_follows_creator ON user_follows(creator_id) WHERE creator_id IS NOT NULL;
-CREATE INDEX idx_user_follows_sponsor ON user_follows(sponsor_id) WHERE sponsor_id IS NOT NULL;
+### Consolidation Strategy
 
--- RLS Policies
-ALTER TABLE user_follows ENABLE ROW LEVEL SECURITY;
+1. **How It Works becomes the authoritative FAQ destination** with all platform FAQs
+2. Homepage shows 3-4 teaser questions with "See all FAQs →" link
+3. About page removes FAQ section entirely
+4. Audience-specific FAQs (creators, volunteers) stay on their respective pages
 
-CREATE POLICY "Users can view their own follows"
-  ON user_follows FOR SELECT
-  USING (follower_id = auth.uid());
+---
 
-CREATE POLICY "Users can view follower counts (public)"
-  ON user_follows FOR SELECT
-  USING (true);
+## Part 2: Enhanced How It Works Page
 
-CREATE POLICY "Users can follow/unfollow"
-  ON user_follows FOR INSERT
-  WITH CHECK (follower_id = auth.uid());
+### New Structure
 
-CREATE POLICY "Users can unfollow"
-  ON user_follows FOR DELETE
-  USING (follower_id = auth.uid());
-```
-
-### 1.2 Follower Count Materialized View
-
-For performance when displaying follower counts on profiles:
-
-```sql
--- Function to get follower counts
-CREATE OR REPLACE FUNCTION get_creator_follower_count(p_creator_id UUID)
-RETURNS BIGINT AS $$
-  SELECT COUNT(*) FROM user_follows WHERE creator_id = p_creator_id;
-$$ LANGUAGE SQL STABLE SECURITY DEFINER;
-
-CREATE OR REPLACE FUNCTION get_sponsor_follower_count(p_sponsor_id UUID)
-RETURNS BIGINT AS $$
-  SELECT COUNT(*) FROM user_follows WHERE sponsor_id = p_sponsor_id;
-$$ LANGUAGE SQL STABLE SECURITY DEFINER;
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│                         HOW IT WORKS                            │
+├─────────────────────────────────────────────────────────────────┤
+│ Hero Section (existing)                                         │
+├─────────────────────────────────────────────────────────────────┤
+│ The Journey - 4 Steps (existing, COLLAPSIBLE)                  │
+│   [▼ Expand to see all steps]                                  │
+├─────────────────────────────────────────────────────────────────┤
+│ Your Quest Journey - PathCarousel (existing)                   │
+├─────────────────────────────────────────────────────────────────┤
+│ Your Progression - Timeline (existing)                          │
+├─────────────────────────────────────────────────────────────────┤
+│ Meet BUGGS (existing)                                           │
+├─────────────────────────────────────────────────────────────────┤
+│ ★ NEW: FAQ Section (Consolidated)                              │
+│   - Searchable input                                            │
+│   - Category tabs: General | Quests | Matching | Safety | Costs │
+│   - Accordion with all FAQs                                     │
+├─────────────────────────────────────────────────────────────────┤
+│ ★ NEW: Glossary Section                                        │
+│   - Searchable A-Z terms                                        │
+│   - Quest, Clique, XP, BUGGS, etc.                             │
+├─────────────────────────────────────────────────────────────────┤
+│ CTA Section (existing)                                          │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Part 2: React Hooks
+## Part 3: Searchable Help Center Components
 
-### 2.1 `useFollows.ts`
+### 3.1 Consolidated FAQ Data Structure
 
-| Function | Purpose |
-|----------|---------|
-| `useIsFollowing(type, id)` | Check if current user follows a creator/sponsor |
-| `useFollowCreator()` | Mutation to follow a creator |
-| `useUnfollowCreator()` | Mutation to unfollow a creator |
-| `useFollowSponsor()` | Mutation to follow a sponsor |
-| `useUnfollowSponsor()` | Mutation to unfollow a sponsor |
-| `useFollowedCreators()` | List all creators the user follows |
-| `useFollowedSponsors()` | List all sponsors the user follows |
-| `useFollowerCount(type, id)` | Get follower count for a creator/sponsor |
-
-### 2.2 `useFollowingFeed.ts`
-
-Fetches quests from all followed creators and sponsors, sorted by newest first:
+Update `content.ts` with categorized FAQs:
 
 ```typescript
-interface FollowingFeedQuest extends Quest {
-  source: {
-    type: 'creator' | 'sponsor';
-    id: string;
-    name: string;
-    slug: string;
-  };
-  contactsJoined: number; // How many of user's contacts signed up
-}
-```
-
----
-
-## Part 3: UI Components
-
-### 3.1 `FollowButton.tsx`
-
-A reusable button component for creator/sponsor profiles:
-
-```text
-┌─────────────────┐     ┌─────────────────┐
-│ [♡] Follow      │ ──► │ [✓] Following   │
-└─────────────────┘     └─────────────────┘
-     (not following)         (following)
-```
-
-**Props:**
-- `type: 'creator' | 'sponsor'`
-- `targetId: string`
-- `size?: 'sm' | 'md' | 'lg'`
-- `variant?: 'default' | 'outline'`
-
-### 3.2 `FollowerCountBadge.tsx`
-
-Displays follower count with appropriate formatting:
-- Under 1000: exact number (e.g., "247 followers")
-- 1000+: abbreviated (e.g., "1.2k followers")
-
-### 3.3 `FollowingFeedRow.tsx`
-
-A new row type for the Netflix-style quest discovery:
-
-```text
-┌──────────────────────────────────────────────────────────────┐
-│ From Creators & Brands You Follow                        (8) │
-├──────────────────────────────────────────────────────────────┤
-│ [Quest Card]  [Quest Card]  [Quest Card]  [Quest Card] ──►   │
-│   by Nike       by @chef_sarah  by @yoga_guru  by REI        │
-└──────────────────────────────────────────────────────────────┘
-```
-
-Each card shows:
-- Source attribution (creator name or brand logo)
-- Quest date, difficulty
-- Contacts joined indicator (if any)
-
-### 3.4 `FollowingFilterToggle.tsx`
-
-A filter toggle for the quest discovery page:
-
-```text
-[All Quests] [Following Only]
-```
-
-When "Following Only" is active, only quests from followed accounts appear.
-
----
-
-## Part 4: Profile Page Integration
-
-### 4.1 Creator Public Profile (`CreatorPublicProfile.tsx`)
-
-Add Follow button and follower count to hero section:
-
-```text
-┌─────────────────────────────────────────────────────┐
-│  [Avatar]  Chef Sarah Martinez                      │
-│            @chef_sarah                              │
-│            Austin, TX                               │
-│                                                     │
-│            247 followers                            │
-│            [Follow]                                 │
-├─────────────────────────────────────────────────────┤
-│  Stats: 12 Quests | 340 Participants | ★ 4.8       │
-└─────────────────────────────────────────────────────┘
-```
-
-### 4.2 Sponsor Public Profile (`SponsorPublicProfile.tsx`)
-
-Same pattern as creator profile:
-
-```text
-┌─────────────────────────────────────────────────────┐
-│  [Logo]  Nike Austin                                │
-│          Brand & Venue                              │
-│          1.2k followers                             │
-│          [Follow]                                   │
-└─────────────────────────────────────────────────────┘
-```
-
----
-
-## Part 5: Quest Discovery Integration
-
-### 5.1 Update `Quests.tsx`
-
-Add "Following" row to Netflix-style layout:
-
-```typescript
-// In questGroups calculation
-const followingQuests = filteredQuests.filter(quest => {
-  // Check if creator_id or sponsor_id is in user's followed list
-  return followedCreatorIds.has(quest.creatorId) || 
-         followedSponsorIds.has(quest.sponsorId);
-});
-
-// Render order:
-// 1. "From People You Follow" (if user follows anyone and has quests)
-// 2. "Happening This Week"
-// 3. Category rows
-// 4. Creator rows
-```
-
-### 5.2 Update `QuestFilterBar.tsx`
-
-Add "Following" filter option:
-
-```typescript
-export interface QuestFilters {
-  // ... existing filters
-  followingOnly: boolean;  // NEW
-}
-```
-
-UI:
-```text
-┌─────────────────────────────────────────────────────┐
-│ 🔍 [Search quests...]          [Starting Soon ▾]   │
-├─────────────────────────────────────────────────────┤
-│ [Following] [Culture] [Wellness] [Social]          │
-└─────────────────────────────────────────────────────┘
-```
-
-"Following" is a special toggle that:
-- Appears first when user follows at least one account
-- Shows only quests from followed creators/sponsors when active
-- Displays count of available quests
-
----
-
-## Part 6: Contact Social Proof
-
-### 6.1 Quest Card Enhancement
-
-Show how many of the user's contacts have joined:
-
-```text
-┌─────────────────────────────┐
-│ [Quest Image]               │
-│ 🍜 Ramen Quest              │
-│ Mar 15 • Austin             │
-│                             │
-│ 👥 2 contacts interested    │  ← NEW
-└─────────────────────────────┘
-```
-
-This leverages the existing contacts system:
-1. Fetch user's accepted contacts
-2. Cross-reference with quest signups
-3. Display count (or nothing if 0)
-
----
-
-## Part 7: Anti-Spam Mechanics
-
-### 7.1 Feed Diversity Rules
-
-Prevent any single creator/sponsor from dominating the Following feed:
-
-```typescript
-// In useFollowingFeed.ts
-const diversifyFeed = (quests: FollowingFeedQuest[]) => {
-  const MAX_PER_SOURCE = 3; // Max 3 quests per creator/sponsor in feed
-  const seen = new Map<string, number>();
+export const HELP_CENTER = {
+  categories: [
+    { id: 'general', label: 'General', icon: 'HelpCircle' },
+    { id: 'quests', label: 'Quests', icon: 'Compass' },
+    { id: 'matching', label: 'Matching & Cliques', icon: 'Users' },
+    { id: 'safety', label: 'Safety & Privacy', icon: 'Shield' },
+    { id: 'costs', label: 'Costs & Pricing', icon: 'CreditCard' },
+  ],
   
-  return quests.filter(quest => {
-    const key = `${quest.source.type}_${quest.source.id}`;
-    const count = seen.get(key) || 0;
-    if (count >= MAX_PER_SOURCE) return false;
-    seen.set(key, count + 1);
-    return true;
-  });
+  faqs: [
+    // General
+    { category: 'general', question: 'What exactly is a quest?', answer: '...' },
+    { category: 'general', question: 'What cities are you in?', answer: '...' },
+    
+    // Quests
+    { category: 'quests', question: 'How long do quests last?', answer: '...' },
+    { category: 'quests', question: 'Can I bring friends?', answer: '...' },
+    
+    // Matching
+    { category: 'matching', question: 'How does matching work?', answer: '...' },
+    { category: 'matching', question: 'What is a clique?', answer: '...' },
+    
+    // Safety
+    { category: 'safety', question: 'How is my data used?', answer: '...' },
+    { category: 'safety', question: 'How do I report someone?', answer: '...' },
+    
+    // Costs
+    { category: 'costs', question: 'How much does it cost?', answer: '...' },
+    { category: 'costs', question: 'Are there refunds?', answer: '...' },
+  ],
+  
+  glossary: [
+    { term: 'Quest', definition: 'A time-bound, real-world mission...' },
+    { term: 'Clique', definition: 'A temporary small group...' },
+    { term: 'XP', definition: 'Experience points earned...' },
+    { term: 'BUGGS', definition: 'Behavioral Utility for Group Guidance...' },
+    { term: 'Meta-Quest', definition: 'Multi-quest progression...' },
+    // ... more terms
+  ],
 };
 ```
 
-### 7.2 No Push Notifications by Default
+### 3.2 SearchableHelpSection Component
 
-The `notify_new_quests` column defaults to `false`. Users browse the Following feed on their own schedule.
-
-Future enhancement: Per-creator notification toggle:
 ```text
-┌─────────────────────────────────────────────────────┐
-│ [Following ✓]  [🔔 Get notified]                   │
-└─────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────┐
+│ Frequently Asked Questions                            │
+├───────────────────────────────────────────────────────┤
+│ 🔍 [Search questions...]                             │
+├───────────────────────────────────────────────────────┤
+│ [All] [General] [Quests] [Matching] [Safety] [Costs] │
+├───────────────────────────────────────────────────────┤
+│ ▸ What exactly is a quest?                           │
+│ ▸ How does matching work?                            │
+│ ▸ What cities are you in?                            │
+│ ▸ How is my data used?                               │
+│ ▸ ...                                                │
+└───────────────────────────────────────────────────────┘
+```
+
+Features:
+- Fuzzy search across questions AND answers
+- Category filtering via tabs
+- Smooth accordion expand/collapse
+- "Didn't find your answer?" → Opens support ticket
+
+### 3.3 Glossary Component
+
+```text
+┌───────────────────────────────────────────────────────┐
+│ Glossary                                              │
+├───────────────────────────────────────────────────────┤
+│ 🔍 [Search terms...]                                 │
+├───────────────────────────────────────────────────────┤
+│ B                                                     │
+│   BUGGS - Behavioral Utility for Group Guidance...   │
+│ C                                                     │
+│   Clique - A temporary small group formed for...     │
+│ M                                                     │
+│   Meta-Quest - Multi-quest progression that...       │
+│ Q                                                     │
+│   Quest - A time-bound, real-world mission with...   │
+│ X                                                     │
+│   XP - Experience points earned by completing...     │
+└───────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Part 8: Analytics & Social Proof
+## Part 4: Homepage HowItWorksMini Enhancement
 
-### 8.1 Creator Analytics
+### Make Collapsible Option
 
-Add follower metrics to creator dashboard (`CreatorAnalytics.tsx`):
+The `HowItWorksMini` section on the homepage will remain as-is but:
+1. Keep it visible by default (important for first-time visitors)
+2. Add a subtle "Learn more →" link to `/how-it-works`
 
-| Metric | Description |
-|--------|-------------|
-| Total Followers | Current follower count |
-| Follower Growth | Week-over-week change |
-| Follower → Signup Rate | % of followers who sign up for quests |
+No collapsible needed on homepage - it's already a teaser section.
 
-### 8.2 Sponsor Analytics
+### FAQ Teaser on Homepage
 
-Same metrics in sponsor dashboard.
+Replace full FAQ with condensed teaser (3 questions max):
+
+```text
+┌───────────────────────────────────────────────────────┐
+│ Quick Questions                                       │
+├───────────────────────────────────────────────────────┤
+│ ▸ What exactly is a quest?                           │
+│ ▸ How does matching work?                            │
+│ ▸ How much does it cost?                             │
+├───────────────────────────────────────────────────────┤
+│           [See All FAQs →]  (links to /how-it-works) │
+└───────────────────────────────────────────────────────┘
+```
+
+---
+
+## Part 5: Navigation Cleanup
+
+### Current Navbar (Crowded)
+```
+Home | Quests | Pricing | How It Works | About | [Get Involved ▼] | [Find People] | [My Hub]
+```
+
+### Recommended Changes
+
+1. **Keep "How It Works"** - this becomes the Help Center destination
+2. **Rename to "Help" in nav** (optional) - or keep as "How It Works" with Help integrated
+3. **Add "Help" to footer** - alternative entry point
+4. **Remove FAQ from About page** - reduces redundancy
+
+### Footer Enhancement
+
+Add Help Center link:
+
+```text
+Links                    Connect
+─────                    ───────
+For Businesses           hello@...
+Help Center ← NEW        Get Help
+Privacy                  [Social icons]
+Terms
+```
+
+---
+
+## Part 6: Files to Create
+
+| File | Purpose |
+|------|---------|
+| `src/components/help/SearchableHelpSection.tsx` | FAQ with search and category filters |
+| `src/components/help/GlossarySection.tsx` | Searchable A-Z glossary |
+| `src/components/help/FAQTeaser.tsx` | Condensed FAQ for homepage |
+| `src/components/help/index.ts` | Barrel exports |
+
+## Part 7: Files to Modify
+
+| File | Changes |
+|------|---------|
+| `src/constants/content.ts` | Add `HELP_CENTER` with categorized FAQs and glossary |
+| `src/pages/HowItWorks.tsx` | Add SearchableHelpSection and GlossarySection |
+| `src/pages/Index.tsx` | Replace `<FAQ />` with `<FAQTeaser />` |
+| `src/pages/About.tsx` | Remove `<FAQ />` component |
+| `src/components/Footer.tsx` | Add "Help Center" link |
+
+---
+
+## Part 8: Glossary Terms (Initial Set)
+
+| Term | Definition |
+|------|------------|
+| **Quest** | A time-bound, real-world adventure for a small group (3-6 people). Each quest has clear objectives and is designed to spark genuine connection. |
+| **Clique** | Your squad - a small group of people you quest with. Cliques can be temporary (one quest) or recurring (your regular crew). |
+| **BUGGS** | Behavioral Utility for Group Guidance & Structure - your AI guide that handles logistics, icebreakers, and gentle nudges. |
+| **XP** | Experience points earned by completing quests, giving feedback, and engaging with the platform. XP tracks your OpenClique journey. |
+| **Meta-Quest** | A monthly challenge that tracks progress across multiple quests and activities. Complete meta-quests to earn bonus rewards. |
+| **Squad** | Another term for your clique - the people matched to complete a quest together. |
+| **Creator** | Someone who designs and hosts quests. Creators build their reputation through ratings and can be discovered by brands. |
+| **Sponsor** | A brand or venue that partners with OpenClique to host or sponsor quests. |
+| **Friend Code** | A unique code you can share to add people directly to your contacts list. |
+| **LFG** | "Looking for Group" - a broadcast feature to invite your contacts to join open quest slots. |
+| **Contacts** | Your personal roster of OpenClique users you've connected with - like a friend list for future adventures. |
 
 ---
 
 ## Implementation Phases
 
-### Phase 1: Database & Core Hooks (This Sprint)
-1. Create `user_follows` table with RLS
-2. Create follower count functions
-3. Build `useFollows.ts` hooks
-4. Build `useFollowingFeed.ts` hook
+### Phase 1: Content Consolidation
+1. Create `HELP_CENTER` data structure in `content.ts`
+2. Migrate existing FAQs into categorized format
+3. Write initial glossary terms
 
-### Phase 2: Profile Integration (This Sprint)
-5. Create `FollowButton.tsx` component
-6. Create `FollowerCountBadge.tsx` component
-7. Update `CreatorPublicProfile.tsx` with follow button + count
-8. Update `SponsorPublicProfile.tsx` with follow button + count
+### Phase 2: Help Components
+4. Build `SearchableHelpSection.tsx` with fuzzy search
+5. Build `GlossarySection.tsx` with alphabetical grouping
+6. Build `FAQTeaser.tsx` for homepage
 
-### Phase 3: Quest Discovery (This Sprint)
-9. Update `QuestFilterBar.tsx` with Following toggle
-10. Update `Quests.tsx` with Following row
-11. Create `FollowingFeedRow.tsx` component
-12. Add contacts-joined indicator to quest cards
-
-### Phase 4: Analytics (Future)
-13. Add follower metrics to creator/sponsor dashboards
-14. Build follower growth charts
-15. Create conversion tracking (follower → signup)
+### Phase 3: Page Updates
+7. Update `HowItWorks.tsx` to include FAQ and Glossary sections
+8. Update `Index.tsx` to use `FAQTeaser` instead of full `FAQ`
+9. Remove `FAQ` from `About.tsx`
+10. Add Help Center link to `Footer.tsx`
 
 ---
 
-## Files to Create
+## Technical Notes
 
-| File | Purpose |
-|------|---------|
-| `src/hooks/useFollows.ts` | Follow/unfollow mutations and queries |
-| `src/hooks/useFollowingFeed.ts` | Fetch quests from followed accounts |
-| `src/components/social/FollowButton.tsx` | Reusable follow/unfollow button |
-| `src/components/social/FollowerCountBadge.tsx` | Display formatted follower count |
-| `src/components/quests/FollowingFeedRow.tsx` | Netflix-style row for following feed |
+### Search Implementation
 
-## Files to Modify
+Use simple string matching for MVP:
 
-| File | Changes |
-|------|---------|
-| `src/pages/CreatorPublicProfile.tsx` | Add FollowButton, FollowerCountBadge |
-| `src/pages/SponsorPublicProfile.tsx` | Add FollowButton, FollowerCountBadge |
-| `src/pages/Quests.tsx` | Add Following row to Netflix layout |
-| `src/components/QuestFilterBar.tsx` | Add "Following" filter toggle |
-| `src/components/QuestCard.tsx` | Add contacts-joined indicator |
+```typescript
+const filterFAQs = (query: string, category: string) => {
+  return faqs.filter(faq => {
+    const matchesCategory = category === 'all' || faq.category === category;
+    const matchesSearch = !query || 
+      faq.question.toLowerCase().includes(query.toLowerCase()) ||
+      faq.answer.toLowerCase().includes(query.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+};
+```
 
----
+### Alphabetical Glossary Grouping
 
-## Technical Architecture
-
-```text
-┌─────────────────────────────────────────────────────────────┐
-│                     user_follows table                      │
-│  ┌─────────────┬─────────────┬─────────────┬─────────────┐ │
-│  │ follower_id │ creator_id  │ sponsor_id  │ notify_     │ │
-│  │ (required)  │ (nullable)  │ (nullable)  │ new_quests  │ │
-│  └──────┬──────┴──────┬──────┴──────┬──────┴─────────────┘ │
-│         │             │             │                       │
-│         ▼             ▼             ▼                       │
-│   auth.users   creator_profiles  sponsor_profiles          │
-└─────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────┐
-│                    Data Flow                                │
-│                                                             │
-│  CreatorPublicProfile ──► FollowButton ──► useFollows      │
-│                               │                             │
-│                               ▼                             │
-│                        user_follows                         │
-│                               │                             │
-│                               ▼                             │
-│                      useFollowingFeed                       │
-│                               │                             │
-│                               ▼                             │
-│                     Quests.tsx (feed)                       │
-└─────────────────────────────────────────────────────────────┘
+```typescript
+const groupedTerms = glossary.reduce((acc, item) => {
+  const letter = item.term[0].toUpperCase();
+  if (!acc[letter]) acc[letter] = [];
+  acc[letter].push(item);
+  return acc;
+}, {} as Record<string, typeof glossary>);
 ```
 
 ---
 
-## Security Considerations
+## Summary
 
-| Concern | Mitigation |
-|---------|------------|
-| Follow spam | Rate limit via RLS (same user can't follow same target twice) |
-| Fake follower counts | All follows require authenticated user |
-| Privacy | Users can only see their own follow list; counts are public |
-| Manipulation | No public API for bulk operations |
-
----
-
-## Key Design Decisions
-
-### Why No Push Notifications?
-- Users stay in control of their attention
-- Prevents notification fatigue
-- Following feed becomes a "pull" experience
-- Future opt-in per-creator keeps it intentional
-
-### Why Polymorphic Table?
-- Single `user_follows` table handles both creators and sponsors
-- Simpler queries for the "Following" feed
-- Easier to add new followable entity types later
-
-### Why Follower Counts Are Public?
-- Social proof for creators/brands
-- Helps users discover popular accounts
-- Enables brand partnership matching
-
-### Why Limit Feed Diversity?
-- Prevents a prolific creator from drowning out others
-- Encourages variety in the Following experience
-- Mirrors how streaming services prevent binge-listing from one source
+This plan:
+1. **Eliminates FAQ redundancy** by consolidating to How It Works page
+2. **Creates a searchable Help Center** with categories and fuzzy search
+3. **Adds a Glossary** with platform terminology
+4. **Keeps navigation clean** - no new top-level nav items
+5. **Improves discoverability** via search and categorization
