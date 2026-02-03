@@ -14,6 +14,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
+import { FollowButton } from '@/components/social/FollowButton';
+import { FollowerCountBadge } from '@/components/social/FollowerCountBadge';
 import { 
   Building2, 
   MapPin, 
@@ -183,6 +185,12 @@ export default function SponsorPublicProfile() {
                     {sponsor.city}
                   </p>
                 )}
+
+                {/* Follower Count & Follow Button */}
+                <div className="flex items-center gap-4 mb-4">
+                  <FollowerCountBadge type="sponsor" targetId={sponsor.id} />
+                  <FollowButton type="sponsor" targetId={sponsor.id} />
+                </div>
                 
                 {sponsor.description && (
                   <p className="text-foreground/80 mb-4">{sponsor.description}</p>

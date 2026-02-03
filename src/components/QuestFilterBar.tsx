@@ -1,4 +1,4 @@
-import { Search, Calendar, X, Sparkles, User, ArrowUpDown } from 'lucide-react';
+import { Search, Calendar, X, Sparkles, User, ArrowUpDown, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/collapsible';
 import { useState } from 'react';
 import { useActiveCreators, type CreatorInfo } from '@/hooks/useCreatorSlugs';
+import { useFollowedIds } from '@/hooks/useFollows';
 
 // Status types matching database
 type QuestStatus = 'open' | 'closed' | 'coming-soon' | 'completed';
@@ -63,6 +64,7 @@ export interface QuestFilters {
   interests: string[];
   creatorId: string | null;
   sortBy: 'date' | 'newest' | 'popular' | 'rating';
+  followingOnly: boolean;
 }
 
 interface QuestFilterBarProps {
@@ -73,6 +75,7 @@ interface QuestFilterBarProps {
 const QuestFilterBar = ({ filters, onFilterChange }: QuestFilterBarProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const { data: creators = [] } = useActiveCreators();
+  const { hasFollows } = useFollowedIds();
 
   const hasActiveFilters = 
     filters.search.length > 0 ||
@@ -80,7 +83,8 @@ const QuestFilterBar = ({ filters, onFilterChange }: QuestFilterBarProps) => {
     filters.days.length > 0 || 
     filters.statuses.length > 0 ||
     filters.interests.length > 0 ||
-    filters.creatorId !== null;
+    filters.creatorId !== null ||
+    filters.followingOnly;
 
   const handleSearchChange = (value: string) => {
     onFilterChange({ ...filters, search: value });
@@ -117,6 +121,10 @@ const QuestFilterBar = ({ filters, onFilterChange }: QuestFilterBarProps) => {
     onFilterChange({ ...filters, interests: newInterests });
   };
 
+  const handleFollowingToggle = () => {
+    onFilterChange({ ...filters, followingOnly: !filters.followingOnly });
+  };
+
   const handleCreatorChange = (value: string) => {
     onFilterChange({
       ...filters,
@@ -140,6 +148,7 @@ const QuestFilterBar = ({ filters, onFilterChange }: QuestFilterBarProps) => {
       interests: [],
       creatorId: null,
       sortBy: 'date',
+      followingOnly: false,
     });
   };
 
@@ -198,13 +207,30 @@ const QuestFilterBar = ({ filters, onFilterChange }: QuestFilterBarProps) => {
         </Select>
       </div>
 
-      {/* Interest / Theme Filter (always visible) */}
+      {/* Following + Interest Filter (always visible) */}
       <div className="space-y-2">
         <label className="text-xs text-muted-foreground uppercase tracking-wide flex items-center gap-1">
           <Sparkles className="w-3 h-3" />
           Interests
         </label>
         <div className="flex flex-wrap gap-2">
+          {/* Following Toggle - only show if user follows anyone */}
+          {hasFollows && (
+            <button
+              onClick={handleFollowingToggle}
+              className={`
+                flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium
+                transition-all border
+                ${filters.followingOnly 
+                  ? 'border-primary bg-primary/10 text-foreground' 
+                  : 'border-border bg-background text-muted-foreground hover:border-primary/50'
+                }
+              `}
+            >
+              <Heart className={`h-4 w-4 ${filters.followingOnly ? 'fill-primary' : ''}`} />
+              <span>Following</span>
+            </button>
+          )}
           {INTEREST_OPTIONS.map(({ id, label, emoji }) => {
             const isActive = filters.interests.includes(id);
             return (
