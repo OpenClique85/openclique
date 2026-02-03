@@ -129,7 +129,6 @@ Deno.serve(async (req) => {
             display_name: bot.name,
             email: bot.email,
             is_synthetic: true,
-            onboarding_completed: true,
           })
           .eq('id', authData.user.id);
 
@@ -171,7 +170,6 @@ Deno.serve(async (req) => {
           title: '🧪 Solo Simulation Test Quest',
           slug: `sim-test-${Date.now()}`,
           description: 'A test quest for solo squad simulation',
-          category: 'Social',
           is_demo: true,
           status: 'published',
           quest_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 1 week from now
@@ -181,8 +179,6 @@ Deno.serve(async (req) => {
           location_type: 'in_person',
           estimated_duration: '2 hours',
           meeting_point: 'Test Location',
-          what_to_bring: ['Enthusiasm', 'Open mind'],
-          who_its_for: 'Admin testers',
         })
         .select('id')
         .single();
