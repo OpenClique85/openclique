@@ -5,6 +5,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PokeButton } from './PokeButton';
+import { AddContactButton } from '@/components/contacts/AddContactButton';
 import { UserPlus, Send, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -70,6 +71,9 @@ export function UserSearchCard({
           
           {/* Actions */}
           <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
+            {/* Add Contact Button */}
+            <AddContactButton targetUserId={user.id} source="search" />
+            
             {onInviteToClique && (
               <Button
                 variant="outline"

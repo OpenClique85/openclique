@@ -2245,6 +2245,99 @@ export type Database = {
         }
         Relationships: []
       }
+      lfg_broadcasts: {
+        Row: {
+          created_at: string | null
+          expires_at: string
+          id: string
+          is_active: boolean | null
+          message: string | null
+          quest_id: string
+          spots_available: number
+          squad_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          is_active?: boolean | null
+          message?: string | null
+          quest_id: string
+          spots_available?: number
+          squad_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          is_active?: boolean | null
+          message?: string | null
+          quest_id?: string
+          spots_available?: number
+          squad_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lfg_broadcasts_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lfg_broadcasts_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lfg_broadcasts_squad_id_fkey"
+            columns: ["squad_id"]
+            isOneToOne: false
+            referencedRelation: "quest_squads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lfg_responses: {
+        Row: {
+          broadcast_id: string
+          confirmed_at: string | null
+          id: string
+          responded_at: string | null
+          responder_id: string
+          status: string
+        }
+        Insert: {
+          broadcast_id: string
+          confirmed_at?: string | null
+          id?: string
+          responded_at?: string | null
+          responder_id: string
+          status?: string
+        }
+        Update: {
+          broadcast_id?: string
+          confirmed_at?: string | null
+          id?: string
+          responded_at?: string | null
+          responder_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lfg_responses_broadcast_id_fkey"
+            columns: ["broadcast_id"]
+            isOneToOne: false
+            referencedRelation: "lfg_broadcasts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       listing_applications: {
         Row: {
           availability: string | null
@@ -6688,6 +6781,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_contacts: {
+        Row: {
+          accepted_at: string | null
+          contact_id: string
+          id: string
+          nickname: string | null
+          notes: string | null
+          requested_at: string | null
+          source: string | null
+          source_id: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          contact_id: string
+          id?: string
+          nickname?: string | null
+          notes?: string | null
+          requested_at?: string | null
+          source?: string | null
+          source_id?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          accepted_at?: string | null
+          contact_id?: string
+          id?: string
+          nickname?: string | null
+          notes?: string | null
+          requested_at?: string | null
+          source?: string | null
+          source_id?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_entitlements: {
         Row: {
           created_at: string | null
@@ -8679,6 +8811,18 @@ export type Database = {
         }[]
       }
       get_org_contact_emails: { Args: { target_org_id: string }; Returns: Json }
+      get_pending_contact_requests: {
+        Args: { p_user_id: string }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          request_id: string
+          requested_at: string
+          requester_id: string
+          source: string
+          username: string
+        }[]
+      }
       get_pilot_metrics: { Args: { p_pilot_id: string }; Returns: Json }
       get_quest_emergency_contact: {
         Args: { target_quest_id: string }
@@ -8717,6 +8861,19 @@ export type Database = {
           start_time: string
           status: Database["public"]["Enums"]["instance_status"]
           title: string
+        }[]
+      }
+      get_user_contacts: {
+        Args: { p_user_id: string }
+        Returns: {
+          accepted_at: string
+          avatar_url: string
+          contact_id: string
+          display_name: string
+          nickname: string
+          notes: string
+          source: string
+          username: string
         }[]
       }
       get_user_email: { Args: { target_user_id: string }; Returns: string }
@@ -8915,6 +9072,10 @@ export type Database = {
         | "support_ticket_update"
         | "support_ticket_assigned"
         | "admin_direct_message"
+        | "contact_request"
+        | "contact_accepted"
+        | "lfg_broadcast"
+        | "lfg_response"
       ops_event_type:
         | "signup_created"
         | "signup_status_changed"
@@ -9265,6 +9426,10 @@ export const Constants = {
         "support_ticket_update",
         "support_ticket_assigned",
         "admin_direct_message",
+        "contact_request",
+        "contact_accepted",
+        "lfg_broadcast",
+        "lfg_response",
       ],
       ops_event_type: [
         "signup_created",
