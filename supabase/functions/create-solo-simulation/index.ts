@@ -149,36 +149,35 @@ Deno.serve(async (req) => {
     let questId: string;
     let instanceId: string;
 
-    // Look for an existing test quest that's still active
+    // Look for an existing simulation test quest that's still active
     const { data: existingQuest } = await supabase
       .from('quests')
       .select('id')
       .eq('status', 'published')
-      .eq('is_demo', true)
+      .ilike('slug', 'sim-test-%')
       .order('created_at', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
     if (existingQuest) {
       questId = existingQuest.id;
       console.log(`Using existing quest ${questId}`);
     } else {
-      // Create a test quest
+      // Create a test quest with actual schema columns
       const { data: newQuest, error: questError } = await supabase
         .from('quests')
         .insert({
           title: '🧪 Solo Simulation Test Quest',
           slug: `sim-test-${Date.now()}`,
-          description: 'A test quest for solo squad simulation',
-          is_demo: true,
+          short_description: 'A test quest for solo squad simulation',
+          full_description: 'This is a simulation quest created for admin testing purposes.',
           status: 'published',
-          quest_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 1 week from now
-          min_squad_size: 2,
-          max_squad_size: 6,
-          signup_deadline: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000).toISOString(),
-          location_type: 'in_person',
-          estimated_duration: '2 hours',
-          meeting_point: 'Test Location',
+          start_datetime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          end_datetime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000).toISOString(),
+          default_squad_size: 4,
+          default_capacity: 10,
+          meeting_location_name: 'Test Location',
+          visibility: 'unlisted',
         })
         .select('id')
         .single();
