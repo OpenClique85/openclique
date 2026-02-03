@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Loader2, ChevronLeft, ChevronRight, Save, Send, ArrowLeft } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import { saveQuestRelatedData, parseManualObjectives } from '@/lib/questDataSaver';
 
 import {
   WizardProgress,
@@ -236,6 +237,22 @@ export default function QuestBuilder() {
       .slice(0, 50);
   };
 
+  // Helper to save related quest data after main quest is saved
+  const saveRelatedDataAfterQuestSave = async (questId: string, data: QuestFormData) => {
+    // Prepare objectives from manual entry if AI draft wasn't used
+    let dataToSave = { ...data };
+    if ((!data.ai_draft_objectives || data.ai_draft_objectives.length === 0) && data.objectives) {
+      dataToSave.ai_draft_objectives = parseManualObjectives(data.objectives);
+    }
+    
+    const result = await saveQuestRelatedData(questId, dataToSave);
+    if (!result.success) {
+      console.warn('Some related data may not have been saved:', result.error);
+    } else {
+      console.log('Related data saved:', result.savedCounts);
+    }
+  };
+
   // Save quest mutation
   const saveMutation = useMutation({
     mutationFn: async (submitForReview: boolean) => {
@@ -299,6 +316,10 @@ export default function QuestBuilder() {
           .single();
         
         if (error) throw error;
+        
+        // Save related data (constraints, objectives, roles, affinities)
+        await saveRelatedDataAfterQuestSave(data.id, formData);
+        
         return data;
       } else {
         // Create new
@@ -309,6 +330,10 @@ export default function QuestBuilder() {
           .single();
         
         if (error) throw error;
+        
+        // Save related data (constraints, objectives, roles, affinities)
+        await saveRelatedDataAfterQuestSave(data.id, formData);
+        
         return data;
       }
     },
