@@ -1,21 +1,27 @@
 /**
  * =============================================================================
- * MeTab - Personal identity, algorithm, and progress for unified Profile page
+ * MeTab - Personal hub with Adventure Journal and Algorithm
  * =============================================================================
  * 
- * Contains:
- * - Your Algorithm dashboard
- * - Progress & Gamification
- * - Quick Settings links to /settings page
+ * Reorganized to prioritize:
+ * 1. Adventure Journal (Level, Achievements, Badges, Meta Quests)
+ * 2. Your Algorithm (Social energy, group roles, traits)
+ * 3. Quick Settings
  */
 
+import { AdventureJournal } from '@/components/journal/AdventureJournal';
 import { YourAlgorithmDashboard } from '@/components/profile/YourAlgorithmDashboard';
-import { ProfileGamificationSection } from '@/components/profile/ProfileGamificationSection';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Settings, Bell, Shield, HelpCircle, Database, Trash2 } from 'lucide-react';
+import { Settings, Bell, Shield, HelpCircle, Database, Trash2, BookOpen, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 
 interface MeTabProps {
   userId: string;
@@ -24,16 +30,39 @@ interface MeTabProps {
 export function MeTab({ userId }: MeTabProps) {
   return (
     <div className="space-y-8">
-      {/* Your Algorithm Section */}
+      {/* Adventure Journal - Primary Focus */}
       <section>
-        <YourAlgorithmDashboard />
+        <div className="flex items-center gap-2 mb-4">
+          <BookOpen className="h-5 w-5 text-primary" />
+          <h2 className="text-lg font-display font-semibold">Adventure Journal</h2>
+        </div>
+        <AdventureJournal />
       </section>
 
       <Separator />
 
-      {/* Progress & Gamification */}
+      {/* Your Algorithm - Collapsed by default in accordion */}
       <section>
-        <ProfileGamificationSection />
+        <Accordion type="single" collapsible className="w-full">
+          <AccordionItem value="algorithm" className="border rounded-lg">
+            <AccordionTrigger className="px-4 hover:no-underline">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                </div>
+                <div className="text-left">
+                  <span className="font-medium">Your Algorithm</span>
+                  <p className="text-xs text-muted-foreground font-normal">
+                    How you show up, group roles, and matching preferences
+                  </p>
+                </div>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pb-4">
+              <YourAlgorithmDashboard />
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </section>
 
       <Separator />

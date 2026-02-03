@@ -2469,6 +2469,110 @@ export type Database = {
         }
         Relationships: []
       }
+      monthly_meta_quest_templates: {
+        Row: {
+          coin_reward: number | null
+          created_at: string | null
+          criteria_metadata: Json | null
+          criteria_target: number
+          criteria_type: string
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          is_seasonal: boolean | null
+          name: string
+          seasonal_months: number[] | null
+          weight: number | null
+          xp_reward: number | null
+        }
+        Insert: {
+          coin_reward?: number | null
+          created_at?: string | null
+          criteria_metadata?: Json | null
+          criteria_target?: number
+          criteria_type: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_seasonal?: boolean | null
+          name: string
+          seasonal_months?: number[] | null
+          weight?: number | null
+          xp_reward?: number | null
+        }
+        Update: {
+          coin_reward?: number | null
+          created_at?: string | null
+          criteria_metadata?: Json | null
+          criteria_target?: number
+          criteria_type?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_seasonal?: boolean | null
+          name?: string
+          seasonal_months?: number[] | null
+          weight?: number | null
+          xp_reward?: number | null
+        }
+        Relationships: []
+      }
+      monthly_meta_quests: {
+        Row: {
+          coin_reward: number | null
+          created_at: string | null
+          criteria_metadata: Json | null
+          criteria_target: number
+          criteria_type: string
+          description: string | null
+          icon: string | null
+          id: string
+          month_year: string
+          name: string
+          template_id: string | null
+          xp_reward: number | null
+        }
+        Insert: {
+          coin_reward?: number | null
+          created_at?: string | null
+          criteria_metadata?: Json | null
+          criteria_target: number
+          criteria_type: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          month_year: string
+          name: string
+          template_id?: string | null
+          xp_reward?: number | null
+        }
+        Update: {
+          coin_reward?: number | null
+          created_at?: string | null
+          criteria_metadata?: Json | null
+          criteria_target?: number
+          criteria_type?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          month_year?: string
+          name?: string
+          template_id?: string | null
+          xp_reward?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monthly_meta_quests_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "monthly_meta_quest_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string | null
@@ -6974,6 +7078,83 @@ export type Database = {
         }
         Relationships: []
       }
+      user_meta_quest_progress: {
+        Row: {
+          completed_at: string | null
+          current_progress: number | null
+          id: string
+          meta_quest_id: string | null
+          reward_claimed_at: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          current_progress?: number | null
+          id?: string
+          meta_quest_id?: string | null
+          reward_claimed_at?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          current_progress?: number | null
+          id?: string
+          meta_quest_id?: string | null
+          reward_claimed_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_meta_quest_progress_meta_quest_id_fkey"
+            columns: ["meta_quest_id"]
+            isOneToOne: false
+            referencedRelation: "monthly_meta_quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_monthly_summaries: {
+        Row: {
+          coins_earned: number | null
+          created_at: string | null
+          id: string
+          month_year: string
+          special_reward_id: string | null
+          summary_shown_at: string | null
+          total_completed: number | null
+          tracked_completed: number | null
+          user_id: string
+          xp_earned: number | null
+        }
+        Insert: {
+          coins_earned?: number | null
+          created_at?: string | null
+          id?: string
+          month_year: string
+          special_reward_id?: string | null
+          summary_shown_at?: string | null
+          total_completed?: number | null
+          tracked_completed?: number | null
+          user_id: string
+          xp_earned?: number | null
+        }
+        Update: {
+          coins_earned?: number | null
+          created_at?: string | null
+          id?: string
+          month_year?: string
+          special_reward_id?: string | null
+          summary_shown_at?: string | null
+          total_completed?: number | null
+          tracked_completed?: number | null
+          user_id?: string
+          xp_earned?: number | null
+        }
+        Relationships: []
+      }
       user_personality_types: {
         Row: {
           created_at: string | null
@@ -7330,6 +7511,35 @@ export type Database = {
             columns: ["streak_rule_id"]
             isOneToOne: false
             referencedRelation: "streak_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_tracked_meta_quests: {
+        Row: {
+          id: string
+          meta_quest_id: string | null
+          tracked_at: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          meta_quest_id?: string | null
+          tracked_at?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          meta_quest_id?: string | null
+          tracked_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_tracked_meta_quests_meta_quest_id_fkey"
+            columns: ["meta_quest_id"]
+            isOneToOne: false
+            referencedRelation: "monthly_meta_quests"
             referencedColumns: ["id"]
           },
         ]
@@ -8792,6 +9002,10 @@ export type Database = {
         Args: { p_squad_id: string }
         Returns: undefined
       }
+      count_user_tracked_meta_quests: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
       create_instance_from_quest: {
         Args: {
           p_end_time?: string
@@ -8829,6 +9043,10 @@ export type Database = {
         }
         Returns: string
       }
+      generate_monthly_meta_quests: {
+        Args: { p_month_year: string }
+        Returns: number
+      }
       generate_simple_invite_code: { Args: never; Returns: string }
       generate_user_friend_code: { Args: never; Returns: string }
       get_application_email: {
@@ -8843,6 +9061,7 @@ export type Database = {
         Args: { target_creator_id: string }
         Returns: Json
       }
+      get_current_month_year: { Args: never; Returns: string }
       get_deletion_request_email: {
         Args: { target_request_id: string }
         Returns: string
