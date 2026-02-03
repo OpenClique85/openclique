@@ -95,6 +95,20 @@ export function Navbar() {
                 {link.label}
               </Link>
             ))}
+            {/* Find People search link for logged in users */}
+            {user && (
+              <Link
+                to="/users"
+                className={`text-sm font-medium px-3 py-2 rounded-md transition-colors hover:bg-muted flex items-center gap-1.5 ${
+                  location.pathname === '/users' 
+                    ? "text-primary bg-primary/5" 
+                    : "text-muted-foreground"
+                }`}
+              >
+                <Search className="h-4 w-4" />
+                Find People
+              </Link>
+            )}
             {/* My Hub - consolidated profile link for logged in users */}
             {user && (
               <Link
@@ -262,6 +276,22 @@ export function Navbar() {
                 </Link>
               ))}
               
+              {/* Find People link for logged in users */}
+              {user && (
+                <Link
+                  to="/users"
+                  className={`flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md ${
+                    location.pathname === '/users'
+                      ? "text-primary bg-primary/5" 
+                      : "text-muted-foreground hover:bg-muted"
+                  }`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  <Search className="h-4 w-4" />
+                  Find People
+                </Link>
+              )}
+
               {/* My Hub link for logged in users */}
               {user && (
                 <Link

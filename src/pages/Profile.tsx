@@ -18,13 +18,16 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
-import { Loader2, Settings, Users, Compass, User, Building2 } from 'lucide-react';
+import { Loader2, Settings, Users, Compass, User, Building2, AtSign, Copy } from 'lucide-react';
 import { ProfileEditModal } from '@/components/ProfileEditModal';
 import { ProfileModal } from '@/components/ProfileModal';
+import { UsernameRequiredModal } from '@/components/profile/UsernameRequiredModal';
 import { CliquesTab } from '@/components/profile/CliquesTab';
 import { QuestsTab } from '@/components/profile/QuestsTab';
 import { MeTab } from '@/components/profile/MeTab';
 import { OrganizationsTab } from '@/components/profile/OrganizationsTab';
+import { FriendCodeCard } from '@/components/profile/FriendCodeCard';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Profile() {
   const { user, profile, isLoading: authLoading, isProfileLoaded } = useAuth();
@@ -32,6 +35,8 @@ export default function Profile() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [showEditModal, setShowEditModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showUsernameModal, setShowUsernameModal] = useState(false);
+  const { toast } = useToast();
   
   // Get initial tab from URL or default to 'cliques'
   const tabParam = searchParams.get('tab');
@@ -50,6 +55,13 @@ export default function Profile() {
       setShowProfileModal(true);
     }
   }, [user, profile, authLoading, isProfileLoaded]);
+
+  // Show username modal for returning users without username
+  useEffect(() => {
+    if (user && profile && !profile.username && !authLoading && isProfileLoaded && !showProfileModal) {
+      setShowUsernameModal(true);
+    }
+  }, [user, profile, authLoading, isProfileLoaded, showProfileModal]);
 
   // Sync tab with URL
   useEffect(() => {
@@ -81,7 +93,7 @@ export default function Profile() {
       
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto space-y-6">
-          {/* Profile Header */}
+        {/* Profile Header */}
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-start justify-between">
@@ -93,9 +105,12 @@ export default function Profile() {
                     <h1 className="text-2xl font-display font-bold text-foreground">
                       {profile?.display_name || 'Adventurer'}
                     </h1>
-                    <p className="text-muted-foreground text-sm">
-                      {user?.email}
-                    </p>
+                    {profile?.username && (
+                      <p className="text-primary font-medium text-sm flex items-center gap-1">
+                        <AtSign className="h-3.5 w-3.5" />
+                        {profile.username}
+                      </p>
+                    )}
                     <p className="text-muted-foreground text-xs mt-1">
                       Member since {profile?.created_at ? format(new Date(profile.created_at), 'MMMM yyyy') : 'recently'}
                     </p>
@@ -108,6 +123,11 @@ export default function Profile() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Friend Code Card */}
+          {profile?.friend_code && (
+            <FriendCodeCard friendCode={profile.friend_code} />
+          )}
 
           {/* Tabbed Content: Cliques | Quests | Me */}
           <Tabs value={activeTab} onValueChange={handleTabChange}>
@@ -149,9 +169,6 @@ export default function Profile() {
             <TabsContent value="me" className="mt-6">
               <MeTab userId={user.id} />
             </TabsContent>
-            <TabsContent value="me" className="mt-6">
-              <MeTab userId={user.id} />
-            </TabsContent>
           </Tabs>
         </div>
       </main>
@@ -168,6 +185,14 @@ export default function Profile() {
       <ProfileModal
         open={showProfileModal}
         onComplete={() => setShowProfileModal(false)}
+      />
+
+      {/* Username Required Modal (for returning users without username) */}
+      <UsernameRequiredModal
+        open={showUsernameModal}
+        onComplete={() => {
+          setShowUsernameModal(false);
+        }}
       />
     </div>
   );
