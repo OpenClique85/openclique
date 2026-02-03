@@ -103,7 +103,6 @@ export function SquadDetailModal({
         .select(`
           id,
           squad_name,
-          whatsapp_link,
           formation_reason,
           compatibility_score,
           referral_bonds,
@@ -259,12 +258,6 @@ export function SquadDetailModal({
     sendMessageMutation.mutate({ recipientIds: [userId], content: messageContent, type: messageType });
   };
 
-  const copyWhatsAppLink = () => {
-    if (squad?.whatsapp_link) {
-      navigator.clipboard.writeText(squad.whatsapp_link);
-      toast({ title: 'WhatsApp link copied' });
-    }
-  };
 
   const formationReason = squad?.formation_reason as unknown as FormationReason | null;
 
@@ -418,30 +411,6 @@ export function SquadDetailModal({
                 )}
               </CardContent>
             </Card>
-
-            {/* WhatsApp Link */}
-            {squad?.whatsapp_link && (
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm flex items-center gap-2">
-                    <Link2 className="h-4 w-4" />
-                    WhatsApp Group
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      value={squad.whatsapp_link}
-                      readOnly
-                      className="text-xs"
-                    />
-                    <Button size="icon" variant="outline" onClick={copyWhatsAppLink}>
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
           </TabsContent>
 
           <TabsContent value="members" className="mt-4">

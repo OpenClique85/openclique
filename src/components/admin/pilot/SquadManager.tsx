@@ -32,7 +32,6 @@ import { SquadSwapModal } from './SquadSwapModal';
 interface SquadWithMembers {
   id: string;
   name: string;
-  whatsapp_invite_link: string | null;
   locked_at: string | null;
   members: {
     id: string;
@@ -40,7 +39,6 @@ interface SquadWithMembers {
     display_name: string;
     status: string;
     checked_in_at: string | null;
-    whatsapp_joined: boolean;
   }[];
 }
 
@@ -55,8 +53,6 @@ export function SquadManager({ instanceId, instanceTitle = 'Quest', targetSquadS
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [isGenerating, setIsGenerating] = useState(false);
-  const [editingSquad, setEditingSquad] = useState<string | null>(null);
-  const [whatsappLink, setWhatsappLink] = useState('');
   const [isBroadcastOpen, setIsBroadcastOpen] = useState(false);
   const [isDragDropOpen, setIsDragDropOpen] = useState(false);
   const [isSwapOpen, setIsSwapOpen] = useState(false);
@@ -69,7 +65,7 @@ export function SquadManager({ instanceId, instanceTitle = 'Quest', targetSquadS
       // First get squads - use existing quest_squads columns
       const { data: squadData, error: squadError } = await supabase
         .from('quest_squads')
-        .select('id, squad_name, whatsapp_link, locked_at')
+        .select('id, squad_name, locked_at')
         .eq('quest_id', instanceId)
         .order('squad_name');
       
@@ -89,15 +85,13 @@ export function SquadManager({ instanceId, instanceTitle = 'Quest', targetSquadS
           return {
             id: squad.id,
             name: squad.squad_name || `Squad ${squad.id.slice(0, 4)}`,
-            whatsapp_invite_link: squad.whatsapp_link,
             locked_at: squad.locked_at,
             members: (members || []).map((m: any) => ({
               id: m.id,
               user_id: m.user_id,
               display_name: m.profiles?.display_name || 'Unknown',
-              status: 'confirmed', // Will need to join with signups if needed
+              status: 'confirmed',
               checked_in_at: null,
-              whatsapp_joined: false,
             }))
           };
         })
@@ -206,25 +200,6 @@ export function SquadManager({ instanceId, instanceTitle = 'Quest', targetSquadS
       toast({ title: 'Failed to generate squads', description: err.message, variant: 'destructive' });
     } finally {
       setIsGenerating(false);
-    }
-  };
-
-  // Update WhatsApp link - use existing column name
-  const updateWhatsAppLink = async (squadId: string) => {
-    try {
-      const { error } = await supabase
-        .from('quest_squads')
-        .update({ whatsapp_link: whatsappLink })
-        .eq('id', squadId);
-      
-      if (error) throw error;
-      
-      queryClient.invalidateQueries({ queryKey: ['instance-squads-detail', instanceId] });
-      setEditingSquad(null);
-      setWhatsappLink('');
-      toast({ title: 'WhatsApp link saved' });
-    } catch (err: any) {
-      toast({ title: 'Failed to save link', description: err.message, variant: 'destructive' });
     }
   };
 
@@ -426,48 +401,12 @@ export function SquadManager({ instanceId, instanceTitle = 'Quest', targetSquadS
                     <div key={m.id} className="flex items-center justify-between text-sm py-1">
                       <span>{m.display_name}</span>
                       <div className="flex items-center gap-2">
-                        {m.whatsapp_joined && (
-                          <CheckCircle className="h-3 w-3 text-green-600" />
-                        )}
                         <Badge variant="outline" className="text-xs">
                           {m.status}
                         </Badge>
                       </div>
                     </div>
                   ))}
-                </div>
-
-                {/* WhatsApp Link */}
-                <div className="pt-2 border-t">
-                  {squad.whatsapp_invite_link ? (
-                    <div className="flex items-center gap-2">
-                      <Link2 className="h-4 w-4 text-green-600 flex-shrink-0" />
-                      <span className="text-xs text-muted-foreground truncate flex-1">
-                        {squad.whatsapp_invite_link}
-                      </span>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-6 w-6"
-                        onClick={() => copyToClipboard(squad.whatsapp_invite_link!, 'Link')}
-                      >
-                        <Copy className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="w-full"
-                      onClick={() => {
-                        setEditingSquad(squad.id);
-                        setWhatsappLink('');
-                      }}
-                    >
-                      <MessageSquare className="h-4 w-4 mr-2" />
-                      Add WhatsApp Link
-                    </Button>
-                  )}
                 </div>
               </CardContent>
             </Card>
@@ -484,35 +423,6 @@ export function SquadManager({ instanceId, instanceTitle = 'Quest', targetSquadS
           </CardContent>
         </Card>
       )}
-
-      {/* WhatsApp Link Dialog */}
-      <Dialog open={!!editingSquad} onOpenChange={() => setEditingSquad(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add WhatsApp Group Link</DialogTitle>
-            <DialogDescription>
-              Paste the invite link for this squad's WhatsApp group.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="whatsapp-link">WhatsApp Invite Link</Label>
-              <Input
-                id="whatsapp-link"
-                placeholder="https://chat.whatsapp.com/..."
-                value={whatsappLink}
-                onChange={(e) => setWhatsappLink(e.target.value)}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditingSquad(null)}>Cancel</Button>
-            <Button onClick={() => editingSquad && updateWhatsAppLink(editingSquad)}>
-              Save Link
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Broadcast Modal */}
       <InstanceBroadcastModal

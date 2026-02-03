@@ -452,18 +452,6 @@ export function QuestsTab({ userId }: QuestsTabProps) {
                         </div>
                       )}
                       
-                      {signup.quest.whatsapp_invite_link && (
-                        <a
-                          href={signup.quest.whatsapp_invite_link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 text-sm text-green-600 hover:text-green-700 mb-4"
-                        >
-                          <MessageCircle className="h-4 w-4" />
-                          Join WhatsApp Group
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
-                      )}
                     </>
                   )}
                   

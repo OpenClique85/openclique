@@ -40,7 +40,6 @@ export function CreatorSignupsTab({ questId, capacity }: CreatorSignupsTabProps)
           wants_reenlist,
           reenlist_answered_at,
           instance_id,
-          whatsapp_joined,
           checked_in_at,
           proof_submitted_at,
           completed_at,

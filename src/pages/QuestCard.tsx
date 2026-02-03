@@ -53,11 +53,9 @@ interface ParticipantData {
   status: string;
   checked_in_at: string | null;
   completed_at: string | null;
-  whatsapp_joined: boolean;
   squad_id?: string;
   squad_name?: string;
   squad_status?: string;
-  whatsapp_link?: string;
 }
 
 export default function QuestCard() {
@@ -90,7 +88,7 @@ export default function QuestCard() {
         const { data: signup } = await supabase
           .from('quest_signups')
           .select(`
-            id, user_id, status, checked_in_at, completed_at, whatsapp_joined
+            id, user_id, status, checked_in_at, completed_at
           `)
           .eq('instance_id', instance.id)
           .eq('user_id', user.id)
@@ -101,7 +99,7 @@ export default function QuestCard() {
           const { data: squadMember } = await supabase
             .from('squad_members')
             .select(`
-              quest_squads(id, squad_name, status, whatsapp_link)
+              quest_squads(id, squad_name, status)
             `)
             .eq('user_id', user.id)
             .eq('quest_squads.instance_id', instance.id)
@@ -115,11 +113,9 @@ export default function QuestCard() {
             status: signup.status,
             checked_in_at: signup.checked_in_at,
             completed_at: signup.completed_at,
-            whatsapp_joined: signup.whatsapp_joined,
             squad_id: squadData?.id,
             squad_name: squadData?.squad_name,
             squad_status: squadData?.status,
-            whatsapp_link: squadData?.whatsapp_link,
           };
         }
       }
@@ -395,30 +391,6 @@ export default function QuestCard() {
                   Join Warm-Up Chat
                 </Button>
               </Link>
-            </CardContent>
-          </Card>
-        )}
-        
-        {/* WhatsApp Join */}
-        {participant && participant.whatsapp_link && !participant.whatsapp_joined && (
-          <Card className="border-green-200 bg-green-50">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3 mb-4">
-                <MessageSquare className="h-6 w-6 text-green-600" />
-                <div>
-                  <p className="font-medium">Join Your Squad's WhatsApp</p>
-                  <p className="text-sm text-muted-foreground">
-                    Stay connected with your squad
-                  </p>
-                </div>
-              </div>
-              <Button 
-                className="w-full bg-green-600 hover:bg-green-700"
-                onClick={() => window.open(participant.whatsapp_link, '_blank')}
-              >
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Join WhatsApp Group
-              </Button>
             </CardContent>
           </Card>
         )}

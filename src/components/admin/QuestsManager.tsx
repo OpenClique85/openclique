@@ -128,7 +128,6 @@ interface FormData {
   success_criteria: string;
   briefing_html: string;
   capacity_total: number;
-  whatsapp_invite_link: string;
   // Gamification fields
   base_xp: number;
   min_level: number;
@@ -156,7 +155,6 @@ const defaultFormData: FormData = {
   success_criteria: '',
   briefing_html: '',
   capacity_total: 6,
-  whatsapp_invite_link: '',
   // Gamification defaults
   base_xp: 50,
   min_level: 0,
@@ -383,7 +381,7 @@ export function QuestsManager() {
         success_criteria: quest.success_criteria || '',
         briefing_html: quest.briefing_html || '',
         capacity_total: quest.capacity_total || 6,
-        whatsapp_invite_link: quest.whatsapp_invite_link || '',
+        
         base_xp: quest.base_xp ?? 50,
         min_level: quest.min_level ?? 0,
         min_tree_xp: quest.min_tree_xp ?? 0,
@@ -497,7 +495,7 @@ export function QuestsManager() {
       success_criteria: formData.success_criteria || null,
       briefing_html: formData.briefing_html || null,
       capacity_total: formData.capacity_total,
-      whatsapp_invite_link: formData.whatsapp_invite_link || null,
+      
       base_xp: formData.base_xp,
       min_level: formData.min_level,
       min_tree_xp: formData.min_tree_xp,
@@ -1200,15 +1198,6 @@ export function QuestsManager() {
                     />
                   </div>
                   
-                  <div className="space-y-2">
-                    <Label htmlFor="whatsapp">WhatsApp Invite Link</Label>
-                    <Input
-                      id="whatsapp"
-                      value={formData.whatsapp_invite_link}
-                      onChange={(e) => setFormData(prev => ({ ...prev, whatsapp_invite_link: e.target.value }))}
-                      placeholder="https://chat.whatsapp.com/..."
-                    />
-                  </div>
                 </div>
                 
                 <div className="space-y-2">

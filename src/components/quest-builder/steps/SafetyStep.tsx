@@ -98,15 +98,15 @@ export function SafetyStep({ formData, updateFormData }: SafetyStepProps) {
 
       {/* Emergency Contact */}
       <div className="space-y-2">
-        <Label htmlFor="emergency_contact" className="text-base font-medium">Emergency Contact *</Label>
+        <Label htmlFor="emergency_contact" className="text-base font-medium">Emergency Contact Info</Label>
         <Input
           id="emergency_contact"
-          placeholder="Your phone number for day-of emergencies (e.g., 512-555-0123)"
+          placeholder="How participants can reach you during the event (e.g., @yourname on the app)"
           value={formData.emergency_contact}
           onChange={(e) => updateFormData({ emergency_contact: e.target.value })}
         />
         <p className="text-sm text-muted-foreground">
-          This will only be shared with participants on the day of the event.
+          This will be shared with participants on the day of the event. Use in-app contact methods only.
         </p>
       </div>
     </div>

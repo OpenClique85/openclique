@@ -114,7 +114,6 @@ export const ADMIN_SECTIONS: AdminSection[] = [
     tabs: [
       { id: 'messaging', label: 'Messaging' },
       { id: 'notification-console', label: 'Notification Console' },
-      { id: 'whatsapp', label: 'WhatsApp' },
     ],
   },
   {
