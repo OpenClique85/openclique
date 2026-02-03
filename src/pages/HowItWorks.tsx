@@ -33,6 +33,7 @@ import { HOW_IT_WORKS } from "@/constants/content";
 import { Check } from "lucide-react";
 import PathCarousel from "@/components/progression/PathCarousel";
 import { UserJourneySection } from "@/components/UserJourneySection";
+import { SearchableHelpSection, GlossarySection } from "@/components/help";
 
 // ============ IMAGES ============
 import buggsFace from "@/assets/buggs-face.png";       // BUGGS mascot for Meet BUGGS section
@@ -200,7 +201,17 @@ export default function HowItWorks() {
           </div>
         </section>
 
-        {/* ============ SECTION 6: CTA ============ */}
+        {/* ============ SECTION 6: FAQ (Consolidated Help Center) ============ */}
+        {/* Searchable FAQ with category filters */}
+        <div id="faq">
+          <SearchableHelpSection />
+        </div>
+
+        {/* ============ SECTION 7: GLOSSARY ============ */}
+        {/* Searchable A-Z platform terminology */}
+        <GlossarySection />
+
+        {/* ============ SECTION 8: CTA ============ */}
         <CTASection />
       </main>
       <Footer />

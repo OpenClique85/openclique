@@ -49,7 +49,7 @@ import { BenefitsSection } from "@/components/BenefitsSection";
 import { WhoItsForSection } from "@/components/WhoItsForSection";
 import { TestimonialsSection } from "@/components/TestimonialsSection";
 import { UGCShowcase } from "@/components/UGCShowcase";
-import { FAQ } from "@/components/FAQ";
+import { FAQTeaser } from "@/components/help";
 import { CTASection } from "@/components/CTASection";
 import { Footer } from "@/components/Footer";
 import BuggsFloating from "@/components/BuggsFloating";
@@ -92,9 +92,9 @@ const Index = () => {
         {/* Approved user photos/videos from quests */}
         <UGCShowcase limit={6} />
         
-        {/* ============ SECTION 7: FAQ ============ */}
-        {/* Expandable accordion with common questions */}
-        <FAQ />
+        {/* ============ SECTION 7: FAQ Teaser ============ */}
+        {/* Condensed FAQ with link to full Help Center */}
+        <FAQTeaser />
         
         {/* ============ SECTION 7: Final CTA ============ */}
         {/* Dark section with "Join the Pilot" and "Get Involved" buttons */}

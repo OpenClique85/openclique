@@ -30,6 +30,14 @@ export function Footer() {
                   </Link>
                 </li>
               ))}
+              <li>
+                <Link
+                  to="/how-it-works#faq"
+                  className="text-sm text-background/70 hover:text-background transition-colors"
+                >
+                  Help Center
+                </Link>
+              </li>
             </ul>
           </div>
 

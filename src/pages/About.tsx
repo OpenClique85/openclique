@@ -36,7 +36,6 @@
 
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { FAQ } from "@/components/FAQ";
 import { CTASection } from "@/components/CTASection";
 import { UGCShowcase } from "@/components/UGCShowcase";
 import { ABOUT } from "@/constants/content";
@@ -287,8 +286,7 @@ export default function About() {
         {/* Approved user photos/videos from quests */}
         <UGCShowcase limit={6} />
 
-        {/* ============ SECTION 5 & 6: FAQ and CTA ============ */}
-        <FAQ />
+        {/* ============ SECTION 5: CTA ============ */}
         <CTASection />
       </main>
       <Footer />

@@ -367,7 +367,7 @@ export const ABOUT = {
 };
 
 // =============================================================================
-// FAQ CONTENT
+// FAQ CONTENT (Legacy - kept for backwards compatibility)
 // =============================================================================
 
 export const FAQ = [
@@ -380,18 +380,197 @@ export const FAQ = [
     answer: "Our AI considers your interests, availability, location, and adventure preferences to match you with compatible clique members. We optimize for shared interests while also introducing you to people you might not otherwise meet.",
   },
   {
-    question: "What cities are you in?",
-    answer: "We're currently launching our pilot program in Austin, TX. Sign up to be among the first to experience OpenClique, and let us know if you want us in your city next!",
-  },
-  {
-    question: "How is my data used?",
-    answer: "We only collect the information needed to match you with great squads and quests. We never sell your data to third parties. Check our Privacy Policy for full details.",
-  },
-  {
     question: "How much does it cost?",
     answer: "During our pilot phase, OpenClique is free to join. Some quests may have costs associated with the activity itself (like a cooking class fee), but we'll always be transparent about any costs upfront.",
   },
 ];
+
+// =============================================================================
+// HELP CENTER - CONSOLIDATED FAQ & GLOSSARY
+// =============================================================================
+
+export const HELP_CENTER = {
+  categories: [
+    { id: 'all', label: 'All', icon: 'HelpCircle' },
+    { id: 'general', label: 'General', icon: 'HelpCircle' },
+    { id: 'quests', label: 'Quests', icon: 'Compass' },
+    { id: 'matching', label: 'Matching & Cliques', icon: 'Users' },
+    { id: 'safety', label: 'Safety & Privacy', icon: 'Shield' },
+    { id: 'costs', label: 'Costs & Pricing', icon: 'CreditCard' },
+  ],
+  
+  faqs: [
+    // General
+    {
+      category: 'general',
+      question: "What exactly is a quest?",
+      answer: "A quest is a curated, time-boxed adventure for a small group (3-6 people). It could be anything from a sunrise hike to a cooking class to a scavenger hunt. Each quest has a clear goal and is designed to help strangers become friends.",
+    },
+    {
+      category: 'general',
+      question: "What cities are you in?",
+      answer: "We're currently launching our pilot program in Austin, TX. Sign up to be among the first to experience OpenClique, and let us know if you want us in your city next!",
+    },
+    {
+      category: 'general',
+      question: "Who is OpenClique for?",
+      answer: "Anyone looking for real-world connection! Students, newcomers to a city, remote workers, hobby explorers, and anyone tired of superficial social apps. If you want to meet people who actually show up, you're in the right place.",
+    },
+    
+    // Quests
+    {
+      category: 'quests',
+      question: "How long do quests last?",
+      answer: "Most quests are 60-90 minutes, designed to be meaningful without eating your whole day. Some special quests (like day trips or multi-part adventures) may be longer — we always tell you upfront.",
+    },
+    {
+      category: 'quests',
+      question: "Can I bring friends?",
+      answer: "Absolutely! You can sign up solo or bring friends. When you join a quest, you can choose to go alone (get matched with others) or bring up to 2 friends. Just make sure everyone signs up.",
+    },
+    {
+      category: 'quests',
+      question: "What if I need to cancel?",
+      answer: "We get it — life happens. You can cancel up to 24 hours before a quest with no penalty. Late cancellations may affect your reliability score, which helps us match committed groups.",
+    },
+    {
+      category: 'quests',
+      question: "What types of quests are available?",
+      answer: "Quests span many categories: outdoor adventures, food & drink, arts & culture, wellness, social games, and more. Browse the quest catalog to see what's available in your area.",
+    },
+    
+    // Matching & Cliques
+    {
+      category: 'matching',
+      question: "How does matching work?",
+      answer: "Our AI considers your interests, availability, location, and adventure preferences to match you with compatible clique members. We optimize for shared interests while also introducing you to people you might not otherwise meet.",
+    },
+    {
+      category: 'matching',
+      question: "What is a clique?",
+      answer: "A clique is your small group of 3-6 people matched to complete a quest together. Cliques can be one-time (just for that quest) or recurring (your regular adventure crew). Think of it as a built-in friend group for shared experiences.",
+    },
+    {
+      category: 'matching',
+      question: "What if I don't like my match?",
+      answer: "Not every group is a perfect fit, and that's okay! Give honest feedback after each quest, and our matching algorithm learns your preferences. You can also add people you click with to your contacts for future adventures.",
+    },
+    {
+      category: 'matching',
+      question: "Can I see who I'm matched with before the quest?",
+      answer: "Yes! Once matched, you'll see first names and brief profiles of your clique members. This helps break the ice before you meet up. Full introductions happen in the warm-up chat before the quest.",
+    },
+    
+    // Safety & Privacy
+    {
+      category: 'safety',
+      question: "How is my data used?",
+      answer: "We only collect the information needed to match you with great squads and quests. We never sell your data to third parties. Check our Privacy Policy for full details.",
+    },
+    {
+      category: 'safety',
+      question: "How do I report someone?",
+      answer: "If you feel uncomfortable or witness inappropriate behavior, use the 'Report' button in the app or contact our support team directly. We take all reports seriously and respond within 24 hours.",
+    },
+    {
+      category: 'safety',
+      question: "Are quests safe?",
+      answer: "Safety is our priority. All quests take place in public venues. We verify participants and provide clear guidelines. Quest hosts are trained to create welcoming environments. Trust your instincts — if something feels off, reach out to us.",
+    },
+    {
+      category: 'safety',
+      question: "What are the community guidelines?",
+      answer: "Be respectful, show up on time, participate with an open mind, and treat others how you want to be treated. Harassment, discrimination, and no-shows are not tolerated. Full guidelines are in our Terms of Service.",
+    },
+    
+    // Costs & Pricing
+    {
+      category: 'costs',
+      question: "How much does it cost?",
+      answer: "During our pilot phase, OpenClique is free to join. Some quests may have costs associated with the activity itself (like a cooking class fee), but we'll always be transparent about any costs upfront.",
+    },
+    {
+      category: 'costs',
+      question: "Are there refunds?",
+      answer: "For paid quests, refunds are available if you cancel more than 24 hours before the start time. Within 24 hours, refunds are at the discretion of the quest creator. Platform fees are generally non-refundable.",
+    },
+    {
+      category: 'costs',
+      question: "What are Clique Coins?",
+      answer: "Clique Coins are our in-app currency earned by completing quests, giving feedback, and achieving milestones. Use them for discounts on paid quests, exclusive experiences, and special perks.",
+    },
+  ],
+  
+  glossary: [
+    {
+      term: "Quest",
+      definition: "A time-bound, real-world adventure for a small group (3-6 people). Each quest has clear objectives and is designed to spark genuine connection through shared experiences.",
+    },
+    {
+      term: "Clique",
+      definition: "Your squad — a small group of people matched to complete a quest together. Cliques can be temporary (one quest) or recurring (your regular adventure crew).",
+    },
+    {
+      term: "BUGGS",
+      definition: "Behavioral Utility for Group Guidance & Structure — your AI guide that handles logistics, icebreakers, and gentle nudges. Always helpful, never awkward.",
+    },
+    {
+      term: "XP",
+      definition: "Experience points earned by completing quests, giving feedback, and engaging with the platform. XP tracks your OpenClique journey and unlocks rewards.",
+    },
+    {
+      term: "Meta-Quest",
+      definition: "A monthly challenge that tracks progress across multiple quests and activities. Complete meta-quests to earn bonus rewards and special badges.",
+    },
+    {
+      term: "Squad",
+      definition: "Another term for your clique — the people matched to complete a quest together.",
+    },
+    {
+      term: "Creator",
+      definition: "Someone who designs and hosts quests. Creators build their reputation through ratings and can be discovered by brands for sponsored activations.",
+    },
+    {
+      term: "Sponsor",
+      definition: "A brand or venue that partners with OpenClique to host or sponsor quests, providing perks and rewards for participants.",
+    },
+    {
+      term: "Friend Code",
+      definition: "A unique code you can share to add people directly to your contacts list without needing to search for them.",
+    },
+    {
+      term: "LFG",
+      definition: "Looking for Group — a broadcast feature to invite your contacts to join open quest slots when you need more people.",
+    },
+    {
+      term: "Contacts",
+      definition: "Your personal roster of OpenClique users you've connected with — like a friend list for future adventures together.",
+    },
+    {
+      term: "Warm-Up",
+      definition: "The pre-quest chat phase where your clique introduces themselves and gets ready for the adventure ahead.",
+    },
+    {
+      term: "Clique Coins",
+      definition: "In-app currency earned through quests and achievements. Use them for discounts, exclusive experiences, and special perks.",
+    },
+    {
+      term: "Quest Chain",
+      definition: "A series of connected quests that build on each other, often with a narrative arc and bonus rewards for completing the full chain.",
+    },
+    {
+      term: "Reliability Score",
+      definition: "A measure of how consistently you show up to quests you've signed up for. High reliability helps you get matched with other committed adventurers.",
+    },
+  ],
+  
+  // Top 3 questions for homepage teaser
+  teaserQuestions: [
+    "What exactly is a quest?",
+    "How does matching work?",
+    "How much does it cost?",
+  ],
+};
 
 // =============================================================================
 // INTAKE PAGE CONTENT
