@@ -155,13 +155,19 @@ export function getQuestTemporalStatus(quest: Quest): 'upcoming' | 'today' | 'li
 
 // Transform database quest to UI quest format
 export const transformQuest = (dbQuest: DbQuest & { sponsor_profiles?: { name: string } | null }): Quest => {
-  // Parse highlights from JSONB - could be string[] or {items: string[]}
+  // Parse highlights from JSONB - could be string[], {items: string[]}, or a single string with line breaks
   let highlights: string[] | undefined;
   if (dbQuest.highlights) {
     if (Array.isArray(dbQuest.highlights)) {
       highlights = dbQuest.highlights as string[];
     } else if (typeof dbQuest.highlights === 'object' && 'items' in (dbQuest.highlights as object)) {
       highlights = (dbQuest.highlights as { items: string[] }).items;
+    } else if (typeof dbQuest.highlights === 'string') {
+      // Handle string format - split on line breaks and clean up dash prefixes
+      highlights = (dbQuest.highlights as string)
+        .split('\n')
+        .map(line => line.replace(/^[\s-]+/, '').trim())
+        .filter(line => line.length > 0);
     }
   }
 

@@ -3,10 +3,9 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { QuestFormData } from '../types';
-import { MapPin, Image, MessageCircle, Loader2, Sparkles, Upload } from 'lucide-react';
+import { MapPin, Image, Loader2, Sparkles, Upload } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-
 interface MediaStepProps {
   formData: QuestFormData;
   updateFormData: (updates: Partial<QuestFormData>) => void;
@@ -196,23 +195,6 @@ export function MediaStep({ formData, updateFormData }: MediaStepProps) {
         />
         <p className="text-sm text-muted-foreground">
           Full address for GPS navigation.
-        </p>
-      </div>
-
-      {/* WhatsApp Link */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <MessageCircle className="w-4 h-4 text-muted-foreground" />
-          <Label htmlFor="whatsapp_invite_link" className="text-base font-medium">WhatsApp Group Link</Label>
-        </div>
-        <Input
-          id="whatsapp_invite_link"
-          placeholder="https://chat.whatsapp.com/..."
-          value={formData.whatsapp_invite_link}
-          onChange={(e) => updateFormData({ whatsapp_invite_link: e.target.value })}
-        />
-        <p className="text-sm text-muted-foreground">
-          Optional: Create a WhatsApp group for quest communication.
         </p>
       </div>
     </div>

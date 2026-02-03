@@ -273,7 +273,6 @@ export default function QuestBuilder() {
         image_url: formData.image_url || null,
         meeting_location_name: formData.meeting_location_name || null,
         meeting_address: formData.meeting_address || null,
-        whatsapp_invite_link: formData.whatsapp_invite_link || null,
         creator_id: user.id,
         creator_type: 'community' as const,
         review_status: submitForReview ? 'pending_review' as const : 'draft' as const,
