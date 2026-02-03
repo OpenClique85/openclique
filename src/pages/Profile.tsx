@@ -29,7 +29,7 @@ import { QuestsTab } from '@/components/profile/QuestsTab';
 import { MeTab } from '@/components/profile/MeTab';
 import { OrganizationsTab } from '@/components/profile/OrganizationsTab';
 import { ContactsTab } from '@/components/contacts/ContactsTab';
-import { FriendCodeCard } from '@/components/profile/FriendCodeCard';
+import { FindPeopleSection } from '@/components/profile/FindPeopleSection';
 import { useToast } from '@/hooks/use-toast';
 
 export default function Profile() {
@@ -127,10 +127,8 @@ export default function Profile() {
             </CardContent>
           </Card>
 
-          {/* Friend Code Card */}
-          {profile?.friend_code && (
-            <FriendCodeCard friendCode={profile.friend_code} />
-          )}
+          {/* Connect with People Section */}
+          <FindPeopleSection friendCode={profile?.friend_code} />
 
           {/* Tabbed Content: Cliques | Quests | Me */}
           <Tabs value={activeTab} onValueChange={handleTabChange}>
