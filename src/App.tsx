@@ -84,6 +84,7 @@ const JoinClique = lazy(() => import("./pages/JoinClique"));
 
 // User support & engagement
 const Notifications = lazy(() => import("./pages/Notifications"));
+const UserSearch = lazy(() => import("./pages/UserSearch"));
 const Support = lazy(() => import("./pages/Support"));
 const SupportTicketDetail = lazy(() => import("./pages/SupportTicketDetail"));
 const FeedbackFlow = lazy(() => import("./pages/FeedbackFlow"));
@@ -203,6 +204,7 @@ const App = () => (
                 <Route path="/squads/:squadId" element={<ProtectedRoute><CliqueDetail /></ProtectedRoute>} />
                 <Route path="/warmup/:squadId" element={<ProtectedRoute><CliqueWarmUp /></ProtectedRoute>} />
                 <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+                <Route path="/users" element={<ProtectedRoute><UserSearch /></ProtectedRoute>} />
                 <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
                 <Route path="/support/:ticketId" element={<ProtectedRoute><SupportTicketDetail /></ProtectedRoute>} />
                 <Route path="/admin" element={<ProtectedRoute requireAdmin><Admin /></ProtectedRoute>} />

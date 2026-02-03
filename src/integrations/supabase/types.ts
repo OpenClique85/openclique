@@ -616,6 +616,50 @@ export type Database = {
           },
         ]
       }
+      clique_invitations: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          invitee_id: string
+          inviter_id: string
+          message: string | null
+          responded_at: string | null
+          squad_id: string
+          status: string | null
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          invitee_id: string
+          inviter_id: string
+          message?: string | null
+          responded_at?: string | null
+          squad_id: string
+          status?: string | null
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          invitee_id?: string
+          inviter_id?: string
+          message?: string | null
+          responded_at?: string | null
+          squad_id?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clique_invitations_squad_id_fkey"
+            columns: ["squad_id"]
+            isOneToOne: false
+            referencedRelation: "squads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clique_lore_entries: {
         Row: {
           content: string | null
@@ -3632,6 +3676,7 @@ export type Database = {
           date_of_birth: string | null
           display_name: string
           email: string | null
+          friend_code: string | null
           id: string
           notification_preferences: Json | null
           preferences: Json | null
@@ -3639,6 +3684,7 @@ export type Database = {
           tutorial_completed_at: string | null
           tutorial_steps_completed: Json | null
           updated_at: string
+          username: string | null
         }
         Insert: {
           age_verified_at?: string | null
@@ -3648,6 +3694,7 @@ export type Database = {
           date_of_birth?: string | null
           display_name: string
           email?: string | null
+          friend_code?: string | null
           id: string
           notification_preferences?: Json | null
           preferences?: Json | null
@@ -3655,6 +3702,7 @@ export type Database = {
           tutorial_completed_at?: string | null
           tutorial_steps_completed?: Json | null
           updated_at?: string
+          username?: string | null
         }
         Update: {
           age_verified_at?: string | null
@@ -3664,6 +3712,7 @@ export type Database = {
           date_of_birth?: string | null
           display_name?: string
           email?: string | null
+          friend_code?: string | null
           id?: string
           notification_preferences?: Json | null
           preferences?: Json | null
@@ -3671,6 +3720,7 @@ export type Database = {
           tutorial_completed_at?: string | null
           tutorial_steps_completed?: Json | null
           updated_at?: string
+          username?: string | null
         }
         Relationships: []
       }
@@ -6703,6 +6753,39 @@ export type Database = {
           },
         ]
       }
+      user_interactions: {
+        Row: {
+          created_at: string
+          from_user_id: string
+          id: string
+          interaction_type: string
+          message: string | null
+          payload: Json | null
+          read_at: string | null
+          to_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          from_user_id: string
+          id?: string
+          interaction_type: string
+          message?: string | null
+          payload?: Json | null
+          read_at?: string | null
+          to_user_id: string
+        }
+        Update: {
+          created_at?: string
+          from_user_id?: string
+          id?: string
+          interaction_type?: string
+          message?: string | null
+          payload?: Json | null
+          read_at?: string | null
+          to_user_id?: string
+        }
+        Relationships: []
+      }
       user_personality_types: {
         Row: {
           created_at: string | null
@@ -8512,6 +8595,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      check_username_availability: {
+        Args: { p_user_id?: string; p_username: string }
+        Returns: Json
+      }
       cleanup_old_location_data: { Args: never; Returns: number }
       confirm_warm_up_readiness: {
         Args: { p_squad_id: string }
@@ -8555,6 +8642,7 @@ export type Database = {
         Returns: string
       }
       generate_simple_invite_code: { Args: never; Returns: string }
+      generate_user_friend_code: { Args: never; Returns: string }
       get_application_email: {
         Args: { table_name: string; target_id: string }
         Returns: string
@@ -8729,6 +8817,16 @@ export type Database = {
         Returns: {
           rounded_lat: number
           rounded_lng: number
+        }[]
+      }
+      search_users: {
+        Args: { p_limit?: number; p_query: string; p_requester_id?: string }
+        Returns: {
+          city: string
+          display_name: string
+          friend_code: string
+          id: string
+          username: string
         }[]
       }
       start_squad_warm_up: { Args: { p_squad_id: string }; Returns: undefined }

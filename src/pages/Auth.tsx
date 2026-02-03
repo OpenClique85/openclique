@@ -20,11 +20,12 @@ const passwordSchema = z.string().min(6, 'Password must be at least 6 characters
 export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [inviteCode, setInviteCode] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string; confirmPassword?: string }>({});
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [redemptionId, setRedemptionId] = useState<string | undefined>();
   const [inviteCodeLabel, setInviteCodeLabel] = useState<string | null>(null);
@@ -59,8 +60,8 @@ export default function Auth() {
     }
   }, [user, redemptionId, navigate, from]);
 
-  const validateForm = (checkPassword = true) => {
-    const newErrors: { email?: string; password?: string } = {};
+  const validateForm = (checkPassword = true, checkConfirmPassword = false) => {
+    const newErrors: { email?: string; password?: string; confirmPassword?: string } = {};
     
     try {
       emailSchema.parse(email);
@@ -77,6 +78,12 @@ export default function Auth() {
         if (e instanceof z.ZodError) {
           newErrors.password = e.errors[0].message;
         }
+      }
+    }
+    
+    if (checkConfirmPassword) {
+      if (password !== confirmPassword) {
+        newErrors.confirmPassword = 'Passwords do not match';
       }
     }
     
@@ -161,7 +168,7 @@ export default function Auth() {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    if (!validateForm(true, true)) return;
     
     setIsSubmitting(true);
     const { error } = await signUp(email, password);
@@ -477,6 +484,22 @@ export default function Auth() {
                       />
                     </div>
                     {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-confirm-password">Confirm Password</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="signup-confirm-password"
+                        type="password"
+                        placeholder="••••••••"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                    {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword}</p>}
                   </div>
                   
                   <Button type="submit" className="w-full" disabled={isSubmitting}>
