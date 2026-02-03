@@ -90,21 +90,30 @@ Deno.serve(async (req) => {
     const botProfiles: { id: string; name: string; isBot: true }[] = [];
     
     for (const bot of selectedBots) {
-      // Check if bot profile already exists
-      const { data: existingProfile } = await supabase
-        .from('profiles')
-        .select('id, display_name')
-        .eq('email', bot.email)
-        .eq('is_synthetic', true)
-        .single();
-
-      if (existingProfile) {
+      // First, check if the auth user exists by trying to list users with this email
+      const { data: usersData } = await supabase.auth.admin.listUsers();
+      const existingAuthUser = usersData?.users?.find(u => u.email === bot.email);
+      
+      if (existingAuthUser) {
+        // Auth user exists, ensure profile is marked as synthetic
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            display_name: bot.name,
+            is_synthetic: true,
+          })
+          .eq('id', existingAuthUser.id);
+        
+        if (updateError) {
+          console.error(`Failed to update profile for ${bot.name}:`, updateError);
+        }
+        
         botProfiles.push({
-          id: existingProfile.id,
-          name: existingProfile.display_name || bot.name,
+          id: existingAuthUser.id,
+          name: bot.name,
           isBot: true,
         });
-        console.log(`Bot ${bot.name} already exists with id ${existingProfile.id}`);
+        console.log(`Bot ${bot.name} already exists with id ${existingAuthUser.id}`);
       } else {
         // Create synthetic bot user in auth
         const { data: authData, error: authError } = await supabase.auth.admin.createUser({
@@ -127,7 +136,6 @@ Deno.serve(async (req) => {
           .from('profiles')
           .update({
             display_name: bot.name,
-            email: bot.email,
             is_synthetic: true,
           })
           .eq('id', authData.user.id);
