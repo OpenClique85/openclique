@@ -29,7 +29,8 @@ import { InstancePicker, QuestInstance } from '@/components/quests';
 import QuestProgressionSection from './progression/QuestProgressionSection';
 import { 
   MapPin, Calendar, DollarSign, Users, Gift, Star, ChevronRight,
-  Bookmark, BookmarkCheck, Send, Loader2, Sparkles, UserCheck
+  Bookmark, BookmarkCheck, Send, Loader2, Sparkles, UserCheck,
+  Clock, Package, Shirt, AlertTriangle, Target, CheckCircle2
 } from 'lucide-react';
 
 interface QuestModalProps {
@@ -373,13 +374,24 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
                 <Users className="w-4 h-4 shrink-0" />
                 <span>{quest.metadata.squadSize}</span>
               </div>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Clock className="w-4 h-4 shrink-0" />
+                <span>{quest.metadata.duration}</span>
+              </div>
               {quest.meetingLocation && (
-                <div className="flex items-center gap-2 text-muted-foreground">
+                <div className="flex items-center gap-2 text-muted-foreground col-span-2">
                   <MapPin className="w-4 h-4 shrink-0" />
                   <span className="truncate">{quest.meetingLocation.name}</span>
                 </div>
               )}
             </div>
+
+            {/* Duration Notes */}
+            {quest.metadata.durationNotes && (
+              <p className="text-sm text-muted-foreground italic">
+                {quest.metadata.durationNotes}
+              </p>
+            )}
 
             {/* Who It's For - Personality Affinity */}
             {affinities.length > 0 && (
@@ -414,7 +426,56 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
               <p className="text-muted-foreground text-sm leading-relaxed">
                 {quest.shortDescription}
               </p>
+              {quest.fullDescription && quest.fullDescription !== quest.shortDescription && (
+                <p className="text-muted-foreground text-sm leading-relaxed mt-2">
+                  {quest.fullDescription}
+                </p>
+              )}
             </section>
+
+            {/* Highlights */}
+            {quest.highlights && quest.highlights.length > 0 && (
+              <section className="space-y-2">
+                <h4 className="font-display font-semibold text-foreground flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  Highlights
+                </h4>
+                <ul className="space-y-2">
+                  {quest.highlights.map((highlight, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                      {highlight}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {/* Objectives */}
+            {quest.objectives && (
+              <section className="space-y-2">
+                <h4 className="font-display font-semibold text-foreground flex items-center gap-2">
+                  <Target className="w-4 h-4 text-primary" />
+                  Quest Objectives
+                </h4>
+                <p className="text-muted-foreground text-sm whitespace-pre-line">
+                  {quest.objectives}
+                </p>
+              </section>
+            )}
+
+            {/* Success Criteria */}
+            {quest.successCriteria && (
+              <section className="space-y-2">
+                <h4 className="font-display font-semibold text-foreground flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-primary" />
+                  How You'll Know You Succeeded
+                </h4>
+                <p className="text-muted-foreground text-sm whitespace-pre-line">
+                  {quest.successCriteria}
+                </p>
+              </section>
+            )}
 
             {/* Rewards */}
             {quest.rewards && (
@@ -426,6 +487,64 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
                 <p className="text-muted-foreground text-sm bg-primary/5 rounded-lg p-3">
                   {quest.rewards}
                 </p>
+              </section>
+            )}
+
+            {/* Practical Info Section */}
+            {(quest.whatToBring || quest.dressCode || quest.physicalRequirements || quest.ageRestriction) && (
+              <section className="space-y-3">
+                <h4 className="font-display font-semibold text-foreground">Before You Go</h4>
+                <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                  {quest.whatToBring && (
+                    <div className="flex items-start gap-3">
+                      <Package className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-sm">What to Bring</p>
+                        <p className="text-muted-foreground text-sm">{quest.whatToBring}</p>
+                      </div>
+                    </div>
+                  )}
+                  {quest.dressCode && (
+                    <div className="flex items-start gap-3">
+                      <Shirt className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-sm">Dress Code</p>
+                        <p className="text-muted-foreground text-sm">{quest.dressCode}</p>
+                      </div>
+                    </div>
+                  )}
+                  {quest.physicalRequirements && (
+                    <div className="flex items-start gap-3">
+                      <Users className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-sm">Physical Requirements</p>
+                        <p className="text-muted-foreground text-sm">{quest.physicalRequirements}</p>
+                      </div>
+                    </div>
+                  )}
+                  {quest.ageRestriction && (
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-sm">Age Restriction</p>
+                        <p className="text-muted-foreground text-sm">{quest.ageRestriction}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
+
+            {/* Safety Notes */}
+            {quest.safetyNotes && (
+              <section className="space-y-2">
+                <div className="flex items-start gap-3 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-700">
+                  <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-sm text-amber-800 dark:text-amber-300">Safety Note</p>
+                    <p className="text-sm text-amber-700 dark:text-amber-400">{quest.safetyNotes}</p>
+                  </div>
+                </div>
               </section>
             )}
 
@@ -457,7 +576,7 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
               </section>
             )}
 
-            {/* Sections from database */}
+            {/* Sections from database (legacy briefing_html) */}
             {quest.sections?.map((section, index) => (
               <section key={index} className="space-y-2">
                 <h4 className="font-display font-semibold text-foreground">

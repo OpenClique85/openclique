@@ -17,6 +17,7 @@ export interface Quest {
   image: string;
   imageAlt: string;
   shortDescription: string;
+  fullDescription?: string;
   rewards: string;
   progressionTree?: string;
   creatorId?: string;
@@ -24,6 +25,7 @@ export interface Quest {
   creatorName?: string;
   creatorSocialUrl?: string;
   startDatetime?: string;
+  endDatetime?: string;
   isSponsored?: boolean;
   sponsorId?: string;
   sponsorName?: string;
@@ -32,6 +34,7 @@ export interface Quest {
     date: string;
     cost: string;
     duration: string;
+    durationNotes?: string;
     squadSize: string;
   };
   sections?: Array<{
@@ -43,6 +46,15 @@ export interface Quest {
     name: string;
     address: string;
   };
+  // Rich content from creator
+  highlights?: string[];
+  whatToBring?: string;
+  dressCode?: string;
+  physicalRequirements?: string;
+  ageRestriction?: string;
+  safetyNotes?: string;
+  objectives?: string;
+  successCriteria?: string;
 }
 
 // Map database status to UI status
@@ -143,6 +155,16 @@ export function getQuestTemporalStatus(quest: Quest): 'upcoming' | 'today' | 'li
 
 // Transform database quest to UI quest format
 export const transformQuest = (dbQuest: DbQuest & { sponsor_profiles?: { name: string } | null }): Quest => {
+  // Parse highlights from JSONB - could be string[] or {items: string[]}
+  let highlights: string[] | undefined;
+  if (dbQuest.highlights) {
+    if (Array.isArray(dbQuest.highlights)) {
+      highlights = dbQuest.highlights as string[];
+    } else if (typeof dbQuest.highlights === 'object' && 'items' in (dbQuest.highlights as object)) {
+      highlights = (dbQuest.highlights as { items: string[] }).items;
+    }
+  }
+
   return {
     id: dbQuest.id,
     slug: dbQuest.slug,
@@ -154,6 +176,7 @@ export const transformQuest = (dbQuest: DbQuest & { sponsor_profiles?: { name: s
     image: dbQuest.image_url || '/placeholder.svg',
     imageAlt: `${dbQuest.title} quest image`,
     shortDescription: dbQuest.short_description || 'An exciting quest awaits!',
+    fullDescription: dbQuest.full_description || undefined,
     rewards: dbQuest.rewards || 'Memories & new friends',
     progressionTree: dbQuest.progression_tree || undefined,
     creatorId: dbQuest.creator_id || undefined,
@@ -161,6 +184,7 @@ export const transformQuest = (dbQuest: DbQuest & { sponsor_profiles?: { name: s
     creatorName: (dbQuest as DbQuest & { creator_name?: string }).creator_name || undefined,
     creatorSocialUrl: (dbQuest as DbQuest & { creator_social_url?: string }).creator_social_url || undefined,
     startDatetime: dbQuest.start_datetime || undefined,
+    endDatetime: dbQuest.end_datetime || undefined,
     isSponsored: dbQuest.is_sponsored || false,
     sponsorId: dbQuest.sponsor_id || undefined,
     sponsorName: dbQuest.sponsor_profiles?.name || undefined,
@@ -169,7 +193,10 @@ export const transformQuest = (dbQuest: DbQuest & { sponsor_profiles?: { name: s
       date: formatDateRange(dbQuest.start_datetime, dbQuest.end_datetime),
       cost: dbQuest.cost_description || 'Free',
       duration: calculateDuration(dbQuest.start_datetime, dbQuest.end_datetime),
-      squadSize: `${dbQuest.capacity_total || 6} people`,
+      durationNotes: dbQuest.duration_notes || undefined,
+      squadSize: dbQuest.default_squad_size 
+        ? `${dbQuest.default_squad_size} people per clique`
+        : `${dbQuest.capacity_total || 6} people`,
     },
     sections: dbQuest.briefing_html ? [
       {
@@ -182,6 +209,15 @@ export const transformQuest = (dbQuest: DbQuest & { sponsor_profiles?: { name: s
       name: dbQuest.meeting_location_name,
       address: dbQuest.meeting_address || '',
     } : undefined,
+    // Rich creator content
+    highlights,
+    whatToBring: dbQuest.what_to_bring || undefined,
+    dressCode: dbQuest.dress_code || undefined,
+    physicalRequirements: dbQuest.physical_requirements || undefined,
+    ageRestriction: dbQuest.age_restriction || undefined,
+    safetyNotes: dbQuest.safety_notes || undefined,
+    objectives: dbQuest.objectives || undefined,
+    successCriteria: dbQuest.success_criteria || undefined,
   };
 };
 
