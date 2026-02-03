@@ -1,443 +1,353 @@
 
-# Enhanced Account & Social Coordination System
+# Follow Function for Quest Creators and Brands
 
 ## Overview
 
-This plan implements a comprehensive set of features to improve signup security, user identity, discoverability, and structured social interactions - all without enabling direct messaging. The goal is to keep socializing within cliques while providing lightweight coordination tools.
+This plan implements a "Follow" system allowing users to subscribe to quest creators and brand (sponsor) accounts. Followers can discover new quests through a dedicated "Following" feed without push notifications, while creators and brands gain social proof through follower counts.
 
 ---
 
-## Part 1: Signup Security Enhancements
+## Part 1: Database Schema
 
-### 1.1 Password Confirmation Field
-
-**Current Gap**: Users can typo their password during signup and get locked out.
-
-**Changes to `src/pages/Auth.tsx`:**
-
-| Element | Change |
-|---------|--------|
-| New state | `confirmPassword: string` |
-| New validation | Passwords must match before submission |
-| New field | "Confirm Password" input between Password and Create Account button |
-| Error display | "Passwords do not match" shown below confirm field |
-
-**UI Flow:**
-```text
-Email: [________________]
-Password: [________________]
-Confirm Password: [________________]  ← NEW
-[Create Account]
-```
-
----
-
-## Part 2: Unique Username System
-
-### 2.1 Database Schema
+### 1.1 New Table: `user_follows`
 
 ```sql
--- Add username column to profiles
-ALTER TABLE profiles 
-  ADD COLUMN username TEXT UNIQUE;
-
--- Add friend_code for sharing/inviting
-ALTER TABLE profiles 
-  ADD COLUMN friend_code TEXT UNIQUE;
-
--- Case-insensitive unique index
-CREATE UNIQUE INDEX idx_profiles_username_lower 
-  ON profiles (LOWER(username));
-
--- Format validation (3-20 chars, alphanumeric + underscore)
-ALTER TABLE profiles 
-  ADD CONSTRAINT username_format 
-  CHECK (username ~ '^[a-zA-Z0-9_]{3,20}$');
-
--- Auto-generate friend codes
-CREATE OR REPLACE FUNCTION generate_user_friend_code()
-RETURNS TEXT AS $$
-DECLARE
-  chars TEXT := 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  result TEXT := '';
-  i INT;
-BEGIN
-  FOR i IN 1..8 LOOP
-    result := result || substr(chars, floor(random() * length(chars) + 1)::int, 1);
-  END LOOP;
-  RETURN result;
-END;
-$$ LANGUAGE plpgsql;
-
--- Trigger to auto-generate on profile creation
-CREATE TRIGGER trigger_auto_generate_friend_code
-  BEFORE INSERT ON profiles
-  FOR EACH ROW
-  EXECUTE FUNCTION auto_generate_friend_code();
-
--- Backfill existing users
-UPDATE profiles 
-SET friend_code = generate_user_friend_code()
-WHERE friend_code IS NULL;
-```
-
-### 2.2 New Components
-
-| Component | Purpose |
-|-----------|---------|
-| `src/components/profile/UsernameInput.tsx` | Real-time availability check with debounce |
-| `src/components/profile/FriendCodeCard.tsx` | Display, copy, and share friend code |
-| `src/hooks/useUsernameAvailability.ts` | Debounced check against database |
-
-### 2.3 UI Integration
-
-**ProfileModal.tsx** (for new users):
-```text
-Display Name: [John Smith          ]
-Username:     [@johnsmith         ] ✓ Available
-              "Your unique handle. Others find you as @johnsmith"
-```
-
-**ProfileEditModal.tsx** (for existing users):
-- Add username field
-- Show friend code (read-only, with copy button)
-
----
-
-## Part 3: User Search & Discovery
-
-### 3.1 Database Function
-
-```sql
-CREATE OR REPLACE FUNCTION search_users(
-  p_query TEXT,
-  p_limit INT DEFAULT 20,
-  p_requester_id UUID DEFAULT NULL
-) RETURNS TABLE (
-  id UUID,
-  display_name TEXT,
-  username TEXT,
-  city TEXT,
-  friend_code TEXT
-) AS $$
-BEGIN
-  RETURN QUERY
-  SELECT 
-    p.id,
-    p.display_name,
-    p.username,
-    p.city,
-    p.friend_code
-  FROM profiles p
-  LEFT JOIN user_blocks ub ON ub.blocker_id = p_requester_id AND ub.blocked_id = p.id
-  LEFT JOIN user_blocks ub2 ON ub2.blocker_id = p.id AND ub2.blocked_id = p_requester_id
-  WHERE 
-    (p.username ILIKE '%' || p_query || '%'
-     OR p.display_name ILIKE '%' || p_query || '%'
-     OR p.friend_code = UPPER(p_query))
-    AND (p.privacy_settings->>'profile_visible')::boolean IS NOT FALSE
-    AND ub.blocker_id IS NULL  -- Not blocked by requester
-    AND ub2.blocker_id IS NULL -- Not blocking requester
-    AND p.id != COALESCE(p_requester_id, '00000000-0000-0000-0000-000000000000'::uuid)
-  ORDER BY 
-    CASE WHEN p.username ILIKE p_query || '%' THEN 0 ELSE 1 END,
-    p.display_name
-  LIMIT p_limit;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-```
-
-### 3.2 New Pages & Components
-
-| File | Purpose |
-|------|---------|
-| `src/pages/UserSearch.tsx` | `/users` route for finding people |
-| `src/components/social/UserSearchCard.tsx` | Result card with action buttons |
-| `src/components/social/UserProfilePreview.tsx` | Quick-view drawer for user profiles |
-
-### 3.3 Search Page UI
-
-```text
-┌─────────────────────────────────────────────┐
-│ Find People                                 │
-├─────────────────────────────────────────────┤
-│ [🔍 Search by @username, name, or code...] │
-│                                             │
-│ Results:                                    │
-│ ┌─────────────────────────────────────────┐ │
-│ │ [J]  John S.         @johnsmith         │ │
-│ │      Austin, TX                         │ │
-│ │      [Invite to Clique] [Send Quest] [👋]│ │
-│ └─────────────────────────────────────────┘ │
-└─────────────────────────────────────────────┘
-```
-
-**Privacy Enforcement:**
-- Only show users with `profile_visible = true`
-- Hide blocked users in both directions
-- Never expose email addresses
-
----
-
-## Part 4: Structured Social Interactions (No DMs)
-
-### 4.1 Interaction Types
-
-Instead of direct messaging, users can perform these structured actions:
-
-| Action | Description | Recipient Notification |
-|--------|-------------|------------------------|
-| **Poke** | "Hey, thinking of you!" nudge | "[User] poked you 👋" |
-| **Invite to Clique** | Add someone to your squad | "[User] invited you to join [Clique Name]" |
-| **Send Quest** | Share a quest recommendation | "[User] thinks you'd like [Quest Name]" |
-| **Wave** | Friendly acknowledgment | "[User] waved at you 👋" |
-
-### 4.2 Database Schema
-
-```sql
--- User interactions table (not messages!)
-CREATE TABLE user_interactions (
+CREATE TABLE user_follows (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  from_user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  to_user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  interaction_type TEXT NOT NULL, -- 'poke', 'wave', 'quest_share', 'clique_invite'
-  payload JSONB, -- {quest_id: 'xxx'} or {clique_id: 'xxx'}
-  message TEXT, -- Optional short context (max 100 chars)
-  read_at TIMESTAMPTZ,
+  follower_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  
+  -- Polymorphic target: either a creator OR a sponsor (not both)
+  creator_id UUID REFERENCES creator_profiles(id) ON DELETE CASCADE,
+  sponsor_id UUID REFERENCES sponsor_profiles(id) ON DELETE CASCADE,
+  
+  -- Notification preferences (future opt-in)
+  notify_new_quests BOOLEAN DEFAULT false,
+  
   created_at TIMESTAMPTZ DEFAULT now(),
   
-  -- Prevent spam: one interaction type per pair per 24 hours
-  CONSTRAINT unique_interaction_daily 
-    UNIQUE NULLS NOT DISTINCT (from_user_id, to_user_id, interaction_type, 
-      (created_at::date))
+  -- Constraints
+  CONSTRAINT follow_has_target CHECK (
+    (creator_id IS NOT NULL AND sponsor_id IS NULL) OR
+    (creator_id IS NULL AND sponsor_id IS NOT NULL)
+  ),
+  CONSTRAINT unique_creator_follow UNIQUE (follower_id, creator_id),
+  CONSTRAINT unique_sponsor_follow UNIQUE (follower_id, sponsor_id)
 );
 
--- Rate limiting: max 10 interactions per user per day
-CREATE OR REPLACE FUNCTION check_interaction_limit()
-RETURNS TRIGGER AS $$
-BEGIN
-  IF (
-    SELECT COUNT(*) FROM user_interactions 
-    WHERE from_user_id = NEW.from_user_id 
-    AND created_at > now() - interval '24 hours'
-  ) >= 10 THEN
-    RAISE EXCEPTION 'Daily interaction limit reached (10/day)';
-  END IF;
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER enforce_interaction_limit
-  BEFORE INSERT ON user_interactions
-  FOR EACH ROW EXECUTE FUNCTION check_interaction_limit();
-
--- Clique invitations (person-to-person, not generic codes)
-CREATE TABLE clique_invitations (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  squad_id UUID REFERENCES squads(id) ON DELETE CASCADE,
-  inviter_id UUID REFERENCES auth.users(id),
-  invitee_id UUID REFERENCES auth.users(id),
-  status TEXT DEFAULT 'pending', -- pending, accepted, declined, expired
-  message TEXT, -- Optional: "Hey, join us for trivia night!"
-  created_at TIMESTAMPTZ DEFAULT now(),
-  responded_at TIMESTAMPTZ,
-  expires_at TIMESTAMPTZ DEFAULT now() + interval '7 days',
-  UNIQUE(squad_id, invitee_id)
-);
+-- Indexes for fast lookups
+CREATE INDEX idx_user_follows_follower ON user_follows(follower_id);
+CREATE INDEX idx_user_follows_creator ON user_follows(creator_id) WHERE creator_id IS NOT NULL;
+CREATE INDEX idx_user_follows_sponsor ON user_follows(sponsor_id) WHERE sponsor_id IS NOT NULL;
 
 -- RLS Policies
-ALTER TABLE user_interactions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE clique_invitations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_follows ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can see interactions involving them"
-  ON user_interactions FOR SELECT
-  USING (from_user_id = auth.uid() OR to_user_id = auth.uid());
+CREATE POLICY "Users can view their own follows"
+  ON user_follows FOR SELECT
+  USING (follower_id = auth.uid());
 
-CREATE POLICY "Users can create interactions"
-  ON user_interactions FOR INSERT
-  WITH CHECK (from_user_id = auth.uid());
+CREATE POLICY "Users can view follower counts (public)"
+  ON user_follows FOR SELECT
+  USING (true);
 
-CREATE POLICY "Users can see their invitations"
-  ON clique_invitations FOR SELECT
-  USING (inviter_id = auth.uid() OR invitee_id = auth.uid());
+CREATE POLICY "Users can follow/unfollow"
+  ON user_follows FOR INSERT
+  WITH CHECK (follower_id = auth.uid());
+
+CREATE POLICY "Users can unfollow"
+  ON user_follows FOR DELETE
+  USING (follower_id = auth.uid());
 ```
 
-### 4.3 Anti-Creep Safeguards
+### 1.2 Follower Count Materialized View
 
-| Safeguard | Implementation |
-|-----------|----------------|
-| **Rate Limiting** | 10 interactions/day per user |
-| **One-per-day** | Can only poke same person once per 24h |
-| **Blocking** | Blocked users can't interact at all |
-| **No Custom Text** | Interactions are structured, not free-form |
-| **Short Context Only** | Optional message capped at 100 chars |
-| **Auto-Expire** | Clique invites expire after 7 days |
+For performance when displaying follower counts on profiles:
 
-### 4.4 New Components
+```sql
+-- Function to get follower counts
+CREATE OR REPLACE FUNCTION get_creator_follower_count(p_creator_id UUID)
+RETURNS BIGINT AS $$
+  SELECT COUNT(*) FROM user_follows WHERE creator_id = p_creator_id;
+$$ LANGUAGE SQL STABLE SECURITY DEFINER;
 
-| Component | Purpose |
-|-----------|---------|
-| `src/components/social/PokeButton.tsx` | Send poke with cooldown indicator |
-| `src/components/social/InviteToCliqueDialog.tsx` | Select clique to invite user to |
-| `src/components/social/SendQuestDialog.tsx` | Share a quest with someone |
-| `src/components/social/InteractionFeed.tsx` | Show received interactions on profile |
+CREATE OR REPLACE FUNCTION get_sponsor_follower_count(p_sponsor_id UUID)
+RETURNS BIGINT AS $$
+  SELECT COUNT(*) FROM user_follows WHERE sponsor_id = p_sponsor_id;
+$$ LANGUAGE SQL STABLE SECURITY DEFINER;
+```
 
-### 4.5 Notification Integration
+---
 
-Update `useNotifications.ts` types:
+## Part 2: React Hooks
+
+### 2.1 `useFollows.ts`
+
+| Function | Purpose |
+|----------|---------|
+| `useIsFollowing(type, id)` | Check if current user follows a creator/sponsor |
+| `useFollowCreator()` | Mutation to follow a creator |
+| `useUnfollowCreator()` | Mutation to unfollow a creator |
+| `useFollowSponsor()` | Mutation to follow a sponsor |
+| `useUnfollowSponsor()` | Mutation to unfollow a sponsor |
+| `useFollowedCreators()` | List all creators the user follows |
+| `useFollowedSponsors()` | List all sponsors the user follows |
+| `useFollowerCount(type, id)` | Get follower count for a creator/sponsor |
+
+### 2.2 `useFollowingFeed.ts`
+
+Fetches quests from all followed creators and sponsors, sorted by newest first:
 
 ```typescript
-type: 'poke' | 'wave' | 'quest_shared_user' | 'clique_invite_received' | ...
+interface FollowingFeedQuest extends Quest {
+  source: {
+    type: 'creator' | 'sponsor';
+    id: string;
+    name: string;
+    slug: string;
+  };
+  contactsJoined: number; // How many of user's contacts signed up
+}
 ```
-
-These flow into the existing Notifications page with proper icons and categories.
 
 ---
 
-## Part 5: Admin User Profile Drawer
+## Part 3: UI Components
 
-### 5.1 New Component: `AdminUserProfileDrawer.tsx`
+### 3.1 `FollowButton.tsx`
 
-A slide-out panel showing complete user information for admins:
-
-```text
-┌─────────────────────────────────────┐
-│ [←] User Profile                    │
-├─────────────────────────────────────┤
-│  [J]  John Smith                    │
-│  @johnsmith                         │
-│  john@example.com                   │
-│  Member Since: Jan 15, 2026         │
-│  Age Verified: ✓ (28 years old)     │
-│  Friend Code: XKCD7M3N              │
-│                                     │
-│  ── Activity ──                     │
-│  Quests Attended: 12                │
-│  Total XP: 1,250                    │
-│  Cliques: 3 (2 as leader)           │
-│                                     │
-│  ── Trust & Safety ──               │
-│  Trust Score: 85                    │
-│  Reports Filed: 2                   │
-│  Reports Against: 0                 │
-│  Blocks: 1                          │
-│  Interactions Sent: 45              │
-│                                     │
-│  ── Actions ──                      │
-│  [View Quest History]               │
-│  [View Cliques]                     │
-│  [Send Admin Message]               │
-│  [Suspend Account] [Ban User]       │
-└─────────────────────────────────────┘
-```
-
-### 5.2 Integration Points
-
-Make usernames clickable in:
-
-| Panel | Clickable Elements |
-|-------|-------------------|
-| `AdminReportsQueuePanel` | Reporter, Reported User |
-| `AdminSOSAlertsPanel` | User who triggered alert |
-| `ModerationDashboard` | Trust score entries |
-| `SignupsManager` | Signup user names |
-
-### 5.3 Admin User Directory Tab
-
-New tab in `ModerationDashboard.tsx`:
+A reusable button component for creator/sponsor profiles:
 
 ```text
-[Overview] [SOS Alerts] [User Reports] [User Directory] [Legacy Flags]
+┌─────────────────┐     ┌─────────────────┐
+│ [♡] Follow      │ ──► │ [✓] Following   │
+└─────────────────┘     └─────────────────┘
+     (not following)         (following)
 ```
 
-Features:
-- Full-text search across email, username, display_name
-- Filters: join date range, XP level, trust score, verified/unverified
-- Bulk export to CSV
-- Click any row to open `AdminUserProfileDrawer`
+**Props:**
+- `type: 'creator' | 'sponsor'`
+- `targetId: string`
+- `size?: 'sm' | 'md' | 'lg'`
+- `variant?: 'default' | 'outline'`
+
+### 3.2 `FollowerCountBadge.tsx`
+
+Displays follower count with appropriate formatting:
+- Under 1000: exact number (e.g., "247 followers")
+- 1000+: abbreviated (e.g., "1.2k followers")
+
+### 3.3 `FollowingFeedRow.tsx`
+
+A new row type for the Netflix-style quest discovery:
+
+```text
+┌──────────────────────────────────────────────────────────────┐
+│ From Creators & Brands You Follow                        (8) │
+├──────────────────────────────────────────────────────────────┤
+│ [Quest Card]  [Quest Card]  [Quest Card]  [Quest Card] ──►   │
+│   by Nike       by @chef_sarah  by @yoga_guru  by REI        │
+└──────────────────────────────────────────────────────────────┘
+```
+
+Each card shows:
+- Source attribution (creator name or brand logo)
+- Quest date, difficulty
+- Contacts joined indicator (if any)
+
+### 3.4 `FollowingFilterToggle.tsx`
+
+A filter toggle for the quest discovery page:
+
+```text
+[All Quests] [Following Only]
+```
+
+When "Following Only" is active, only quests from followed accounts appear.
 
 ---
 
-## Part 6: Friend Code System
+## Part 4: Profile Page Integration
 
-### 6.1 How It Works
+### 4.1 Creator Public Profile (`CreatorPublicProfile.tsx`)
 
-Each user gets an auto-generated 8-character code like `XKCD7M3N`.
-
-**Uses:**
-1. **Share for discovery**: "Add me on OpenClique: XKCD7M3N"
-2. **Direct lookup**: Search by code to find exact user
-3. **Invite to clique**: Use code to send direct clique invitation
-
-### 6.2 UI: Friend Code Card
-
-On Profile page (MeTab or new section):
+Add Follow button and follower count to hero section:
 
 ```text
-┌─────────────────────────────────────┐
-│ Your Friend Code                    │
-│                                     │
-│    ┌───────────────────────────┐    │
-│    │  XKCD-7M3N                │    │
-│    └───────────────────────────┘    │
-│    [📋 Copy]  [📤 Share]            │
-│                                     │
-│ Share this code so friends can      │
-│ find you and invite you to cliques. │
-└─────────────────────────────────────┘
+┌─────────────────────────────────────────────────────┐
+│  [Avatar]  Chef Sarah Martinez                      │
+│            @chef_sarah                              │
+│            Austin, TX                               │
+│                                                     │
+│            247 followers                            │
+│            [Follow]                                 │
+├─────────────────────────────────────────────────────┤
+│  Stats: 12 Quests | 340 Participants | ★ 4.8       │
+└─────────────────────────────────────────────────────┘
 ```
 
-### 6.3 Add by Friend Code Flow
+### 4.2 Sponsor Public Profile (`SponsorPublicProfile.tsx`)
+
+Same pattern as creator profile:
 
 ```text
-┌─────────────────────────────────────┐
-│ Add by Friend Code                  │
-├─────────────────────────────────────┤
-│ [Enter friend code: __________ ]    │
-│                                     │
-│ [Search]                            │
-│                                     │
-│ Found:                              │
-│ ┌─────────────────────────────────┐ │
-│ │ [S]  Sarah M.      @sarahm      │ │
-│ │ [Invite to Clique] [Poke] [Send Quest] │
-│ └─────────────────────────────────┘ │
-└─────────────────────────────────────┘
+┌─────────────────────────────────────────────────────┐
+│  [Logo]  Nike Austin                                │
+│          Brand & Venue                              │
+│          1.2k followers                             │
+│          [Follow]                                   │
+└─────────────────────────────────────────────────────┘
 ```
+
+---
+
+## Part 5: Quest Discovery Integration
+
+### 5.1 Update `Quests.tsx`
+
+Add "Following" row to Netflix-style layout:
+
+```typescript
+// In questGroups calculation
+const followingQuests = filteredQuests.filter(quest => {
+  // Check if creator_id or sponsor_id is in user's followed list
+  return followedCreatorIds.has(quest.creatorId) || 
+         followedSponsorIds.has(quest.sponsorId);
+});
+
+// Render order:
+// 1. "From People You Follow" (if user follows anyone and has quests)
+// 2. "Happening This Week"
+// 3. Category rows
+// 4. Creator rows
+```
+
+### 5.2 Update `QuestFilterBar.tsx`
+
+Add "Following" filter option:
+
+```typescript
+export interface QuestFilters {
+  // ... existing filters
+  followingOnly: boolean;  // NEW
+}
+```
+
+UI:
+```text
+┌─────────────────────────────────────────────────────┐
+│ 🔍 [Search quests...]          [Starting Soon ▾]   │
+├─────────────────────────────────────────────────────┤
+│ [Following] [Culture] [Wellness] [Social]          │
+└─────────────────────────────────────────────────────┘
+```
+
+"Following" is a special toggle that:
+- Appears first when user follows at least one account
+- Shows only quests from followed creators/sponsors when active
+- Displays count of available quests
+
+---
+
+## Part 6: Contact Social Proof
+
+### 6.1 Quest Card Enhancement
+
+Show how many of the user's contacts have joined:
+
+```text
+┌─────────────────────────────┐
+│ [Quest Image]               │
+│ 🍜 Ramen Quest              │
+│ Mar 15 • Austin             │
+│                             │
+│ 👥 2 contacts interested    │  ← NEW
+└─────────────────────────────┘
+```
+
+This leverages the existing contacts system:
+1. Fetch user's accepted contacts
+2. Cross-reference with quest signups
+3. Display count (or nothing if 0)
+
+---
+
+## Part 7: Anti-Spam Mechanics
+
+### 7.1 Feed Diversity Rules
+
+Prevent any single creator/sponsor from dominating the Following feed:
+
+```typescript
+// In useFollowingFeed.ts
+const diversifyFeed = (quests: FollowingFeedQuest[]) => {
+  const MAX_PER_SOURCE = 3; // Max 3 quests per creator/sponsor in feed
+  const seen = new Map<string, number>();
+  
+  return quests.filter(quest => {
+    const key = `${quest.source.type}_${quest.source.id}`;
+    const count = seen.get(key) || 0;
+    if (count >= MAX_PER_SOURCE) return false;
+    seen.set(key, count + 1);
+    return true;
+  });
+};
+```
+
+### 7.2 No Push Notifications by Default
+
+The `notify_new_quests` column defaults to `false`. Users browse the Following feed on their own schedule.
+
+Future enhancement: Per-creator notification toggle:
+```text
+┌─────────────────────────────────────────────────────┐
+│ [Following ✓]  [🔔 Get notified]                   │
+└─────────────────────────────────────────────────────┘
+```
+
+---
+
+## Part 8: Analytics & Social Proof
+
+### 8.1 Creator Analytics
+
+Add follower metrics to creator dashboard (`CreatorAnalytics.tsx`):
+
+| Metric | Description |
+|--------|-------------|
+| Total Followers | Current follower count |
+| Follower Growth | Week-over-week change |
+| Follower → Signup Rate | % of followers who sign up for quests |
+
+### 8.2 Sponsor Analytics
+
+Same metrics in sponsor dashboard.
 
 ---
 
 ## Implementation Phases
 
-### Phase 1: Database & Auth (Sprint 1)
-1. Add `username` and `friend_code` to profiles schema
-2. Create `user_interactions` and `clique_invitations` tables
-3. Add password confirmation to Auth.tsx
-4. Create username availability check function
+### Phase 1: Database & Core Hooks (This Sprint)
+1. Create `user_follows` table with RLS
+2. Create follower count functions
+3. Build `useFollows.ts` hooks
+4. Build `useFollowingFeed.ts` hook
 
-### Phase 2: Profile & Identity (Sprint 1)
-5. Build `UsernameInput.tsx` component
-6. Update `ProfileModal.tsx` and `ProfileEditModal.tsx`
-7. Build `FriendCodeCard.tsx`
-8. Integrate into Profile page
+### Phase 2: Profile Integration (This Sprint)
+5. Create `FollowButton.tsx` component
+6. Create `FollowerCountBadge.tsx` component
+7. Update `CreatorPublicProfile.tsx` with follow button + count
+8. Update `SponsorPublicProfile.tsx` with follow button + count
 
-### Phase 3: User Search (Sprint 2)
-9. Create `search_users()` database function
-10. Build `UserSearch.tsx` page
-11. Add `/users` route to App.tsx
-12. Build `UserSearchCard.tsx` and `UserProfilePreview.tsx`
+### Phase 3: Quest Discovery (This Sprint)
+9. Update `QuestFilterBar.tsx` with Following toggle
+10. Update `Quests.tsx` with Following row
+11. Create `FollowingFeedRow.tsx` component
+12. Add contacts-joined indicator to quest cards
 
-### Phase 4: Social Interactions (Sprint 2)
-13. Build `PokeButton.tsx`, `InviteToCliqueDialog.tsx`, `SendQuestDialog.tsx`
-14. Create interaction triggers and notifications
-15. Update notification types and UI
-16. Build `InteractionFeed.tsx` for profile
-
-### Phase 5: Admin Tools (Sprint 3)
-17. Build `AdminUserProfileDrawer.tsx`
-18. Add User Directory tab to ModerationDashboard
-19. Make usernames clickable across admin panels
-20. Add interaction/invitation analytics
+### Phase 4: Analytics (Future)
+13. Add follower metrics to creator/sponsor dashboards
+14. Build follower growth charts
+15. Create conversion tracking (follower → signup)
 
 ---
 
@@ -445,36 +355,53 @@ On Profile page (MeTab or new section):
 
 | File | Purpose |
 |------|---------|
-| `src/components/profile/UsernameInput.tsx` | Username field with availability |
-| `src/components/profile/FriendCodeCard.tsx` | Display/share friend code |
-| `src/components/social/UserSearchCard.tsx` | Search result card |
-| `src/components/social/UserProfilePreview.tsx` | Quick-view drawer |
-| `src/components/social/PokeButton.tsx` | Send poke interaction |
-| `src/components/social/InviteToCliqueDialog.tsx` | Invite user to clique |
-| `src/components/social/SendQuestDialog.tsx` | Share quest with user |
-| `src/components/social/InteractionFeed.tsx` | Show received interactions |
-| `src/components/admin/AdminUserProfileDrawer.tsx` | Admin user detail view |
-| `src/components/admin/AdminUserDirectory.tsx` | Searchable user list |
-| `src/pages/UserSearch.tsx` | `/users` route |
-| `src/hooks/useUsernameAvailability.ts` | Debounced check |
-| `src/hooks/useUserSearch.ts` | Search hook |
-| `src/hooks/useUserInteractions.ts` | Interaction CRUD |
+| `src/hooks/useFollows.ts` | Follow/unfollow mutations and queries |
+| `src/hooks/useFollowingFeed.ts` | Fetch quests from followed accounts |
+| `src/components/social/FollowButton.tsx` | Reusable follow/unfollow button |
+| `src/components/social/FollowerCountBadge.tsx` | Display formatted follower count |
+| `src/components/quests/FollowingFeedRow.tsx` | Netflix-style row for following feed |
 
 ## Files to Modify
 
 | File | Changes |
 |------|---------|
-| `src/pages/Auth.tsx` | Add confirmPassword field |
-| `src/components/ProfileModal.tsx` | Add username field |
-| `src/components/ProfileEditModal.tsx` | Add username field |
-| `src/pages/Profile.tsx` | Add FriendCodeCard |
-| `src/components/profile/MeTab.tsx` | Add friend code section |
-| `src/components/admin/ModerationDashboard.tsx` | Add User Directory tab |
-| `src/components/admin/AdminReportsQueuePanel.tsx` | Clickable usernames |
-| `src/components/admin/AdminSOSAlertsPanel.tsx` | Clickable usernames |
-| `src/hooks/useNotifications.ts` | Add interaction types |
-| `src/pages/Notifications.tsx` | Add interaction icons/labels |
-| `src/App.tsx` | Add `/users` route |
+| `src/pages/CreatorPublicProfile.tsx` | Add FollowButton, FollowerCountBadge |
+| `src/pages/SponsorPublicProfile.tsx` | Add FollowButton, FollowerCountBadge |
+| `src/pages/Quests.tsx` | Add Following row to Netflix layout |
+| `src/components/QuestFilterBar.tsx` | Add "Following" filter toggle |
+| `src/components/QuestCard.tsx` | Add contacts-joined indicator |
+
+---
+
+## Technical Architecture
+
+```text
+┌─────────────────────────────────────────────────────────────┐
+│                     user_follows table                      │
+│  ┌─────────────┬─────────────┬─────────────┬─────────────┐ │
+│  │ follower_id │ creator_id  │ sponsor_id  │ notify_     │ │
+│  │ (required)  │ (nullable)  │ (nullable)  │ new_quests  │ │
+│  └──────┬──────┴──────┬──────┴──────┬──────┴─────────────┘ │
+│         │             │             │                       │
+│         ▼             ▼             ▼                       │
+│   auth.users   creator_profiles  sponsor_profiles          │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│                    Data Flow                                │
+│                                                             │
+│  CreatorPublicProfile ──► FollowButton ──► useFollows      │
+│                               │                             │
+│                               ▼                             │
+│                        user_follows                         │
+│                               │                             │
+│                               ▼                             │
+│                      useFollowingFeed                       │
+│                               │                             │
+│                               ▼                             │
+│                     Quests.tsx (feed)                       │
+└─────────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -482,46 +409,32 @@ On Profile page (MeTab or new section):
 
 | Concern | Mitigation |
 |---------|------------|
-| Username squatting | Reserved words list, rate limit changes (1/30 days) |
-| Interaction spam | 10/day limit, 1/pair/day for same type |
-| Creep behavior | Blocking prevents all interactions |
-| Friend code brute force | 8-char = ~2 trillion combinations |
-| Privacy leakage | Search respects profile_visible setting |
-| Admin abuse | All admin profile views logged to audit table |
-
----
-
-## Analytics & Insights (Admin)
-
-New metrics available in admin dashboard:
-
-| Metric | Description |
-|--------|-------------|
-| Interactions/day | Total pokes, waves, quest shares, invites |
-| Conversion rate | Clique invites → acceptances |
-| Most active inviters | Users sending most clique invites |
-| Search popularity | Most searched terms |
-| Friend code usage | Codes looked up vs. successful finds |
-
-These feed into the existing analytics framework without new infrastructure.
+| Follow spam | Rate limit via RLS (same user can't follow same target twice) |
+| Fake follower counts | All follows require authenticated user |
+| Privacy | Users can only see their own follow list; counts are public |
+| Manipulation | No public API for bulk operations |
 
 ---
 
 ## Key Design Decisions
 
-### Why No DMs?
-- **Creep prevention**: Structured interactions can't contain inappropriate content
-- **Bot resistance**: Rate limits and structured actions deter automation
-- **Focus**: Keeps real conversation inside cliques where context exists
-- **Safety**: All interactions are visible in notifications, never private
+### Why No Push Notifications?
+- Users stay in control of their attention
+- Prevents notification fatigue
+- Following feed becomes a "pull" experience
+- Future opt-in per-creator keeps it intentional
 
-### Why Friend Codes?
-- **Privacy**: Share code without sharing email or full name
-- **Precision**: Exact lookup vs. fuzzy name search
-- **Shareability**: Easy to text, say out loud, put on social media
-- **Regenerable**: Can get new code if compromised
+### Why Polymorphic Table?
+- Single `user_follows` table handles both creators and sponsors
+- Simpler queries for the "Following" feed
+- Easier to add new followable entity types later
 
-### Why Rate Limits?
-- **Quality over quantity**: 10/day forces intentional interactions
-- **Spam prevention**: Can't mass-poke hundreds of users
-- **Creep deterrent**: Limited harassment surface area
+### Why Follower Counts Are Public?
+- Social proof for creators/brands
+- Helps users discover popular accounts
+- Enables brand partnership matching
+
+### Why Limit Feed Diversity?
+- Prevents a prolific creator from drowning out others
+- Encourages variety in the Following experience
+- Mirrors how streaming services prevent binge-listing from one source
