@@ -68,8 +68,8 @@ Keep it to 2-3 sentences.`,
 - Any required waivers or acknowledgments
 Format as bullet points.`,
 
-  emergency_contact: `This field should be filled by the creator with their personal contact info.
-Suggest a format like: "Your phone number (e.g., 512-555-0123) for day-of emergencies"`,
+  emergency_contact: `This field should contain in-app contact information for the creator.
+Suggest a format like: "@yourhandle on the app" or "Use in-app messaging to reach me during the event"`,
 };
 
 // Import rate limiting

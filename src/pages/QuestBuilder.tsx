@@ -176,7 +176,7 @@ export default function QuestBuilder() {
         image_url: existingQuest.image_url || '',
         meeting_location_name: existingQuest.meeting_location_name || '',
         meeting_address: existingQuest.meeting_address || '',
-        whatsapp_invite_link: existingQuest.whatsapp_invite_link || '',
+        
         // Load constraint values from quest_constraints table or use defaults
         safety_level: (existingQuest.safety_level as QuestFormData['safety_level']) || 'public_only',
         ai_generated: existingQuest.ai_generated || false,

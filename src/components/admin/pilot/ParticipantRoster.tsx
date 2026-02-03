@@ -12,7 +12,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from '@/components/ui/table';
@@ -25,7 +24,7 @@ import {
 } from '@/components/ui/select';
 import { 
   Search, MoreHorizontal, MessageSquare, UserMinus, 
-  AlertTriangle, CheckCircle, Eye, EyeOff, Loader2
+  AlertTriangle, CheckCircle, Loader2
 } from 'lucide-react';
 import type { Tables, Enums } from '@/integrations/supabase/types';
 
@@ -35,8 +34,6 @@ interface ParticipantWithProfile {
   id: string;
   user_id: string;
   status: SignupStatus;
-  phone: string | null;
-  whatsapp_joined: boolean;
   checked_in_at: string | null;
   completed_at: string | null;
   last_activity_at: string | null;
@@ -69,7 +66,6 @@ export function ParticipantRoster({ instanceId }: ParticipantRosterProps) {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [showPhones, setShowPhones] = useState(false);
 
   // Fetch participants
   const { data: participants, isLoading } = useQuery({
@@ -78,7 +74,7 @@ export function ParticipantRoster({ instanceId }: ParticipantRosterProps) {
       const { data, error } = await supabase
         .from('quest_signups')
         .select(`
-          id, user_id, status, phone, whatsapp_joined, 
+          id, user_id, status,
           checked_in_at, completed_at, last_activity_at, created_at, squad_id,
           profiles!inner(display_name, email),
           quest_squads(name)
@@ -109,19 +105,6 @@ export function ParticipantRoster({ instanceId }: ParticipantRosterProps) {
     }
   });
 
-  // Toggle WhatsApp joined
-  const toggleWhatsAppMutation = useMutation({
-    mutationFn: async ({ signupId, joined }: { signupId: string; joined: boolean }) => {
-      const { error } = await supabase
-        .from('quest_signups')
-        .update({ whatsapp_joined: joined })
-        .eq('id', signupId);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['instance-participants', instanceId] });
-    },
-  });
 
   // Filter participants
   const filteredParticipants = participants?.filter(p => {
@@ -132,11 +115,6 @@ export function ParticipantRoster({ instanceId }: ParticipantRosterProps) {
     return matchesSearch && matchesStatus;
   }) || [];
 
-  const maskPhone = (phone: string | null) => {
-    if (!phone) return '—';
-    if (!showPhones) return `***-***-${phone.slice(-4)}`;
-    return phone;
-  };
 
   const formatTime = (timestamp: string | null) => {
     if (!timestamp) return '—';
@@ -185,13 +163,6 @@ export function ParticipantRoster({ instanceId }: ParticipantRosterProps) {
               </SelectContent>
             </Select>
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowPhones(!showPhones)}
-            >
-              {showPhones ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </Button>
           </div>
         </div>
       </CardHeader>
@@ -204,8 +175,6 @@ export function ParticipantRoster({ instanceId }: ParticipantRosterProps) {
                 <TableHead>Name</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Squad</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>WhatsApp</TableHead>
                 <TableHead>Checked In</TableHead>
                 <TableHead>Last Activity</TableHead>
                 <TableHead className="w-10"></TableHead>
@@ -214,7 +183,7 @@ export function ParticipantRoster({ instanceId }: ParticipantRosterProps) {
             <TableBody>
               {filteredParticipants.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                     No participants found
                   </TableCell>
                 </TableRow>
@@ -232,17 +201,6 @@ export function ParticipantRoster({ instanceId }: ParticipantRosterProps) {
                     </TableCell>
                     <TableCell>
                       {p.quest_squads?.name || <span className="text-muted-foreground">—</span>}
-                    </TableCell>
-                    <TableCell className="font-mono text-sm">
-                      {maskPhone(p.phone)}
-                    </TableCell>
-                    <TableCell>
-                      <Checkbox
-                        checked={p.whatsapp_joined}
-                        onCheckedChange={(checked) => 
-                          toggleWhatsAppMutation.mutate({ signupId: p.id, joined: !!checked })
-                        }
-                      />
                     </TableCell>
                     <TableCell>
                       {p.checked_in_at ? (

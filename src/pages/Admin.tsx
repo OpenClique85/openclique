@@ -7,7 +7,6 @@ import { Loader2 } from 'lucide-react';
 import { QuestsManager } from '@/components/admin/QuestsManager';
 import { SignupsManager } from '@/components/admin/SignupsManager';
 import { MessagingCenter } from '@/components/admin/MessagingCenter';
-import { WhatsAppManager } from '@/components/admin/WhatsAppManager';
 import { Analytics } from '@/components/admin/Analytics';
 import { PersistentSquadsManager } from '@/components/admin/PersistentSquadsManager';
 import { CreatorsManager } from '@/components/admin/CreatorsManager';
@@ -119,7 +118,6 @@ export default function Admin() {
       case 'testimonials': return <TestimonialsManager />;
       // Communications
       case 'messaging': return <MessagingCenter />;
-      case 'whatsapp': return <WhatsAppManager />;
       case 'notification-console': return <NotificationConsole />;
       // Growth
       case 'invite-codes': return <InviteCodesManager />;

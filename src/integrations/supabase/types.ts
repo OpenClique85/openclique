@@ -4341,7 +4341,6 @@ export type Database = {
           location_consent_given: boolean | null
           notes_private: string | null
           participant_token: string | null
-          phone: string | null
           proof_submitted_at: string | null
           quest_id: string
           reenlist_answered_at: string | null
@@ -4350,7 +4349,6 @@ export type Database = {
           updated_at: string
           user_id: string
           wants_reenlist: boolean | null
-          whatsapp_joined: boolean | null
           xp_awarded_at: string | null
         }
         Insert: {
@@ -4368,7 +4366,6 @@ export type Database = {
           location_consent_given?: boolean | null
           notes_private?: string | null
           participant_token?: string | null
-          phone?: string | null
           proof_submitted_at?: string | null
           quest_id: string
           reenlist_answered_at?: string | null
@@ -4377,7 +4374,6 @@ export type Database = {
           updated_at?: string
           user_id: string
           wants_reenlist?: boolean | null
-          whatsapp_joined?: boolean | null
           xp_awarded_at?: string | null
         }
         Update: {
@@ -4395,7 +4391,6 @@ export type Database = {
           location_consent_given?: boolean | null
           notes_private?: string | null
           participant_token?: string | null
-          phone?: string | null
           proof_submitted_at?: string | null
           quest_id?: string
           reenlist_answered_at?: string | null
@@ -4404,7 +4399,6 @@ export type Database = {
           updated_at?: string
           user_id?: string
           wants_reenlist?: boolean | null
-          whatsapp_joined?: boolean | null
           xp_awarded_at?: string | null
         }
         Relationships: [
@@ -4454,7 +4448,6 @@ export type Database = {
           referral_bonds: number | null
           squad_name: string
           status: Database["public"]["Enums"]["squad_status"]
-          whatsapp_link: string | null
         }
         Insert: {
           archived_at?: string | null
@@ -4471,7 +4464,6 @@ export type Database = {
           referral_bonds?: number | null
           squad_name?: string
           status?: Database["public"]["Enums"]["squad_status"]
-          whatsapp_link?: string | null
         }
         Update: {
           archived_at?: string | null
@@ -4488,7 +4480,6 @@ export type Database = {
           referral_bonds?: number | null
           squad_name?: string
           status?: Database["public"]["Enums"]["squad_status"]
-          whatsapp_link?: string | null
         }
         Relationships: [
           {
@@ -4592,7 +4583,6 @@ export type Database = {
           warm_up_prompt_custom: string | null
           warm_up_prompt_id: string | null
           what_to_bring: string | null
-          whatsapp_invite_link: string | null
           xp_rules: Json | null
         }
         Insert: {
@@ -4683,7 +4673,6 @@ export type Database = {
           warm_up_prompt_custom?: string | null
           warm_up_prompt_id?: string | null
           what_to_bring?: string | null
-          whatsapp_invite_link?: string | null
           xp_rules?: Json | null
         }
         Update: {
@@ -4774,7 +4763,6 @@ export type Database = {
           warm_up_prompt_custom?: string | null
           warm_up_prompt_id?: string | null
           what_to_bring?: string | null
-          whatsapp_invite_link?: string | null
           xp_rules?: Json | null
         }
         Relationships: [
@@ -8387,7 +8375,6 @@ export type Database = {
           updated_at: string | null
           user_id: string | null
           wants_reenlist: boolean | null
-          whatsapp_joined: boolean | null
           xp_awarded_at: string | null
         }
         Insert: {
@@ -8405,7 +8392,6 @@ export type Database = {
           updated_at?: string | null
           user_id?: string | null
           wants_reenlist?: boolean | null
-          whatsapp_joined?: boolean | null
           xp_awarded_at?: string | null
         }
         Update: {
@@ -8423,7 +8409,6 @@ export type Database = {
           updated_at?: string | null
           user_id?: string | null
           wants_reenlist?: boolean | null
-          whatsapp_joined?: boolean | null
           xp_awarded_at?: string | null
         }
         Relationships: [
@@ -8466,11 +8451,12 @@ export type Database = {
           last_activity_at: string | null
           proof_submitted_at: string | null
           quest_id: string | null
+          reenlist_answered_at: string | null
           signed_up_at: string | null
           status: Database["public"]["Enums"]["signup_status"] | null
           updated_at: string | null
           user_id: string | null
-          whatsapp_joined: boolean | null
+          wants_reenlist: boolean | null
         }
         Insert: {
           checked_in_at?: string | null
@@ -8480,11 +8466,12 @@ export type Database = {
           last_activity_at?: string | null
           proof_submitted_at?: string | null
           quest_id?: string | null
+          reenlist_answered_at?: string | null
           signed_up_at?: string | null
           status?: Database["public"]["Enums"]["signup_status"] | null
           updated_at?: string | null
           user_id?: string | null
-          whatsapp_joined?: boolean | null
+          wants_reenlist?: boolean | null
         }
         Update: {
           checked_in_at?: string | null
@@ -8494,11 +8481,12 @@ export type Database = {
           last_activity_at?: string | null
           proof_submitted_at?: string | null
           quest_id?: string | null
+          reenlist_answered_at?: string | null
           signed_up_at?: string | null
           status?: Database["public"]["Enums"]["signup_status"] | null
           updated_at?: string | null
           user_id?: string | null
-          whatsapp_joined?: boolean | null
+          wants_reenlist?: boolean | null
         }
         Relationships: [
           {
@@ -9226,7 +9214,6 @@ export type Database = {
           title: string
         }[]
       }
-      get_signup_phone: { Args: { target_signup_id: string }; Returns: string }
       get_sponsor_contact_email: {
         Args: { target_sponsor_id: string }
         Returns: string
