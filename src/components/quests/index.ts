@@ -62,3 +62,17 @@ export type { QuestJourneyTimelineProps } from './QuestJourneyTimeline';
 
 /** Weekly calendar showing user's upcoming quests */
 export { UserWeekCalendarView } from './UserWeekCalendarView';
+
+// -----------------------------------------------------------------------------
+// MOBILE COMPONENTS
+// -----------------------------------------------------------------------------
+
+/** Mobile drawer for quest filters - Netflix-style UX */
+export { MobileFilterDrawer } from './MobileFilterDrawer';
+
+// -----------------------------------------------------------------------------
+// SOCIAL FEATURES
+// -----------------------------------------------------------------------------
+
+/** Button for recruiting friends to a quest */
+export { RecruitFriendButton } from './RecruitFriendButton';

@@ -7,10 +7,11 @@ import QuestRow from '@/components/QuestRow';
 import QuestModal from '@/components/QuestModal';
 import QuestFilterBar, { type QuestFilters } from '@/components/QuestFilterBar';
 import { CTASection } from '@/components/CTASection';
-import { UserWeekCalendarView } from '@/components/quests';
+import { UserWeekCalendarView, MobileFilterDrawer } from '@/components/quests';
 import { useQuests, type Quest } from '@/hooks/useQuests';
 import { useCreatorSlugs } from '@/hooks/useCreatorSlugs';
 import { useFollowedIds } from '@/hooks/useFollows';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Loader2, Inbox, CalendarDays, LayoutGrid } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
@@ -26,6 +27,7 @@ const CATEGORY_CONFIG = {
 
 const Quests = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const { data: quests = [], isLoading, error } = useQuests();
   const { creatorIds: followedCreatorIds, sponsorIds: followedSponsorIds, hasFollows } = useFollowedIds();
   
@@ -227,70 +229,116 @@ const Quests = () => {
       <Navbar />
       
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="py-12 md:py-16 px-4 relative overflow-hidden">
-          <div 
-            className="absolute inset-0 opacity-15"
-            style={{
-              backgroundImage: `url(${foodTruckScene})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/90 to-background" />
-          
-          <div className="max-w-4xl mx-auto text-center relative z-10">
-            <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3">
-              Discover Your Next Quest
-            </h1>
-            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
-              Browse curated experiences designed to help you meet new people and explore Austin.
-            </p>
-          </div>
-        </section>
-
-        {/* Filter Controls + View Toggle */}
-        <section className="px-4 pb-6">
-          <div className="max-w-6xl mx-auto space-y-4">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex-1">
-                <QuestFilterBar 
+        {/* Mobile: Compact Header with Filter Drawer */}
+        {isMobile ? (
+          <section className="px-4 pt-4 pb-2">
+            <div className="flex items-center justify-between gap-3">
+              <h1 className="font-display text-xl font-bold text-foreground">
+                Discover Quests
+              </h1>
+              <div className="flex items-center gap-2">
+                <MobileFilterDrawer 
                   filters={filters}
                   onFilterChange={setFilters}
                 />
-              </div>
-              
-              {/* Calendar View Toggle */}
-              <div className="flex items-center gap-1 border rounded-lg p-1 bg-muted/30">
-                <Toggle
-                  pressed={!showCalendar}
-                  onPressedChange={() => setShowCalendar(false)}
-                  size="sm"
-                  aria-label="Grid view"
-                  className="data-[state=on]:bg-background data-[state=on]:shadow-sm"
-                >
-                  <LayoutGrid className="h-4 w-4" />
-                </Toggle>
-                <Toggle
-                  pressed={showCalendar}
-                  onPressedChange={() => setShowCalendar(true)}
-                  size="sm"
-                  aria-label="Calendar view"
-                  className="data-[state=on]:bg-background data-[state=on]:shadow-sm"
-                >
-                  <CalendarDays className="h-4 w-4" />
-                </Toggle>
+                {/* Calendar View Toggle */}
+                <div className="flex items-center gap-0.5 border rounded-lg p-0.5 bg-muted/30">
+                  <Toggle
+                    pressed={!showCalendar}
+                    onPressedChange={() => setShowCalendar(false)}
+                    size="sm"
+                    aria-label="Grid view"
+                    className="h-8 w-8 p-0 data-[state=on]:bg-background data-[state=on]:shadow-sm"
+                  >
+                    <LayoutGrid className="h-4 w-4" />
+                  </Toggle>
+                  <Toggle
+                    pressed={showCalendar}
+                    onPressedChange={() => setShowCalendar(true)}
+                    size="sm"
+                    aria-label="Calendar view"
+                    className="h-8 w-8 p-0 data-[state=on]:bg-background data-[state=on]:shadow-sm"
+                  >
+                    <CalendarDays className="h-4 w-4" />
+                  </Toggle>
+                </div>
               </div>
             </div>
             
-            {/* Calendar View */}
+            {/* Calendar View (Mobile) */}
             {showCalendar && (
-              <div className="pt-2">
+              <div className="pt-3">
                 <UserWeekCalendarView onQuestClick={handleCalendarQuestClick} />
               </div>
             )}
-          </div>
-        </section>
+          </section>
+        ) : (
+          /* Desktop: Full Hero + Filter Bar */
+          <>
+            <section className="py-12 md:py-16 px-4 relative overflow-hidden">
+              <div 
+                className="absolute inset-0 opacity-15"
+                style={{
+                  backgroundImage: `url(${foodTruckScene})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/90 to-background" />
+              
+              <div className="max-w-4xl mx-auto text-center relative z-10">
+                <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3">
+                  Discover Your Next Quest
+                </h1>
+                <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
+                  Browse curated experiences designed to help you meet new people and explore Austin.
+                </p>
+              </div>
+            </section>
+
+            <section className="px-4 pb-6">
+              <div className="max-w-6xl mx-auto space-y-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex-1">
+                    <QuestFilterBar 
+                      filters={filters}
+                      onFilterChange={setFilters}
+                    />
+                  </div>
+                  
+                  {/* Calendar View Toggle */}
+                  <div className="flex items-center gap-1 border rounded-lg p-1 bg-muted/30">
+                    <Toggle
+                      pressed={!showCalendar}
+                      onPressedChange={() => setShowCalendar(false)}
+                      size="sm"
+                      aria-label="Grid view"
+                      className="data-[state=on]:bg-background data-[state=on]:shadow-sm"
+                    >
+                      <LayoutGrid className="h-4 w-4" />
+                    </Toggle>
+                    <Toggle
+                      pressed={showCalendar}
+                      onPressedChange={() => setShowCalendar(true)}
+                      size="sm"
+                      aria-label="Calendar view"
+                      className="data-[state=on]:bg-background data-[state=on]:shadow-sm"
+                    >
+                      <CalendarDays className="h-4 w-4" />
+                    </Toggle>
+                  </div>
+                </div>
+                
+                {/* Calendar View */}
+                {showCalendar && (
+                  <div className="pt-2">
+                    <UserWeekCalendarView onQuestClick={handleCalendarQuestClick} />
+                  </div>
+                )}
+              </div>
+            </section>
+          </>
+        )}
 
         {/* Loading State */}
         {isLoading && (
