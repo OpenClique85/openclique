@@ -544,26 +544,59 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
               
               <Separator className="my-3" />
               
-              {/* Admin message input */}
-              <div className="flex gap-2">
-                <Input
-                  value={adminMessage}
-                  onChange={(e) => setAdminMessage(e.target.value)}
-                  placeholder="Send an admin message to the clique..."
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }
-                  }}
-                />
-                <Button
-                  size="icon"
-                  onClick={handleSendMessage}
-                  disabled={!adminMessage.trim() || sendAdminMessage.isPending}
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
+              {/* Admin message input with send-as toggle */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={initiateReadyCheck}
+                    disabled={sendAdminMessage.isPending}
+                    className="text-xs"
+                  >
+                    <Bell className="h-3 w-3 mr-1" />
+                    Ready Check
+                  </Button>
+                  <div className="flex-1" />
+                  <Button
+                    variant={sendAs === 'buggs' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSendAs('buggs')}
+                    className="text-xs"
+                  >
+                    <Bot className="h-3 w-3 mr-1" />
+                    BUGGS
+                  </Button>
+                  <Button
+                    variant={sendAs === 'admin' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSendAs('admin')}
+                    className="text-xs"
+                  >
+                    <ShieldCheck className="h-3 w-3 mr-1" />
+                    Admin
+                  </Button>
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    value={adminMessage}
+                    onChange={(e) => setAdminMessage(e.target.value)}
+                    placeholder={`Send message as ${sendAs === 'buggs' ? 'BUGGS 🐰' : 'Admin 🛡️'}...`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }
+                    }}
+                  />
+                  <Button
+                    size="icon"
+                    onClick={handleSendMessage}
+                    disabled={!adminMessage.trim() || sendAdminMessage.isPending}
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
