@@ -542,6 +542,17 @@ export function CliquesTab({ userId }: CliquesTabProps) {
               {cliques.map((clique) => {
                 const leader = clique.members.find(m => m.role === 'leader');
                 const isCurrentUserLeader = leader?.user_id === userId;
+                const isQuestClique = (clique as any)._isQuestClique;
+                const cliqueStatus = (clique as any)._status;
+
+                // Determine destination based on clique type and status
+                const getCliqueDestination = () => {
+                  if (isQuestClique) {
+                    // Quest cliques go to warmup room
+                    return `/warmup/${clique.id}`;
+                  }
+                  return `/cliques/${clique.id}`;
+                };
 
                 return (
                   <Card 
@@ -557,19 +568,30 @@ export function CliquesTab({ userId }: CliquesTabProps) {
                               <Users className="h-5 w-5 text-primary" />
                             </div>
                             <div>
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 flex-wrap">
                                 <h3 className="font-display font-semibold text-lg">
                                   {clique.name}
                                 </h3>
+                                {isQuestClique && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    🎯 Quest Clique
+                                  </Badge>
+                                )}
                                 {isCurrentUserLeader && (
-                                  <Badge variant="outline" className="text-xs">
-                                    <Crown className="h-3 w-3 mr-1 text-amber-500" />
+                                  <Badge variant="outline" className="text-xs border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300">
+                                    <Crown className="h-3 w-3 mr-1" />
                                     Leader
+                                  </Badge>
+                                )}
+                                {cliqueStatus && cliqueStatus === 'warming_up' && (
+                                  <Badge variant="outline" className="text-xs border-orange-500/30 bg-orange-500/10 text-orange-700 dark:text-orange-300">
+                                    Warming Up
                                   </Badge>
                                 )}
                               </div>
                               <p className="text-sm text-muted-foreground">
-                                {clique.members.length} members • Formed {format(new Date(clique.created_at), 'MMM yyyy')}
+                                {clique.members.length} members 
+                                {!isQuestClique && ` • Formed ${format(new Date(clique.created_at), 'MMM yyyy')}`}
                               </p>
                             </div>
                           </div>
@@ -596,7 +618,7 @@ export function CliquesTab({ userId }: CliquesTabProps) {
                           </div>
                           {leader && (
                             <span className="text-sm text-muted-foreground flex items-center gap-1">
-                              <Crown className="h-3 w-3 text-amber-500" />
+                              <Crown className="h-3 w-3 text-amber-600 dark:text-amber-400" />
                               {leader.display_name}
                             </span>
                           )}
@@ -608,7 +630,7 @@ export function CliquesTab({ userId }: CliquesTabProps) {
                         <div className="px-4 py-3 border-b bg-muted/30">
                           <div className="flex items-center gap-2 text-sm">
                             <Calendar className="h-4 w-4 text-primary" />
-                            <span className="font-medium">Next:</span>
+                            <span className="font-medium">{isQuestClique ? 'Quest:' : 'Next:'}</span>
                             <span className="text-muted-foreground">
                               {clique.next_quest.icon} {clique.next_quest.title}
                             </span>
@@ -644,24 +666,26 @@ export function CliquesTab({ userId }: CliquesTabProps) {
                           className="flex-1"
                           onClick={(e) => {
                             e.stopPropagation();
-                            navigate(`/cliques/${clique.id}`);
+                            navigate(getCliqueDestination());
                           }}
                         >
                           <MessageCircle className="h-4 w-4 mr-2" />
-                          View Clique
+                          {isQuestClique ? 'Open Chat' : 'View Clique'}
                         </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          className="flex-1"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleSuggestQuest(clique);
-                          }}
-                        >
-                          <Sparkles className="h-4 w-4 mr-2" />
-                          Suggest Quest
-                        </Button>
+                        {!isQuestClique && (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="flex-1"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSuggestQuest(clique);
+                            }}
+                          >
+                            <Sparkles className="h-4 w-4 mr-2" />
+                            Suggest Quest
+                          </Button>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
