@@ -1,11 +1,11 @@
 /**
- * Clique Builder
+ * Clique Builder (WoW Raid-style)
  * 
- * Drag-and-drop interface for manually assigning users to cliques.
+ * Fixed 8-group grid with drag-and-drop user assignment.
  * Click on users to see their profile details.
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -32,7 +32,7 @@ import {
 } from '@/components/ui/sheet';
 import { 
   Users, Plus, GripVertical, Trash2, 
-  Check, Loader2, UserPlus, AlertCircle, User, X
+  Check, Loader2, UserPlus, AlertCircle, User, Pencil
 } from 'lucide-react';
 import { auditLog } from '@/lib/auditLog';
 
@@ -49,6 +49,7 @@ interface DragClique {
   id: string;
   name: string;
   members: DragUser[];
+  isNew?: boolean; // not yet saved to DB
 }
 
 interface CliqueBuilderProps {
@@ -59,6 +60,8 @@ interface CliqueBuilderProps {
   targetCliqueSize: number;
 }
 
+const DEFAULT_CLIQUE_COUNT = 8;
+
 export function CliqueBuilder({
   open,
   onOpenChange,
@@ -68,18 +71,19 @@ export function CliqueBuilder({
 }: CliqueBuilderProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
   const [cliques, setCliques] = useState<DragClique[]>([]);
   const [unassigned, setUnassigned] = useState<DragUser[]>([]);
   const [draggedUser, setDraggedUser] = useState<DragUser | null>(null);
   const [dragOverTarget, setDragOverTarget] = useState<string | null>(null);
-  const [isNewCliqueDialogOpen, setIsNewCliqueDialogOpen] = useState(false);
-  const [newCliqueName, setNewCliqueName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [selectedUser, setSelectedUser] = useState<DragUser | null>(null);
+  const [editingCliqueId, setEditingCliqueId] = useState<string | null>(null);
+  const [editingCliqueName, setEditingCliqueName] = useState('');
 
-  // Fetch current state
-  const { isLoading } = useQuery({
+  // Fetch current state from DB
+  const { isLoading, refetch } = useQuery({
     queryKey: ['clique-builder-data', instanceId],
     queryFn: async () => {
       // Fetch cliques by instance_id
@@ -103,7 +107,7 @@ export function CliqueBuilder({
 
       if (signupError) throw signupError;
 
-      // Fetch squad_members to know who is in which clique
+      // Fetch squad_members
       const cliqueIds = (cliqueData || []).map(c => c.id);
       const { data: memberData } = cliqueIds.length > 0 
         ? await supabase
@@ -118,15 +122,13 @@ export function CliqueBuilder({
         userCliqueMap.set(member.user_id, member.squad_id);
       }
 
-      // Build clique structure
-      const cliqueMap = new Map<string, DragClique>();
-      for (const clique of cliqueData || []) {
-        cliqueMap.set(clique.id, {
-          id: clique.id,
-          name: clique.squad_name || `Clique ${clique.id.slice(0, 4)}`,
-          members: [],
-        });
-      }
+      // Build clique structure from DB
+      const dbCliques: DragClique[] = (cliqueData || []).map((c) => ({
+        id: c.id,
+        name: c.squad_name || `Clique ${c.id.slice(0, 4)}`,
+        members: [],
+        isNew: false,
+      }));
 
       const unassignedUsers: DragUser[] = [];
 
@@ -141,21 +143,53 @@ export function CliqueBuilder({
           clique_id: userCliqueId,
         };
 
-        if (userCliqueId && cliqueMap.has(userCliqueId)) {
-          cliqueMap.get(userCliqueId)!.members.push(user);
+        if (userCliqueId) {
+          const clique = dbCliques.find(c => c.id === userCliqueId);
+          if (clique) {
+            clique.members.push(user);
+          } else {
+            unassignedUsers.push(user);
+          }
         } else {
           unassignedUsers.push(user);
         }
       }
 
-      setCliques(Array.from(cliqueMap.values()));
-      setUnassigned(unassignedUsers);
-      setHasChanges(false);
-
-      return { cliques: cliqueMap, unassigned: unassignedUsers };
+      return { cliques: dbCliques, unassigned: unassignedUsers };
     },
     enabled: open,
   });
+
+  // Initialize 8 clique grid when data loads
+  useEffect(() => {
+    if (!open) return;
+
+    refetch().then((result) => {
+      if (!result.data) return;
+
+      const dbCliques = result.data.cliques;
+      const dbUnassigned = result.data.unassigned;
+
+      // Fill up to 8 cliques
+      const grid: DragClique[] = [];
+      for (let i = 0; i < DEFAULT_CLIQUE_COUNT; i++) {
+        if (dbCliques[i]) {
+          grid.push(dbCliques[i]);
+        } else {
+          grid.push({
+            id: `new-${i}`,
+            name: `Clique ${i + 1}`,
+            members: [],
+            isNew: true,
+          });
+        }
+      }
+
+      setCliques(grid);
+      setUnassigned(dbUnassigned);
+      setHasChanges(false);
+    });
+  }, [open, refetch]);
 
   // Drag handlers
   const handleDragStart = useCallback((user: DragUser) => {
@@ -212,89 +246,96 @@ export function CliqueBuilder({
     setDragOverTarget(null);
   }, [draggedUser]);
 
-  // Create new clique
-  const handleCreateClique = async () => {
-    if (!newCliqueName.trim()) return;
+  // Add more cliques beyond 8
+  const handleAddClique = () => {
+    const nextNum = cliques.length + 1;
+    setCliques(prev => [...prev, {
+      id: `new-${Date.now()}`,
+      name: `Clique ${nextNum}`,
+      members: [],
+      isNew: true,
+    }]);
+    setHasChanges(true);
+  };
 
-    try {
-      const { data, error } = await supabase
-        .from('quest_squads')
-        .insert({
-          instance_id: instanceId,
-          squad_name: newCliqueName.trim(),
-        } as any)
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      setCliques(prev => [...prev, {
-        id: data.id,
-        name: data.squad_name || newCliqueName.trim(),
-        members: [],
-      }]);
-
-      setNewCliqueName('');
-      setIsNewCliqueDialogOpen(false);
-      setHasChanges(true);
-      toast({ title: 'Clique created' });
-    } catch (err: any) {
-      toast({ title: 'Failed to create clique', description: err.message, variant: 'destructive' });
+  // Rename clique
+  const handleRenameClique = (cliqueId: string) => {
+    const clique = cliques.find(c => c.id === cliqueId);
+    if (clique) {
+      setEditingCliqueId(cliqueId);
+      setEditingCliqueName(clique.name);
     }
   };
 
-  // Delete empty clique
-  const handleDeleteClique = async (cliqueId: string) => {
-    const clique = cliques.find(c => c.id === cliqueId);
-    if (!clique || clique.members.length > 0) {
-      toast({ title: 'Cannot delete clique with members', variant: 'destructive' });
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from('quest_squads')
-        .delete()
-        .eq('id', cliqueId);
-
-      if (error) throw error;
-
-      setCliques(prev => prev.filter(c => c.id !== cliqueId));
-      setHasChanges(true);
-      toast({ title: 'Clique deleted' });
-    } catch (err: any) {
-      toast({ title: 'Failed to delete clique', description: err.message, variant: 'destructive' });
-    }
+  const saveCliqueName = () => {
+    if (!editingCliqueId || !editingCliqueName.trim()) return;
+    setCliques(prev => prev.map(c => 
+      c.id === editingCliqueId ? { ...c, name: editingCliqueName.trim() } : c
+    ));
+    setEditingCliqueId(null);
+    setEditingCliqueName('');
+    setHasChanges(true);
   };
 
   // Save all changes
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // Get all user ids
-      const allUserIds = [
-        ...cliques.flatMap(c => c.members.map(m => m.user_id)),
-        ...unassigned.map(u => u.user_id),
-      ];
+      // 1. Get or create cliques in DB
+      const cliqueIdMap = new Map<string, string>(); // local id -> db id
 
-      // Get clique IDs for this instance
-      const cliqueIds = cliques.map(c => c.id);
+      for (const clique of cliques) {
+        if (clique.isNew) {
+          // Only create if has members
+          if (clique.members.length > 0) {
+            const { data, error } = await supabase
+              .from('quest_squads')
+              .insert({
+                instance_id: instanceId,
+                squad_name: clique.name,
+              } as any)
+              .select()
+              .single();
 
-      // Delete existing memberships for users in these cliques
-      if (cliqueIds.length > 0) {
+            if (error) throw error;
+            cliqueIdMap.set(clique.id, data.id);
+          }
+        } else {
+          cliqueIdMap.set(clique.id, clique.id);
+          // Update name if changed
+          await supabase
+            .from('quest_squads')
+            .update({ squad_name: clique.name })
+            .eq('id', clique.id);
+        }
+      }
+
+      // 2. Get all current clique IDs for this instance
+      const { data: dbCliques } = await supabase
+        .from('quest_squads')
+        .select('id')
+        .eq('instance_id', instanceId);
+
+      const dbCliqueIds = (dbCliques || []).map(c => c.id);
+
+      // 3. Clear existing memberships for these cliques
+      if (dbCliqueIds.length > 0) {
         await supabase
           .from('squad_members')
           .delete()
-          .in('squad_id', cliqueIds);
+          .in('squad_id', dbCliqueIds);
       }
 
-      // Insert new memberships
+      // 4. Insert new memberships
       for (const clique of cliques) {
+        const dbId = cliqueIdMap.get(clique.id);
+        if (!dbId) continue;
+
         for (const member of clique.members) {
           await supabase
             .from('squad_members')
             .insert({
-              squad_id: clique.id,
+              squad_id: dbId,
               user_id: member.user_id,
             });
         }
@@ -305,12 +346,14 @@ export function CliqueBuilder({
         targetTable: 'quest_instances',
         targetId: instanceId,
         newValues: {
-          clique_count: cliques.length,
+          clique_count: cliques.filter(c => c.members.length > 0).length,
           total_assigned: cliques.reduce((sum, c) => sum + c.members.length, 0),
           unassigned_count: unassigned.length,
         },
       });
 
+      queryClient.invalidateQueries({ queryKey: ['instance-cliques-detail', instanceId] });
+      queryClient.invalidateQueries({ queryKey: ['instance-unassigned', instanceId] });
       toast({ title: 'Clique assignments saved!' });
       setHasChanges(false);
       onOpenChange(false);
@@ -321,106 +364,86 @@ export function CliqueBuilder({
     }
   };
 
-  // User card component with click-to-view profile
+  // User card component
   const UserCard = ({ user, isDragging }: { user: DragUser; isDragging?: boolean }) => (
     <div
       draggable
       onDragStart={() => handleDragStart(user)}
       onClick={() => setSelectedUser(user)}
-      className={`flex items-center gap-2 p-2 rounded-md border bg-card cursor-move transition-all ${
+      className={`flex items-center gap-2 p-1.5 rounded border bg-card cursor-move transition-all text-sm ${
         isDragging ? 'opacity-50 scale-95' : 'hover:border-primary/50 hover:bg-accent/50'
       }`}
     >
-      <GripVertical className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-      <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-      <span className="text-sm flex-1 truncate">{user.display_name}</span>
-      <Badge variant="outline" className="text-xs">
-        {user.status}
-      </Badge>
+      <GripVertical className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+      <User className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+      <span className="flex-1 truncate">{user.display_name}</span>
     </div>
   );
 
-  // Drop zone component
-  const DropZone = ({ 
-    id, 
-    title, 
-    users, 
-    onDelete,
-    showTargetSize = false,
-  }: { 
-    id: string; 
-    title: string; 
-    users: DragUser[]; 
-    onDelete?: () => void;
-    showTargetSize?: boolean;
-  }) => {
-    const isOver = dragOverTarget === id;
-    const isOverfilled = showTargetSize && users.length > targetCliqueSize;
-    const isUnderfilled = showTargetSize && users.length > 0 && users.length < targetCliqueSize;
-    const emptySlots = showTargetSize ? Math.max(0, targetCliqueSize - users.length) : 0;
+  // Empty slot component
+  const EmptySlot = ({ index }: { index: number }) => (
+    <div className="flex items-center gap-2 p-1.5 rounded border border-dashed border-muted-foreground/30 text-muted-foreground text-sm">
+      <User className="h-3 w-3" />
+      <span>Empty</span>
+    </div>
+  );
+
+  // Clique Group component (WoW-style)
+  const CliqueGroup = ({ clique, index }: { clique: DragClique; index: number }) => {
+    const isOver = dragOverTarget === clique.id;
+    const emptySlots = Math.max(0, targetCliqueSize - clique.members.length);
 
     return (
       <Card
-        onDragOver={(e) => handleDragOver(e, id)}
+        onDragOver={(e) => handleDragOver(e, clique.id)}
         onDragLeave={handleDragLeave}
-        onDrop={() => handleDrop(id)}
+        onDrop={() => handleDrop(clique.id)}
         className={`transition-all ${
           isOver ? 'ring-2 ring-primary border-primary' : ''
         }`}
       >
-        <CardHeader className="py-3 px-4">
+        <CardHeader className="py-2 px-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-sm flex items-center gap-2">
-              {title}
-              <Badge 
-                variant={isOverfilled ? 'destructive' : isUnderfilled ? 'outline' : 'secondary'}
-                className="text-xs"
+            {editingCliqueId === clique.id ? (
+              <div className="flex items-center gap-1 flex-1">
+                <Input
+                  value={editingCliqueName}
+                  onChange={(e) => setEditingCliqueName(e.target.value)}
+                  className="h-6 text-xs"
+                  autoFocus
+                  onBlur={saveCliqueName}
+                  onKeyDown={(e) => e.key === 'Enter' && saveCliqueName()}
+                />
+              </div>
+            ) : (
+              <CardTitle 
+                className="text-xs font-medium flex items-center gap-1 cursor-pointer hover:text-primary"
+                onClick={() => handleRenameClique(clique.id)}
               >
-                {users.length}{showTargetSize && `/${targetCliqueSize}`}
-              </Badge>
-            </CardTitle>
-            {onDelete && users.length === 0 && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 text-muted-foreground hover:text-destructive"
-                onClick={onDelete}
-              >
-                <Trash2 className="h-3 w-3" />
-              </Button>
+                {clique.name}
+                <Pencil className="h-2.5 w-2.5 opacity-50" />
+              </CardTitle>
             )}
+            <Badge 
+              variant={clique.members.length > targetCliqueSize ? 'destructive' : 'secondary'}
+              className="text-xs h-5"
+            >
+              {clique.members.length}/{targetCliqueSize}
+            </Badge>
           </div>
         </CardHeader>
-        <CardContent className="px-4 pb-4">
-          <div className="space-y-2 min-h-[60px]">
-            {users.map((user) => (
+        <CardContent className="px-3 pb-3">
+          <div className="space-y-1 min-h-[100px]">
+            {clique.members.map((user) => (
               <UserCard
                 key={user.id}
                 user={user}
                 isDragging={draggedUser?.id === user.id}
               />
             ))}
-            
-            {/* Empty slots */}
-            {showTargetSize && emptySlots > 0 && (
-              <>
-                {Array.from({ length: emptySlots }).map((_, i) => (
-                  <div 
-                    key={`empty-${i}`}
-                    className="flex items-center gap-2 p-2 rounded-md border border-dashed border-muted-foreground/30 text-muted-foreground text-sm"
-                  >
-                    <User className="h-4 w-4" />
-                    <span>Empty slot</span>
-                  </div>
-                ))}
-              </>
-            )}
-            
-            {users.length === 0 && !showTargetSize && (
-              <div className="flex items-center justify-center h-[60px] border-2 border-dashed rounded-md text-muted-foreground text-sm">
-                Drop users here
-              </div>
-            )}
+            {emptySlots > 0 && Array.from({ length: emptySlots }).map((_, i) => (
+              <EmptySlot key={`empty-${i}`} index={i} />
+            ))}
           </div>
         </CardContent>
       </Card>
@@ -442,79 +465,77 @@ export function CliqueBuilder({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-5xl max-h-[90vh] flex flex-col">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-6xl max-h-[95vh] flex flex-col p-0">
+          <DialogHeader className="px-6 pt-6 pb-2">
             <DialogTitle className="flex items-center gap-2">
               <Users className="h-5 w-5 text-primary" />
-              Clique Builder
+              Clique Builder — {instanceTitle}
             </DialogTitle>
             <DialogDescription>
-              Drag and drop users between cliques. Click on a user to view their profile.
+              Drag and drop users into cliques. Click names to view profiles.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="flex-1 overflow-hidden">
-            <ScrollArea className="h-[60vh]">
-              <div className="grid lg:grid-cols-4 gap-4 p-1">
-                {/* Unassigned Pool */}
-                <div className="lg:col-span-1">
-                  <DropZone id="unassigned" title="Unassigned" users={unassigned} />
-                </div>
+          <div className="flex-1 overflow-hidden px-6">
+            <ScrollArea className="h-[65vh]">
+              <div className="grid grid-cols-4 gap-3 pr-4">
+                {/* 8-clique grid */}
+                {cliques.map((clique, index) => (
+                  <CliqueGroup key={clique.id} clique={clique} index={index} />
+                ))}
+              </div>
 
-                {/* Cliques */}
-                <div className="lg:col-span-3">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-medium text-muted-foreground">
-                      Cliques ({cliques.length})
-                    </h3>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        const nextNum = cliques.length + 1;
-                        setNewCliqueName(`${instanceTitle} Clique ${nextNum}`);
-                        setIsNewCliqueDialogOpen(true);
-                      }}
-                    >
-                      <Plus className="h-4 w-4 mr-1" />
-                      Add Clique
-                    </Button>
-                  </div>
+              {/* Add more cliques button */}
+              <div className="mt-3">
+                <Button variant="outline" size="sm" onClick={handleAddClique}>
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add Clique
+                </Button>
+              </div>
 
-                  {cliques.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {cliques.map((clique) => (
-                        <DropZone
-                          key={clique.id}
-                          id={clique.id}
-                          title={clique.name}
-                          users={clique.members}
-                          onDelete={() => handleDeleteClique(clique.id)}
-                          showTargetSize
-                        />
+              {/* Unassigned pool */}
+              {unassigned.length > 0 && (
+                <Card 
+                  className={`mt-4 border-amber-500/50 bg-amber-50/50 dark:bg-amber-950/20 ${
+                    dragOverTarget === 'unassigned' ? 'ring-2 ring-primary' : ''
+                  }`}
+                  onDragOver={(e) => handleDragOver(e, 'unassigned')}
+                  onDragLeave={handleDragLeave}
+                  onDrop={() => handleDrop('unassigned')}
+                >
+                  <CardHeader className="py-2 px-3">
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4 text-warning" />
+                      Unassigned ({unassigned.length})
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="px-3 pb-3">
+                    <div className="flex flex-wrap gap-2">
+                      {unassigned.map((user) => (
+                        <div
+                          key={user.id}
+                          draggable
+                          onDragStart={() => handleDragStart(user)}
+                          onClick={() => setSelectedUser(user)}
+                          className="flex items-center gap-1 px-2 py-1 rounded border bg-card cursor-move hover:border-primary/50 text-sm"
+                        >
+                          <GripVertical className="h-3 w-3 text-muted-foreground" />
+                          <span>{user.display_name}</span>
+                        </div>
                       ))}
                     </div>
-                  ) : (
-                    <Card className="border-dashed">
-                      <CardContent className="py-8 text-center">
-                        <UserPlus className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                        <p className="text-sm text-muted-foreground">
-                          No cliques yet. Create one to start assigning users.
-                        </p>
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
-              </div>
+                  </CardContent>
+                </Card>
+              )}
             </ScrollArea>
           </div>
 
-          <DialogFooter className="flex items-center justify-between border-t pt-4">
+          <DialogFooter className="flex items-center justify-between border-t px-6 py-4">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               {hasChanges && (
                 <>
-                  <AlertCircle className="h-4 w-4 text-orange-500" />
-                  <span>You have unsaved changes</span>
+                  <AlertCircle className="h-4 w-4 text-warning" />
+                  <span>Unsaved changes</span>
                 </>
               )}
             </div>
@@ -535,37 +556,6 @@ export function CliqueBuilder({
         </DialogContent>
       </Dialog>
 
-      {/* New Clique Dialog */}
-      <Dialog open={isNewCliqueDialogOpen} onOpenChange={setIsNewCliqueDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create New Clique</DialogTitle>
-            <DialogDescription>
-              Enter a name for the new clique.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4 space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="new-clique-name">Clique Name</Label>
-              <Input
-                id="new-clique-name"
-                value={newCliqueName}
-                onChange={(e) => setNewCliqueName(e.target.value)}
-                placeholder="e.g., Party at Moontower Clique 1"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsNewCliqueDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleCreateClique} disabled={!newCliqueName.trim()}>
-              Create
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
       {/* User Profile Sheet */}
       <Sheet open={!!selectedUser} onOpenChange={(open) => !open && setSelectedUser(null)}>
         <SheetContent>
@@ -575,7 +565,7 @@ export function CliqueBuilder({
               User Profile
             </SheetTitle>
             <SheetDescription>
-              View participant details and constraints
+              View participant details
             </SheetDescription>
           </SheetHeader>
           
