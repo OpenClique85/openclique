@@ -329,8 +329,62 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
 
   const handleSendMessage = () => {
     if (!adminMessage.trim()) return;
-    sendAdminMessage.mutate(adminMessage.trim());
+    sendAdminMessage.mutate({ message: adminMessage.trim(), asType: sendAs });
   };
+
+  // Ready Check action
+  const initiateReadyCheck = async () => {
+    // Send ready check message as system
+    await sendAdminMessage.mutateAsync({
+      message: '🔔 **READY CHECK!** Are you ready to begin? React with ✅ to confirm!',
+      asType: 'system',
+    });
+    toast.success('Ready Check sent to clique');
+  };
+
+  // Assign role to member
+  const assignRole = useMutation({
+    mutationFn: async ({ memberId, role, memberName }: { memberId: string; role: string; memberName: string }) => {
+      if (!user) throw new Error('Not authenticated');
+      
+      // Update the member's role in squad_members (using warm_up_progress for now)
+      const { error: memberError } = await supabase
+        .from('squad_members')
+        .update({
+          warm_up_progress: { assigned_role: role },
+        })
+        .eq('id', memberId);
+      
+      if (memberError) throw memberError;
+      
+      // Post role assignment notification to chat
+      await supabase
+        .from('squad_chat_messages')
+        .insert({
+          squad_id: cliqueId,
+          sender_id: user.id,
+          message: `🎭 **Role Assigned:** ${memberName} has been assigned as **${role}**!`,
+          sender_type: 'system',
+        });
+      
+      await auditLog({
+        action: 'assign_clique_role',
+        targetTable: 'squad_members',
+        targetId: memberId,
+        newValues: { role },
+      });
+    },
+    onSuccess: () => {
+      toast.success('Role assigned!');
+      setShowRoleDialog({ open: false, memberId: '', memberName: '' });
+      setSelectedRole('');
+      queryClient.invalidateQueries({ queryKey: ['admin-clique-members', cliqueId] });
+      queryClient.invalidateQueries({ queryKey: ['admin-clique-chat', cliqueId] });
+    },
+    onError: (error) => {
+      toast.error('Failed to assign role', { description: error.message });
+    },
+  });
 
   if (cliqueLoading || membersLoading) {
     return (
