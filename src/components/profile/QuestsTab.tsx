@@ -117,7 +117,7 @@ export function QuestsTab({ userId }: QuestsTabProps) {
       // We need to match by user_id and then link to signups via quest relationship
       // because signup_id in squad_members may be NULL when admins create cliques
       const signupIds = signupData.map(s => s.id);
-      const questIds = signupData.map(s => s.quest_id);
+      const signupQuestIds = signupData.map(s => s.quest_id);
       
       let squadBySignup = new Map<string, {
         squadId: string;
