@@ -50,6 +50,11 @@ import {
   SlidersHorizontal,
   Loader2,
   ThermometerSun,
+  Bot,
+  ShieldCheck,
+  Bell,
+  UserCog,
+  Mail,
 } from 'lucide-react';
 import { SQUAD_STATUS_LABELS, SQUAD_STATUS_STYLES, SquadStatus, calculateWarmUpProgress } from '@/lib/squadLifecycle';
 import { auditLog } from '@/lib/auditLog';
