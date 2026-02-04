@@ -2,6 +2,7 @@
  * Run of Show Controls
  * 
  * Template-based messaging panel for operators to send notifications at key moments.
+ * Also includes monitoring for active cliques.
  */
 
 import { useState } from 'react';
@@ -13,15 +14,17 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { 
   Send, Copy, Users, Clock, Bell, 
-  AlertCircle, CheckCircle, Loader2
+  AlertCircle, CheckCircle, Loader2, MessageCircle
 } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
+import { ActiveCliquesPanel } from './ActiveCliquesPanel';
 
 type QuestInstance = Tables<'quest_instances'>;
 
