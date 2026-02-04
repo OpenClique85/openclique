@@ -71,6 +71,7 @@ interface CliqueMember {
   prompt_response: string | null;
   readiness_confirmed_at: string | null;
   warm_up_progress: Record<string, unknown>;
+  clique_role: string | null;
   display_name: string | null;
   avatar_url: string | null;
 }
@@ -171,6 +172,7 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
           prompt_response: member.prompt_response as string | null,
           readiness_confirmed_at: member.readiness_confirmed_at as string | null,
           warm_up_progress: (member.warm_up_progress as Record<string, unknown>) || {},
+          clique_role: member.clique_role as string | null,
           display_name: profile?.display_name || null,
           avatar_url: null,
         };
@@ -347,6 +349,14 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
     toast.success('Ready Check sent to clique');
   };
 
+  // Role label mapping for display
+  const ROLE_LABELS: Record<string, string> = {
+    navigator: 'Navigator',
+    vibe_curator: 'Vibe Curator',
+    timekeeper: 'Timekeeper',
+    archivist: 'Archivist',
+  };
+
   // Assign role to member
   const assignRole = useMutation({
     mutationFn: async ({ memberId, role, memberName }: { memberId: string; role: string; memberName: string }) => {
@@ -364,13 +374,14 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
       
       if (memberError) throw memberError;
       
-      // Post role assignment notification to chat
+      // Post role assignment notification to chat with human-readable label
+      const roleLabel = ROLE_LABELS[role] || role;
       await supabase
         .from('squad_chat_messages')
         .insert({
           squad_id: cliqueId,
           sender_id: user.id,
-          message: `🎭 **Role Assigned:** ${memberName} has been assigned as **${role}**!`,
+          message: `🎭 **Role Assigned:** ${memberName} has been assigned as **${roleLabel}**!`,
           sender_type: 'system',
         });
       
@@ -620,7 +631,9 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
                   const hasPrompt = !!member.prompt_response;
                   const hasConfirmed = !!member.readiness_confirmed_at;
                   const isReady = hasPrompt && hasConfirmed;
-                  const memberRole = (member.warm_up_progress as Record<string, string>)?.assigned_role || null;
+                  // Use the clique_role column directly, with display label
+                  const memberRole = member.clique_role;
+                  const roleDisplayLabel = memberRole ? ROLE_LABELS[memberRole] || memberRole : null;
                   
                   return (
                     <TableRow key={member.id}>
@@ -635,9 +648,9 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {memberRole ? (
+                        {roleDisplayLabel ? (
                           <Badge variant="secondary" className="text-xs">
-                            {memberRole}
+                            {roleDisplayLabel}
                           </Badge>
                         ) : (
                           <span className="text-muted-foreground text-xs">—</span>
@@ -872,19 +885,24 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
           </DialogHeader>
           
           <div className="space-y-3 py-4">
-            {['Navigator', 'Archivist', 'Timekeeper', 'Scout', 'Connector'].map((role) => (
+            {/* Roles must match DB check constraint: navigator, vibe_curator, timekeeper, archivist */}
+            {[
+              { value: 'navigator', label: 'Navigator', icon: '🧭', desc: 'Plans routes & venues' },
+              { value: 'vibe_curator', label: 'Vibe Curator', icon: '✨', desc: 'Sets the mood' },
+              { value: 'timekeeper', label: 'Timekeeper', icon: '⏱️', desc: 'Manages schedule' },
+              { value: 'archivist', label: 'Archivist', icon: '📸', desc: 'Captures memories' },
+            ].map((role) => (
               <Button
-                key={role}
-                variant={selectedRole === role ? 'default' : 'outline'}
+                key={role.value}
+                variant={selectedRole === role.value ? 'default' : 'outline'}
                 className="w-full justify-start"
-                onClick={() => setSelectedRole(role)}
+                onClick={() => setSelectedRole(role.value)}
               >
-                {role === 'Navigator' && '🧭 '}
-                {role === 'Archivist' && '📚 '}
-                {role === 'Timekeeper' && '⏱️ '}
-                {role === 'Scout' && '🔍 '}
-                {role === 'Connector' && '🤝 '}
-                {role}
+                <span className="mr-2">{role.icon}</span>
+                <span className="flex-1 text-left">
+                  <span className="block font-medium">{role.label}</span>
+                  <span className="block text-xs text-muted-foreground">{role.desc}</span>
+                </span>
               </Button>
             ))}
           </div>
@@ -897,11 +915,19 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
               Cancel
             </Button>
             <Button
-              onClick={() => assignRole.mutate({ 
-                memberId: showRoleDialog.memberId, 
-                role: selectedRole, 
-                memberName: showRoleDialog.memberName 
-              })}
+              onClick={() => {
+                const roleLabels: Record<string, string> = {
+                  navigator: 'Navigator',
+                  vibe_curator: 'Vibe Curator',
+                  timekeeper: 'Timekeeper',
+                  archivist: 'Archivist',
+                };
+                assignRole.mutate({ 
+                  memberId: showRoleDialog.memberId, 
+                  role: selectedRole, 
+                  memberName: showRoleDialog.memberName 
+                });
+              }}
               disabled={!selectedRole || assignRole.isPending}
             >
               {assignRole.isPending ? 'Assigning...' : 'Assign Role'}
