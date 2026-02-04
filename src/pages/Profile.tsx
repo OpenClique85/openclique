@@ -126,9 +126,6 @@ export default function Profile() {
             </CardContent>
           </Card>
 
-          {/* Connect with People Section */}
-          <FindPeopleSection friendCode={profile?.friend_code} />
-
           {/* Tabbed Content: Cliques | Quests | Me */}
           <Tabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList className="grid w-full grid-cols-5 h-auto">
