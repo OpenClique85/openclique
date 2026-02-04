@@ -9368,6 +9368,10 @@ export type Database = {
           username: string
         }[]
       }
+      start_quest_and_link_signups: {
+        Args: { p_quest_id: string }
+        Returns: string
+      }
       start_squad_warm_up: { Args: { p_squad_id: string }; Returns: undefined }
       submit_warm_up_prompt: {
         Args: { p_response: string; p_squad_id: string }
