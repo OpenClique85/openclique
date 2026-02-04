@@ -519,13 +519,16 @@ export function QuestsTab({ userId }: QuestsTabProps) {
         )}
       </MobileCollapsibleSection>
       
-      {/* Past Quests */}
+      {/* Past Quests - Collapsible on mobile */}
       {pastSignups.length > 0 && (
-        <section>
-          <h3 className="text-lg font-display font-semibold mb-3 text-muted-foreground">
-            Past Quests ({pastSignups.length})
-          </h3>
-          
+        <MobileCollapsibleSection
+          title="Past Quests"
+          icon={<History className="h-5 w-5 text-muted-foreground" />}
+          count={pastSignups.length}
+          variant="muted"
+          defaultOpenMobile={false}
+          defaultOpenDesktop={true}
+        >
           <div className="space-y-3">
             {pastSignups.map((signup) => {
               const isPast = signup.quest.start_datetime && new Date(signup.quest.start_datetime) < now;
@@ -536,11 +539,11 @@ export function QuestsTab({ userId }: QuestsTabProps) {
               return (
                 <Card key={signup.id} className="bg-muted/30">
                   <CardContent className="py-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="flex items-center gap-3">
                         <span className="text-2xl opacity-60">{signup.quest.icon || '🎯'}</span>
                         <div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <p className="font-medium">{signup.quest.title}</p>
                             {signup.quest.is_sponsored && (
                               <Badge variant="outline" className="text-sunset/60 border-sunset/40 text-xs">
@@ -557,22 +560,22 @@ export function QuestsTab({ userId }: QuestsTabProps) {
                         </div>
                       </div>
                       
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 ml-11 sm:ml-0">
                         <Badge variant={STATUS_BADGES[signup.status || 'pending'].variant}>
                           {STATUS_BADGES[signup.status || 'pending'].label}
                         </Badge>
                         
                         {canLeaveFeedback && (
                           hasFeedback ? (
-                            <Button variant="ghost" size="sm" disabled className="text-muted-foreground">
-                              <CheckCircle className="h-4 w-4 mr-1" />
-                              Feedback Sent
+                            <Button variant="ghost" size="sm" disabled className="text-muted-foreground text-xs">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Done
                             </Button>
                           ) : (
-                            <Button variant="outline" size="sm" asChild>
+                            <Button variant="outline" size="sm" asChild className="text-xs">
                               <Link to={`/feedback/${signup.quest.id}`}>
-                                <Star className="h-4 w-4 mr-1" />
-                                Leave Feedback
+                                <Star className="h-3 w-3 mr-1" />
+                                Feedback
                               </Link>
                             </Button>
                           )
@@ -584,7 +587,7 @@ export function QuestsTab({ userId }: QuestsTabProps) {
               );
             })}
           </div>
-        </section>
+        </MobileCollapsibleSection>
       )}
       
       {/* Cancel Modal */}
