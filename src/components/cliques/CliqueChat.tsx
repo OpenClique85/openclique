@@ -137,6 +137,7 @@ export function CliqueChat({ cliqueId, isLeader }: CliqueChatProps) {
         squad_id: cliqueId,
         sender_id: user.id,
         message: newMessage.trim(),
+        sender_type: 'user',
       });
 
     setIsSending(false);

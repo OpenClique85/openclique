@@ -223,19 +223,18 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
     100 // Default to 100% required
   );
 
-  // Send admin message to chat
+  // Send admin message to chat (as BUGGS or Admin)
   const sendAdminMessage = useMutation({
-    mutationFn: async (message: string) => {
+    mutationFn: async ({ message, asType = 'buggs' }: { message: string; asType?: 'admin' | 'buggs' | 'system' }) => {
       if (!user) throw new Error('Not authenticated');
       
-      const { error } = await (supabase as unknown as { from: (t: string) => { insert: (d: unknown) => Promise<{ error: Error | null }> } })
+      const { error } = await supabase
         .from('squad_chat_messages')
         .insert({
           squad_id: cliqueId,
           sender_id: user.id,
-          message: `[Admin] ${message}`,
-          is_prompt_response: false,
-          is_system_message: true,
+          message,
+          sender_type: asType,
         });
       
       if (error) throw error;

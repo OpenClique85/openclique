@@ -234,15 +234,14 @@ export function useSquadWarmUp(squadId: string | null) {
       
       if (rpcError) throw rpcError;
       
-      // Also post as chat message
-      await (supabase as unknown as { from: (t: string) => { insert: (d: unknown) => Promise<{ error: Error | null }> } })
+      // Also post as chat message with [Prompt Response] prefix for identification
+      await supabase
         .from('squad_chat_messages')
         .insert({
           squad_id: squadId,
           sender_id: user.id,
-          message: response,
-          is_prompt_response: true,
-          prompt_id: prompt?.id,
+          message: `📝 **Prompt Response:** ${response}`,
+          sender_type: 'user',
         });
     },
     onSuccess: () => {
