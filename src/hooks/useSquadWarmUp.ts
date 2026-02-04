@@ -128,18 +128,18 @@ export function useSquadWarmUp(squadId: string | null) {
     enabled: !!squadId,
   });
 
-  // Fetch warm-up prompt
+  // Fetch warm-up prompt - get a random one from message_templates
   const { data: prompt } = useQuery({
-    queryKey: ['warm-up-prompt', squad?.quest_instances?.warm_up_prompt_id],
+    queryKey: ['warm-up-prompt', squadId],
     queryFn: async () => {
-      const promptId = squad?.quest_instances?.warm_up_prompt_id;
+      // Get a random warm-up prompt from message_templates
+      const { data, error } = await supabase
+        .from('message_templates')
+        .select('id, name, body')
+        .eq('category', 'warm_up')
+        .limit(1)
+        .single();
       
-      // If no specific prompt assigned, get a random warm-up prompt
-      const query = promptId
-        ? supabase.from('message_templates').select('id, name, body').eq('id', promptId).single()
-        : supabase.from('message_templates').select('id, name, body').eq('category', 'warm_up').limit(1).single();
-      
-      const { data, error } = await query;
       if (error) return null;
       return data as WarmUpPrompt;
     },

@@ -46,8 +46,6 @@ export default function CliqueWarmUp() {
             icon,
             scheduled_date,
             start_time,
-            warm_up_prompt_id,
-            warm_up_required,
             quest_card_token
           )
         `)
