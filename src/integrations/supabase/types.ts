@@ -4458,6 +4458,7 @@ export type Database = {
           created_at: string
           formation_reason: Json | null
           id: string
+          instance_id: string | null
           is_simulation: boolean | null
           locked_at: string | null
           locked_by: string | null
@@ -4474,6 +4475,7 @@ export type Database = {
           created_at?: string
           formation_reason?: Json | null
           id?: string
+          instance_id?: string | null
           is_simulation?: boolean | null
           locked_at?: string | null
           locked_by?: string | null
@@ -4490,6 +4492,7 @@ export type Database = {
           created_at?: string
           formation_reason?: Json | null
           id?: string
+          instance_id?: string | null
           is_simulation?: boolean | null
           locked_at?: string | null
           locked_by?: string | null
@@ -4499,6 +4502,20 @@ export type Database = {
           status?: Database["public"]["Enums"]["squad_status"]
         }
         Relationships: [
+          {
+            foreignKeyName: "quest_squads_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "quest_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quest_squads_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "quest_instances_public"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "quest_squads_quest_id_fkey"
             columns: ["quest_id"]

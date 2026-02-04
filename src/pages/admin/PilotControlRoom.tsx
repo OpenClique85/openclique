@@ -31,7 +31,7 @@ import { Loader2, ArrowLeft, Copy, QrCode, Pause, Play, X, Archive } from 'lucid
 import { InstanceOverviewPanel } from '@/components/admin/pilot/InstanceOverviewPanel';
 import { InstanceNotificationPanel } from '@/components/admin/pilot/InstanceNotificationPanel';
 import { ParticipantRoster } from '@/components/admin/pilot/ParticipantRoster';
-import { SquadManager } from '@/components/admin/pilot/SquadManager';
+import { CliqueManager } from '@/components/admin/pilot/CliqueManager';
 import { SquadWarmUpTab } from '@/components/admin/pilot/SquadWarmUpTab';
 import { RunOfShowControls } from '@/components/admin/pilot/RunOfShowControls';
 import { ProofInbox } from '@/components/admin/pilot/ProofInbox';
@@ -303,8 +303,8 @@ export default function PilotControlRoom() {
         {/* Notification Panel */}
         <InstanceNotificationPanel 
           instance={instance}
-          onFormSquads={() => setActiveTab('squads')}
-          onOpenSquadTab={() => setActiveTab('squads')}
+          onFormSquads={() => setActiveTab('cliques')}
+          onOpenSquadTab={() => setActiveTab('cliques')}
         />
 
         {/* Main Tabs */}
@@ -312,7 +312,7 @@ export default function PilotControlRoom() {
           <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:inline-grid">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="roster">Roster</TabsTrigger>
-            <TabsTrigger value="squads">Squads</TabsTrigger>
+            <TabsTrigger value="cliques">Cliques</TabsTrigger>
             <TabsTrigger value="warm-up">Warm-Up</TabsTrigger>
             <TabsTrigger value="run-of-show">Run of Show</TabsTrigger>
             <TabsTrigger value="proofs">Proofs</TabsTrigger>
@@ -326,11 +326,11 @@ export default function PilotControlRoom() {
             <ParticipantRoster instanceId={instance.id} />
           </TabsContent>
 
-          <TabsContent value="squads">
-            <SquadManager 
+          <TabsContent value="cliques">
+            <CliqueManager 
               instanceId={instance.id} 
               instanceTitle={instance.title}
-              targetSquadSize={instance.target_squad_size || 6} 
+              targetCliqueSize={instance.target_squad_size || 6} 
             />
           </TabsContent>
 
