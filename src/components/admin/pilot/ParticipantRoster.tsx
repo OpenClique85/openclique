@@ -37,7 +37,7 @@ interface ParticipantWithProfile {
   checked_in_at: string | null;
   completed_at: string | null;
   last_activity_at: string | null;
-  created_at: string;
+  signed_up_at: string;
   squad_id: string | null;
   profiles: {
     display_name: string | null;
@@ -75,12 +75,12 @@ export function ParticipantRoster({ instanceId }: ParticipantRosterProps) {
         .from('quest_signups')
         .select(`
           id, user_id, status,
-          checked_in_at, completed_at, last_activity_at, created_at, squad_id,
+          checked_in_at, completed_at, last_activity_at, signed_up_at, squad_id,
           profiles!inner(display_name, email),
           quest_squads(name)
         `)
         .eq('instance_id', instanceId)
-        .order('created_at', { ascending: false });
+        .order('signed_up_at', { ascending: false });
       
       if (error) throw error;
       return data as unknown as ParticipantWithProfile[];
