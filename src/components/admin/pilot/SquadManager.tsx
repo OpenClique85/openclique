@@ -78,7 +78,7 @@ export function SquadManager({ instanceId, instanceTitle = 'Quest', targetSquadS
             .from('squad_members')
             .select(`
               id, user_id,
-              profiles!inner(display_name)
+              profiles(display_name)
             `)
             .eq('squad_id', squad.id);
           
@@ -105,18 +105,37 @@ export function SquadManager({ instanceId, instanceTitle = 'Quest', targetSquadS
   const { data: unassigned } = useQuery({
     queryKey: ['instance-unassigned', instanceId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('quest_signups')
-        .select(`
-          id, user_id, status,
-          profiles!inner(display_name)
-        `)
-        .eq('instance_id', instanceId)
-        .is('squad_id', null)
-        .in('status', ['pending', 'confirmed']);
-      
-      if (error) throw error;
-      return data;
+      // Schema note: quest_signups does NOT have a squad_id column.
+      // Assignment is tracked via squad_members.
+
+      const [{ data: signups, error: signupsError }, { data: squadRows, error: squadsError }] = await Promise.all([
+        supabase
+          .from('quest_signups')
+          .select(`id, user_id, status, profiles(display_name)`)
+          .eq('instance_id', instanceId)
+          .in('status', ['pending', 'confirmed']),
+        supabase
+          .from('quest_squads')
+          .select('id')
+          .eq('quest_id', instanceId),
+      ]);
+
+      if (signupsError) throw signupsError;
+      if (squadsError) throw squadsError;
+
+      const squadIds = (squadRows || []).map((s) => s.id);
+
+      let assignedUserIds = new Set<string>();
+      if (squadIds.length > 0) {
+        const { data: memberRows, error: membersError } = await supabase
+          .from('squad_members')
+          .select('user_id')
+          .in('squad_id', squadIds);
+        if (membersError) throw membersError;
+        assignedUserIds = new Set((memberRows || []).map((m) => m.user_id));
+      }
+
+      return (signups || []).filter((s: any) => !assignedUserIds.has(s.user_id));
     },
   });
 

@@ -38,13 +38,9 @@ interface ParticipantWithProfile {
   completed_at: string | null;
   last_activity_at: string | null;
   signed_up_at: string;
-  squad_id: string | null;
   profiles: {
     display_name: string | null;
     email: string | null;
-  } | null;
-  quest_squads: {
-    name: string;
   } | null;
 }
 
@@ -75,9 +71,8 @@ export function ParticipantRoster({ instanceId }: ParticipantRosterProps) {
         .from('quest_signups')
         .select(`
           id, user_id, status,
-          checked_in_at, completed_at, last_activity_at, signed_up_at, squad_id,
-          profiles!inner(display_name, email),
-          quest_squads(name)
+          checked_in_at, completed_at, last_activity_at, signed_up_at,
+          profiles(display_name, email)
         `)
         .eq('instance_id', instanceId)
         .order('signed_up_at', { ascending: false });
@@ -174,7 +169,6 @@ export function ParticipantRoster({ instanceId }: ParticipantRosterProps) {
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Squad</TableHead>
                 <TableHead>Checked In</TableHead>
                 <TableHead>Last Activity</TableHead>
                 <TableHead className="w-10"></TableHead>
@@ -183,7 +177,7 @@ export function ParticipantRoster({ instanceId }: ParticipantRosterProps) {
             <TableBody>
               {filteredParticipants.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                     No participants found
                   </TableCell>
                 </TableRow>
@@ -198,9 +192,6 @@ export function ParticipantRoster({ instanceId }: ParticipantRosterProps) {
                     </TableCell>
                     <TableCell>
                       <Badge className={STATUS_COLORS[p.status]}>{p.status}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      {p.quest_squads?.name || <span className="text-muted-foreground">—</span>}
                     </TableCell>
                     <TableCell>
                       {p.checked_in_at ? (
