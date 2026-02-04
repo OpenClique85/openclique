@@ -172,6 +172,7 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
           prompt_response: member.prompt_response as string | null,
           readiness_confirmed_at: member.readiness_confirmed_at as string | null,
           warm_up_progress: (member.warm_up_progress as Record<string, unknown>) || {},
+          clique_role: member.clique_role as string | null,
           display_name: profile?.display_name || null,
           avatar_url: null,
         };
