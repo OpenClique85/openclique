@@ -201,6 +201,52 @@ export function ActiveQuestCard({ signup, isLive = false, onCancelClick }: Activ
         />
       </CardContent>
       
+      {/* Clique Info - if user is in a squad/clique for this quest */}
+      {signup.squadId && signup.squadName && (
+        <CardContent className="py-3 border-t bg-primary/5">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="p-1.5 rounded-full bg-primary/10">
+                <Users className="h-4 w-4 text-primary" />
+              </div>
+              <div className="min-w-0">
+                <p className="font-medium text-sm truncate">{signup.squadName}</p>
+                {signup.squadMembers && signup.squadMembers.length > 0 && (
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <div className="flex -space-x-1.5">
+                      {signup.squadMembers.slice(0, 4).map((member) => (
+                        <Avatar key={member.user_id} className="h-5 w-5 border border-background">
+                          <AvatarFallback className="text-[10px] bg-primary/10 text-primary">
+                            {member.display_name.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                      ))}
+                      {signup.squadMembers.length > 4 && (
+                        <div className="h-5 w-5 rounded-full bg-muted flex items-center justify-center text-[10px] font-medium border border-background">
+                          +{signup.squadMembers.length - 4}
+                        </div>
+                      )}
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {signup.squadMembers.map(m => m.display_name).slice(0, 3).join(', ')}
+                      {signup.squadMembers.length > 3 && ` +${signup.squadMembers.length - 3}`}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+            <Button 
+              variant="default" 
+              size="sm"
+              onClick={() => navigate(`/warmup/${signup.squadId}`)}
+            >
+              <MessageCircle className="h-4 w-4 mr-1" />
+              Chat
+            </Button>
+          </div>
+        </CardContent>
+      )}
+      
       {/* Location & Actions */}
       <CardContent className="pt-0">
         {signup.status === 'confirmed' && signup.quest.meeting_location_name && (
