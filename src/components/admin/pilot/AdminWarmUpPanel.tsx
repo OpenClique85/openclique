@@ -860,6 +860,55 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Role Assignment Dialog */}
+      <Dialog open={showRoleDialog.open} onOpenChange={(open) => setShowRoleDialog(prev => ({ ...prev, open }))}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Assign Role</DialogTitle>
+            <DialogDescription>
+              Assign a role to {showRoleDialog.memberName}. This will be announced in the clique chat.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-3 py-4">
+            {['Navigator', 'Archivist', 'Timekeeper', 'Scout', 'Connector'].map((role) => (
+              <Button
+                key={role}
+                variant={selectedRole === role ? 'default' : 'outline'}
+                className="w-full justify-start"
+                onClick={() => setSelectedRole(role)}
+              >
+                {role === 'Navigator' && '🧭 '}
+                {role === 'Archivist' && '📚 '}
+                {role === 'Timekeeper' && '⏱️ '}
+                {role === 'Scout' && '🔍 '}
+                {role === 'Connector' && '🤝 '}
+                {role}
+              </Button>
+            ))}
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowRoleDialog({ open: false, memberId: '', memberName: '' });
+              setSelectedRole('');
+            }}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => assignRole.mutate({ 
+                memberId: showRoleDialog.memberId, 
+                role: selectedRole, 
+                memberName: showRoleDialog.memberName 
+              })}
+              disabled={!selectedRole || assignRole.isPending}
+            >
+              {assignRole.isPending ? 'Assigning...' : 'Assign Role'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
