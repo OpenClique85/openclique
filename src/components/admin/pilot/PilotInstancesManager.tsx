@@ -26,7 +26,8 @@ import {
 } from '@/components/ui/table';
 import { 
   Plus, Rocket, Calendar, MapPin, 
-  ExternalLink, Copy, Loader2, Clock, List, CalendarDays, Settings2, Users
+  ExternalLink, Copy, Loader2, Clock, List, CalendarDays, Settings2, Users,
+  Play, Lock, Zap
 } from 'lucide-react';
 import { BulkStatusUpdateDialog } from './BulkStatusUpdateDialog';
 import { InstanceCalendarView } from './InstanceCalendarView';
@@ -176,6 +177,40 @@ export function PilotInstancesManager() {
     navigate(`/admin/pilot/${instanceId}`);
   };
 
+  // Quick status update for inline actions
+  const quickStatusUpdate = useMutation({
+    mutationFn: async ({ instanceId, newStatus }: { instanceId: string; newStatus: InstanceStatus }) => {
+      const { error } = await supabase
+        .from('quest_instances')
+        .update({ status: newStatus })
+        .eq('id', instanceId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['quest-instances'] });
+      toast({ title: 'Status updated!' });
+    },
+    onError: (err: Error) => {
+      toast({ title: 'Failed to update status', description: err.message, variant: 'destructive' });
+    }
+  });
+
+  // Get quick action for an instance based on its status
+  const getQuickAction = (instance: QuestInstance, squadCount: number) => {
+    const signups = instance.current_signup_count || 0;
+    
+    if (instance.status === 'draft') {
+      return { label: 'Start Recruiting', icon: Play, status: 'recruiting' as InstanceStatus, color: 'text-blue-600' };
+    }
+    if (instance.status === 'recruiting' && signups >= 3) {
+      return { label: 'Form Squads', icon: Lock, status: 'locked' as InstanceStatus, color: 'text-amber-600' };
+    }
+    if (instance.status === 'locked' && squadCount > 0) {
+      return { label: 'Go Live', icon: Rocket, status: 'live' as InstanceStatus, color: 'text-green-600' };
+    }
+    return null;
+  };
+
   // Calculate summary stats
   const summaryStats = useMemo(() => {
     if (!instances) return { totalInstances: 0, todayCount: 0, needsAttention: 0, totalConfirmed: 0 };
@@ -263,15 +298,16 @@ export function PilotInstancesManager() {
                       <TableHead>Countdown</TableHead>
                       <TableHead>Signups</TableHead>
                       <TableHead>Squads</TableHead>
-                      <TableHead>Location</TableHead>
                       <TableHead>Attention</TableHead>
-                      <TableHead className="w-20"></TableHead>
+                      <TableHead>Quick Action</TableHead>
+                      <TableHead className="w-16"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {instances.map((instance) => {
                       const squadCount = squadCounts?.[instance.id] || 0;
                       const attentionFlag = calculateAttentionFlag(instance, squadCount);
+                      const quickAction = getQuickAction(instance, squadCount);
 
                       return (
                         <TableRow 
@@ -326,19 +362,33 @@ export function PilotInstancesManager() {
                             </span>
                           </TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-1 text-sm text-muted-foreground max-w-32 truncate">
-                              {instance.meeting_point_name ? (
-                                <>
-                                  <MapPin className="h-3 w-3 flex-shrink-0" />
-                                  <span className="truncate">{instance.meeting_point_name}</span>
-                                </>
-                              ) : (
-                                '—'
-                              )}
-                            </div>
+                            <InstanceAttentionFlag flag={attentionFlag} />
                           </TableCell>
                           <TableCell>
-                            <InstanceAttentionFlag flag={attentionFlag} />
+                            {quickAction ? (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className={`text-xs ${quickAction.color}`}
+                                disabled={quickStatusUpdate.isPending}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  quickStatusUpdate.mutate({ 
+                                    instanceId: instance.id, 
+                                    newStatus: quickAction.status 
+                                  });
+                                }}
+                              >
+                                {quickStatusUpdate.isPending ? (
+                                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                ) : (
+                                  <quickAction.icon className="h-3 w-3 mr-1" />
+                                )}
+                                {quickAction.label}
+                              </Button>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">—</span>
+                            )}
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-1">

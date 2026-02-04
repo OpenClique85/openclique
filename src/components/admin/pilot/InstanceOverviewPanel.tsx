@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { 
   Users, Calendar, MapPin, Clock, ChevronRight, 
-  CheckCircle, AlertCircle, Loader2 
+  CheckCircle, AlertCircle, Loader2, Play, Lock, Rocket, Archive
 } from 'lucide-react';
 import type { Tables, Enums } from '@/integrations/supabase/types';
 
@@ -24,12 +24,12 @@ interface InstanceOverviewPanelProps {
   onStatusChange: (status: InstanceStatus) => void;
 }
 
-const STATUS_CONFIG: Record<InstanceStatus, { label: string; color: string; next?: InstanceStatus; nextLabel?: string }> = {
-  draft: { label: 'Draft', color: 'bg-muted text-muted-foreground', next: 'recruiting', nextLabel: 'Open Recruiting' },
-  recruiting: { label: 'Recruiting', color: 'bg-blue-500/20 text-blue-700', next: 'locked', nextLabel: 'Lock Roster' },
-  locked: { label: 'Locked', color: 'bg-amber-500/20 text-amber-700', next: 'live', nextLabel: 'Go Live' },
-  live: { label: 'Live', color: 'bg-green-500/20 text-green-700', next: 'completed', nextLabel: 'Mark Complete' },
-  completed: { label: 'Completed', color: 'bg-purple-500/20 text-purple-700', next: 'archived', nextLabel: 'Archive' },
+const STATUS_CONFIG: Record<InstanceStatus, { label: string; color: string; next?: InstanceStatus; nextLabel?: string; nextIcon?: string }> = {
+  draft: { label: 'Draft', color: 'bg-muted text-muted-foreground', next: 'recruiting', nextLabel: 'Start Recruiting', nextIcon: 'play' },
+  recruiting: { label: 'Recruiting', color: 'bg-blue-500/20 text-blue-700', next: 'locked', nextLabel: 'Form Squads & Lock Roster', nextIcon: 'lock' },
+  locked: { label: 'Squads Formed', color: 'bg-amber-500/20 text-amber-700', next: 'live', nextLabel: 'Start Quest (Go Live)', nextIcon: 'rocket' },
+  live: { label: 'In Progress', color: 'bg-green-500/20 text-green-700', next: 'completed', nextLabel: 'Complete Quest', nextIcon: 'check' },
+  completed: { label: 'Completed', color: 'bg-purple-500/20 text-purple-700', next: 'archived', nextLabel: 'Archive', nextIcon: 'archive' },
   cancelled: { label: 'Cancelled', color: 'bg-destructive/20 text-destructive' },
   archived: { label: 'Archived', color: 'bg-muted text-muted-foreground' },
   paused: { label: 'Paused', color: 'bg-orange-500/20 text-orange-700' },
@@ -90,12 +90,27 @@ export function InstanceOverviewPanel({ instance, onStatusChange }: InstanceOver
 
   const countdown = getCountdown();
 
+  // Get appropriate icon for next action
+  const getNextIcon = () => {
+    switch (statusConfig.nextIcon) {
+      case 'play': return <Play className="h-4 w-4 mr-2" />;
+      case 'lock': return <Lock className="h-4 w-4 mr-2" />;
+      case 'rocket': return <Rocket className="h-4 w-4 mr-2" />;
+      case 'check': return <CheckCircle className="h-4 w-4 mr-2" />;
+      case 'archive': return <Archive className="h-4 w-4 mr-2" />;
+      default: return null;
+    }
+  };
+
+  // Determine if the next action is a major milestone
+  const isMajorAction = ['locked', 'live'].includes(statusConfig.next || '');
+
   return (
     <div className="space-y-6">
       {/* Status Bar */}
-      <Card>
+      <Card className={isMajorAction && statusConfig.next ? 'border-primary/50 bg-primary/5' : ''}>
         <CardContent className="py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-3">
             <div className="flex items-center gap-4">
               <Badge className={statusConfig.color}>{statusConfig.label}</Badge>
               {!countdown.isPast && (
@@ -108,12 +123,28 @@ export function InstanceOverviewPanel({ instance, onStatusChange }: InstanceOver
             </div>
             
             {statusConfig.next && (
-              <Button onClick={() => onStatusChange(statusConfig.next!)}>
+              <Button 
+                onClick={() => onStatusChange(statusConfig.next!)}
+                size={isMajorAction ? 'lg' : 'default'}
+                className={isMajorAction ? 'bg-primary hover:bg-primary/90 shadow-md' : ''}
+              >
+                {getNextIcon()}
                 {statusConfig.nextLabel}
-                <ChevronRight className="h-4 w-4 ml-2" />
               </Button>
             )}
           </div>
+          
+          {/* Helpful hint for major actions */}
+          {instance.status === 'recruiting' && signupStats && signupStats.confirmed >= 3 && (
+            <p className="text-sm text-muted-foreground mt-3 pt-3 border-t">
+              💡 <strong>{signupStats.confirmed} users</strong> are signed up. Ready to form squads and lock the roster!
+            </p>
+          )}
+          {instance.status === 'locked' && squadCount && squadCount > 0 && (
+            <p className="text-sm text-muted-foreground mt-3 pt-3 border-t">
+              🚀 <strong>{squadCount} squads</strong> formed. Click "Start Quest" to go live and begin the experience!
+            </p>
+          )}
         </CardContent>
       </Card>
 
