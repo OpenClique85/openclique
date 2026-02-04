@@ -367,6 +367,18 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
     toast.success('Ready Check sent to clique');
   };
 
+  // Send Ice-Breaker prompt action
+  const sendIcebreakerPrompt = async (promptBody: string) => {
+    await sendAdminMessage.mutateAsync({
+      message: `🎯 **Ice-Breaker Time!**\n\n${promptBody}\n\n💬 *Reply in the chat to share your answer!*`,
+      asType: 'buggs',
+    });
+    setShowIcebreakerDialog(false);
+    setSelectedPrompt(null);
+    setCustomIcebreaker('');
+    toast.success('Ice-Breaker prompt sent to clique!');
+  };
+
   // Role label mapping for display
   const ROLE_LABELS: Record<string, string> = {
     navigator: 'Navigator',
