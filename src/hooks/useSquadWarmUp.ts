@@ -25,7 +25,7 @@ interface ChatMessage {
   squad_id: string;
   sender_id: string;
   message: string;
-  is_prompt_response: boolean;
+  sender_type: 'user' | 'admin' | 'buggs' | 'system';
   created_at: string;
   sender_name?: string;
 }
