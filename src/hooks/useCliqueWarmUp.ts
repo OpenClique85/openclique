@@ -279,21 +279,27 @@ export function useCliqueWarmUp(cliqueId: string | null) {
   const hasAnsweredPrompt = !!currentMember?.prompt_response;
   const hasConfirmedReadiness = !!currentMember?.readiness_confirmed_at;
 
-  // Calculate clique progress
+  // Calculate clique progress with 50/50 split
   const calculateProgress = useCallback((): WarmUpProgress => {
     const activeMembers = members.filter(m => m.status !== 'dropped');
+    const promptAnswered = activeMembers.filter(m => !!m.prompt_response).length;
+    const readinessConfirmed = activeMembers.filter(m => !!m.readiness_confirmed_at).length;
     const readyMembers = activeMembers.filter(
       m => m.prompt_response && m.readiness_confirmed_at
     );
     
+    // 50% for prompts, 50% for readiness
+    const promptPct = activeMembers.length > 0 ? (promptAnswered / activeMembers.length) * 50 : 0;
+    const readinessPct = activeMembers.length > 0 ? (readinessConfirmed / activeMembers.length) * 50 : 0;
+    const percentage = Math.round(promptPct + readinessPct);
+    
     const minPct = clique?.quest_instances?.warm_up_min_ready_pct ?? 100;
-    const percentage = activeMembers.length > 0
-      ? Math.round((readyMembers.length / activeMembers.length) * 100)
-      : 0;
     
     return {
       totalMembers: activeMembers.length,
       readyMembers: readyMembers.length,
+      promptAnswered,
+      readinessConfirmed,
       percentage,
       isComplete: percentage >= minPct,
     };
