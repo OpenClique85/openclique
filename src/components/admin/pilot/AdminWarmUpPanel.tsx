@@ -71,6 +71,7 @@ interface CliqueMember {
   prompt_response: string | null;
   readiness_confirmed_at: string | null;
   warm_up_progress: Record<string, unknown>;
+  clique_role: string | null;
   display_name: string | null;
   avatar_url: string | null;
 }
