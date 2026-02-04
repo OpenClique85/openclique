@@ -28,6 +28,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { format, isToday, formatDistanceToNow } from 'date-fns';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Quest = Tables<'quests'>;
