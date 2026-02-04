@@ -49,9 +49,7 @@ interface CliqueWithInstance {
     title: string;
     scheduled_date: string;
     start_time: string;
-    warm_up_prompt_id: string | null;
     warm_up_min_ready_pct: number | null;
-    warm_up_required: boolean | null;
   } | null;
 }
 
