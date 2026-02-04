@@ -76,7 +76,7 @@ export function useSquadWarmUp(squadId: string | null) {
       const instanceId = data.instance_id || data.quest_id;
       const { data: instance } = await supabase
         .from('quest_instances')
-        .select('id, title, scheduled_date, start_time, warm_up_prompt_id, warm_up_min_ready_pct, warm_up_required')
+        .select('id, title, scheduled_date, start_time')
         .eq('id', instanceId)
         .single();
       
