@@ -220,14 +220,28 @@ export default function SquadWarmUp() {
             />
           </div>
           
-          <div className="flex items-center gap-3">
-            <span className="text-2xl sm:text-3xl">{instance?.icon}</span>
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold">{instance?.title}</h1>
-              <p className="text-sm text-muted-foreground">
-                Squad: {squad.squad_name}
-              </p>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl sm:text-3xl">{instance?.icon}</span>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold">{instance?.title}</h1>
+                <p className="text-sm text-muted-foreground">
+                  Squad: {squad.squad_name}
+                </p>
+              </div>
             </div>
+            {instance?.quest_card_token && (
+              <Button
+                variant="outline"
+                size="sm"
+                asChild
+              >
+                <Link to={`/quest-card/${instance.quest_card_token}`}>
+                  <ExternalLink className="h-4 w-4 mr-1" />
+                  <span className="hidden sm:inline">View Quest</span>
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
 
