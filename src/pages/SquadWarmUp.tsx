@@ -141,32 +141,12 @@ export default function SquadWarmUp() {
   const { squad, instance } = data;
   const squadStatus = squad.status as string;
 
-  // Squad already approved - redirect to quest card
-  if (squadStatus === 'approved' || squadStatus === 'active' || squadStatus === 'completed') {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <div className="flex-1 flex items-center justify-center p-4">
-          <Card className="max-w-md w-full">
-            <CardContent className="pt-6 text-center">
-              <CheckCircle2 className="h-12 w-12 text-green-600 mx-auto mb-4" />
-              <h2 className="text-xl font-bold mb-2">Squad Approved!</h2>
-              <p className="text-muted-foreground mb-4">
-                Your squad has been approved. You can now view the full quest details.
-              </p>
-              <Button onClick={() => navigate(`/quest-card/${instance?.quest_card_token}`)}>
-                View Quest Details
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
+  // Check if squad is in a valid state to show chat
+  const isWarmingUp = squadStatus === 'warming_up' || squadStatus === 'ready_for_review';
+  const isApproved = squadStatus === 'approved' || squadStatus === 'active' || squadStatus === 'completed';
 
-  // Not in warm-up phase
-  if (squadStatus !== 'warming_up' && squadStatus !== 'ready_for_review') {
+  // Not in a valid phase for chat (locked, recruiting, etc.)
+  if (!isWarmingUp && !isApproved) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
@@ -174,17 +154,17 @@ export default function SquadWarmUp() {
           <Card className="max-w-md w-full">
             <CardContent className="pt-6 text-center">
               <Lock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h2 className="text-xl font-bold mb-2">Warm-Up Not Available</h2>
+              <h2 className="text-xl font-bold mb-2">Chat Not Available</h2>
               <p className="text-muted-foreground mb-4">
-                This squad is not currently in the warm-up phase.
+                This clique chat is not currently active.
               </p>
               <Badge variant="outline" className="mb-4">
                 Status: {squadStatus}
               </Badge>
               <div>
-                <Button variant="outline" onClick={() => navigate('/my-quests')}>
+                <Button variant="outline" onClick={() => navigate('/profile')}>
                   <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to My Quests
+                  Back to Profile
                 </Button>
               </div>
             </CardContent>
@@ -204,11 +184,11 @@ export default function SquadWarmUp() {
         <div className="mb-4 sm:mb-6">
           <div className="flex items-center justify-between mb-3 sm:mb-4">
             <Link 
-              to="/my-quests" 
+              to="/profile" 
               className="text-sm text-muted-foreground hover:text-primary flex items-center gap-1"
             >
               <ArrowLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">Back to My Quests</span>
+              <span className="hidden sm:inline">Back to Profile</span>
               <span className="sm:hidden">Back</span>
             </Link>
             <GetHelpButton
@@ -224,28 +204,60 @@ export default function SquadWarmUp() {
             <div className="flex items-center gap-3">
               <span className="text-2xl sm:text-3xl">{instance?.icon}</span>
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold">{instance?.title}</h1>
+                <h1 className="text-xl sm:text-2xl font-bold">{squad.squad_name}</h1>
                 <p className="text-sm text-muted-foreground">
-                  Squad: {squad.squad_name}
+                  {instance?.title}
                 </p>
               </div>
             </div>
-            {instance?.quest_card_token && (
-              <Button
-                variant="outline"
-                size="sm"
-                asChild
-              >
-                <Link to={`/quest-card/${instance.quest_card_token}`}>
-                  <ExternalLink className="h-4 w-4 mr-1" />
-                  <span className="hidden sm:inline">View Quest</span>
-                </Link>
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              {isApproved && (
+                <Badge variant="default" className="bg-green-600 text-white">
+                  <CheckCircle2 className="h-3 w-3 mr-1" />
+                  Approved
+                </Badge>
+              )}
+              {instance?.quest_card_token && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  asChild
+                >
+                  <Link to={`/quest-card/${instance.quest_card_token}`}>
+                    <ExternalLink className="h-4 w-4 mr-1" />
+                    <span className="hidden sm:inline">View Quest</span>
+                  </Link>
+                </Button>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Warm-Up Room */}
+        {/* Approved Banner */}
+        {isApproved && (
+          <Card className="mb-4 border-green-200 bg-green-50/50 dark:bg-green-900/10">
+            <CardContent className="py-3 flex items-center gap-3">
+              <CheckCircle2 className="h-5 w-5 text-green-600" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-green-700 dark:text-green-400">
+                  Quest Unlocked! View the full quest details and check-in when ready.
+                </p>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-green-300 text-green-700 hover:bg-green-100"
+                asChild
+              >
+                <Link to={`/quest-card/${instance?.quest_card_token}`}>
+                  View Quest Card
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Chat Room */}
         <SquadWarmUpRoom squadId={squadId!} />
       </main>
 
