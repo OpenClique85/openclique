@@ -4081,6 +4081,7 @@ export type Database = {
           timezone: string | null
           title: string
           updated_at: string
+          warm_up_min_ready_pct: number
           what_to_bring: string | null
           whatsapp_invite_link: string | null
           xp_rules: Json | null
@@ -4122,6 +4123,7 @@ export type Database = {
           timezone?: string | null
           title: string
           updated_at?: string
+          warm_up_min_ready_pct?: number
           what_to_bring?: string | null
           whatsapp_invite_link?: string | null
           xp_rules?: Json | null
@@ -4163,6 +4165,7 @@ export type Database = {
           timezone?: string | null
           title?: string
           updated_at?: string
+          warm_up_min_ready_pct?: number
           what_to_bring?: string | null
           whatsapp_invite_link?: string | null
           xp_rules?: Json | null
