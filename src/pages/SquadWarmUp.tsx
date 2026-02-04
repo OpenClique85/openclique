@@ -145,8 +145,8 @@ export default function SquadWarmUp() {
   const isWarmingUp = squadStatus === 'warming_up' || squadStatus === 'ready_for_review';
   const isApproved = squadStatus === 'approved' || squadStatus === 'active' || squadStatus === 'completed';
 
-  // Not in warm-up phase
-  if (squadStatus !== 'warming_up' && squadStatus !== 'ready_for_review') {
+  // Not in a valid phase for chat (locked, recruiting, etc.)
+  if (!isWarmingUp && !isApproved) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
@@ -154,17 +154,17 @@ export default function SquadWarmUp() {
           <Card className="max-w-md w-full">
             <CardContent className="pt-6 text-center">
               <Lock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h2 className="text-xl font-bold mb-2">Warm-Up Not Available</h2>
+              <h2 className="text-xl font-bold mb-2">Chat Not Available</h2>
               <p className="text-muted-foreground mb-4">
-                This squad is not currently in the warm-up phase.
+                This clique chat is not currently active.
               </p>
               <Badge variant="outline" className="mb-4">
                 Status: {squadStatus}
               </Badge>
               <div>
-                <Button variant="outline" onClick={() => navigate('/my-quests')}>
+                <Button variant="outline" onClick={() => navigate('/profile')}>
                   <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to My Quests
+                  Back to Profile
                 </Button>
               </div>
             </CardContent>
