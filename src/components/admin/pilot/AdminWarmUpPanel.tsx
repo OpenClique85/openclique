@@ -95,8 +95,11 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [adminMessage, setAdminMessage] = useState('');
+  const [sendAs, setSendAs] = useState<'admin' | 'buggs'>('buggs');
   const [showApproveDialog, setShowApproveDialog] = useState(false);
   const [showProgressDialog, setShowProgressDialog] = useState(false);
+  const [showRoleDialog, setShowRoleDialog] = useState<{ open: boolean; memberId: string; memberName: string }>({ open: false, memberId: '', memberName: '' });
+  const [selectedRole, setSelectedRole] = useState<string>('');
   const [approvalNotes, setApprovalNotes] = useState('');
   const [manualProgress, setManualProgress] = useState(0);
 
