@@ -496,31 +496,38 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
                   <div className="space-y-3">
                     {messages.map((msg) => {
                       const sender = members.find(m => m.user_id === msg.sender_id);
-                      const isAdmin = msg.message.startsWith('[Admin]');
+                      const isBuggs = msg.sender_type === 'buggs';
+                      const isAdmin = msg.sender_type === 'admin';
+                      const isSystem = msg.sender_type === 'system';
+                      const isPromptResponse = msg.message.startsWith('📝 **Prompt Response:**');
                       
                       return (
                         <div
                           key={msg.id}
-                          className={`text-sm ${
-                            isAdmin 
-                              ? 'bg-primary/10 border border-primary/30 rounded-lg p-2' 
-                              : msg.is_prompt_response 
-                                ? 'bg-amber-500/10 border border-amber-500/30 rounded-lg p-2' 
-                                : ''
+                          className={`text-sm rounded-lg p-2 ${
+                            isBuggs 
+                              ? 'bg-orange-500/10 border border-orange-500/30' 
+                              : isAdmin
+                                ? 'bg-primary/10 border border-primary/30'
+                                : isSystem
+                                  ? 'bg-muted border border-border'
+                                  : isPromptResponse
+                                    ? 'bg-amber-500/10 border border-amber-500/30'
+                                    : ''
                           }`}
                         >
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <span className={`font-medium ${isAdmin ? 'text-primary' : 'text-foreground'}`}>
-                              {isAdmin ? '🛡️ Admin' : sender?.display_name || 'Unknown'}
+                            <span className={`font-medium ${isBuggs ? 'text-orange-600' : isAdmin ? 'text-primary' : 'text-foreground'}`}>
+                              {isBuggs ? '🐰 BUGGS' : isAdmin ? '🛡️ Admin' : isSystem ? '⚙️ System' : sender?.display_name || 'Unknown'}
                             </span>
-                            {msg.is_prompt_response && (
+                            {isPromptResponse && (
                               <Badge variant="outline" className="text-[10px] h-4">
                                 Prompt Response
                               </Badge>
                             )}
                             <span>{format(new Date(msg.created_at), 'h:mm a')}</span>
                           </div>
-                          <p className="mt-1">{isAdmin ? msg.message.replace('[Admin] ', '') : msg.message}</p>
+                          <p className="mt-1">{msg.message}</p>
                         </div>
                       );
                     })}
