@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -44,7 +45,8 @@ import {
   Pause,
   Archive,
   Play,
-  Trash2
+  Trash2,
+  Rocket
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -163,6 +165,7 @@ const defaultFormData: FormData = {
 
 export function QuestsManager() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [quests, setQuests] = useState<QuestWithCounts[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -189,6 +192,9 @@ export function QuestsManager() {
   const [statusChangeQuest, setStatusChangeQuest] = useState<Quest | null>(null);
   const [pendingStatus, setPendingStatus] = useState<QuestStatus | null>(null);
   const [isChangingStatus, setIsChangingStatus] = useState(false);
+  
+  // Start quest state
+  const [isStartingQuest, setIsStartingQuest] = useState<string | null>(null);
 
   // Quick status change handler
   const handleQuickStatusChange = async (quest: Quest, newStatus: QuestStatus) => {
@@ -266,6 +272,39 @@ export function QuestsManager() {
   const handleDeleteQuest = async (quest: Quest) => {
     setStatusChangeQuest(quest);
     setPendingStatus('cancelled' as QuestStatus); // We'll handle delete specially
+  };
+
+  // Start Quest - creates instance and navigates to Control Room
+  const handleStartQuest = async (quest: QuestWithCounts) => {
+    if (!quest.start_datetime) {
+      toast({ variant: 'destructive', title: 'Quest needs a date/time first' });
+      return;
+    }
+    
+    setIsStartingQuest(quest.id);
+    
+    try {
+      // Use the atomic RPC to create instance and link signups
+      const { data: instanceId, error } = await supabase.rpc('start_quest_and_link_signups', {
+        p_quest_id: quest.id
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      toast({ title: 'Quest started! Opening Control Room...' });
+      navigate(`/admin/pilot/${instanceId}`);
+    } catch (error: any) {
+      console.error('Failed to start quest:', error);
+      toast({ 
+        variant: 'destructive', 
+        title: 'Failed to start quest', 
+        description: error.message 
+      });
+    } finally {
+      setIsStartingQuest(null);
+    }
   };
 
   const fetchQuests = async () => {
@@ -737,7 +776,71 @@ export function QuestsManager() {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="pt-0">
+              <CardContent className="pt-0 space-y-3">
+                {/* Start Quest CTA - Show when quest has signups, has date, and no active instance */}
+                {(() => {
+                  const totalSignups = quest.signup_counts 
+                    ? (quest.signup_counts.confirmed + quest.signup_counts.pending + quest.signup_counts.standby)
+                    : 0;
+                  const hasNoInstance = !quest.instance_count || quest.instance_count === 0;
+                  const hasDate = !!quest.start_datetime;
+                  
+                  if (totalSignups > 0 && hasNoInstance && hasDate) {
+                    return (
+                      <div className="flex items-center gap-3 p-3 bg-primary/10 rounded-lg border border-primary/20">
+                        <div className="flex-1">
+                          <p className="font-medium text-primary">
+                            {totalSignups} {totalSignups === 1 ? 'person' : 'people'} signed up
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Ready to start squad formation
+                          </p>
+                        </div>
+                        <Button 
+                          onClick={() => handleStartQuest(quest)}
+                          disabled={isStartingQuest === quest.id}
+                          className="bg-primary hover:bg-primary/90"
+                        >
+                          {isStartingQuest === quest.id ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Starting...
+                            </>
+                          ) : (
+                            <>
+                              <Rocket className="mr-2 h-4 w-4" />
+                              Start Quest
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    );
+                  }
+                  
+                  // Show hint if signups exist but no date
+                  if (totalSignups > 0 && !hasDate) {
+                    return (
+                      <div className="flex items-center gap-3 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                        <div className="flex-1">
+                          <p className="font-medium text-amber-700 dark:text-amber-300">
+                            {totalSignups} signed up — Set a date to start
+                          </p>
+                        </div>
+                        <Button 
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleOpenModal(quest)}
+                        >
+                          <Calendar className="mr-2 h-4 w-4" />
+                          Set Date
+                        </Button>
+                      </div>
+                    );
+                  }
+                  
+                  return null;
+                })()}
+                
                 <div className="flex flex-wrap items-center gap-4 text-sm">
                   <div className="flex items-center gap-1">
                     <Users className="h-4 w-4 text-muted-foreground" />
