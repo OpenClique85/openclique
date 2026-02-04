@@ -57,14 +57,16 @@ export default function SquadWarmUp() {
       if (squadError) throw squadError;
 
       // Check if user is a member
-      const { data: membership, error: memberError } = await supabase
+       const { data: membership, error: memberError } = await supabase
         .from('squad_members')
         .select('id, role')
         .eq('squad_id', squadId)
         .eq('user_id', user.id)
-        .single();
+         .neq('status', 'dropped')
+         .limit(1)
+         .maybeSingle();
 
-      if (memberError || !membership) {
+       if (memberError || !membership) {
         throw new Error('You are not a member of this squad');
       }
 
