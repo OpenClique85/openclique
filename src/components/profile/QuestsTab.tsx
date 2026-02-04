@@ -485,13 +485,14 @@ export function QuestsTab({ userId }: QuestsTabProps) {
         </section>
       )}
       
-      {/* Upcoming Quests */}
-      <section>
-        <h3 className="text-lg font-display font-semibold mb-3 flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-primary" />
-          Upcoming ({upcomingSignups.length})
-        </h3>
-        
+      {/* Upcoming Quests - Collapsible on mobile */}
+      <MobileCollapsibleSection
+        title="Upcoming"
+        icon={<Calendar className="h-5 w-5 text-primary" />}
+        count={upcomingSignups.length}
+        defaultOpenMobile={false}
+        defaultOpenDesktop={true}
+      >
         {upcomingSignups.length === 0 && todaySignups.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="py-8 text-center">
@@ -516,7 +517,7 @@ export function QuestsTab({ userId }: QuestsTabProps) {
             ))}
           </div>
         )}
-      </section>
+      </MobileCollapsibleSection>
       
       {/* Past Quests */}
       {pastSignups.length > 0 && (
