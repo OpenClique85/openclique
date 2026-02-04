@@ -181,6 +181,20 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
     enabled: !!cliqueId,
   });
 
+  // Fetch warm-up prompts from message_templates
+  const { data: warmUpPrompts = [] } = useQuery({
+    queryKey: ['warm-up-prompts'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('message_templates')
+        .select('id, name, body')
+        .eq('category', 'warm_up');
+      
+      if (error) return [];
+      return data as Array<{ id: string; name: string; body: string }>;
+    },
+  });
+
   // Fetch chat messages
   const { data: messages = [] } = useQuery({
     queryKey: ['admin-clique-chat', cliqueId],
