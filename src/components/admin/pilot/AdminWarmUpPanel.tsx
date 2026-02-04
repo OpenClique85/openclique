@@ -55,6 +55,7 @@ import {
   Bell,
   UserCog,
   Mail,
+  Sparkles,
 } from 'lucide-react';
 import { SQUAD_STATUS_LABELS, SQUAD_STATUS_STYLES, SquadStatus, calculateWarmUpProgress } from '@/lib/squadLifecycle';
 import { auditLog } from '@/lib/auditLog';
