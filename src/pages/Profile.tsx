@@ -29,7 +29,6 @@ import { QuestsTab } from '@/components/profile/QuestsTab';
 import { MeTab } from '@/components/profile/MeTab';
 import { OrganizationsTab } from '@/components/profile/OrganizationsTab';
 import { ContactsTab } from '@/components/contacts/ContactsTab';
-import { FindPeopleSection } from '@/components/profile/FindPeopleSection';
 import { useToast } from '@/hooks/use-toast';
 
 export default function Profile() {
