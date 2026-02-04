@@ -772,6 +772,28 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-3">
+              {/* Ice-Breaker and Ready Check buttons - available during warm-up */}
+              {isWarmingUp && (
+                <>
+                  <Button
+                    variant="secondary"
+                    onClick={() => setShowIcebreakerDialog(true)}
+                    disabled={sendAdminMessage.isPending}
+                  >
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Send Ice-Breaker
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={initiateReadyCheck}
+                    disabled={sendAdminMessage.isPending}
+                  >
+                    <Bell className="h-4 w-4 mr-2" />
+                    Ready Check
+                  </Button>
+                </>
+              )}
+
               {(isWarmingUp || isReadyForReview) && (
                 <Button
                   onClick={() => setShowApproveDialog(true)}
