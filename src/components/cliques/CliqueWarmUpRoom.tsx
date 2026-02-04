@@ -126,15 +126,29 @@ export function CliqueWarmUpRoom({ cliqueId, onInstructionsUnlocked }: CliqueWar
         <CardContent className="px-4 sm:px-6">
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span>{progress.readyMembers} of {progress.totalMembers} ready</span>
+              <span>{progress.readyMembers} of {progress.totalMembers} fully ready</span>
               <span className="font-medium">{progress.percentage}%</span>
             </div>
             <Progress value={progress.percentage} className="h-2" />
             
+            {/* Progress breakdown */}
+            <div className="text-xs text-muted-foreground space-y-1 mt-2">
+              <div className="flex justify-between">
+                <span>Answered prompts</span>
+                <span>{progress.promptAnswered}/{progress.totalMembers} (50%)</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Confirmed ready</span>
+                <span>{progress.readinessConfirmed}/{progress.totalMembers} (50%)</span>
+              </div>
+            </div>
+            
             {/* Member Status List */}
             <div className="flex flex-wrap gap-2 mt-3">
               {members.map((member) => {
-                const isReady = member.prompt_response && member.readiness_confirmed_at;
+                const hasPrompt = !!member.prompt_response;
+                const hasReadiness = !!member.readiness_confirmed_at;
+                const isFullyReady = hasPrompt && hasReadiness;
                 return (
                   <button
                     key={member.id}
@@ -145,14 +159,16 @@ export function CliqueWarmUpRoom({ cliqueId, onInstructionsUnlocked }: CliqueWar
                     className="flex items-center gap-1.5 text-xs hover:bg-muted/50 rounded-lg p-1 -m-1 transition-colors cursor-pointer"
                   >
                     <Avatar className="h-6 w-6">
-                      <AvatarFallback className={isReady ? 'bg-emerald-500/20' : 'bg-muted'}>
+                      <AvatarFallback className={isFullyReady ? 'bg-emerald-500/20' : hasPrompt || hasReadiness ? 'bg-amber-500/20' : 'bg-muted'}>
                         {member.display_name?.[0]?.toUpperCase() || '?'}
                       </AvatarFallback>
                     </Avatar>
-                    <span className={isReady ? 'text-emerald-600' : 'text-muted-foreground'}>
+                    <span className={isFullyReady ? 'text-emerald-600' : hasPrompt || hasReadiness ? 'text-amber-600' : 'text-muted-foreground'}>
                       {member.display_name || 'Member'}
                     </span>
-                    {isReady && <CheckCircle2 className="h-3 w-3 text-emerald-500" />}
+                    {/* Show individual checkmarks */}
+                    {hasReadiness && <span title="Ready"><CheckCircle2 className="h-3 w-3 text-emerald-500" /></span>}
+                    {hasPrompt && !hasReadiness && <span title="Answered prompt"><CheckCircle2 className="h-3 w-3 text-amber-500" /></span>}
                   </button>
                 );
               })}

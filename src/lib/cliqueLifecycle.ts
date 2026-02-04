@@ -104,6 +104,8 @@ export function needsAdminAction(status: CliqueStatus | string): boolean {
 export interface WarmUpProgress {
   totalMembers: number;
   readyMembers: number;
+  promptAnswered: number;
+  readinessConfirmed: number;
   percentage: number;
   isComplete: boolean;
 }
@@ -117,17 +119,22 @@ export function calculateWarmUpProgress(
   minReadyPct: number = 100
 ): WarmUpProgress {
   const activeMembers = members.filter(m => m.status !== 'dropped');
+  const promptAnswered = activeMembers.filter(m => !!m.prompt_response).length;
+  const readinessConfirmed = activeMembers.filter(m => !!m.readiness_confirmed_at).length;
   const readyMembers = activeMembers.filter(
     m => m.prompt_response && m.readiness_confirmed_at
   );
   
-  const percentage = activeMembers.length > 0
-    ? Math.round((readyMembers.length / activeMembers.length) * 100)
-    : 0;
+  // 50% for prompts, 50% for readiness
+  const promptPct = activeMembers.length > 0 ? (promptAnswered / activeMembers.length) * 50 : 0;
+  const readinessPct = activeMembers.length > 0 ? (readinessConfirmed / activeMembers.length) * 50 : 0;
+  const percentage = Math.round(promptPct + readinessPct);
   
   return {
     totalMembers: activeMembers.length,
     readyMembers: readyMembers.length,
+    promptAnswered,
+    readinessConfirmed,
     percentage,
     isComplete: percentage >= minReadyPct,
   };

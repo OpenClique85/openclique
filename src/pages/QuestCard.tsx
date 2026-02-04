@@ -27,7 +27,7 @@ import {
   MapPin, Calendar, Clock, Users, Package, 
   Shield, CheckCircle, Camera, Video, FileText,
   MessageSquare, Loader2, AlertCircle, ExternalLink,
-  Star, Trophy, MessageCircleMore
+  Star, Trophy, MessageCircleMore, ArrowLeft, Target
 } from 'lucide-react';
 
 interface QuestInstanceData {
@@ -45,6 +45,7 @@ interface QuestInstanceData {
   check_in_opens_at: string | null;
   check_in_closes_at: string | null;
   xp_rules: any;
+  objectives: string | null;
 }
 
 interface ParticipantData {
@@ -295,6 +296,17 @@ export default function QuestCard() {
       {/* Header */}
       <div className="bg-primary text-primary-foreground p-4 sm:p-6 pb-6 sm:pb-8">
         <div className="max-w-lg mx-auto">
+          {/* Back to warm-up navigation */}
+          {isSquadWarmingUp && participant?.squad_id && (
+            <Link 
+              to={`/warmup/${participant.squad_id}`}
+              className="inline-flex items-center gap-1 text-sm text-primary-foreground/80 hover:text-primary-foreground mb-3"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Warm-Up Chat
+            </Link>
+          )}
+          
           <div className="flex items-center gap-3 mb-4">
             <span className="text-3xl sm:text-4xl">{instance.icon}</span>
             <div>
@@ -369,6 +381,23 @@ export default function QuestCard() {
             )}
           </CardContent>
         </Card>
+
+        {/* Quest Objectives */}
+        {instance.objectives && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Target className="h-5 w-5 text-primary" />
+                Quest Objectives
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground whitespace-pre-line">
+                {instance.objectives}
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Status-based Action Cards */}
         
