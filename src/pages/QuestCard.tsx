@@ -45,6 +45,7 @@ interface QuestInstanceData {
   check_in_opens_at: string | null;
   check_in_closes_at: string | null;
   xp_rules: any;
+  objectives: string | null;
 }
 
 interface ParticipantData {
