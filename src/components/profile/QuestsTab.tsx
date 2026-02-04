@@ -113,8 +113,11 @@ export function QuestsTab({ userId }: QuestsTabProps) {
         return true;
       });
       
-      // Fetch squad memberships for these signups
+      // Fetch squad memberships for this user
+      // We need to match by user_id and then link to signups via quest relationship
+      // because signup_id in squad_members may be NULL when admins create cliques
       const signupIds = signupData.map(s => s.id);
+      const signupQuestIds = signupData.map(s => s.quest_id);
       
       let squadBySignup = new Map<string, {
         squadId: string;
@@ -123,7 +126,14 @@ export function QuestsTab({ userId }: QuestsTabProps) {
         questCardToken: string | null;
       }>();
       
+      // Build a map of quest_id -> signup for matching
+      const signupByQuestId = new Map<string, string>();
+      signupData.forEach(s => {
+        signupByQuestId.set(s.quest_id, s.id);
+      });
+      
       if (signupIds.length > 0) {
+        // First try to find memberships by signup_id
         const { data: squadMemberships } = await supabase
           .from('squad_members')
           .select(`
@@ -133,11 +143,11 @@ export function QuestsTab({ userId }: QuestsTabProps) {
               id,
               status,
               squad_name,
-              quest_instances(quest_card_token)
+              instance_id,
+              quest_instances(quest_card_token, quest_id)
             )
           `)
           .eq('user_id', userId)
-          .in('signup_id', signupIds)
           .neq('status', 'dropped');
         
         squadMemberships?.forEach(m => {
@@ -146,14 +156,26 @@ export function QuestsTab({ userId }: QuestsTabProps) {
               id: string;
               status: string;
               squad_name: string | null;
-              quest_instances: { quest_card_token: string | null } | null;
+              instance_id: string;
+              quest_instances: { quest_card_token: string | null; quest_id: string } | null;
             };
-            squadBySignup.set(m.signup_id, {
-              squadId: squad.id,
-              squadStatus: squad.status,
-              squadName: squad.squad_name,
-              questCardToken: squad.quest_instances?.quest_card_token || null,
-            });
+            
+            // Match to signup either by signup_id or by quest_id from the instance
+            let signupId: string | null = m.signup_id;
+            
+            if (!signupId && squad.quest_instances?.quest_id) {
+              // Find the signup for this quest
+              signupId = signupByQuestId.get(squad.quest_instances.quest_id) || null;
+            }
+            
+            if (signupId) {
+              squadBySignup.set(signupId, {
+                squadId: squad.id,
+                squadStatus: squad.status,
+                squadName: squad.squad_name,
+                questCardToken: squad.quest_instances?.quest_card_token || null,
+              });
+            }
           }
         });
       }
