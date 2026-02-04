@@ -76,6 +76,9 @@ const MyQuests = lazy(() => import("./pages/MyQuests"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Settings = lazy(() => import("./pages/Settings"));
 
+// Squad pages (legacy warm-up route)
+const SquadWarmUp = lazy(() => import("./pages/SquadWarmUp"));
+
 // Clique pages
 const CliqueDetail = lazy(() => import("./pages/CliqueDetail"));
 const CliqueWarmUp = lazy(() => import("./pages/CliqueWarmUp"));
@@ -202,7 +205,7 @@ const App = () => (
                 <Route path="/join/:code" element={<JoinClique />} />
                 {/* Legacy routes for backward compatibility */}
                 <Route path="/squads/:squadId" element={<ProtectedRoute><CliqueDetail /></ProtectedRoute>} />
-                <Route path="/warmup/:squadId" element={<ProtectedRoute><CliqueWarmUp /></ProtectedRoute>} />
+                 <Route path="/warmup/:squadId" element={<ProtectedRoute><SquadWarmUp /></ProtectedRoute>} />
                 <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
                 <Route path="/users" element={<ProtectedRoute><UserSearch /></ProtectedRoute>} />
                 <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
