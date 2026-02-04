@@ -96,17 +96,28 @@ export default function QuestCard() {
           .single();
         
         if (signup) {
-          // Get squad membership separately
-          const { data: squadMember } = await supabase
-            .from('squad_members')
-            .select(`
-              quest_squads(id, squad_name, status)
-            `)
-            .eq('user_id', user.id)
-            .eq('quest_squads.instance_id', instance.id)
-            .maybeSingle();
+          // Get squad membership - first get all squads for this instance, then find user's membership
+          const { data: instanceSquads } = await supabase
+            .from('quest_squads')
+            .select('id, squad_name, status, instance_id')
+            .or(`instance_id.eq.${instance.id},quest_id.eq.${instance.id}`);
           
-          const squadData = squadMember?.quest_squads as any;
+          let squadData: { id: string; squad_name: string; status: string } | null = null;
+          
+          if (instanceSquads && instanceSquads.length > 0) {
+            // Check if user is a member of any of these squads
+            const squadIds = instanceSquads.map(s => s.id);
+            const { data: membership } = await supabase
+              .from('squad_members')
+              .select('squad_id')
+              .eq('user_id', user.id)
+              .in('squad_id', squadIds)
+              .maybeSingle();
+            
+            if (membership) {
+              squadData = instanceSquads.find(s => s.id === membership.squad_id) || null;
+            }
+          }
           
           participant = {
             id: signup.id,
