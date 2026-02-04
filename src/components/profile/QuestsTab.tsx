@@ -384,13 +384,15 @@ export function QuestsTab({ userId }: QuestsTabProps) {
         </Button>
       </div>
 
-      {/* Pinned Quests */}
+      {/* Pinned Quests - Collapsible on mobile */}
       {pinnedQuestsWithData.length > 0 && (
-        <section>
-          <h3 className="text-lg font-display font-semibold mb-3 flex items-center gap-2">
-            <Bookmark className="h-5 w-5 text-primary" />
-            Saved for Later ({pinnedQuestsWithData.length})
-          </h3>
+        <MobileCollapsibleSection
+          title="Saved for Later"
+          icon={<Bookmark className="h-5 w-5 text-primary" />}
+          count={pinnedQuestsWithData.length}
+          defaultOpenMobile={false}
+          defaultOpenDesktop={true}
+        >
           <div className="grid gap-3 sm:grid-cols-2">
             {pinnedQuestsWithData.map((quest: any) => (
               <Card 
@@ -427,7 +429,7 @@ export function QuestsTab({ userId }: QuestsTabProps) {
               </Card>
             ))}
           </div>
-        </section>
+        </MobileCollapsibleSection>
       )}
 
       {/* Your Rewards */}
