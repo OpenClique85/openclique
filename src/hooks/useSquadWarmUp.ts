@@ -205,13 +205,13 @@ export function useSquadWarmUp(squadId: string | null) {
     mutationFn: async (message: string) => {
       if (!squadId || !user) throw new Error('Not authenticated');
       
-      const { error } = await (supabase as unknown as { from: (t: string) => { insert: (d: unknown) => Promise<{ error: Error | null }> } })
+      const { error } = await supabase
         .from('squad_chat_messages')
         .insert({
           squad_id: squadId,
           sender_id: user.id,
           message,
-          is_prompt_response: false,
+          sender_type: 'user',
         });
       
       if (error) throw error;
