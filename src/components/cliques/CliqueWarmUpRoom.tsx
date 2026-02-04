@@ -167,8 +167,8 @@ export function CliqueWarmUpRoom({ cliqueId, onInstructionsUnlocked }: CliqueWar
                       {member.display_name || 'Member'}
                     </span>
                     {/* Show individual checkmarks */}
-                    {hasReadiness && <CheckCircle2 className="h-3 w-3 text-emerald-500" title="Ready" />}
-                    {hasPrompt && !hasReadiness && <CheckCircle2 className="h-3 w-3 text-amber-500" title="Answered prompt" />}
+                    {hasReadiness && <span title="Ready"><CheckCircle2 className="h-3 w-3 text-emerald-500" /></span>}
+                    {hasPrompt && !hasReadiness && <span title="Answered prompt"><CheckCircle2 className="h-3 w-3 text-amber-500" /></span>}
                   </button>
                 );
               })}
