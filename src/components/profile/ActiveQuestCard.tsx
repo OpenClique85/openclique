@@ -26,6 +26,7 @@ import {
   Flame,
   Clock,
   ExternalLink,
+  MessageCircle,
 } from 'lucide-react';
 import { format, isToday, formatDistanceToNow } from 'date-fns';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
