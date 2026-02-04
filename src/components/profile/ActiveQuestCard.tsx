@@ -44,6 +44,7 @@ interface SignupWithJourney {
   squadStatus?: string | null;
   squadName?: string | null;
   questCardToken?: string | null;
+  squadMembers?: Array<{ user_id: string; display_name: string }>;
 }
 
 const STATUS_BADGES: Record<string, { label: string; variant: 'default' | 'secondary' | 'outline' | 'destructive' }> = {
