@@ -184,27 +184,44 @@ export function SquadWarmUpRoom({ squadId, onInstructionsUnlocked }: SquadWarmUp
                       Be the first to say hello! 👋
                     </p>
                   )}
-                  {messages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`flex flex-col ${msg.is_prompt_response ? 'bg-primary/5 rounded-lg p-2 border border-primary/20' : ''}`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-sm">
-                          {msg.sender_name}
-                        </span>
-                        {msg.is_prompt_response && (
-                          <Badge variant="outline" className="text-[10px] h-4">
-                            Prompt Response
-                          </Badge>
-                        )}
-                        <span className="text-xs text-muted-foreground ml-auto">
-                          {format(new Date(msg.created_at), 'h:mm a')}
-                        </span>
+                  {messages.map((msg) => {
+                    const isBuggs = msg.sender_type === 'buggs';
+                    const isAdmin = msg.sender_type === 'admin';
+                    const isSystem = msg.sender_type === 'system';
+                    const isPromptResponse = msg.message.startsWith('📝 **Prompt Response:**');
+                    
+                    return (
+                      <div
+                        key={msg.id}
+                        className={`flex flex-col rounded-lg p-2 ${
+                          isBuggs 
+                            ? 'bg-orange-500/10 border border-orange-500/30' 
+                            : isAdmin
+                              ? 'bg-primary/5 border border-primary/20'
+                              : isSystem
+                                ? 'bg-muted border border-border'
+                                : isPromptResponse
+                                  ? 'bg-primary/5 border border-primary/20'
+                                  : ''
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-sm">
+                            {isBuggs ? '🐰 BUGGS' : isAdmin ? '🛡️ Admin' : isSystem ? '⚙️ System' : msg.sender_name}
+                          </span>
+                          {isPromptResponse && (
+                            <Badge variant="outline" className="text-[10px] h-4">
+                              Prompt Response
+                            </Badge>
+                          )}
+                          <span className="text-xs text-muted-foreground ml-auto">
+                            {format(new Date(msg.created_at), 'h:mm a')}
+                          </span>
+                        </div>
+                        <p className="text-sm mt-1">{msg.message}</p>
                       </div>
-                      <p className="text-sm mt-1">{msg.message}</p>
-                    </div>
-                  ))}
+                    );
+                  })}
                   <div ref={messagesEndRef} />
                 </div>
               </ScrollArea>

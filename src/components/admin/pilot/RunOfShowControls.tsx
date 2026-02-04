@@ -2,6 +2,7 @@
  * Run of Show Controls
  * 
  * Template-based messaging panel for operators to send notifications at key moments.
+ * Also includes monitoring for active cliques.
  */
 
 import { useState } from 'react';
@@ -13,15 +14,17 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { 
   Send, Copy, Users, Clock, Bell, 
-  AlertCircle, CheckCircle, Loader2
+  AlertCircle, CheckCircle, Loader2, MessageCircle
 } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
+import { ActiveCliquesPanel } from './ActiveCliquesPanel';
 
 type QuestInstance = Tables<'quest_instances'>;
 
@@ -202,11 +205,24 @@ export function RunOfShowControls({ instance }: RunOfShowControlsProps) {
   };
 
   return (
-    <div className="grid lg:grid-cols-2 gap-6">
-      {/* Message Composer */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Send Message</CardTitle>
+    <Tabs defaultValue="messages" className="space-y-6">
+      <TabsList>
+        <TabsTrigger value="messages" className="flex items-center gap-2">
+          <Send className="h-4 w-4" />
+          Messages
+        </TabsTrigger>
+        <TabsTrigger value="cliques" className="flex items-center gap-2">
+          <Users className="h-4 w-4" />
+          Active Cliques
+        </TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="messages">
+        <div className="grid lg:grid-cols-2 gap-6">
+          {/* Message Composer */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Send Message</CardTitle>
           <CardDescription>
             Select a template and recipients to send notifications
           </CardDescription>
@@ -368,8 +384,14 @@ export function RunOfShowControls({ instance }: RunOfShowControlsProps) {
 
         {/* Recent Sends Log */}
         <RecentSendsLog instanceId={instance.id} />
-      </div>
-    </div>
+        </div>
+        </div>
+      </TabsContent>
+
+      <TabsContent value="cliques">
+        <ActiveCliquesPanel instanceId={instance.id} />
+      </TabsContent>
+    </Tabs>
   );
 }
 

@@ -11,6 +11,7 @@ export { SquadManager } from './SquadManager';
 export { SquadDetailModal } from './SquadDetailModal';
 export { SquadSwapModal } from './SquadSwapModal';
 export { RunOfShowControls } from './RunOfShowControls';
+export { ActiveCliquesPanel } from './ActiveCliquesPanel';
 export { ProofInbox } from './ProofInbox';
 export { PilotInstancesManager } from './PilotInstancesManager';
 export { BulkStatusUpdateDialog } from './BulkStatusUpdateDialog';

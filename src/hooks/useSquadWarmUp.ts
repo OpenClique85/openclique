@@ -25,7 +25,7 @@ interface ChatMessage {
   squad_id: string;
   sender_id: string;
   message: string;
-  is_prompt_response: boolean;
+  sender_type: 'user' | 'admin' | 'buggs' | 'system';
   created_at: string;
   sender_name?: string;
 }
@@ -205,13 +205,13 @@ export function useSquadWarmUp(squadId: string | null) {
     mutationFn: async (message: string) => {
       if (!squadId || !user) throw new Error('Not authenticated');
       
-      const { error } = await (supabase as unknown as { from: (t: string) => { insert: (d: unknown) => Promise<{ error: Error | null }> } })
+      const { error } = await supabase
         .from('squad_chat_messages')
         .insert({
           squad_id: squadId,
           sender_id: user.id,
           message,
-          is_prompt_response: false,
+          sender_type: 'user',
         });
       
       if (error) throw error;
@@ -234,15 +234,14 @@ export function useSquadWarmUp(squadId: string | null) {
       
       if (rpcError) throw rpcError;
       
-      // Also post as chat message
-      await (supabase as unknown as { from: (t: string) => { insert: (d: unknown) => Promise<{ error: Error | null }> } })
+      // Also post as chat message with [Prompt Response] prefix for identification
+      await supabase
         .from('squad_chat_messages')
         .insert({
           squad_id: squadId,
           sender_id: user.id,
-          message: response,
-          is_prompt_response: true,
-          prompt_id: prompt?.id,
+          message: `📝 **Prompt Response:** ${response}`,
+          sender_type: 'user',
         });
     },
     onSuccess: () => {
@@ -340,7 +339,7 @@ interface AdminChatMessage {
   squad_id: string;
   sender_id: string;
   message: string;
-  is_prompt_response: boolean;
+  sender_type: 'user' | 'admin' | 'buggs' | 'system';
   created_at: string;
 }
 

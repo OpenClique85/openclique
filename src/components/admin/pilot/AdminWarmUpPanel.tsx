@@ -50,6 +50,11 @@ import {
   SlidersHorizontal,
   Loader2,
   ThermometerSun,
+  Bot,
+  ShieldCheck,
+  Bell,
+  UserCog,
+  Mail,
 } from 'lucide-react';
 import { SQUAD_STATUS_LABELS, SQUAD_STATUS_STYLES, SquadStatus, calculateWarmUpProgress } from '@/lib/squadLifecycle';
 import { auditLog } from '@/lib/auditLog';
@@ -75,8 +80,7 @@ interface ChatMessage {
   squad_id: string;
   sender_id: string;
   message: string;
-  is_prompt_response: boolean;
-  is_system_message: boolean;
+  sender_type: 'user' | 'admin' | 'buggs' | 'system';
   created_at: string;
 }
 
@@ -96,8 +100,11 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [adminMessage, setAdminMessage] = useState('');
+  const [sendAs, setSendAs] = useState<'admin' | 'buggs'>('buggs');
   const [showApproveDialog, setShowApproveDialog] = useState(false);
   const [showProgressDialog, setShowProgressDialog] = useState(false);
+  const [showRoleDialog, setShowRoleDialog] = useState<{ open: boolean; memberId: string; memberName: string }>({ open: false, memberId: '', memberName: '' });
+  const [selectedRole, setSelectedRole] = useState<string>('');
   const [approvalNotes, setApprovalNotes] = useState('');
   const [manualProgress, setManualProgress] = useState(0);
 
@@ -223,19 +230,18 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
     100 // Default to 100% required
   );
 
-  // Send admin message to chat
+  // Send admin message to chat (as BUGGS or Admin)
   const sendAdminMessage = useMutation({
-    mutationFn: async (message: string) => {
+    mutationFn: async ({ message, asType = 'buggs' }: { message: string; asType?: 'admin' | 'buggs' | 'system' }) => {
       if (!user) throw new Error('Not authenticated');
       
-      const { error } = await (supabase as unknown as { from: (t: string) => { insert: (d: unknown) => Promise<{ error: Error | null }> } })
+      const { error } = await supabase
         .from('squad_chat_messages')
         .insert({
           squad_id: cliqueId,
           sender_id: user.id,
-          message: `[Admin] ${message}`,
-          is_prompt_response: false,
-          is_system_message: true,
+          message,
+          sender_type: asType,
         });
       
       if (error) throw error;
@@ -328,8 +334,64 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
 
   const handleSendMessage = () => {
     if (!adminMessage.trim()) return;
-    sendAdminMessage.mutate(adminMessage.trim());
+    sendAdminMessage.mutate({ message: adminMessage.trim(), asType: sendAs });
   };
+
+  // Ready Check action
+  const initiateReadyCheck = async () => {
+    // Send ready check message as system
+    await sendAdminMessage.mutateAsync({
+      message: '🔔 **READY CHECK!** Are you ready to begin? React with ✅ to confirm!',
+      asType: 'system',
+    });
+    toast.success('Ready Check sent to clique');
+  };
+
+  // Assign role to member
+  const assignRole = useMutation({
+    mutationFn: async ({ memberId, role, memberName }: { memberId: string; role: string; memberName: string }) => {
+      if (!user) throw new Error('Not authenticated');
+      
+      // Update the member's role using the proper clique_role column
+      const { error: memberError } = await supabase
+        .from('squad_members')
+        .update({
+          clique_role: role,
+          role_assigned_at: new Date().toISOString(),
+          role_assigned_by: user.id,
+        })
+        .eq('id', memberId);
+      
+      if (memberError) throw memberError;
+      
+      // Post role assignment notification to chat
+      await supabase
+        .from('squad_chat_messages')
+        .insert({
+          squad_id: cliqueId,
+          sender_id: user.id,
+          message: `🎭 **Role Assigned:** ${memberName} has been assigned as **${role}**!`,
+          sender_type: 'system',
+        });
+      
+      await auditLog({
+        action: 'assign_clique_role',
+        targetTable: 'squad_members',
+        targetId: memberId,
+        newValues: { role },
+      });
+    },
+    onSuccess: () => {
+      toast.success('Role assigned!');
+      setShowRoleDialog({ open: false, memberId: '', memberName: '' });
+      setSelectedRole('');
+      queryClient.invalidateQueries({ queryKey: ['admin-clique-members', cliqueId] });
+      queryClient.invalidateQueries({ queryKey: ['admin-clique-chat', cliqueId] });
+    },
+    onError: (error) => {
+      toast.error('Failed to assign role', { description: error.message });
+    },
+  });
 
   if (cliqueLoading || membersLoading) {
     return (
@@ -441,31 +503,38 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
                   <div className="space-y-3">
                     {messages.map((msg) => {
                       const sender = members.find(m => m.user_id === msg.sender_id);
-                      const isAdmin = msg.message.startsWith('[Admin]');
+                      const isBuggs = msg.sender_type === 'buggs';
+                      const isAdmin = msg.sender_type === 'admin';
+                      const isSystem = msg.sender_type === 'system';
+                      const isPromptResponse = msg.message.startsWith('📝 **Prompt Response:**');
                       
                       return (
                         <div
                           key={msg.id}
-                          className={`text-sm ${
-                            isAdmin 
-                              ? 'bg-primary/10 border border-primary/30 rounded-lg p-2' 
-                              : msg.is_prompt_response 
-                                ? 'bg-amber-500/10 border border-amber-500/30 rounded-lg p-2' 
-                                : ''
+                          className={`text-sm rounded-lg p-2 ${
+                            isBuggs 
+                              ? 'bg-orange-500/10 border border-orange-500/30' 
+                              : isAdmin
+                                ? 'bg-primary/10 border border-primary/30'
+                                : isSystem
+                                  ? 'bg-muted border border-border'
+                                  : isPromptResponse
+                                    ? 'bg-amber-500/10 border border-amber-500/30'
+                                    : ''
                           }`}
                         >
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <span className={`font-medium ${isAdmin ? 'text-primary' : 'text-foreground'}`}>
-                              {isAdmin ? '🛡️ Admin' : sender?.display_name || 'Unknown'}
+                            <span className={`font-medium ${isBuggs ? 'text-orange-600' : isAdmin ? 'text-primary' : 'text-foreground'}`}>
+                              {isBuggs ? '🐰 BUGGS' : isAdmin ? '🛡️ Admin' : isSystem ? '⚙️ System' : sender?.display_name || 'Unknown'}
                             </span>
-                            {msg.is_prompt_response && (
+                            {isPromptResponse && (
                               <Badge variant="outline" className="text-[10px] h-4">
                                 Prompt Response
                               </Badge>
                             )}
                             <span>{format(new Date(msg.created_at), 'h:mm a')}</span>
                           </div>
-                          <p className="mt-1">{isAdmin ? msg.message.replace('[Admin] ', '') : msg.message}</p>
+                          <p className="mt-1">{msg.message}</p>
                         </div>
                       );
                     })}
@@ -475,26 +544,59 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
               
               <Separator className="my-3" />
               
-              {/* Admin message input */}
-              <div className="flex gap-2">
-                <Input
-                  value={adminMessage}
-                  onChange={(e) => setAdminMessage(e.target.value)}
-                  placeholder="Send an admin message to the clique..."
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }
-                  }}
-                />
-                <Button
-                  size="icon"
-                  onClick={handleSendMessage}
-                  disabled={!adminMessage.trim() || sendAdminMessage.isPending}
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
+              {/* Admin message input with send-as toggle */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={initiateReadyCheck}
+                    disabled={sendAdminMessage.isPending}
+                    className="text-xs"
+                  >
+                    <Bell className="h-3 w-3 mr-1" />
+                    Ready Check
+                  </Button>
+                  <div className="flex-1" />
+                  <Button
+                    variant={sendAs === 'buggs' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSendAs('buggs')}
+                    className="text-xs"
+                  >
+                    <Bot className="h-3 w-3 mr-1" />
+                    BUGGS
+                  </Button>
+                  <Button
+                    variant={sendAs === 'admin' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSendAs('admin')}
+                    className="text-xs"
+                  >
+                    <ShieldCheck className="h-3 w-3 mr-1" />
+                    Admin
+                  </Button>
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    value={adminMessage}
+                    onChange={(e) => setAdminMessage(e.target.value)}
+                    placeholder={`Send message as ${sendAs === 'buggs' ? 'BUGGS 🐰' : 'Admin 🛡️'}...`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }
+                    }}
+                  />
+                  <Button
+                    size="icon"
+                    onClick={handleSendMessage}
+                    disabled={!adminMessage.trim() || sendAdminMessage.isPending}
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -507,6 +609,7 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
               <TableHeader>
                 <TableRow>
                   <TableHead>Member</TableHead>
+                  <TableHead>Role</TableHead>
                   <TableHead className="text-center">Prompt</TableHead>
                   <TableHead className="text-center">Ready</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -517,6 +620,7 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
                   const hasPrompt = !!member.prompt_response;
                   const hasConfirmed = !!member.readiness_confirmed_at;
                   const isReady = hasPrompt && hasConfirmed;
+                  const memberRole = (member.warm_up_progress as Record<string, string>)?.assigned_role || null;
                   
                   return (
                     <TableRow key={member.id}>
@@ -529,6 +633,15 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
                           </Avatar>
                           <span>{member.display_name || 'Unknown'}</span>
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        {memberRole ? (
+                          <Badge variant="secondary" className="text-xs">
+                            {memberRole}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground text-xs">—</span>
+                        )}
                       </TableCell>
                       <TableCell className="text-center">
                         {hasPrompt ? (
@@ -545,17 +658,28 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
                         )}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          variant={isReady ? "outline" : "default"}
-                          size="sm"
-                          onClick={() => overrideMemberProgress.mutate({ 
-                            memberId: member.id, 
-                            confirmed: !isReady 
-                          })}
-                          disabled={overrideMemberProgress.isPending}
-                        >
-                          {isReady ? 'Reset' : 'Mark Ready'}
-                        </Button>
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => setShowRoleDialog({ open: true, memberId: member.id, memberName: member.display_name || 'Member' })}
+                            title="Assign Role"
+                          >
+                            <UserCog className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant={isReady ? "outline" : "default"}
+                            size="sm"
+                            onClick={() => overrideMemberProgress.mutate({ 
+                              memberId: member.id, 
+                              confirmed: !isReady 
+                            })}
+                            disabled={overrideMemberProgress.isPending}
+                          >
+                            {isReady ? 'Reset' : 'Mark Ready'}
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
@@ -732,6 +856,55 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowProgressDialog(false)}>
               Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Role Assignment Dialog */}
+      <Dialog open={showRoleDialog.open} onOpenChange={(open) => setShowRoleDialog(prev => ({ ...prev, open }))}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Assign Role</DialogTitle>
+            <DialogDescription>
+              Assign a role to {showRoleDialog.memberName}. This will be announced in the clique chat.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-3 py-4">
+            {['Navigator', 'Archivist', 'Timekeeper', 'Scout', 'Connector'].map((role) => (
+              <Button
+                key={role}
+                variant={selectedRole === role ? 'default' : 'outline'}
+                className="w-full justify-start"
+                onClick={() => setSelectedRole(role)}
+              >
+                {role === 'Navigator' && '🧭 '}
+                {role === 'Archivist' && '📚 '}
+                {role === 'Timekeeper' && '⏱️ '}
+                {role === 'Scout' && '🔍 '}
+                {role === 'Connector' && '🤝 '}
+                {role}
+              </Button>
+            ))}
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowRoleDialog({ open: false, memberId: '', memberName: '' });
+              setSelectedRole('');
+            }}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => assignRole.mutate({ 
+                memberId: showRoleDialog.memberId, 
+                role: selectedRole, 
+                memberName: showRoleDialog.memberName 
+              })}
+              disabled={!selectedRole || assignRole.isPending}
+            >
+              {assignRole.isPending ? 'Assigning...' : 'Assign Role'}
             </Button>
           </DialogFooter>
         </DialogContent>
