@@ -29,7 +29,7 @@ export interface TransitionOptions {
 const ALLOWED_TRANSITIONS: Record<InstanceStatus, InstanceStatus[]> = {
   draft: ['recruiting', 'cancelled'],
   recruiting: ['locked', 'paused', 'cancelled'],
-  locked: ['live', 'paused', 'cancelled'],
+  locked: ['recruiting', 'live', 'paused', 'cancelled'], // Can unlock back to recruiting
   live: ['completed', 'paused'],
   paused: ['recruiting', 'locked', 'live', 'cancelled'], // Resume to previous or cancel
   completed: ['archived'],
