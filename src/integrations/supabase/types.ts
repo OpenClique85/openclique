@@ -5964,6 +5964,20 @@ export type Database = {
             referencedRelation: "quest_squads"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "squad_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "squad_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       squad_quest_invites: {

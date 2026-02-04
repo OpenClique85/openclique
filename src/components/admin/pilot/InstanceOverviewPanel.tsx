@@ -122,16 +122,28 @@ export function InstanceOverviewPanel({ instance, onStatusChange }: InstanceOver
               )}
             </div>
             
-            {statusConfig.next && (
-              <Button 
-                onClick={() => onStatusChange(statusConfig.next!)}
-                size={isMajorAction ? 'lg' : 'default'}
-                className={isMajorAction ? 'bg-primary hover:bg-primary/90 shadow-md' : ''}
-              >
-                {getNextIcon()}
-                {statusConfig.nextLabel}
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              {instance.status === 'locked' && (
+                <Button
+                  variant="outline"
+                  onClick={() => onStatusChange('recruiting')}
+                >
+                  <ChevronRight className="h-4 w-4 mr-2 rotate-180" />
+                  Unlock Squads
+                </Button>
+              )}
+
+              {statusConfig.next && (
+                <Button 
+                  onClick={() => onStatusChange(statusConfig.next!)}
+                  size={isMajorAction ? 'lg' : 'default'}
+                  className={isMajorAction ? 'bg-primary hover:bg-primary/90 shadow-md' : ''}
+                >
+                  {getNextIcon()}
+                  {statusConfig.nextLabel}
+                </Button>
+              )}
+            </div>
           </div>
           
           {/* Helpful hint for major actions */}
