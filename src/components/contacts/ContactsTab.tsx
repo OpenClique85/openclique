@@ -35,6 +35,7 @@ interface ContactsTabProps {
 }
 
 export function ContactsTab({ userId }: ContactsTabProps) {
+  const { profile } = useAuth();
   const { 
     contacts, 
     pendingRequests, 
@@ -57,6 +58,9 @@ export function ContactsTab({ userId }: ContactsTabProps) {
 
   return (
     <div className="space-y-6">
+      {/* Connect with People Section - moved here from Profile header */}
+      <FindPeopleSection friendCode={profile?.friend_code} />
+
       {/* Pending Requests Banner */}
       {pendingRequests.length > 0 && (
         <Card className="border-primary/30 bg-primary/5">
