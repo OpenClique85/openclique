@@ -49,9 +49,7 @@ interface CliqueWithInstance {
     title: string;
     scheduled_date: string;
     start_time: string;
-    warm_up_prompt_id: string | null;
     warm_up_min_ready_pct: number | null;
-    warm_up_required: boolean | null;
   } | null;
 }
 
@@ -78,7 +76,7 @@ export function useCliqueWarmUp(cliqueId: string | null) {
       // Fetch quest instance separately
       const { data: instance } = await supabase
         .from('quest_instances')
-        .select('id, title, scheduled_date, start_time, warm_up_prompt_id, warm_up_min_ready_pct, warm_up_required')
+        .select('id, title, scheduled_date, start_time')
         .eq('id', data.quest_id)
         .single();
       
@@ -130,18 +128,18 @@ export function useCliqueWarmUp(cliqueId: string | null) {
     enabled: !!cliqueId,
   });
 
-  // Fetch warm-up prompt
+  // Fetch warm-up prompt - get a random one from message_templates
   const { data: prompt } = useQuery({
-    queryKey: ['warm-up-prompt', clique?.quest_instances?.warm_up_prompt_id],
+    queryKey: ['warm-up-prompt', cliqueId],
     queryFn: async () => {
-      const promptId = clique?.quest_instances?.warm_up_prompt_id;
+      // Get a random warm-up prompt from message_templates
+      const { data, error } = await supabase
+        .from('message_templates')
+        .select('id, name, body')
+        .eq('category', 'warm_up')
+        .limit(1)
+        .single();
       
-      // If no specific prompt assigned, get a random warm-up prompt
-      const query = promptId
-        ? supabase.from('message_templates').select('id, name, body').eq('id', promptId).single()
-        : supabase.from('message_templates').select('id, name, body').eq('category', 'warm_up').limit(1).single();
-      
-      const { data, error } = await query;
       if (error) return null;
       return data as WarmUpPrompt;
     },

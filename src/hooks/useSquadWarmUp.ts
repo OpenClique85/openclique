@@ -49,7 +49,6 @@ interface SquadWithInstance {
     title: string;
     scheduled_date: string;
     start_time: string;
-    warm_up_prompt_id?: string | null;
   } | null;
 }
 
@@ -77,7 +76,7 @@ export function useSquadWarmUp(squadId: string | null) {
       const instanceId = data.instance_id || data.quest_id;
       const { data: instance } = await supabase
         .from('quest_instances')
-        .select('id, title, scheduled_date, start_time, warm_up_prompt_id, warm_up_min_ready_pct, warm_up_required')
+        .select('id, title, scheduled_date, start_time')
         .eq('id', instanceId)
         .single();
       
@@ -129,18 +128,18 @@ export function useSquadWarmUp(squadId: string | null) {
     enabled: !!squadId,
   });
 
-  // Fetch warm-up prompt
+  // Fetch warm-up prompt - get a random one from message_templates
   const { data: prompt } = useQuery({
-    queryKey: ['warm-up-prompt', squad?.quest_instances?.warm_up_prompt_id],
+    queryKey: ['warm-up-prompt', squadId],
     queryFn: async () => {
-      const promptId = squad?.quest_instances?.warm_up_prompt_id;
+      // Get a random warm-up prompt from message_templates
+      const { data, error } = await supabase
+        .from('message_templates')
+        .select('id, name, body')
+        .eq('category', 'warm_up')
+        .limit(1)
+        .single();
       
-      // If no specific prompt assigned, get a random warm-up prompt
-      const query = promptId
-        ? supabase.from('message_templates').select('id, name, body').eq('id', promptId).single()
-        : supabase.from('message_templates').select('id, name, body').eq('category', 'warm_up').limit(1).single();
-      
-      const { data, error } = await query;
       if (error) return null;
       return data as WarmUpPrompt;
     },
