@@ -104,132 +104,229 @@ export function CliquesTab({ userId }: CliquesTabProps) {
     }
   };
 
-  // Fetch user's cliques
+  // Fetch user's cliques (both persistent and quest-based)
   useEffect(() => {
     const fetchCliques = async () => {
       setIsLoading(true);
       
-      const { data: memberships } = await supabase
+      // 1. Fetch persistent cliques (from squads table)
+      const { data: persistentMemberships } = await supabase
         .from('squad_members')
         .select('persistent_squad_id')
         .eq('user_id', userId)
         .eq('status', 'active')
         .not('persistent_squad_id', 'is', null);
 
-      if (!memberships || memberships.length === 0) {
-        setIsLoading(false);
-        return;
+      const persistentCliqueIds = persistentMemberships
+        ?.map(m => m.persistent_squad_id)
+        .filter((id): id is string => id !== null) || [];
+
+      // 2. Fetch quest-based cliques (from quest_squads where user is a member)
+      const { data: questMemberships } = await supabase
+        .from('squad_members')
+        .select('squad_id')
+        .eq('user_id', userId)
+        .eq('status', 'active')
+        .not('squad_id', 'is', null);
+
+      const questSquadIds = questMemberships
+        ?.map(m => m.squad_id)
+        .filter((id): id is string => id !== null) || [];
+
+      // Fetch quest squads data
+      let questBasedCliques: Clique[] = [];
+      if (questSquadIds.length > 0) {
+        const { data: questSquadsData } = await supabase
+          .from('quest_squads')
+          .select(`
+            id, 
+            squad_name, 
+            status,
+            instance_id,
+            quest_instances(id, title, scheduled_date, start_datetime)
+          `)
+          .in('id', questSquadIds)
+          .in('status', ['warming_up', 'ready_for_review', 'approved', 'active', 'completed']);
+
+        if (questSquadsData) {
+          questBasedCliques = await Promise.all(
+            questSquadsData.map(async (squad: any) => {
+              // Get members
+              const { data: members } = await supabase
+                .from('squad_members')
+                .select('user_id, role, clique_role')
+                .eq('squad_id', squad.id)
+                .eq('status', 'active');
+
+              const memberUserIds = members?.map(m => m.user_id) || [];
+              const { data: profiles } = await supabase
+                .from('profiles')
+                .select('id, display_name')
+                .in('id', memberUserIds);
+
+              const membersWithNames: CliqueMember[] = (members || []).map(m => {
+                const profile = profiles?.find(p => p.id === m.user_id);
+                return {
+                  user_id: m.user_id,
+                  display_name: profile?.display_name || 'Unknown',
+                  role: (m.role as 'leader' | 'member') || 'member'
+                };
+              });
+
+              // Get last message
+              const { data: lastMessageData } = await supabase
+                .from('squad_chat_messages')
+                .select('message, sender_id, created_at')
+                .eq('squad_id', squad.id)
+                .is('hidden_at', null)
+                .order('created_at', { ascending: false })
+                .limit(1);
+
+              let lastMessage = null;
+              if (lastMessageData && lastMessageData.length > 0) {
+                const msg = lastMessageData[0];
+                const senderProfile = profiles?.find(p => p.id === msg.sender_id);
+                lastMessage = {
+                  message: msg.message,
+                  sender_name: senderProfile?.display_name || 'Unknown',
+                  created_at: msg.created_at
+                };
+              }
+
+              // Format the name with quest context
+              const instance = squad.quest_instances as any;
+              const questName = instance?.title || 'Quest';
+              const displayName = squad.squad_name || `${questName} Clique`;
+
+              return {
+                id: squad.id,
+                name: displayName,
+                created_at: instance?.scheduled_date || new Date().toISOString(),
+                members: membersWithNames,
+                quest_count: 1,
+                next_quest: instance ? {
+                  id: instance.id,
+                  title: questName,
+                  start_datetime: instance.start_datetime || instance.scheduled_date,
+                  icon: '🎯'
+                } : null,
+                last_message: lastMessage,
+                // Extra metadata for quest cliques
+                _isQuestClique: true,
+                _status: squad.status,
+              } as Clique & { _isQuestClique?: boolean; _status?: string };
+            })
+          );
+        }
       }
 
-      const cliqueIds = memberships
-        .map(m => m.persistent_squad_id)
-        .filter((id): id is string => id !== null);
+      // 3. Fetch persistent cliques
+      let persistentCliques: Clique[] = [];
+      if (persistentCliqueIds.length > 0) {
+        const { data: cliqueData } = await supabase
+          .from('squads')
+          .select('id, name, created_at')
+          .in('id', persistentCliqueIds);
 
-      if (cliqueIds.length === 0) {
-        setIsLoading(false);
-        return;
-      }
+        if (cliqueData) {
+          persistentCliques = await Promise.all(
+            cliqueData.map(async (clique) => {
+              const { data: members } = await supabase
+                .from('squad_members')
+                .select('user_id, role')
+                .eq('persistent_squad_id', clique.id)
+                .eq('status', 'active');
 
-      const { data: cliqueData } = await supabase
-        .from('squads')
-        .select('id, name, created_at')
-        .in('id', cliqueIds);
+              const memberUserIds = members?.map(m => m.user_id) || [];
+              const { data: profiles } = await supabase
+                .from('profiles')
+                .select('id, display_name')
+                .in('id', memberUserIds);
 
-      if (!cliqueData) {
-        setIsLoading(false);
-        return;
-      }
+              const membersWithNames: CliqueMember[] = (members || []).map(m => {
+                const profile = profiles?.find(p => p.id === m.user_id);
+                return {
+                  user_id: m.user_id,
+                  display_name: profile?.display_name || 'Unknown',
+                  role: (m.role as 'leader' | 'member') || 'member'
+                };
+              });
 
-      const cliquesWithDetails: Clique[] = await Promise.all(
-        cliqueData.map(async (clique) => {
-          const { data: members } = await supabase
-            .from('squad_members')
-            .select('user_id, role')
-            .eq('persistent_squad_id', clique.id)
-            .eq('status', 'active');
+              const { count: questCount } = await supabase
+                .from('squad_quest_invites')
+                .select('id', { count: 'exact', head: true })
+                .eq('squad_id', clique.id)
+                .eq('status', 'accepted');
 
-          const memberUserIds = members?.map(m => m.user_id) || [];
-          const { data: profiles } = await supabase
-            .from('profiles')
-            .select('id, display_name')
-            .in('id', memberUserIds);
+              const { data: upcomingInvites } = await supabase
+                .from('squad_quest_invites')
+                .select(`
+                  quest_instance_id,
+                  quest_instances!inner(
+                    id,
+                    start_datetime,
+                    quests(id, title, icon)
+                  )
+                `)
+                .eq('squad_id', clique.id)
+                .eq('status', 'accepted')
+                .gte('quest_instances.start_datetime', new Date().toISOString())
+                .order('quest_instances(start_datetime)', { ascending: true })
+                .limit(1);
 
-          const membersWithNames: CliqueMember[] = (members || []).map(m => {
-            const profile = profiles?.find(p => p.id === m.user_id);
-            return {
-              user_id: m.user_id,
-              display_name: profile?.display_name || 'Unknown',
-              role: (m.role as 'leader' | 'member') || 'member'
-            };
-          });
+              let nextQuest = null;
+              if (upcomingInvites && upcomingInvites.length > 0) {
+                const invite = upcomingInvites[0] as any;
+                if (invite.quest_instances?.quests) {
+                  nextQuest = {
+                    id: invite.quest_instances.quests.id,
+                    title: invite.quest_instances.quests.title,
+                    start_datetime: invite.quest_instances.start_datetime,
+                    icon: invite.quest_instances.quests.icon
+                  };
+                }
+              }
 
-          const { count: questCount } = await supabase
-            .from('squad_quest_invites')
-            .select('id', { count: 'exact', head: true })
-            .eq('squad_id', clique.id)
-            .eq('status', 'accepted');
+              const { data: lastMessageData } = await supabase
+                .from('squad_chat_messages')
+                .select('message, sender_id, created_at')
+                .eq('squad_id', clique.id)
+                .is('hidden_at', null)
+                .order('created_at', { ascending: false })
+                .limit(1);
 
-          const { data: upcomingInvites } = await supabase
-            .from('squad_quest_invites')
-            .select(`
-              quest_instance_id,
-              quest_instances!inner(
-                id,
-                start_datetime,
-                quests(id, title, icon)
-              )
-            `)
-            .eq('squad_id', clique.id)
-            .eq('status', 'accepted')
-            .gte('quest_instances.start_datetime', new Date().toISOString())
-            .order('quest_instances(start_datetime)', { ascending: true })
-            .limit(1);
+              let lastMessage = null;
+              if (lastMessageData && lastMessageData.length > 0) {
+                const msg = lastMessageData[0];
+                const senderProfile = profiles?.find(p => p.id === msg.sender_id);
+                lastMessage = {
+                  message: msg.message,
+                  sender_name: senderProfile?.display_name || 'Unknown',
+                  created_at: msg.created_at
+                };
+              }
 
-          let nextQuest = null;
-          if (upcomingInvites && upcomingInvites.length > 0) {
-            const invite = upcomingInvites[0] as any;
-            if (invite.quest_instances?.quests) {
-              nextQuest = {
-                id: invite.quest_instances.quests.id,
-                title: invite.quest_instances.quests.title,
-                start_datetime: invite.quest_instances.start_datetime,
-                icon: invite.quest_instances.quests.icon
+              return {
+                id: clique.id,
+                name: clique.name,
+                created_at: clique.created_at,
+                members: membersWithNames,
+                quest_count: questCount || 0,
+                next_quest: nextQuest,
+                last_message: lastMessage
               };
-            }
-          }
+            })
+          );
+        }
+      }
 
-          const { data: lastMessageData } = await supabase
-            .from('squad_chat_messages')
-            .select('message, sender_id, created_at')
-            .eq('squad_id', clique.id)
-            .is('hidden_at', null)
-            .order('created_at', { ascending: false })
-            .limit(1);
-
-          let lastMessage = null;
-          if (lastMessageData && lastMessageData.length > 0) {
-            const msg = lastMessageData[0];
-            const senderProfile = profiles?.find(p => p.id === msg.sender_id);
-            lastMessage = {
-              message: msg.message,
-              sender_name: senderProfile?.display_name || 'Unknown',
-              created_at: msg.created_at
-            };
-          }
-
-          return {
-            id: clique.id,
-            name: clique.name,
-            created_at: clique.created_at,
-            members: membersWithNames,
-            quest_count: questCount || 0,
-            next_quest: nextQuest,
-            last_message: lastMessage
-          };
-        })
+      // Combine and dedupe (prefer quest cliques if both exist)
+      const allCliques = [...questBasedCliques, ...persistentCliques];
+      const uniqueCliques = allCliques.filter((clique, index, self) => 
+        index === self.findIndex(c => c.id === clique.id)
       );
 
-      setCliques(cliquesWithDetails);
+      setCliques(uniqueCliques);
       setIsLoading(false);
     };
 
