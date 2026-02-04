@@ -514,185 +514,323 @@ export function CliquesTab({ userId }: CliquesTabProps) {
         </div>
 
         {/* My Cliques Content */}
-        <TabsContent value="my-cliques" className="mt-4">
-          {cliques.length === 0 ? (
-            <Card className="border-dashed">
-              <CardContent className="py-12 text-center">
-                <Users className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-                <h3 className="text-lg font-display font-semibold mb-2">No Cliques Yet</h3>
-                <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                  Form your own clique with friends, or find an open clique to join.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                  <Button asChild>
-                    <Link to="/cliques/new">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Form a Clique
-                    </Link>
-                  </Button>
-                  <Button variant="outline" onClick={() => handleSubTabChange('find-clique')}>
-                    <Search className="h-4 w-4 mr-2" />
-                    Find a Clique
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-4">
-              {cliques.map((clique) => {
-                const leader = clique.members.find(m => m.role === 'leader');
-                const isCurrentUserLeader = leader?.user_id === userId;
-                const isQuestClique = (clique as any)._isQuestClique;
-                const cliqueStatus = (clique as any)._status;
+        <TabsContent value="my-cliques" className="mt-4 space-y-6">
+          {/* Active Quest Cliques Section */}
+          {(() => {
+            const questCliques = cliques.filter((c: any) => c._isQuestClique);
+            if (questCliques.length === 0) return null;
+            
+            return (
+              <section>
+                <h3 className="text-lg font-display font-semibold mb-3 flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  Active Quest Cliques ({questCliques.length})
+                </h3>
+                <div className="space-y-4">
+                  {questCliques.map((clique) => {
+                    const leader = clique.members.find(m => m.role === 'leader');
+                    const isCurrentUserLeader = leader?.user_id === userId;
+                    const cliqueStatus = (clique as any)._status;
 
-                // Determine destination based on clique type and status
-                const getCliqueDestination = () => {
-                  if (isQuestClique) {
-                    // Quest cliques go to warmup room
-                    return `/warmup/${clique.id}`;
-                  }
-                  return `/cliques/${clique.id}`;
-                };
-
-                return (
-                  <Card 
-                    key={clique.id} 
-                    className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer group"
-                  >
-                    <CardContent className="p-0">
-                      {/* Header */}
-                      <div className="p-4 pb-3 border-b bg-gradient-to-r from-primary/5 to-transparent">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2.5 rounded-full bg-primary/10">
-                              <Users className="h-5 w-5 text-primary" />
+                    return (
+                      <Card 
+                        key={clique.id} 
+                        className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer group border-primary/20"
+                      >
+                        <CardContent className="p-0">
+                          {/* Header */}
+                          <div className="p-4 pb-3 border-b bg-gradient-to-r from-primary/10 to-transparent">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2.5 rounded-full bg-primary/20">
+                                  <Sparkles className="h-5 w-5 text-primary" />
+                                </div>
+                                <div>
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <h3 className="font-display font-semibold text-lg">
+                                      {clique.name}
+                                    </h3>
+                                    <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
+                                      🎯 Quest Clique
+                                    </Badge>
+                                    {isCurrentUserLeader && (
+                                      <Badge variant="outline" className="text-xs border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300">
+                                        <Crown className="h-3 w-3 mr-1" />
+                                        Leader
+                                      </Badge>
+                                    )}
+                                    {cliqueStatus && cliqueStatus === 'warming_up' && (
+                                      <Badge variant="outline" className="text-xs border-orange-500/30 bg-orange-500/10 text-orange-700 dark:text-orange-300">
+                                        Warming Up
+                                      </Badge>
+                                    )}
+                                    {cliqueStatus && cliqueStatus === 'approved' && (
+                                      <Badge variant="outline" className="text-xs border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+                                        Ready
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  <p className="text-sm text-muted-foreground">
+                                    {clique.members.length} members
+                                  </p>
+                                </div>
+                              </div>
+                              <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
                             </div>
-                            <div>
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <h3 className="font-display font-semibold text-lg">
-                                  {clique.name}
-                                </h3>
-                                {isQuestClique && (
-                                  <Badge variant="secondary" className="text-xs">
-                                    🎯 Quest Clique
-                                  </Badge>
+                          </div>
+
+                          {/* Members */}
+                          <div className="px-4 py-3 border-b">
+                            <div className="flex items-center gap-2">
+                              <div className="flex -space-x-2">
+                                {clique.members.slice(0, 5).map((member) => (
+                                  <Avatar key={member.user_id} className="h-8 w-8 border-2 border-background">
+                                    <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                                      {member.display_name.charAt(0).toUpperCase()}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                ))}
+                                {clique.members.length > 5 && (
+                                  <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium border-2 border-background">
+                                    +{clique.members.length - 5}
+                                  </div>
                                 )}
-                                {isCurrentUserLeader && (
-                                  <Badge variant="outline" className="text-xs border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300">
-                                    <Crown className="h-3 w-3 mr-1" />
-                                    Leader
-                                  </Badge>
-                                )}
-                                {cliqueStatus && cliqueStatus === 'warming_up' && (
-                                  <Badge variant="outline" className="text-xs border-orange-500/30 bg-orange-500/10 text-orange-700 dark:text-orange-300">
-                                    Warming Up
+                              </div>
+                              <span className="text-sm text-muted-foreground">
+                                {clique.members.map(m => m.display_name).join(', ')}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Quest Info */}
+                          {clique.next_quest && (
+                            <div className="px-4 py-3 border-b bg-muted/30">
+                              <div className="flex items-center gap-2 text-sm">
+                                <Calendar className="h-4 w-4 text-primary" />
+                                <span className="font-medium">Quest:</span>
+                                <span className="text-muted-foreground">
+                                  {clique.next_quest.icon} {clique.next_quest.title}
+                                </span>
+                                {clique.next_quest.start_datetime && (
+                                  <Badge variant="secondary" className="ml-auto text-xs">
+                                    {format(new Date(clique.next_quest.start_datetime), 'MMM d')}
                                   </Badge>
                                 )}
                               </div>
-                              <p className="text-sm text-muted-foreground">
-                                {clique.members.length} members 
-                                {!isQuestClique && ` • Formed ${format(new Date(clique.created_at), 'MMM yyyy')}`}
-                              </p>
                             </div>
-                          </div>
-                          <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                        </div>
-                      </div>
-
-                      {/* Members */}
-                      <div className="px-4 py-3 border-b">
-                        <div className="flex items-center gap-2">
-                          <div className="flex -space-x-2">
-                            {clique.members.slice(0, 5).map((member) => (
-                              <Avatar key={member.user_id} className="h-8 w-8 border-2 border-background">
-                                <AvatarFallback className="text-xs bg-primary/10 text-primary">
-                                  {member.display_name.charAt(0).toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                            ))}
-                            {clique.members.length > 5 && (
-                              <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium border-2 border-background">
-                                +{clique.members.length - 5}
-                              </div>
-                            )}
-                          </div>
-                          {leader && (
-                            <span className="text-sm text-muted-foreground flex items-center gap-1">
-                              <Crown className="h-3 w-3 text-amber-600 dark:text-amber-400" />
-                              {leader.display_name}
-                            </span>
                           )}
-                        </div>
-                      </div>
 
-                      {/* Next Quest */}
-                      {clique.next_quest && (
-                        <div className="px-4 py-3 border-b bg-muted/30">
-                          <div className="flex items-center gap-2 text-sm">
-                            <Calendar className="h-4 w-4 text-primary" />
-                            <span className="font-medium">{isQuestClique ? 'Quest:' : 'Next:'}</span>
-                            <span className="text-muted-foreground">
-                              {clique.next_quest.icon} {clique.next_quest.title}
-                            </span>
-                            {clique.next_quest.start_datetime && (
-                              <Badge variant="secondary" className="ml-auto text-xs">
-                                {format(new Date(clique.next_quest.start_datetime), 'MMM d')}
-                              </Badge>
-                            )}
+                          {/* Last Message */}
+                          {clique.last_message && (
+                            <div className="px-4 py-3 border-b">
+                              <div className="flex items-start gap-2 text-sm">
+                                <MessageCircle className="h-4 w-4 text-muted-foreground mt-0.5" />
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-muted-foreground truncate">
+                                    <span className="font-medium text-foreground">{clique.last_message.sender_name}:</span>{' '}
+                                    "{clique.last_message.message}"
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Actions */}
+                          <div className="p-4">
+                            <Button 
+                              variant="default" 
+                              size="sm" 
+                              className="w-full"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/warmup/${clique.id}`);
+                              }}
+                            >
+                              <MessageCircle className="h-4 w-4 mr-2" />
+                              Open Clique Chat
+                            </Button>
                           </div>
-                        </div>
-                      )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </section>
+            );
+          })()}
 
-                      {/* Last Message */}
-                      {clique.last_message && (
-                        <div className="px-4 py-3 border-b">
-                          <div className="flex items-start gap-2 text-sm">
-                            <MessageCircle className="h-4 w-4 text-muted-foreground mt-0.5" />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-muted-foreground truncate">
-                                <span className="font-medium text-foreground">{clique.last_message.sender_name}:</span>{' '}
-                                "{clique.last_message.message}"
-                              </p>
+          {/* Persistent Cliques Section */}
+          {(() => {
+            const persistentCliques = cliques.filter((c: any) => !c._isQuestClique);
+            const questCliques = cliques.filter((c: any) => c._isQuestClique);
+            
+            if (persistentCliques.length === 0 && questCliques.length === 0) {
+              return (
+                <Card className="border-dashed">
+                  <CardContent className="py-12 text-center">
+                    <Users className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+                    <h3 className="text-lg font-display font-semibold mb-2">No Cliques Yet</h3>
+                    <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                      Form your own clique with friends, or find an open clique to join.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <Button asChild>
+                        <Link to="/cliques/new">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Form a Clique
+                        </Link>
+                      </Button>
+                      <Button variant="outline" onClick={() => handleSubTabChange('find-clique')}>
+                        <Search className="h-4 w-4 mr-2" />
+                        Find a Clique
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            }
+            
+            if (persistentCliques.length === 0) return null;
+            
+            return (
+              <section>
+                <h3 className="text-lg font-display font-semibold mb-3 flex items-center gap-2">
+                  <Users className="h-5 w-5 text-muted-foreground" />
+                  My Cliques ({persistentCliques.length})
+                </h3>
+                <div className="space-y-4">
+                  {persistentCliques.map((clique) => {
+                    const leader = clique.members.find(m => m.role === 'leader');
+                    const isCurrentUserLeader = leader?.user_id === userId;
+
+                    return (
+                      <Card 
+                        key={clique.id} 
+                        className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer group"
+                      >
+                        <CardContent className="p-0">
+                          {/* Header */}
+                          <div className="p-4 pb-3 border-b bg-gradient-to-r from-primary/5 to-transparent">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2.5 rounded-full bg-primary/10">
+                                  <Users className="h-5 w-5 text-primary" />
+                                </div>
+                                <div>
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <h3 className="font-display font-semibold text-lg">
+                                      {clique.name}
+                                    </h3>
+                                    {isCurrentUserLeader && (
+                                      <Badge variant="outline" className="text-xs border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300">
+                                        <Crown className="h-3 w-3 mr-1" />
+                                        Leader
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  <p className="text-sm text-muted-foreground">
+                                    {clique.members.length} members • Formed {format(new Date(clique.created_at), 'MMM yyyy')}
+                                  </p>
+                                </div>
+                              </div>
+                              <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
                             </div>
                           </div>
-                        </div>
-                      )}
 
-                      {/* Actions */}
-                      <div className="p-4 flex gap-2">
-                        <Button 
-                          variant="default" 
-                          size="sm" 
-                          className="flex-1"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(getCliqueDestination());
-                          }}
-                        >
-                          <MessageCircle className="h-4 w-4 mr-2" />
-                          {isQuestClique ? 'Open Chat' : 'View Clique'}
-                        </Button>
-                        {!isQuestClique && (
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            className="flex-1"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleSuggestQuest(clique);
-                            }}
-                          >
-                            <Sparkles className="h-4 w-4 mr-2" />
-                            Suggest Quest
-                          </Button>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
+                          {/* Members */}
+                          <div className="px-4 py-3 border-b">
+                            <div className="flex items-center gap-2">
+                              <div className="flex -space-x-2">
+                                {clique.members.slice(0, 5).map((member) => (
+                                  <Avatar key={member.user_id} className="h-8 w-8 border-2 border-background">
+                                    <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                                      {member.display_name.charAt(0).toUpperCase()}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                ))}
+                                {clique.members.length > 5 && (
+                                  <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium border-2 border-background">
+                                    +{clique.members.length - 5}
+                                  </div>
+                                )}
+                              </div>
+                              {leader && (
+                                <span className="text-sm text-muted-foreground flex items-center gap-1">
+                                  <Crown className="h-3 w-3 text-amber-600 dark:text-amber-400" />
+                                  {leader.display_name}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Next Quest */}
+                          {clique.next_quest && (
+                            <div className="px-4 py-3 border-b bg-muted/30">
+                              <div className="flex items-center gap-2 text-sm">
+                                <Calendar className="h-4 w-4 text-primary" />
+                                <span className="font-medium">Next:</span>
+                                <span className="text-muted-foreground">
+                                  {clique.next_quest.icon} {clique.next_quest.title}
+                                </span>
+                                {clique.next_quest.start_datetime && (
+                                  <Badge variant="secondary" className="ml-auto text-xs">
+                                    {format(new Date(clique.next_quest.start_datetime), 'MMM d')}
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Last Message */}
+                          {clique.last_message && (
+                            <div className="px-4 py-3 border-b">
+                              <div className="flex items-start gap-2 text-sm">
+                                <MessageCircle className="h-4 w-4 text-muted-foreground mt-0.5" />
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-muted-foreground truncate">
+                                    <span className="font-medium text-foreground">{clique.last_message.sender_name}:</span>{' '}
+                                    "{clique.last_message.message}"
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Actions */}
+                          <div className="p-4 flex gap-2">
+                            <Button 
+                              variant="default" 
+                              size="sm" 
+                              className="flex-1"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/cliques/${clique.id}`);
+                              }}
+                            >
+                              <MessageCircle className="h-4 w-4 mr-2" />
+                              View Clique
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              className="flex-1"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleSuggestQuest(clique);
+                              }}
+                            >
+                              <Sparkles className="h-4 w-4 mr-2" />
+                              Suggest Quest
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </section>
+            );
+          })()}
         </TabsContent>
 
         {/* Find a Clique (LFC) Content */}

@@ -42,6 +42,7 @@ type SignupWithJourney = SignupWithQuest & {
   squadStatus?: string | null;
   squadName?: string | null;
   questCardToken?: string | null;
+  squadMembers?: Array<{ user_id: string; display_name: string }>;
 };
 
 type RewardWithSponsor = Reward & {
@@ -134,6 +135,7 @@ export function QuestsTab({ userId }: QuestsTabProps) {
         squadStatus: string;
         squadName: string | null;
         questCardToken: string | null;
+        squadMembers: Array<{ user_id: string; display_name: string }>;
       }>();
       
       // Build a map of quest_id -> signup for matching
@@ -160,6 +162,43 @@ export function QuestsTab({ userId }: QuestsTabProps) {
           .eq('user_id', userId)
           .neq('status', 'dropped');
         
+        // Collect all squad IDs to fetch members
+        const squadIds = new Set<string>();
+        squadMemberships?.forEach(m => {
+          if (m.quest_squads) {
+            const squad = m.quest_squads as unknown as { id: string };
+            squadIds.add(squad.id);
+          }
+        });
+        
+        // Fetch all squad members for those squads
+        let membersBySquad = new Map<string, Array<{ user_id: string; display_name: string }>>();
+        if (squadIds.size > 0) {
+          const { data: allSquadMembers } = await supabase
+            .from('squad_members')
+            .select('squad_id, user_id')
+            .in('squad_id', Array.from(squadIds))
+            .eq('status', 'active');
+          
+          if (allSquadMembers && allSquadMembers.length > 0) {
+            const memberUserIds = allSquadMembers.map(m => m.user_id);
+            const { data: profiles } = await supabase
+              .from('profiles')
+              .select('id, display_name')
+              .in('id', memberUserIds);
+            
+            allSquadMembers.forEach(m => {
+              const profile = profiles?.find(p => p.id === m.user_id);
+              const existing = membersBySquad.get(m.squad_id) || [];
+              existing.push({
+                user_id: m.user_id,
+                display_name: profile?.display_name || 'Unknown'
+              });
+              membersBySquad.set(m.squad_id, existing);
+            });
+          }
+        }
+        
         squadMemberships?.forEach(m => {
           if (m.quest_squads) {
             const squad = m.quest_squads as unknown as {
@@ -184,6 +223,7 @@ export function QuestsTab({ userId }: QuestsTabProps) {
                 squadStatus: squad.status,
                 squadName: squad.squad_name,
                 questCardToken: squad.quest_instances?.quest_card_token || null,
+                squadMembers: membersBySquad.get(squad.id) || [],
               });
             }
           }
@@ -198,6 +238,7 @@ export function QuestsTab({ userId }: QuestsTabProps) {
           squadStatus: squadInfo?.squadStatus || null,
           squadName: squadInfo?.squadName || null,
           questCardToken: squadInfo?.questCardToken || null,
+          squadMembers: squadInfo?.squadMembers || [],
         };
       });
       
