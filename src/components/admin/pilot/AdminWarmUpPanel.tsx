@@ -631,7 +631,9 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
                   const hasPrompt = !!member.prompt_response;
                   const hasConfirmed = !!member.readiness_confirmed_at;
                   const isReady = hasPrompt && hasConfirmed;
-                  const memberRole = (member.warm_up_progress as Record<string, string>)?.assigned_role || null;
+                  // Use the clique_role column directly, with display label
+                  const memberRole = member.clique_role;
+                  const roleDisplayLabel = memberRole ? ROLE_LABELS[memberRole] || memberRole : null;
                   
                   return (
                     <TableRow key={member.id}>
@@ -646,9 +648,9 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {memberRole ? (
+                        {roleDisplayLabel ? (
                           <Badge variant="secondary" className="text-xs">
-                            {memberRole}
+                            {roleDisplayLabel}
                           </Badge>
                         ) : (
                           <span className="text-muted-foreground text-xs">—</span>
