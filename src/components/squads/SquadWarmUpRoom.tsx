@@ -369,6 +369,13 @@ export function SquadWarmUpRoom({ squadId, onInstructionsUnlocked }: SquadWarmUp
           </div>
         </div>
       )}
+
+      {/* Member Profile Sheet */}
+      <MemberProfileSheet
+        userId={selectedMemberId}
+        open={profileSheetOpen}
+        onOpenChange={setProfileSheetOpen}
+      />
     </div>
   );
 }
