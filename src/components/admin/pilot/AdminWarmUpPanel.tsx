@@ -347,6 +347,14 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
     toast.success('Ready Check sent to clique');
   };
 
+  // Role label mapping for display
+  const ROLE_LABELS: Record<string, string> = {
+    navigator: 'Navigator',
+    vibe_curator: 'Vibe Curator',
+    timekeeper: 'Timekeeper',
+    archivist: 'Archivist',
+  };
+
   // Assign role to member
   const assignRole = useMutation({
     mutationFn: async ({ memberId, role, memberName }: { memberId: string; role: string; memberName: string }) => {
@@ -364,13 +372,14 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
       
       if (memberError) throw memberError;
       
-      // Post role assignment notification to chat
+      // Post role assignment notification to chat with human-readable label
+      const roleLabel = ROLE_LABELS[role] || role;
       await supabase
         .from('squad_chat_messages')
         .insert({
           squad_id: cliqueId,
           sender_id: user.id,
-          message: `🎭 **Role Assigned:** ${memberName} has been assigned as **${role}**!`,
+          message: `🎭 **Role Assigned:** ${memberName} has been assigned as **${roleLabel}**!`,
           sender_type: 'system',
         });
       
