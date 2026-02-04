@@ -382,6 +382,23 @@ export default function QuestCard() {
           </CardContent>
         </Card>
 
+        {/* Quest Objectives */}
+        {instance.objectives && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Target className="h-5 w-5 text-primary" />
+                Quest Objectives
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground whitespace-pre-line">
+                {instance.objectives}
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Status-based Action Cards */}
         
         {/* Squad Warm-Up Redirect */}
