@@ -609,6 +609,7 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
               <TableHeader>
                 <TableRow>
                   <TableHead>Member</TableHead>
+                  <TableHead>Role</TableHead>
                   <TableHead className="text-center">Prompt</TableHead>
                   <TableHead className="text-center">Ready</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -619,6 +620,7 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
                   const hasPrompt = !!member.prompt_response;
                   const hasConfirmed = !!member.readiness_confirmed_at;
                   const isReady = hasPrompt && hasConfirmed;
+                  const memberRole = (member.warm_up_progress as Record<string, string>)?.assigned_role || null;
                   
                   return (
                     <TableRow key={member.id}>
@@ -631,6 +633,15 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
                           </Avatar>
                           <span>{member.display_name || 'Unknown'}</span>
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        {memberRole ? (
+                          <Badge variant="secondary" className="text-xs">
+                            {memberRole}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground text-xs">—</span>
+                        )}
                       </TableCell>
                       <TableCell className="text-center">
                         {hasPrompt ? (
@@ -647,17 +658,28 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
                         )}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          variant={isReady ? "outline" : "default"}
-                          size="sm"
-                          onClick={() => overrideMemberProgress.mutate({ 
-                            memberId: member.id, 
-                            confirmed: !isReady 
-                          })}
-                          disabled={overrideMemberProgress.isPending}
-                        >
-                          {isReady ? 'Reset' : 'Mark Ready'}
-                        </Button>
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => setShowRoleDialog({ open: true, memberId: member.id, memberName: member.display_name || 'Member' })}
+                            title="Assign Role"
+                          >
+                            <UserCog className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant={isReady ? "outline" : "default"}
+                            size="sm"
+                            onClick={() => overrideMemberProgress.mutate({ 
+                              memberId: member.id, 
+                              confirmed: !isReady 
+                            })}
+                            disabled={overrideMemberProgress.isPending}
+                          >
+                            {isReady ? 'Reset' : 'Mark Ready'}
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
