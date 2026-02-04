@@ -19,6 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useSquadWarmUp } from '@/hooks/useSquadWarmUp';
 import { SQUAD_STATUS_LABELS, shouldShowInstructions, SquadStatus } from '@/lib/squadLifecycle';
+import { MemberProfileSheet } from './MemberProfileSheet';
 
 interface SquadWarmUpRoomProps {
   squadId: string;
