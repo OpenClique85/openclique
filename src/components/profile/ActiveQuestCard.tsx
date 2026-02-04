@@ -63,6 +63,19 @@ interface ActiveQuestCardProps {
 export function ActiveQuestCard({ signup, isLive = false, onCancelClick }: ActiveQuestCardProps) {
   const navigate = useNavigate();
   const { data: stats } = useQuestStats(signup.quest.id);
+
+  const journeyOverrideBadge: { label: string; variant: 'default' | 'secondary' | 'outline' | 'destructive' } | null =
+    signup.squadStatus && ['warming_up', 'ready_for_review', 'approved', 'active', 'completed'].includes(signup.squadStatus)
+      ? {
+          label:
+            signup.squadStatus === 'ready_for_review'
+              ? 'Warm-Up Complete'
+              : signup.squadStatus === 'warming_up'
+              ? 'Warm-Up'
+              : 'Unlocked',
+          variant: 'default',
+        }
+      : null;
   
   const startDate = signup.quest.start_datetime ? new Date(signup.quest.start_datetime) : null;
   const endDate = signup.quest.end_datetime ? new Date(signup.quest.end_datetime) : null;
@@ -147,8 +160,8 @@ export function ActiveQuestCard({ signup, isLive = false, onCancelClick }: Activ
               </div>
             </div>
           </div>
-          <Badge variant={STATUS_BADGES[signup.status || 'pending'].variant}>
-            {STATUS_BADGES[signup.status || 'pending'].label}
+          <Badge variant={(journeyOverrideBadge || STATUS_BADGES[signup.status || 'pending']).variant}>
+            {(journeyOverrideBadge || STATUS_BADGES[signup.status || 'pending']).label}
           </Badge>
         </div>
       </CardHeader>

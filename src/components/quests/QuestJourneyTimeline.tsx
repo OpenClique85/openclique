@@ -30,21 +30,25 @@ function getCurrentStage(props: QuestJourneyTimelineProps): number {
   
   // Dropped/no-show = no journey shown (handled by parent)
   if (signupStatus === 'dropped' || signupStatus === 'no_show') return -1;
+
+  // IMPORTANT: If a user is already in a squad/clique, that state is the source of truth
+  // even if the underlying signup is still marked pending (can happen in admin flows).
+  if (squadId) {
+    // Stage 3: Squad approved, quest unlocked
+    if (['approved', 'active', 'completed'].includes(squadStatus || '')) return 3;
+
+    // Stage 2: In squad, warming up or ready for review
+    if (squadStatus === 'warming_up' || squadStatus === 'ready_for_review' || squadStatus === 'confirmed') return 2;
+
+    // Default: if we have a squad but unknown status, assume warm-up stage
+    return 2;
+  }
   
   // Stage 0: Signup pending review or standby
   if (signupStatus === 'pending' || signupStatus === 'standby') return 0;
   
   // Stage 1: Confirmed but no squad yet
   if (signupStatus === 'confirmed' && !squadId) return 1;
-  
-  // Stage 2: In squad, warming up or ready for review
-  if (squadStatus === 'warming_up' || squadStatus === 'ready_for_review' || squadStatus === 'confirmed') return 2;
-  
-  // Stage 3: Squad approved, quest unlocked
-  if (['approved', 'active', 'completed'].includes(squadStatus || '')) return 3;
-  
-  // Default to signup stage if we have a squad but unknown status
-  if (squadId) return 2;
   
   return 1;
 }
@@ -54,13 +58,15 @@ function getNextAction(props: QuestJourneyTimelineProps, currentStage: number): 
   cta?: { label: string; href: string };
 } | null {
   const { signupStatus, squadId, squadStatus, questCardToken } = props;
-  
-  if (signupStatus === 'standby') {
-    return { message: "You're on the waitlist. We'll notify you if a spot opens!" };
-  }
-  
-  if (signupStatus === 'pending') {
-    return { message: "Your signup is being reviewed. Hang tight!" };
+
+  // If a squad exists, don't show the generic "pending review" messaging.
+  if (!squadId) {
+    if (signupStatus === 'standby') {
+      return { message: "You're on the waitlist. We'll notify you if a spot opens!" };
+    }
+    if (signupStatus === 'pending') {
+      return { message: 'Your signup is being reviewed. Hang tight!' };
+    }
   }
   
   switch (currentStage) {
