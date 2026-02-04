@@ -347,11 +347,13 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
     mutationFn: async ({ memberId, role, memberName }: { memberId: string; role: string; memberName: string }) => {
       if (!user) throw new Error('Not authenticated');
       
-      // Update the member's role in squad_members (using warm_up_progress for now)
+      // Update the member's role using the proper clique_role column
       const { error: memberError } = await supabase
         .from('squad_members')
         .update({
-          warm_up_progress: { assigned_role: role },
+          clique_role: role,
+          role_assigned_at: new Date().toISOString(),
+          role_assigned_by: user.id,
         })
         .eq('id', memberId);
       
