@@ -987,6 +987,88 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Ice-Breaker Dialog */}
+      <Dialog open={showIcebreakerDialog} onOpenChange={setShowIcebreakerDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-amber-500" />
+              Send Ice-Breaker Prompt
+            </DialogTitle>
+            <DialogDescription>
+              Pick a pre-made prompt or write your own. This will be sent as BUGGS to the clique chat.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-2">
+            {/* Pre-made prompts */}
+            {warmUpPrompts.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Pick a prompt:</p>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {warmUpPrompts.map((prompt) => (
+                    <button
+                      key={prompt.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedPrompt(prompt);
+                        setCustomIcebreaker('');
+                      }}
+                      className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                        selectedPrompt?.id === prompt.id 
+                          ? 'border-primary bg-primary/10' 
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <p className="font-medium text-sm">{prompt.name}</p>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{prompt.body}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            <Separator />
+            
+            {/* Custom prompt */}
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Or write your own:</p>
+              <Textarea
+                placeholder="Write a custom ice-breaker prompt..."
+                value={customIcebreaker}
+                onChange={(e) => {
+                  setCustomIcebreaker(e.target.value);
+                  setSelectedPrompt(null);
+                }}
+                rows={3}
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowIcebreakerDialog(false);
+              setSelectedPrompt(null);
+              setCustomIcebreaker('');
+            }}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                const promptText = customIcebreaker.trim() || selectedPrompt?.body;
+                if (promptText) {
+                  sendIcebreakerPrompt(promptText);
+                }
+              }}
+              disabled={!selectedPrompt && !customIcebreaker.trim()}
+            >
+              <Sparkles className="h-4 w-4 mr-2" />
+              Send Ice-Breaker
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
