@@ -18,7 +18,7 @@ import { GetHelpButton } from '@/components/support';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, ArrowLeft, AlertCircle, Lock, CheckCircle2 } from 'lucide-react';
+import { Loader2, ArrowLeft, AlertCircle, Lock, CheckCircle2, ExternalLink } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 
