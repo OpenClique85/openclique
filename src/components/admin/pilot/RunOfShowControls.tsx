@@ -205,7 +205,20 @@ export function RunOfShowControls({ instance }: RunOfShowControlsProps) {
   };
 
   return (
-    <div className="grid lg:grid-cols-2 gap-6">
+    <Tabs defaultValue="messages" className="space-y-6">
+      <TabsList>
+        <TabsTrigger value="messages" className="flex items-center gap-2">
+          <Send className="h-4 w-4" />
+          Messages
+        </TabsTrigger>
+        <TabsTrigger value="cliques" className="flex items-center gap-2">
+          <Users className="h-4 w-4" />
+          Active Cliques
+        </TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="messages">
+        <div className="grid lg:grid-cols-2 gap-6">
       {/* Message Composer */}
       <Card>
         <CardHeader>
