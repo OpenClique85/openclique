@@ -108,6 +108,9 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
   const [selectedRole, setSelectedRole] = useState<string>('');
   const [approvalNotes, setApprovalNotes] = useState('');
   const [manualProgress, setManualProgress] = useState(0);
+  const [showIcebreakerDialog, setShowIcebreakerDialog] = useState(false);
+  const [selectedPrompt, setSelectedPrompt] = useState<{ id: string; name: string; body: string } | null>(null);
+  const [customIcebreaker, setCustomIcebreaker] = useState('');
 
   // Fetch clique data
   const { data: clique, isLoading: cliqueLoading } = useQuery({
