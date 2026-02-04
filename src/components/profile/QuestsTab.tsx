@@ -42,6 +42,7 @@ type SignupWithJourney = SignupWithQuest & {
   squadStatus?: string | null;
   squadName?: string | null;
   questCardToken?: string | null;
+  squadMembers?: Array<{ user_id: string; display_name: string }>;
 };
 
 type RewardWithSponsor = Reward & {
