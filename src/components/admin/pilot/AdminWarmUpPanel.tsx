@@ -872,19 +872,24 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
           </DialogHeader>
           
           <div className="space-y-3 py-4">
-            {['Navigator', 'Archivist', 'Timekeeper', 'Scout', 'Connector'].map((role) => (
+            {/* Roles must match DB check constraint: navigator, vibe_curator, timekeeper, archivist */}
+            {[
+              { value: 'navigator', label: 'Navigator', icon: '🧭', desc: 'Plans routes & venues' },
+              { value: 'vibe_curator', label: 'Vibe Curator', icon: '✨', desc: 'Sets the mood' },
+              { value: 'timekeeper', label: 'Timekeeper', icon: '⏱️', desc: 'Manages schedule' },
+              { value: 'archivist', label: 'Archivist', icon: '📸', desc: 'Captures memories' },
+            ].map((role) => (
               <Button
-                key={role}
-                variant={selectedRole === role ? 'default' : 'outline'}
+                key={role.value}
+                variant={selectedRole === role.value ? 'default' : 'outline'}
                 className="w-full justify-start"
-                onClick={() => setSelectedRole(role)}
+                onClick={() => setSelectedRole(role.value)}
               >
-                {role === 'Navigator' && '🧭 '}
-                {role === 'Archivist' && '📚 '}
-                {role === 'Timekeeper' && '⏱️ '}
-                {role === 'Scout' && '🔍 '}
-                {role === 'Connector' && '🤝 '}
-                {role}
+                <span className="mr-2">{role.icon}</span>
+                <span className="flex-1 text-left">
+                  <span className="block font-medium">{role.label}</span>
+                  <span className="block text-xs text-muted-foreground">{role.desc}</span>
+                </span>
               </Button>
             ))}
           </div>
@@ -897,11 +902,19 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
               Cancel
             </Button>
             <Button
-              onClick={() => assignRole.mutate({ 
-                memberId: showRoleDialog.memberId, 
-                role: selectedRole, 
-                memberName: showRoleDialog.memberName 
-              })}
+              onClick={() => {
+                const roleLabels: Record<string, string> = {
+                  navigator: 'Navigator',
+                  vibe_curator: 'Vibe Curator',
+                  timekeeper: 'Timekeeper',
+                  archivist: 'Archivist',
+                };
+                assignRole.mutate({ 
+                  memberId: showRoleDialog.memberId, 
+                  role: selectedRole, 
+                  memberName: showRoleDialog.memberName 
+                });
+              }}
               disabled={!selectedRole || assignRole.isPending}
             >
               {assignRole.isPending ? 'Assigning...' : 'Assign Role'}
