@@ -68,11 +68,11 @@ export function InstanceNotificationPanel({
         .in('instance_id', instanceIds)
         .in('status', ['pending', 'confirmed']);
 
-      // Get all squads for these instances
-      const { data: squads } = await supabase
-        .from('quest_squads')
-        .select('id, squad_name, quest_id')
-        .in('quest_id', instanceIds);
+       // Get all cliques (quest_squads) for these instances
+       const { data: squads } = await supabase
+         .from('quest_squads')
+         .select('id, squad_name, instance_id')
+         .in('instance_id', instanceIds);
 
       // Get squad member counts
       const squadIds = (squads || []).map(s => s.id);
@@ -86,7 +86,7 @@ export function InstanceNotificationPanel({
       // Build stats per instance
       return instancesToCheck.map(inst => {
         const instanceSignups = (signups || []).filter(s => s.instance_id === inst.id);
-        const instanceSquads = (squads || []).filter(s => s.quest_id === inst.id);
+         const instanceSquads = (squads || []).filter((s: any) => s.instance_id === inst.id);
         const instanceSquadIds = instanceSquads.map(s => s.id);
         const instanceMembers = (squadMembers || []).filter(m => instanceSquadIds.includes(m.squad_id));
 

@@ -458,11 +458,7 @@ export function CliqueBuilder({
               <div className="grid lg:grid-cols-4 gap-4 p-1">
                 {/* Unassigned Pool */}
                 <div className="lg:col-span-1">
-                  <DropZone
-                    id="unassigned"
-                    title="Unassigned"
-                    users={unassigned}
-                  />
+                  <DropZone id="unassigned" title="Unassigned" users={unassigned} />
                 </div>
 
                 {/* Cliques */}
@@ -486,7 +482,7 @@ export function CliqueBuilder({
                   </div>
 
                   {cliques.length > 0 ? (
-                    <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       {cliques.map((clique) => (
                         <DropZone
                           key={clique.id}

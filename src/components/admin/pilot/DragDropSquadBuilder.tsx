@@ -1,5 +1,5 @@
 /**
- * Drag-and-Drop Squad Builder
+  * Drag-and-Drop Clique Builder (legacy)
  * 
  * Manual squad formation interface allowing admins to drag users
  * between squads and unassigned pool before locking.
@@ -33,7 +33,7 @@ interface DragUser {
   user_id: string;
   display_name: string;
   status: string;
-  squad_id: string | null;
+  clique_id: string | null;
 }
 
 interface DragSquad {
@@ -72,11 +72,11 @@ export function DragDropSquadBuilder({
   const { isLoading } = useQuery({
     queryKey: ['drag-drop-squads', instanceId],
     queryFn: async () => {
-      // Fetch squads
+      // Fetch cliques (quest_squads) for this instance
       const { data: squadData, error: squadError } = await supabase
         .from('quest_squads')
         .select('id, squad_name')
-        .eq('quest_id', instanceId)
+        .eq('instance_id', instanceId)
         .order('squad_name');
 
       if (squadError) throw squadError;
@@ -93,12 +93,12 @@ export function DragDropSquadBuilder({
 
       if (signupError) throw signupError;
 
-      // Fetch squad_members to know who is in which squad
+      // Fetch squad_members to know who is in which clique
       const { data: memberData } = await supabase
         .from('squad_members')
         .select('squad_id, user_id');
 
-      // Build user_id -> squad_id map
+      // Build user_id -> clique_id map
       const userSquadMap = new Map<string, string>();
       for (const member of memberData || []) {
         userSquadMap.set(member.user_id, member.squad_id);
@@ -123,7 +123,7 @@ export function DragDropSquadBuilder({
           user_id: signup.user_id,
           display_name: (signup as any).profiles?.display_name || 'Unknown',
           status: signup.status || 'pending',
-          squad_id: userSquadId,
+          clique_id: userSquadId,
         };
 
         if (userSquadId && squadMap.has(userSquadId)) {
@@ -162,9 +162,9 @@ export function DragDropSquadBuilder({
     setHasChanges(true);
 
     // Remove from current location
-    if (draggedUser.squad_id) {
+    if ((draggedUser as any).clique_id) {
       setSquads(prev => prev.map(squad => {
-        if (squad.id === draggedUser.squad_id) {
+        if (squad.id === (draggedUser as any).clique_id) {
           return {
             ...squad,
             members: squad.members.filter(m => m.id !== draggedUser.id),
@@ -177,7 +177,7 @@ export function DragDropSquadBuilder({
     }
 
     // Add to new location
-    const updatedUser = { ...draggedUser, squad_id: targetSquadId === 'unassigned' ? null : targetSquadId };
+    const updatedUser = { ...draggedUser, clique_id: targetSquadId === 'unassigned' ? null : targetSquadId } as any;
 
     if (targetSquadId === 'unassigned') {
       setUnassigned(prev => [...prev, updatedUser]);
@@ -205,9 +205,9 @@ export function DragDropSquadBuilder({
       const { data, error } = await supabase
         .from('quest_squads')
         .insert({
-          quest_id: instanceId,
+          instance_id: instanceId as any,
           squad_name: newSquadName.trim(),
-        })
+        } as any)
         .select()
         .single();
 
@@ -222,9 +222,9 @@ export function DragDropSquadBuilder({
       setNewSquadName('');
       setIsNewSquadDialogOpen(false);
       setHasChanges(true);
-      toast({ title: 'Squad created' });
+      toast({ title: 'Clique created' });
     } catch (err: any) {
-      toast({ title: 'Failed to create squad', description: err.message, variant: 'destructive' });
+      toast({ title: 'Failed to create clique', description: err.message, variant: 'destructive' });
     }
   };
 

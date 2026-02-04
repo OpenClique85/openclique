@@ -1,5 +1,5 @@
 /**
- * Squad Manager
+  * (Legacy) Squad Manager
  * 
  * Generate squads, assign WhatsApp links, and manage squad composition.
  * Includes broadcast messaging, drag-and-drop manual squad formation,
@@ -62,11 +62,11 @@ export function SquadManager({ instanceId, instanceTitle = 'Quest', targetSquadS
   const { data: squads, isLoading } = useQuery({
     queryKey: ['instance-squads-detail', instanceId],
     queryFn: async () => {
-      // First get squads - use existing quest_squads columns
+      // NOTE: quest_squads are cliques scoped to a quest instance.
       const { data: squadData, error: squadError } = await supabase
         .from('quest_squads')
         .select('id, squad_name, locked_at')
-        .eq('quest_id', instanceId)
+        .eq('instance_id', instanceId)
         .order('squad_name');
       
       if (squadError) throw squadError;
@@ -117,7 +117,7 @@ export function SquadManager({ instanceId, instanceTitle = 'Quest', targetSquadS
         supabase
           .from('quest_squads')
           .select('id')
-          .eq('quest_id', instanceId),
+          .eq('instance_id', instanceId),
       ]);
 
       if (signupsError) throw signupsError;
@@ -162,18 +162,18 @@ export function SquadManager({ instanceId, instanceTitle = 'Quest', targetSquadS
       let squadNumber = (squads?.length || 0) + 1;
       
       for (const suggestion of data.squads || []) {
-        // Create squad with "{Instance Title} Squad {N}" naming and formation_reason
-        const squadName = `${instanceTitle} Squad ${squadNumber++}`;
+        // Create clique with "{Instance Title} Clique {N}" naming and formation_reason
+        const squadName = `${instanceTitle} Clique ${squadNumber++}`;
         
         const { data: newSquad, error: createError } = await supabase
           .from('quest_squads')
           .insert({
-            quest_id: instanceId,
+            instance_id: instanceId as any,
             squad_name: squadName,
             formation_reason: suggestion.formation_reason,
             compatibility_score: suggestion.compatibility_score,
             referral_bonds: suggestion.referral_bonds,
-          })
+          } as any)
           .select()
           .single();
         
@@ -214,9 +214,9 @@ export function SquadManager({ instanceId, instanceTitle = 'Quest', targetSquadS
       
       queryClient.invalidateQueries({ queryKey: ['instance-squads-detail', instanceId] });
       queryClient.invalidateQueries({ queryKey: ['instance-unassigned', instanceId] });
-      toast({ title: 'Squads generated!', description: `Created ${data.squads?.length || 0} squads with "${instanceTitle} Squad N" naming` });
+      toast({ title: 'Cliques generated!', description: `Created ${data.squads?.length || 0} cliques` });
     } catch (err: any) {
-      toast({ title: 'Failed to generate squads', description: err.message, variant: 'destructive' });
+      toast({ title: 'Failed to generate cliques', description: err.message, variant: 'destructive' });
     } finally {
       setIsGenerating(false);
     }
