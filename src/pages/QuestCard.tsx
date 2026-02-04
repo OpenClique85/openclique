@@ -27,7 +27,7 @@ import {
   MapPin, Calendar, Clock, Users, Package, 
   Shield, CheckCircle, Camera, Video, FileText,
   MessageSquare, Loader2, AlertCircle, ExternalLink,
-  Star, Trophy, MessageCircleMore
+  Star, Trophy, MessageCircleMore, ArrowLeft, Target
 } from 'lucide-react';
 
 interface QuestInstanceData {
