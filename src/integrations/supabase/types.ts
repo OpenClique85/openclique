@@ -5820,7 +5820,7 @@ export type Database = {
             foreignKeyName: "squad_chat_messages_squad_id_fkey"
             columns: ["squad_id"]
             isOneToOne: false
-            referencedRelation: "squads"
+            referencedRelation: "quest_squads"
             referencedColumns: ["id"]
           },
           {
