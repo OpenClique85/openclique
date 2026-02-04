@@ -315,17 +315,31 @@ export function SquadWarmUpReview({ squadId, onClose }: SquadWarmUpReviewProps) 
                   <div className="space-y-3">
                     {messages.map((msg) => {
                       const sender = members.find(m => m.user_id === msg.sender_id);
+                      const isBuggs = msg.sender_type === 'buggs';
+                      const isAdmin = msg.sender_type === 'admin';
+                      const isSystem = msg.sender_type === 'system';
+                      const isPromptResponse = msg.message.startsWith('📝 **Prompt Response:**');
                       
                       return (
                         <div
                           key={msg.id}
-                          className={`text-sm ${msg.is_prompt_response ? 'bg-primary/5 border border-primary/20 rounded-lg p-2' : ''}`}
+                          className={`text-sm rounded-lg p-2 ${
+                            isBuggs 
+                              ? 'bg-orange-500/10 border border-orange-500/30' 
+                              : isAdmin
+                                ? 'bg-primary/5 border border-primary/20'
+                                : isSystem
+                                  ? 'bg-muted border border-border'
+                                  : isPromptResponse
+                                    ? 'bg-primary/5 border border-primary/20'
+                                    : ''
+                          }`}
                         >
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <span className="font-medium text-foreground">
-                              {sender?.display_name || 'Unknown'}
+                              {isBuggs ? '🐰 BUGGS' : isAdmin ? '🛡️ Admin' : isSystem ? '⚙️ System' : sender?.display_name || 'Unknown'}
                             </span>
-                            {msg.is_prompt_response && (
+                            {isPromptResponse && (
                               <Badge variant="outline" className="text-[10px] h-4">
                                 Prompt Response
                               </Badge>
