@@ -126,28 +126,29 @@ export default function Profile() {
             </CardContent>
           </Card>
 
-          {/* Tabbed Content: Cliques | Quests | Me */}
+          {/* Tabbed Content: Cliques | Quests | Contacts | Orgs | Me */}
           <Tabs value={activeTab} onValueChange={handleTabChange}>
-            <TabsList className="grid w-full grid-cols-5 h-auto">
-              <TabsTrigger value="cliques" className="flex items-center gap-1 px-2 py-2 sm:gap-2 sm:px-3">
+            {/* Mobile: horizontally scrollable, icon-first, bigger tap targets */}
+            <TabsList className="w-full flex gap-1 overflow-x-auto h-auto p-1 rounded-lg bg-muted/50">
+              <TabsTrigger value="cliques" className="flex items-center justify-center gap-2 px-3 py-2.5 min-w-[88px]">
                 <Users className="h-4 w-4 shrink-0" />
-                <span className="hidden sm:inline text-xs sm:text-sm">Cliques</span>
+                <span className="text-xs sm:text-sm">Cliques</span>
               </TabsTrigger>
-              <TabsTrigger value="quests" className="flex items-center gap-1 px-2 py-2 sm:gap-2 sm:px-3">
+              <TabsTrigger value="quests" className="flex items-center justify-center gap-2 px-3 py-2.5 min-w-[88px]">
                 <Compass className="h-4 w-4 shrink-0" />
-                <span className="hidden sm:inline text-xs sm:text-sm">Quests</span>
+                <span className="text-xs sm:text-sm">Quests</span>
               </TabsTrigger>
-              <TabsTrigger value="contacts" className="flex items-center gap-1 px-2 py-2 sm:gap-2 sm:px-3">
+              <TabsTrigger value="contacts" className="flex items-center justify-center gap-2 px-3 py-2.5 min-w-[104px]">
                 <Contact className="h-4 w-4 shrink-0" />
-                <span className="hidden sm:inline text-xs sm:text-sm">Contacts</span>
+                <span className="text-xs sm:text-sm">Contacts</span>
               </TabsTrigger>
-              <TabsTrigger value="orgs" className="flex items-center gap-1 px-2 py-2 sm:gap-2 sm:px-3">
+              <TabsTrigger value="orgs" className="flex items-center justify-center gap-2 px-3 py-2.5 min-w-[76px]">
                 <Building2 className="h-4 w-4 shrink-0" />
-                <span className="hidden sm:inline text-xs sm:text-sm">Orgs</span>
+                <span className="text-xs sm:text-sm">Orgs</span>
               </TabsTrigger>
-              <TabsTrigger value="me" className="flex items-center gap-1 px-2 py-2 sm:gap-2 sm:px-3">
+              <TabsTrigger value="me" className="flex items-center justify-center gap-2 px-3 py-2.5 min-w-[68px]">
                 <User className="h-4 w-4 shrink-0" />
-                <span className="hidden sm:inline text-xs sm:text-sm">Me</span>
+                <span className="text-xs sm:text-sm">Me</span>
               </TabsTrigger>
             </TabsList>
 

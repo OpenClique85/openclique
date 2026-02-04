@@ -19,6 +19,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { MobileCollapsibleSection } from '@/components/profile/MobileCollapsibleSection';
 import { useMonthlyMetaQuests, MetaQuestWithProgress } from '@/hooks/useMonthlyMetaQuests';
 import { Clock, Plus, Check, X, ArrowRight, Target, Trophy, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -240,8 +241,14 @@ export function MonthlyChallengesTab() {
         )}
       </div>
 
-      {/* All Available Quests */}
-      <div>
+      {/* Available Challenges - collapsible on mobile */}
+      <MobileCollapsibleSection
+        title="Available Challenges"
+        icon={<Trophy className="h-5 w-5 text-primary" />}
+        count={questsWithProgress.length}
+        defaultOpenMobile={false}
+        defaultOpenDesktop={true}
+      >
         <div className="flex items-center justify-between mb-3">
           <h4 className="font-semibold text-muted-foreground">All Challenges This Month</h4>
           <Badge variant="secondary">{questsWithProgress.length} available</Badge>
@@ -258,7 +265,7 @@ export function MonthlyChallengesTab() {
             />
           ))}
         </div>
-      </div>
+      </MobileCollapsibleSection>
 
       {/* Swap Dialog */}
       <Dialog open={swapDialogOpen} onOpenChange={setSwapDialogOpen}>

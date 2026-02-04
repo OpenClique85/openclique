@@ -23,7 +23,7 @@ import { useQuests } from '@/hooks/useQuests';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Calendar, Star, CheckCircle, Gift, Sparkles, Search, Bookmark, X, Zap, History } from 'lucide-react';
+import { Loader2, Calendar, Star, CheckCircle, Gift, Sparkles, Search, Bookmark, X, Zap, History, Compass } from 'lucide-react';
 import { format, isToday as checkIsToday } from 'date-fns';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -64,6 +64,15 @@ interface QuestsTabProps {
 
 export function QuestsTab({ userId }: QuestsTabProps) {
   const navigate = useNavigate();
+
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mql = window.matchMedia('(max-width: 639px)');
+    const onChange = () => setIsMobile(mql.matches);
+    onChange();
+    mql.addEventListener('change', onChange);
+    return () => mql.removeEventListener('change', onChange);
+  }, []);
   
   // All hooks must be called before any conditional returns
   const { data: pinnedQuests = [], isLoading: isPinnedLoading } = usePinnedQuests();
@@ -384,8 +393,8 @@ export function QuestsTab({ userId }: QuestsTabProps) {
         </Button>
       </div>
 
-      {/* Pinned Quests - Collapsible on mobile */}
-      {pinnedQuestsWithData.length > 0 && (
+      {/* On mobile, keep the Quests surface compact: Active is primary, everything else lives inside a single dropdown. */}
+      {!isMobile && pinnedQuestsWithData.length > 0 && (
         <MobileCollapsibleSection
           title="Saved for Later"
           icon={<Bookmark className="h-5 w-5 text-primary" />}
@@ -395,8 +404,8 @@ export function QuestsTab({ userId }: QuestsTabProps) {
         >
           <div className="grid gap-3 sm:grid-cols-2">
             {pinnedQuestsWithData.map((quest: any) => (
-              <Card 
-                key={quest.id} 
+              <Card
+                key={quest.id}
                 className="overflow-hidden cursor-pointer hover:border-primary/50 transition-colors"
                 onClick={() => navigate('/quests')}
               >
@@ -465,12 +474,12 @@ export function QuestsTab({ userId }: QuestsTabProps) {
       {/* Continue Your Journey */}
       <ContinueYourJourney userId={userId} />
       
-      {/* Today / Happening Now */}
+      {/* Active */}
       {todaySignups.length > 0 && (
         <section>
           <h3 className="text-lg font-display font-semibold mb-3 flex items-center gap-2">
             <Zap className="h-5 w-5 text-primary" />
-            Today / Happening Now ({todaySignups.length})
+            Active ({todaySignups.length})
           </h3>
           <div className="space-y-4">
             {todaySignups.map((signup) => (
@@ -484,108 +493,250 @@ export function QuestsTab({ userId }: QuestsTabProps) {
           </div>
         </section>
       )}
-      
-      {/* Upcoming Quests - Collapsible on mobile */}
-      <MobileCollapsibleSection
-        title="Upcoming"
-        icon={<Calendar className="h-5 w-5 text-primary" />}
-        count={upcomingSignups.length}
-        defaultOpenMobile={false}
-        defaultOpenDesktop={true}
-      >
-        {upcomingSignups.length === 0 && todaySignups.length === 0 ? (
-          <Card className="border-dashed">
-            <CardContent className="py-8 text-center">
-              <p className="text-muted-foreground mb-4">
-                You haven't joined any upcoming quests yet.
-              </p>
-              <Button asChild size="sm">
-                <Link to="/quests">Find Your First Quest</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        ) : upcomingSignups.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No upcoming quests scheduled.</p>
-        ) : (
-          <div className="space-y-4">
-            {upcomingSignups.map((signup) => (
-              <ActiveQuestCard 
-                key={signup.id}
-                signup={signup}
-                onCancelClick={handleCancelClick}
-              />
-            ))}
-          </div>
-        )}
-      </MobileCollapsibleSection>
-      
-      {/* Past Quests - Collapsible on mobile */}
-      {pastSignups.length > 0 && (
+
+      {/* Desktop: upcoming + past are separate sections. Mobile: they live under a single "Quests" dropdown. */}
+      {!isMobile ? (
+        <>
+          <MobileCollapsibleSection
+            title="Upcoming"
+            icon={<Calendar className="h-5 w-5 text-primary" />}
+            count={upcomingSignups.length}
+            defaultOpenMobile={false}
+            defaultOpenDesktop={true}
+          >
+            {upcomingSignups.length === 0 && todaySignups.length === 0 ? (
+              <Card className="border-dashed">
+                <CardContent className="py-8 text-center">
+                  <p className="text-muted-foreground mb-4">You haven't joined any upcoming quests yet.</p>
+                  <Button asChild size="sm">
+                    <Link to="/quests">Find Your First Quest</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : upcomingSignups.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No upcoming quests scheduled.</p>
+            ) : (
+              <div className="space-y-4">
+                {upcomingSignups.map((signup) => (
+                  <ActiveQuestCard key={signup.id} signup={signup} onCancelClick={handleCancelClick} />
+                ))}
+              </div>
+            )}
+          </MobileCollapsibleSection>
+
+          {pastSignups.length > 0 && (
+            <MobileCollapsibleSection
+              title="Past Quests"
+              icon={<History className="h-5 w-5 text-muted-foreground" />}
+              count={pastSignups.length}
+              variant="muted"
+              defaultOpenMobile={false}
+              defaultOpenDesktop={true}
+            >
+              <div className="space-y-3">
+                {pastSignups.map((signup) => {
+                  const isPast = signup.quest.start_datetime && new Date(signup.quest.start_datetime) < now;
+                  const wasAttending = ['confirmed', 'completed'].includes(signup.status || '');
+                  const canLeaveFeedback = isPast && wasAttending;
+                  const hasFeedback = feedbackSubmitted.has(signup.quest_id);
+
+                  return (
+                    <Card key={signup.id} className="bg-muted/30">
+                      <CardContent className="py-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl opacity-60">{signup.quest.icon || '🎯'}</span>
+                            <div>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <p className="font-medium">{signup.quest.title}</p>
+                                {signup.quest.is_sponsored && (
+                                  <Badge variant="outline" className="text-sunset/60 border-sunset/40 text-xs">
+                                    <Sparkles className="h-3 w-3 mr-1" />
+                                    Sponsored
+                                  </Badge>
+                                )}
+                              </div>
+                              {signup.quest.start_datetime && (
+                                <p className="text-sm text-muted-foreground">
+                                  {format(new Date(signup.quest.start_datetime), 'MMMM d, yyyy')}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 ml-11 sm:ml-0">
+                            <Badge variant={STATUS_BADGES[signup.status || 'pending'].variant}>
+                              {STATUS_BADGES[signup.status || 'pending'].label}
+                            </Badge>
+
+                            {canLeaveFeedback &&
+                              (hasFeedback ? (
+                                <Button variant="ghost" size="sm" disabled className="text-muted-foreground text-xs">
+                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                  Done
+                                </Button>
+                              ) : (
+                                <Button variant="outline" size="sm" asChild className="text-xs">
+                                  <Link to={`/feedback/${signup.quest.id}`}>
+                                    <Star className="h-3 w-3 mr-1" />
+                                    Feedback
+                                  </Link>
+                                </Button>
+                              ))}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </MobileCollapsibleSection>
+          )}
+        </>
+      ) : (
         <MobileCollapsibleSection
-          title="Past Quests"
-          icon={<History className="h-5 w-5 text-muted-foreground" />}
-          count={pastSignups.length}
-          variant="muted"
+          title="Quests"
+          icon={<Compass className="h-5 w-5 text-primary" />}
+          count={pinnedQuestsWithData.length + upcomingSignups.length + pastSignups.length}
           defaultOpenMobile={false}
-          defaultOpenDesktop={true}
+          defaultOpenDesktop={false}
         >
-          <div className="space-y-3">
-            {pastSignups.map((signup) => {
-              const isPast = signup.quest.start_datetime && new Date(signup.quest.start_datetime) < now;
-              const wasAttending = ['confirmed', 'completed'].includes(signup.status || '');
-              const canLeaveFeedback = isPast && wasAttending;
-              const hasFeedback = feedbackSubmitted.has(signup.quest_id);
-              
-              return (
-                <Card key={signup.id} className="bg-muted/30">
-                  <CardContent className="py-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl opacity-60">{signup.quest.icon || '🎯'}</span>
-                        <div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <p className="font-medium">{signup.quest.title}</p>
-                            {signup.quest.is_sponsored && (
-                              <Badge variant="outline" className="text-sunset/60 border-sunset/40 text-xs">
-                                <Sparkles className="h-3 w-3 mr-1" />
-                                Sponsored
+          <div className="space-y-6">
+            {pinnedQuestsWithData.length > 0 && (
+              <section>
+                <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2 mb-2">
+                  <Bookmark className="h-4 w-4" />
+                  Saved for Later ({pinnedQuestsWithData.length})
+                </h4>
+                <div className="grid gap-3">
+                  {pinnedQuestsWithData.map((quest: any) => (
+                    <Card
+                      key={quest.id}
+                      className="overflow-hidden cursor-pointer hover:border-primary/50 transition-colors"
+                      onClick={() => navigate('/quests')}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-3">
+                          <span className="text-2xl">{quest.icon || '🎯'}</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium truncate">{quest.title}</p>
+                            <p className="text-sm text-muted-foreground">{quest.metadata?.date}</p>
+                            {quest.theme && (
+                              <Badge variant="secondary" className="mt-1 text-xs">
+                                {quest.theme}
                               </Badge>
                             )}
                           </div>
-                          {signup.quest.start_datetime && (
-                            <p className="text-sm text-muted-foreground">
-                              {format(new Date(signup.quest.start_datetime), 'MMMM d, yyyy')}
-                            </p>
-                          )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 shrink-0"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              unpinMutation.mutate(quest.id);
+                            }}
+                            disabled={unpinMutation.isPending}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
                         </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-2 ml-11 sm:ml-0">
-                        <Badge variant={STATUS_BADGES[signup.status || 'pending'].variant}>
-                          {STATUS_BADGES[signup.status || 'pending'].label}
-                        </Badge>
-                        
-                        {canLeaveFeedback && (
-                          hasFeedback ? (
-                            <Button variant="ghost" size="sm" disabled className="text-muted-foreground text-xs">
-                              <CheckCircle className="h-3 w-3 mr-1" />
-                              Done
-                            </Button>
-                          ) : (
-                            <Button variant="outline" size="sm" asChild className="text-xs">
-                              <Link to={`/feedback/${signup.quest.id}`}>
-                                <Star className="h-3 w-3 mr-1" />
-                                Feedback
-                              </Link>
-                            </Button>
-                          )
-                        )}
-                      </div>
-                    </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            <section>
+              <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2 mb-2">
+                <Calendar className="h-4 w-4" />
+                Upcoming ({upcomingSignups.length})
+              </h4>
+
+              {upcomingSignups.length === 0 && todaySignups.length === 0 ? (
+                <Card className="border-dashed">
+                  <CardContent className="py-8 text-center">
+                    <p className="text-muted-foreground mb-4">You haven't joined any upcoming quests yet.</p>
+                    <Button asChild size="sm">
+                      <Link to="/quests">Find Your First Quest</Link>
+                    </Button>
                   </CardContent>
                 </Card>
-              );
-            })}
+              ) : upcomingSignups.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No upcoming quests scheduled.</p>
+              ) : (
+                <div className="space-y-4">
+                  {upcomingSignups.map((signup) => (
+                    <ActiveQuestCard key={signup.id} signup={signup} onCancelClick={handleCancelClick} />
+                  ))}
+                </div>
+              )}
+            </section>
+
+            {pastSignups.length > 0 && (
+              <section>
+                <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2 mb-2">
+                  <History className="h-4 w-4" />
+                  Past ({pastSignups.length})
+                </h4>
+                <div className="space-y-3">
+                  {pastSignups.map((signup) => {
+                    const isPast = signup.quest.start_datetime && new Date(signup.quest.start_datetime) < now;
+                    const wasAttending = ['confirmed', 'completed'].includes(signup.status || '');
+                    const canLeaveFeedback = isPast && wasAttending;
+                    const hasFeedback = feedbackSubmitted.has(signup.quest_id);
+
+                    return (
+                      <Card key={signup.id} className="bg-muted/30">
+                        <CardContent className="py-4">
+                          <div className="flex flex-col justify-between gap-2">
+                            <div className="flex items-center gap-3">
+                              <span className="text-2xl opacity-60">{signup.quest.icon || '🎯'}</span>
+                              <div>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <p className="font-medium">{signup.quest.title}</p>
+                                  {signup.quest.is_sponsored && (
+                                    <Badge variant="outline" className="text-sunset/60 border-sunset/40 text-xs">
+                                      <Sparkles className="h-3 w-3 mr-1" />
+                                      Sponsored
+                                    </Badge>
+                                  )}
+                                </div>
+                                {signup.quest.start_datetime && (
+                                  <p className="text-sm text-muted-foreground">
+                                    {format(new Date(signup.quest.start_datetime), 'MMMM d, yyyy')}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 ml-11">
+                              <Badge variant={STATUS_BADGES[signup.status || 'pending'].variant}>
+                                {STATUS_BADGES[signup.status || 'pending'].label}
+                              </Badge>
+                              {canLeaveFeedback &&
+                                (hasFeedback ? (
+                                  <Button variant="ghost" size="sm" disabled className="text-muted-foreground text-xs">
+                                    <CheckCircle className="h-3 w-3 mr-1" />
+                                    Done
+                                  </Button>
+                                ) : (
+                                  <Button variant="outline" size="sm" asChild className="text-xs">
+                                    <Link to={`/feedback/${signup.quest.id}`}>
+                                      <Star className="h-3 w-3 mr-1" />
+                                      Feedback
+                                    </Link>
+                                  </Button>
+                                ))}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
           </div>
         </MobileCollapsibleSection>
       )}

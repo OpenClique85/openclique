@@ -62,7 +62,9 @@ export default function CliqueWarmUp() {
         .select('id, role')
         .eq('squad_id', cliqueId)
         .eq('user_id', user.id)
-        .single();
+        .neq('status', 'dropped')
+        .limit(1)
+        .maybeSingle();
 
       if (memberError || !membership) {
         throw new Error('You are not a member of this clique');
