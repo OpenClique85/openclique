@@ -19,6 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useSquadWarmUp } from '@/hooks/useSquadWarmUp';
 import { SQUAD_STATUS_LABELS, shouldShowInstructions, SquadStatus } from '@/lib/squadLifecycle';
+import { MemberProfileSheet } from './MemberProfileSheet';
 
 interface SquadWarmUpRoomProps {
   squadId: string;
@@ -46,6 +47,8 @@ export function SquadWarmUpRoom({ squadId, onInstructionsUnlocked }: SquadWarmUp
 
   const [chatInput, setChatInput] = useState('');
   const [promptResponse, setPromptResponse] = useState('');
+  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
+  const [profileSheetOpen, setProfileSheetOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll chat
@@ -133,9 +136,13 @@ export function SquadWarmUpRoom({ squadId, onInstructionsUnlocked }: SquadWarmUp
               {members.map((member) => {
                 const isReady = member.prompt_response && member.readiness_confirmed_at;
                 return (
-                  <div
+                  <button
                     key={member.id}
-                    className="flex items-center gap-1.5 text-xs"
+                    onClick={() => {
+                      setSelectedMemberId(member.user_id);
+                      setProfileSheetOpen(true);
+                    }}
+                    className="flex items-center gap-1.5 text-xs hover:bg-muted/50 rounded-lg p-1 -m-1 transition-colors cursor-pointer"
                   >
                     <Avatar className="h-6 w-6">
                       <AvatarFallback className={isReady ? 'bg-emerald-500/20' : 'bg-muted'}>
@@ -146,7 +153,7 @@ export function SquadWarmUpRoom({ squadId, onInstructionsUnlocked }: SquadWarmUp
                       {member.display_name || 'Member'}
                     </span>
                     {isReady && <CheckCircle2 className="h-3 w-3 text-emerald-500" />}
-                  </div>
+                  </button>
                 );
               })}
             </div>
@@ -362,6 +369,13 @@ export function SquadWarmUpRoom({ squadId, onInstructionsUnlocked }: SquadWarmUp
           </div>
         </div>
       )}
+
+      {/* Member Profile Sheet */}
+      <MemberProfileSheet
+        userId={selectedMemberId}
+        open={profileSheetOpen}
+        onOpenChange={setProfileSheetOpen}
+      />
     </div>
   );
 }
