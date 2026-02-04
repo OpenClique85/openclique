@@ -121,10 +121,10 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
       
       if (error) throw error;
 
-      // Fetch instance info with warm_up_prompt_id
+      // Fetch instance info
       const { data: instance } = await supabase
         .from('quest_instances')
-        .select('id, title, scheduled_date, warm_up_prompt_id')
+        .select('id, title, scheduled_date')
         .eq('id', data.instance_id)
         .single();
 
