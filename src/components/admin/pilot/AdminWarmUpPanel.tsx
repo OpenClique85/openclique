@@ -1,0 +1,741 @@
+/**
+ * Admin Warm-Up Panel
+ * 
+ * Full admin view for managing a clique's warm-up session.
+ * Includes chat transcript, member progress, and admin controls.
+ */
+
+import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { format } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Textarea } from '@/components/ui/textarea';
+import { Slider } from '@/components/ui/slider';
+import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Users,
+  MessageCircle,
+  Send,
+  CheckCircle2,
+  XCircle,
+  Unlock,
+  Lock,
+  AlertTriangle,
+  SlidersHorizontal,
+  Loader2,
+  ThermometerSun,
+} from 'lucide-react';
+import { SQUAD_STATUS_LABELS, SQUAD_STATUS_STYLES, SquadStatus, calculateWarmUpProgress } from '@/lib/squadLifecycle';
+import { auditLog } from '@/lib/auditLog';
+
+interface AdminWarmUpPanelProps {
+  cliqueId: string;
+  onClose?: () => void;
+}
+
+interface CliqueMember {
+  id: string;
+  user_id: string;
+  status: string;
+  prompt_response: string | null;
+  readiness_confirmed_at: string | null;
+  warm_up_progress: Record<string, unknown>;
+  display_name: string | null;
+  avatar_url: string | null;
+}
+
+interface ChatMessage {
+  id: string;
+  squad_id: string;
+  sender_id: string;
+  message: string;
+  is_prompt_response: boolean;
+  is_system_message: boolean;
+  created_at: string;
+}
+
+interface CliqueData {
+  id: string;
+  squad_name: string;
+  status: SquadStatus;
+  instance_id: string;
+  instance?: {
+    id: string;
+    title: string;
+    scheduled_date: string;
+  } | null;
+}
+
+export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const [adminMessage, setAdminMessage] = useState('');
+  const [showApproveDialog, setShowApproveDialog] = useState(false);
+  const [showProgressDialog, setShowProgressDialog] = useState(false);
+  const [approvalNotes, setApprovalNotes] = useState('');
+  const [manualProgress, setManualProgress] = useState(0);
+
+  // Fetch clique data
+  const { data: clique, isLoading: cliqueLoading } = useQuery({
+    queryKey: ['admin-clique-warmup', cliqueId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('quest_squads')
+        .select('id, squad_name, status, instance_id')
+        .eq('id', cliqueId)
+        .single();
+      
+      if (error) throw error;
+
+      // Fetch instance info
+      const { data: instance } = await supabase
+        .from('quest_instances')
+        .select('id, title, scheduled_date')
+        .eq('id', data.instance_id)
+        .single();
+
+      return {
+        id: data.id,
+        squad_name: data.squad_name,
+        status: (data.status || 'confirmed') as SquadStatus,
+        instance_id: data.instance_id,
+        instance,
+      } as CliqueData;
+    },
+    enabled: !!cliqueId,
+  });
+
+  // Fetch members
+  const { data: members = [], isLoading: membersLoading } = useQuery({
+    queryKey: ['admin-clique-members', cliqueId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('squad_members')
+        .select('*')
+        .eq('squad_id', cliqueId);
+      
+      if (error) throw error;
+
+      // Fetch profiles
+      const userIds = (data as { user_id: string }[]).map(m => m.user_id);
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, display_name')
+        .in('id', userIds);
+
+      const profileMap = new Map(
+        profiles?.map(p => [p.id, { display_name: p.display_name }]) || []
+      );
+
+      return (data as unknown[]).map((m: unknown) => {
+        const member = m as Record<string, unknown>;
+        const userId = member.user_id as string;
+        const profile = profileMap.get(userId);
+        return {
+          id: member.id as string,
+          user_id: userId,
+          status: member.status as string,
+          prompt_response: member.prompt_response as string | null,
+          readiness_confirmed_at: member.readiness_confirmed_at as string | null,
+          warm_up_progress: (member.warm_up_progress as Record<string, unknown>) || {},
+          display_name: profile?.display_name || null,
+          avatar_url: null,
+        };
+      }) as CliqueMember[];
+    },
+    enabled: !!cliqueId,
+  });
+
+  // Fetch chat messages
+  const { data: messages = [] } = useQuery({
+    queryKey: ['admin-clique-chat', cliqueId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('squad_chat_messages' as 'quest_ratings')
+        .select('*')
+        .eq('squad_id' as 'quest_id', cliqueId)
+        .order('created_at', { ascending: true });
+      
+      if (error) throw error;
+      return (data as unknown as ChatMessage[]) || [];
+    },
+    enabled: !!cliqueId,
+  });
+
+  // Subscribe to realtime chat
+  useEffect(() => {
+    if (!cliqueId) return;
+
+    const channel = supabase
+      .channel(`admin-clique-chat-${cliqueId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'squad_chat_messages',
+          filter: `squad_id=eq.${cliqueId}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['admin-clique-chat', cliqueId] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [cliqueId, queryClient]);
+
+  // Calculate progress
+  const progress = calculateWarmUpProgress(
+    members.map(m => ({
+      prompt_response: m.prompt_response,
+      readiness_confirmed_at: m.readiness_confirmed_at,
+      status: m.status,
+    })),
+    100 // Default to 100% required
+  );
+
+  // Send admin message to chat
+  const sendAdminMessage = useMutation({
+    mutationFn: async (message: string) => {
+      if (!user) throw new Error('Not authenticated');
+      
+      const { error } = await (supabase as unknown as { from: (t: string) => { insert: (d: unknown) => Promise<{ error: Error | null }> } })
+        .from('squad_chat_messages')
+        .insert({
+          squad_id: cliqueId,
+          sender_id: user.id,
+          message: `[Admin] ${message}`,
+          is_prompt_response: false,
+          is_system_message: true,
+        });
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      setAdminMessage('');
+      toast.success('Message sent to clique');
+      queryClient.invalidateQueries({ queryKey: ['admin-clique-chat', cliqueId] });
+    },
+    onError: (error) => {
+      toast.error('Failed to send message', { description: error.message });
+    },
+  });
+
+  // Update clique status
+  const updateStatus = useMutation({
+    mutationFn: async ({ status, notes }: { status: SquadStatus; notes?: string }) => {
+      const { error } = await supabase
+        .from('quest_squads')
+        .update({ 
+          status, 
+          approval_notes: notes,
+          ...(status === 'approved' && { approved_at: new Date().toISOString(), approved_by: user?.id }),
+        } as Record<string, unknown>)
+        .eq('id', cliqueId);
+      
+      if (error) throw error;
+
+      // Notify members if approved
+      if (status === 'approved') {
+        await supabase.functions.invoke('notify-clique-members', {
+          body: {
+            squad_id: cliqueId,
+            notification_type: 'clique_approved',
+            title: 'Clique Approved!',
+            body: 'Your clique has been approved. Quest instructions are now unlocked!',
+            metadata: { instance_id: clique?.instance_id },
+          },
+        });
+      }
+
+      await auditLog({
+        action: `clique_status_${status}`,
+        targetTable: 'quest_squads',
+        targetId: cliqueId,
+        newValues: { status, notes },
+      });
+    },
+    onSuccess: (_, variables) => {
+      toast.success(`Clique ${variables.status === 'approved' ? 'approved' : 'updated'}!`);
+      queryClient.invalidateQueries({ queryKey: ['admin-clique-warmup', cliqueId] });
+      queryClient.invalidateQueries({ queryKey: ['instance-cliques-detail'] });
+      queryClient.invalidateQueries({ queryKey: ['instance-squads-warmup'] });
+      setShowApproveDialog(false);
+      setApprovalNotes('');
+    },
+    onError: (error) => {
+      toast.error('Failed to update clique', { description: error.message });
+    },
+  });
+
+  // Admin override member progress
+  const overrideMemberProgress = useMutation({
+    mutationFn: async ({ memberId, confirmed }: { memberId: string; confirmed: boolean }) => {
+      const { error } = await supabase
+        .from('squad_members')
+        .update({
+          readiness_confirmed_at: confirmed ? new Date().toISOString() : null,
+          prompt_response: confirmed ? '[Admin Override]' : null,
+        } as Record<string, unknown>)
+        .eq('id', memberId);
+      
+      if (error) throw error;
+
+      await auditLog({
+        action: 'admin_override_member_progress',
+        targetTable: 'squad_members',
+        targetId: memberId,
+        newValues: { confirmed },
+      });
+    },
+    onSuccess: () => {
+      toast.success('Member progress updated');
+      queryClient.invalidateQueries({ queryKey: ['admin-clique-members', cliqueId] });
+    },
+    onError: (error) => {
+      toast.error('Failed to update member', { description: error.message });
+    },
+  });
+
+  const handleSendMessage = () => {
+    if (!adminMessage.trim()) return;
+    sendAdminMessage.mutate(adminMessage.trim());
+  };
+
+  if (cliqueLoading || membersLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!clique) {
+    return (
+      <div className="text-center p-8 text-muted-foreground">
+        Clique not found.
+      </div>
+    );
+  }
+
+  const statusStyles = SQUAD_STATUS_STYLES[clique.status] || SQUAD_STATUS_STYLES.confirmed;
+  const isWarmingUp = clique.status === 'warming_up';
+  const isReadyForReview = clique.status === 'ready_for_review';
+  const isApproved = ['approved', 'active', 'completed'].includes(clique.status);
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div>
+          <h3 className="text-xl font-semibold flex items-center gap-2">
+            <ThermometerSun className="h-5 w-5 text-amber-500" />
+            {clique.squad_name || 'Unnamed Clique'}
+          </h3>
+          <p className="text-muted-foreground text-sm">
+            {clique.instance?.title} · {clique.instance?.scheduled_date && 
+              format(new Date(clique.instance.scheduled_date), 'MMM d, yyyy')}
+          </p>
+        </div>
+        <Badge className={`${statusStyles.bg} ${statusStyles.text} border ${statusStyles.border}`}>
+          {SQUAD_STATUS_LABELS[clique.status]}
+        </Badge>
+      </div>
+
+      {/* Progress Overview with Admin Controls */}
+      <Card>
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Warm-Up Progress
+            </CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowProgressDialog(true)}
+            >
+              <SlidersHorizontal className="h-4 w-4 mr-2" />
+              Manage
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            <div className="flex justify-between text-sm">
+              <span>{progress.readyMembers} of {progress.totalMembers} members ready</span>
+              <span className={progress.isComplete ? 'text-emerald-600 font-medium' : ''}>
+                {progress.percentage}%
+              </span>
+            </div>
+            <Progress 
+              value={progress.percentage} 
+              className={`h-3 ${progress.isComplete ? '[&>div]:bg-emerald-500' : ''}`}
+            />
+            
+            {progress.isComplete && !isApproved && (
+              <p className="text-sm text-emerald-600 flex items-center gap-1">
+                <CheckCircle2 className="h-4 w-4" />
+                All members are ready!
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Tabs */}
+      <Tabs defaultValue="chat">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="chat">
+            <MessageCircle className="h-4 w-4 mr-2" />
+            Chat
+          </TabsTrigger>
+          <TabsTrigger value="members">
+            <Users className="h-4 w-4 mr-2" />
+            Members
+          </TabsTrigger>
+          <TabsTrigger value="responses">
+            Responses
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Chat Tab */}
+        <TabsContent value="chat" className="space-y-4">
+          <Card className="h-[350px] flex flex-col">
+            <CardContent className="flex-1 flex flex-col p-4">
+              <ScrollArea className="flex-1 pr-4">
+                {messages.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">
+                    No messages yet.
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {messages.map((msg) => {
+                      const sender = members.find(m => m.user_id === msg.sender_id);
+                      const isAdmin = msg.message.startsWith('[Admin]');
+                      
+                      return (
+                        <div
+                          key={msg.id}
+                          className={`text-sm ${
+                            isAdmin 
+                              ? 'bg-primary/10 border border-primary/30 rounded-lg p-2' 
+                              : msg.is_prompt_response 
+                                ? 'bg-amber-500/10 border border-amber-500/30 rounded-lg p-2' 
+                                : ''
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <span className={`font-medium ${isAdmin ? 'text-primary' : 'text-foreground'}`}>
+                              {isAdmin ? '🛡️ Admin' : sender?.display_name || 'Unknown'}
+                            </span>
+                            {msg.is_prompt_response && (
+                              <Badge variant="outline" className="text-[10px] h-4">
+                                Prompt Response
+                              </Badge>
+                            )}
+                            <span>{format(new Date(msg.created_at), 'h:mm a')}</span>
+                          </div>
+                          <p className="mt-1">{isAdmin ? msg.message.replace('[Admin] ', '') : msg.message}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </ScrollArea>
+              
+              <Separator className="my-3" />
+              
+              {/* Admin message input */}
+              <div className="flex gap-2">
+                <Input
+                  value={adminMessage}
+                  onChange={(e) => setAdminMessage(e.target.value)}
+                  placeholder="Send an admin message to the clique..."
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage();
+                    }
+                  }}
+                />
+                <Button
+                  size="icon"
+                  onClick={handleSendMessage}
+                  disabled={!adminMessage.trim() || sendAdminMessage.isPending}
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Members Tab */}
+        <TabsContent value="members">
+          <Card>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Member</TableHead>
+                  <TableHead className="text-center">Prompt</TableHead>
+                  <TableHead className="text-center">Ready</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {members.map((member) => {
+                  const hasPrompt = !!member.prompt_response;
+                  const hasConfirmed = !!member.readiness_confirmed_at;
+                  const isReady = hasPrompt && hasConfirmed;
+                  
+                  return (
+                    <TableRow key={member.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback>
+                              {member.display_name?.[0]?.toUpperCase() || '?'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span>{member.display_name || 'Unknown'}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {hasPrompt ? (
+                          <CheckCircle2 className="h-5 w-5 text-emerald-500 mx-auto" />
+                        ) : (
+                          <XCircle className="h-5 w-5 text-muted-foreground mx-auto" />
+                        )}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {hasConfirmed ? (
+                          <CheckCircle2 className="h-5 w-5 text-emerald-500 mx-auto" />
+                        ) : (
+                          <XCircle className="h-5 w-5 text-muted-foreground mx-auto" />
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant={isReady ? "outline" : "default"}
+                          size="sm"
+                          onClick={() => overrideMemberProgress.mutate({ 
+                            memberId: member.id, 
+                            confirmed: !isReady 
+                          })}
+                          disabled={overrideMemberProgress.isPending}
+                        >
+                          {isReady ? 'Reset' : 'Mark Ready'}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </Card>
+        </TabsContent>
+
+        {/* Responses Tab */}
+        <TabsContent value="responses">
+          <Card>
+            <CardContent className="pt-4">
+              {members.filter(m => m.prompt_response && m.prompt_response !== '[Admin Override]').length === 0 ? (
+                <p className="text-muted-foreground text-center py-4">
+                  No prompt responses yet.
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {members.filter(m => m.prompt_response && m.prompt_response !== '[Admin Override]').map((member) => (
+                    <div key={member.id} className="border rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="font-medium">{member.display_name || 'Unknown'}</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {member.prompt_response}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* Admin Actions */}
+      {!isApproved && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Admin Actions</CardTitle>
+            <CardDescription>
+              {isReadyForReview 
+                ? 'This clique is ready for your approval.'
+                : 'Manage clique warm-up status.'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-3">
+              {(isWarmingUp || isReadyForReview) && (
+                <Button
+                  onClick={() => setShowApproveDialog(true)}
+                  disabled={updateStatus.isPending}
+                >
+                  <Unlock className="h-4 w-4 mr-2" />
+                  Approve Clique
+                </Button>
+              )}
+              
+              {isReadyForReview && (
+                <Button
+                  variant="secondary"
+                  onClick={() => updateStatus.mutate({ status: 'warming_up' })}
+                  disabled={updateStatus.isPending}
+                >
+                  <Lock className="h-4 w-4 mr-2" />
+                  Hold Back
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Approve Dialog */}
+      <Dialog open={showApproveDialog} onOpenChange={setShowApproveDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Approve Clique</DialogTitle>
+            <DialogDescription>
+              This will unlock quest instructions for all clique members and notify them.
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            placeholder="Add approval notes (optional)..."
+            value={approvalNotes}
+            onChange={(e) => setApprovalNotes(e.target.value)}
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowApproveDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => updateStatus.mutate({ status: 'approved', notes: approvalNotes })}
+              disabled={updateStatus.isPending}
+            >
+              {updateStatus.isPending ? 'Approving...' : 'Approve Clique'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Progress Management Dialog */}
+      <Dialog open={showProgressDialog} onOpenChange={setShowProgressDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Manage Progress</DialogTitle>
+            <DialogDescription>
+              Override member readiness or manually adjust progress.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Quick Actions</p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    members.forEach(m => {
+                      if (!m.readiness_confirmed_at) {
+                        overrideMemberProgress.mutate({ memberId: m.id, confirmed: true });
+                      }
+                    });
+                    setShowProgressDialog(false);
+                  }}
+                >
+                  Mark All Ready
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    members.forEach(m => {
+                      if (m.readiness_confirmed_at) {
+                        overrideMemberProgress.mutate({ memberId: m.id, confirmed: false });
+                      }
+                    });
+                    setShowProgressDialog(false);
+                  }}
+                >
+                  Reset All
+                </Button>
+              </div>
+            </div>
+            
+            <Separator />
+            
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Individual Members</p>
+              <div className="space-y-2">
+                {members.map(m => {
+                  const isReady = !!m.prompt_response && !!m.readiness_confirmed_at;
+                  return (
+                    <div key={m.id} className="flex items-center justify-between">
+                      <span className="text-sm">{m.display_name || 'Unknown'}</span>
+                      <Button
+                        variant={isReady ? "secondary" : "default"}
+                        size="sm"
+                        onClick={() => {
+                          overrideMemberProgress.mutate({ memberId: m.id, confirmed: !isReady });
+                        }}
+                      >
+                        {isReady ? 'Reset' : 'Mark Ready'}
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowProgressDialog(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

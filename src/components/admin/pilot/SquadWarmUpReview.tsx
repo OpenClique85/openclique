@@ -102,7 +102,7 @@ export function SquadWarmUpReview({ squadId, onClose }: SquadWarmUpReviewProps) 
       readiness_confirmed_at: m.readiness_confirmed_at,
       status: m.status,
     })),
-    squad.quest_instances?.warm_up_min_ready_pct ?? 100
+    100 // Default to 100% required
   );
 
   const isReadyForApproval = squadStatus === 'ready_for_review';
@@ -389,12 +389,6 @@ export function SquadWarmUpReview({ squadId, onClose }: SquadWarmUpReviewProps) 
               )}
             </div>
             
-            {squad.approval_notes && (
-              <div className="mt-4 p-3 bg-muted rounded-lg text-sm">
-                <p className="font-medium text-xs text-muted-foreground mb-1">Previous Notes:</p>
-                <p>{squad.approval_notes}</p>
-              </div>
-            )}
           </CardContent>
         </Card>
       )}
