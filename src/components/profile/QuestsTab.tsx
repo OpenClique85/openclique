@@ -258,6 +258,45 @@ export function QuestsTab({ userId }: QuestsTabProps) {
     fetchSignups();
   }, [userId]);
 
+  // Keep user view in sync with admin actions (clique creation/locking/warm-up transitions)
+  // by listening for membership + squad status changes.
+  useEffect(() => {
+    if (!userId) return;
+
+    const channel = supabase
+      .channel(`quests-tab-sync:${userId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'squad_members',
+          filter: `user_id=eq.${userId}`,
+        },
+        () => {
+          fetchSignups();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'quest_squads',
+        },
+        () => {
+          // Squad status updates don't always touch squad_members rows
+          fetchSignups();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
+
   const now = new Date();
   
   // Temporal classification helper
