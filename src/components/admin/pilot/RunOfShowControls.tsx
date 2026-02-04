@@ -219,10 +219,10 @@ export function RunOfShowControls({ instance }: RunOfShowControlsProps) {
 
       <TabsContent value="messages">
         <div className="grid lg:grid-cols-2 gap-6">
-      {/* Message Composer */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Send Message</CardTitle>
+          {/* Message Composer */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Send Message</CardTitle>
           <CardDescription>
             Select a template and recipients to send notifications
           </CardDescription>
