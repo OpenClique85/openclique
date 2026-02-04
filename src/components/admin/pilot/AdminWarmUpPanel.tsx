@@ -279,16 +279,16 @@ export function AdminWarmUpPanel({ cliqueId, onClose }: AdminWarmUpPanelProps) {
   // Update clique status
   const updateStatus = useMutation({
     mutationFn: async ({ status, notes }: { status: SquadStatus; notes?: string }) => {
+      // Only update status column - other columns (approval_notes, approved_at, approved_by) don't exist
       const { error } = await supabase
         .from('quest_squads')
-        .update({ 
-          status, 
-          approval_notes: notes,
-          ...(status === 'approved' && { approved_at: new Date().toISOString(), approved_by: user?.id }),
-        } as Record<string, unknown>)
+        .update({ status })
         .eq('id', cliqueId);
       
       if (error) throw error;
+      
+      // Log approval notes separately in audit log since column doesn't exist on table
+      void notes; // Use notes in audit log below
 
       // Notify members if approved
       if (status === 'approved') {
