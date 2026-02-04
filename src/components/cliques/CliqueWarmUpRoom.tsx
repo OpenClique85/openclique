@@ -19,6 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useCliqueWarmUp } from '@/hooks/useCliqueWarmUp';
 import { CLIQUE_STATUS_LABELS, shouldShowInstructions, CliqueStatus } from '@/lib/cliqueLifecycle';
+import { MemberProfileSheet } from '@/components/squads/MemberProfileSheet';
 
 interface CliqueWarmUpRoomProps {
   cliqueId: string;
