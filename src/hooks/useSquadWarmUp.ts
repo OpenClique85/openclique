@@ -49,7 +49,6 @@ interface SquadWithInstance {
     title: string;
     scheduled_date: string;
     start_time: string;
-    warm_up_prompt_id?: string | null;
   } | null;
 }
 
