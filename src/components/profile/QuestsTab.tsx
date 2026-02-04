@@ -16,13 +16,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { ContinueYourJourney } from '@/components/progression/ContinueYourJourney';
 import { RewardClaimCard, RewardClaimModal } from '@/components/rewards';
 import { ActiveQuestCard } from './ActiveQuestCard';
+import { MobileCollapsibleSection } from './MobileCollapsibleSection';
 import { CancelModal } from '@/components/CancelModal';
 import { usePinnedQuests, useUnpinQuest } from '@/hooks/usePinnedQuests';
 import { useQuests } from '@/hooks/useQuests';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Calendar, Star, CheckCircle, Gift, Sparkles, Search, Bookmark, X, Zap } from 'lucide-react';
+import { Loader2, Calendar, Star, CheckCircle, Gift, Sparkles, Search, Bookmark, X, Zap, History } from 'lucide-react';
 import { format, isToday as checkIsToday } from 'date-fns';
 import type { Tables } from '@/integrations/supabase/types';
 
