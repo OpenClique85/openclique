@@ -5,12 +5,14 @@
 import { useState } from 'react';
 import { useContacts } from '@/hooks/useContacts';
 import { useLFG } from '@/hooks/useLFG';
+import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
+import { FindPeopleSection } from '@/components/profile/FindPeopleSection';
 import { 
   Users, 
   UserPlus, 
