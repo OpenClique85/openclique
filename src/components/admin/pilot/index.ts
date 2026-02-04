@@ -23,3 +23,6 @@ export { InstanceBroadcastModal } from './InstanceBroadcastModal';
 export { DragDropSquadBuilder } from './DragDropSquadBuilder';
 export { SquadWarmUpReview } from './SquadWarmUpReview';
 export { SquadWarmUpTab } from './SquadWarmUpTab';
+export { AdminWarmUpPanel } from './AdminWarmUpPanel';
+export { CliqueManager } from './CliqueManager';
+export { CliqueBuilder } from './CliqueBuilder';

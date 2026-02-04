@@ -3,7 +3,7 @@
  * 
  * Create cliques, assign users, and manage clique composition.
  * Includes broadcast messaging, drag-and-drop manual clique formation,
- * clique locking, and member swap functionality.
+ * clique locking, warm-up initiation, and member swap functionality.
  */
 
 import { useState } from 'react';
@@ -17,17 +17,19 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Users, Wand2, Lock, 
   Loader2, AlertCircle,
-  Megaphone, ArrowLeftRight, Unlock, Plus, User
+  Megaphone, ArrowLeftRight, Unlock, Plus, User, Play, ThermometerSun
 } from 'lucide-react';
 import { auditLog } from '@/lib/auditLog';
 import { InstanceBroadcastModal } from './InstanceBroadcastModal';
 import { CliqueBuilder } from './CliqueBuilder';
 import { CliqueSwapModal } from './CliqueSwapModal';
+import { SQUAD_STATUS_LABELS, SQUAD_STATUS_STYLES, SquadStatus } from '@/lib/squadLifecycle';
 
 interface CliqueWithMembers {
   id: string;
   name: string;
   locked_at: string | null;
+  status: SquadStatus;
   members: {
     id: string;
     user_id: string;
@@ -52,6 +54,7 @@ export function CliqueManager({ instanceId, instanceTitle = 'Quest', targetCliqu
   const [isBuilderOpen, setIsBuilderOpen] = useState(false);
   const [isSwapOpen, setIsSwapOpen] = useState(false);
   const [isLockingAll, setIsLockingAll] = useState(false);
+  const [startingWarmUpId, setStartingWarmUpId] = useState<string | null>(null);
 
   // Fetch cliques with members (using instance_id)
   const { data: cliques, isLoading } = useQuery({
@@ -60,7 +63,7 @@ export function CliqueManager({ instanceId, instanceTitle = 'Quest', targetCliqu
       // Get cliques by instance_id
       const { data: cliqueData, error: cliqueError } = await supabase
         .from('quest_squads')
-        .select('id, squad_name, locked_at')
+        .select('id, squad_name, locked_at, status')
         .eq('instance_id', instanceId)
         .order('squad_name');
       
@@ -81,6 +84,7 @@ export function CliqueManager({ instanceId, instanceTitle = 'Quest', targetCliqu
             id: clique.id,
             name: clique.squad_name || `Clique ${clique.id.slice(0, 4)}`,
             locked_at: clique.locked_at,
+            status: (clique.status || 'confirmed') as SquadStatus,
             members: (members || []).map((m: any) => ({
               id: m.id,
               user_id: m.user_id,
@@ -267,6 +271,51 @@ export function CliqueManager({ instanceId, instanceTitle = 'Quest', targetCliqu
     }
   };
 
+  // Start warm-up for a clique
+  const handleStartWarmUp = async (cliqueId: string, cliqueName: string) => {
+    setStartingWarmUpId(cliqueId);
+    try {
+      // Update clique status to warming_up
+      const { error: updateError } = await supabase
+        .from('quest_squads')
+        .update({ status: 'warming_up' })
+        .eq('id', cliqueId);
+      
+      if (updateError) throw updateError;
+      
+      // Notify all clique members
+      try {
+        await supabase.functions.invoke('notify-clique-members', {
+          body: {
+            squad_id: cliqueId,
+            notification_type: 'warm_up_started',
+            title: 'Warm-Up Started!',
+            body: `Your clique "${cliqueName}" is now in the warm-up lobby. Introduce yourself and get ready for the quest!`,
+            metadata: { instance_id: instanceId },
+          },
+        });
+      } catch (notifyErr) {
+        console.error('Failed to send warm-up notifications:', notifyErr);
+        // Don't fail the whole operation if notifications fail
+      }
+      
+      await auditLog({
+        action: 'clique_warmup_started',
+        targetTable: 'quest_squads',
+        targetId: cliqueId,
+        newValues: { status: 'warming_up' },
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ['instance-cliques-detail', instanceId] });
+      queryClient.invalidateQueries({ queryKey: ['instance-squads-warmup', instanceId] });
+      toast({ title: 'Warm-Up Started!', description: `${cliqueName} members have been notified.` });
+    } catch (err: any) {
+      toast({ title: 'Failed to start warm-up', description: err.message, variant: 'destructive' });
+    } finally {
+      setStartingWarmUpId(null);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
@@ -367,72 +416,113 @@ export function CliqueManager({ instanceId, instanceTitle = 'Quest', targetCliqu
       {/* Clique Grid */}
       {cliques && cliques.length > 0 ? (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {cliques.map((clique, index) => (
-            <Card key={clique.id} className={clique.locked_at ? "border-muted bg-muted/30" : ""}>
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <CardTitle className="text-base">{clique.name}</CardTitle>
-                    {clique.locked_at && (
-                      <Lock className="h-4 w-4 text-muted-foreground" />
+          {cliques.map((clique) => {
+            const isLocked = !!clique.locked_at;
+            const isWarmingUp = ['warming_up', 'ready_for_review', 'approved'].includes(clique.status);
+            const canStartWarmUp = isLocked && !isWarmingUp && clique.members.length > 0;
+            const statusStyles = SQUAD_STATUS_STYLES[clique.status] || SQUAD_STATUS_STYLES.confirmed;
+            
+            return (
+              <Card 
+                key={clique.id} 
+                className={isWarmingUp 
+                  ? `${statusStyles.border} ${statusStyles.bg}` 
+                  : isLocked 
+                    ? "border-muted bg-muted/30" 
+                    : ""
+                }
+              >
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <CardTitle className="text-base">{clique.name}</CardTitle>
+                      {isLocked && !isWarmingUp && (
+                        <Lock className="h-4 w-4 text-muted-foreground" />
+                      )}
+                      {isWarmingUp && (
+                        <ThermometerSun className="h-4 w-4 text-amber-500" />
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {isWarmingUp && (
+                        <Badge className={`${statusStyles.bg} ${statusStyles.text} border ${statusStyles.border} text-xs`}>
+                          {SQUAD_STATUS_LABELS[clique.status]}
+                        </Badge>
+                      )}
+                      <Badge variant="secondary">{clique.members.length}/{targetCliqueSize}</Badge>
+                      {!isWarmingUp && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          onClick={() => toggleCliqueLock(clique.id, isLocked)}
+                        >
+                          {isLocked ? (
+                            <Unlock className="h-4 w-4" />
+                          ) : (
+                            <Lock className="h-4 w-4" />
+                          )}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Members list */}
+                  <div className="space-y-1">
+                    {clique.members.length > 0 ? (
+                      clique.members.map((m) => (
+                        <div key={m.id} className="flex items-center justify-between text-sm py-1 px-2 rounded hover:bg-muted cursor-pointer">
+                          <div className="flex items-center gap-2">
+                            <User className="h-3 w-3 text-muted-foreground" />
+                            <span>{m.display_name}</span>
+                          </div>
+                          <Badge variant="outline" className="text-xs">
+                            {m.status}
+                          </Badge>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-4 text-muted-foreground text-sm border-2 border-dashed rounded-md">
+                        Drop users here
+                      </div>
+                    )}
+                    
+                    {/* Empty slots visualization */}
+                    {clique.members.length < targetCliqueSize && clique.members.length > 0 && (
+                      <div className="space-y-1 mt-2">
+                        {Array.from({ length: targetCliqueSize - clique.members.length }).map((_, i) => (
+                          <div 
+                            key={`empty-${i}`} 
+                            className="flex items-center gap-2 text-sm py-1 px-2 rounded border border-dashed border-muted-foreground/30 text-muted-foreground"
+                          >
+                            <User className="h-3 w-3" />
+                            <span>Empty slot</span>
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary">{clique.members.length}/{targetCliqueSize}</Badge>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                      onClick={() => toggleCliqueLock(clique.id, !!clique.locked_at)}
-                    >
-                      {clique.locked_at ? (
-                        <Unlock className="h-4 w-4" />
-                      ) : (
-                        <Lock className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Members list */}
-                <div className="space-y-1">
-                  {clique.members.length > 0 ? (
-                    clique.members.map((m) => (
-                      <div key={m.id} className="flex items-center justify-between text-sm py-1 px-2 rounded hover:bg-muted cursor-pointer">
-                        <div className="flex items-center gap-2">
-                          <User className="h-3 w-3 text-muted-foreground" />
-                          <span>{m.display_name}</span>
-                        </div>
-                        <Badge variant="outline" className="text-xs">
-                          {m.status}
-                        </Badge>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-4 text-muted-foreground text-sm border-2 border-dashed rounded-md">
-                      Drop users here
-                    </div>
-                  )}
                   
-                  {/* Empty slots visualization */}
-                  {clique.members.length < targetCliqueSize && clique.members.length > 0 && (
-                    <div className="space-y-1 mt-2">
-                      {Array.from({ length: targetCliqueSize - clique.members.length }).map((_, i) => (
-                        <div 
-                          key={`empty-${i}`} 
-                          className="flex items-center gap-2 text-sm py-1 px-2 rounded border border-dashed border-muted-foreground/30 text-muted-foreground"
-                        >
-                          <User className="h-3 w-3" />
-                          <span>Empty slot</span>
-                        </div>
-                      ))}
-                    </div>
+                  {/* Start Warm-Up Button */}
+                  {canStartWarmUp && (
+                    <Button
+                      className="w-full"
+                      onClick={() => handleStartWarmUp(clique.id, clique.name)}
+                      disabled={startingWarmUpId === clique.id}
+                    >
+                      {startingWarmUpId === clique.id ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Play className="h-4 w-4 mr-2" />
+                      )}
+                      Start Warm-Up
+                    </Button>
                   )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       ) : (
         <Card>

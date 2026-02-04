@@ -33,7 +33,7 @@ import {
   AlertOctagon
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { SquadWarmUpReview } from './SquadWarmUpReview';
+import { AdminWarmUpPanel } from './AdminWarmUpPanel';
 import { 
   SQUAD_STATUS_LABELS, 
   SQUAD_STATUS_STYLES, 
@@ -65,7 +65,7 @@ export function SquadWarmUpTab({ instanceId }: SquadWarmUpTabProps) {
   const { data: squads, isLoading } = useQuery({
     queryKey: ['instance-squads-warmup', instanceId],
     queryFn: async () => {
-      // Get squads for this instance
+      // Get squads for this instance (using instance_id, not quest_id)
       const { data: squadData, error: squadError } = await supabase
         .from('quest_squads')
         .select(`
@@ -74,7 +74,7 @@ export function SquadWarmUpTab({ instanceId }: SquadWarmUpTabProps) {
           status,
           created_at
         `)
-        .eq('quest_id', instanceId)
+        .eq('instance_id', instanceId)
         .order('squad_name');
 
       if (squadError) throw squadError;
@@ -398,16 +398,16 @@ export function SquadWarmUpTab({ instanceId }: SquadWarmUpTabProps) {
         </CardContent>
       </Card>
 
-      {/* Squad Review Sheet */}
+      {/* Clique Warm-Up Review Sheet */}
       <Sheet open={!!selectedSquadId} onOpenChange={(open) => !open && setSelectedSquadId(null)}>
         <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
           <SheetHeader>
-            <SheetTitle>Squad Warm-Up Review</SheetTitle>
+            <SheetTitle>Clique Warm-Up Management</SheetTitle>
           </SheetHeader>
           {selectedSquadId && (
             <div className="mt-6">
-              <SquadWarmUpReview 
-                squadId={selectedSquadId} 
+              <AdminWarmUpPanel 
+                cliqueId={selectedSquadId} 
                 onClose={() => setSelectedSquadId(null)}
               />
             </div>

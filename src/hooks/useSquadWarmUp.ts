@@ -41,17 +41,15 @@ interface SquadWithInstance {
   name: string;
   status: string;
   quest_id: string;
+  instance_id?: string | null;
   approved_at: string | null;
   approved_by: string | null;
-  approval_notes: string | null;
   quest_instances: {
     id: string;
     title: string;
     scheduled_date: string;
     start_time: string;
-    warm_up_prompt_id: string | null;
-    warm_up_min_ready_pct: number | null;
-    warm_up_required: boolean | null;
+    warm_up_prompt_id?: string | null;
   } | null;
 }
 
@@ -75,11 +73,12 @@ export function useSquadWarmUp(squadId: string | null) {
       
       if (error) throw error;
       
-      // Fetch quest instance separately
+      // Fetch quest instance separately - use instance_id if available, otherwise quest_id
+      const instanceId = data.instance_id || data.quest_id;
       const { data: instance } = await supabase
         .from('quest_instances')
         .select('id, title, scheduled_date, start_time, warm_up_prompt_id, warm_up_min_ready_pct, warm_up_required')
-        .eq('id', data.quest_id)
+        .eq('id', instanceId)
         .single();
       
       return {
@@ -288,7 +287,6 @@ export function useSquadWarmUp(squadId: string | null) {
       m => m.prompt_response && m.readiness_confirmed_at
     );
     
-    const minPct = squad?.quest_instances?.warm_up_min_ready_pct ?? 100;
     const percentage = activeMembers.length > 0
       ? Math.round((readyMembers.length / activeMembers.length) * 100)
       : 0;
@@ -297,9 +295,9 @@ export function useSquadWarmUp(squadId: string | null) {
       totalMembers: activeMembers.length,
       readyMembers: readyMembers.length,
       percentage,
-      isComplete: percentage >= minPct,
+      isComplete: percentage >= 100,
     };
-  }, [members, squad]);
+  }, [members]);
 
   // Enrich messages with sender names
   const enrichedMessages = messages.map(msg => ({
@@ -376,8 +374,8 @@ export function useAdminSquadWarmUp(squadId: string | null) {
       // Fetch instance
       const { data: instance } = await supabase
         .from('quest_instances')
-        .select('id, title, scheduled_date, start_time, warm_up_min_ready_pct')
-        .eq('id', squadRaw.quest_id)
+        .select('id, title, scheduled_date, start_time')
+        .eq('id', squadRaw.instance_id || squadRaw.quest_id)
         .single();
       
       const squad = {
