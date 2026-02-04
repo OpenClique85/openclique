@@ -7,23 +7,18 @@
  */
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { 
-  Users, Wand2, Lock, Copy, MessageSquare, 
-  Loader2, AlertCircle, CheckCircle, Link2,
-  Megaphone, MousePointerClick, ArrowLeftRight, Unlock, Plus, User
+  Users, Wand2, Lock, 
+  Loader2, AlertCircle,
+  Megaphone, ArrowLeftRight, Unlock, Plus, User
 } from 'lucide-react';
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
-} from '@/components/ui/dialog';
 import { auditLog } from '@/lib/auditLog';
 import { InstanceBroadcastModal } from './InstanceBroadcastModal';
 import { CliqueBuilder } from './CliqueBuilder';
@@ -57,9 +52,6 @@ export function CliqueManager({ instanceId, instanceTitle = 'Quest', targetCliqu
   const [isBuilderOpen, setIsBuilderOpen] = useState(false);
   const [isSwapOpen, setIsSwapOpen] = useState(false);
   const [isLockingAll, setIsLockingAll] = useState(false);
-  const [isCreatingClique, setIsCreatingClique] = useState(false);
-  const [newCliqueName, setNewCliqueName] = useState('');
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   // Fetch cliques with members (using instance_id)
   const { data: cliques, isLoading } = useQuery({
@@ -138,46 +130,20 @@ export function CliqueManager({ instanceId, instanceTitle = 'Quest', targetCliqu
       return (signups || []).filter((s: any) => !assignedUserIds.has(s.user_id));
     },
   });
-
-  // Create a new clique
-  const handleCreateClique = async () => {
-    if (!newCliqueName.trim()) return;
-
-    setIsCreatingClique(true);
-    try {
-      const { data, error } = await supabase
-        .from('quest_squads')
-        .insert({
-          instance_id: instanceId,
-          squad_name: newCliqueName.trim(),
-        } as any)
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      await auditLog({
-        action: 'clique_created',
-        targetTable: 'quest_squads',
-        targetId: data.id,
-        newValues: { squad_name: newCliqueName.trim() },
-      });
-
-      queryClient.invalidateQueries({ queryKey: ['instance-cliques-detail', instanceId] });
-      toast({ title: 'Clique created!' });
-      setNewCliqueName('');
-      setShowCreateDialog(false);
-    } catch (err: any) {
-      toast({ title: 'Failed to create clique', description: err.message, variant: 'destructive' });
-    } finally {
-      setIsCreatingClique(false);
-    }
-  };
-
   // Generate cliques (auto)
   const handleGenerateCliques = async () => {
     setIsGenerating(true);
     try {
+      // First, get the quest_id from the instance
+      const { data: instanceData, error: instanceError } = await supabase
+        .from('quest_instances')
+        .select('quest_id')
+        .eq('id', instanceId)
+        .single();
+
+      if (instanceError) throw new Error('Could not find quest instance');
+      const questId = instanceData.quest_id;
+
       const { data, error } = await supabase.functions.invoke('recommend-squads', {
         body: { quest_id: instanceId, squad_size: targetCliqueSize }
       });
@@ -192,7 +158,8 @@ export function CliqueManager({ instanceId, instanceTitle = 'Quest', targetCliqu
         const { data: newClique, error: createError } = await supabase
           .from('quest_squads')
           .insert({
-            instance_id: instanceId as any, // New column, types not yet synced
+            quest_id: questId,
+            instance_id: instanceId,
             squad_name: cliqueName,
             formation_reason: suggestion.formation_reason,
             compatibility_score: suggestion.compatibility_score,
@@ -331,22 +298,10 @@ export function CliqueManager({ instanceId, instanceTitle = 'Quest', targetCliqu
               
               <Button 
                 variant="outline"
-                onClick={() => {
-                  const nextNum = (cliques?.length || 0) + 1;
-                  setNewCliqueName(`${instanceTitle} Clique ${nextNum}`);
-                  setShowCreateDialog(true);
-                }}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Create Clique
-              </Button>
-              
-              <Button 
-                variant="outline"
                 onClick={() => setIsBuilderOpen(true)}
               >
-                <MousePointerClick className="h-4 w-4 mr-2" />
-                Assign Members
+                <Plus className="h-4 w-4 mr-2" />
+                Create Cliques
               </Button>
               
               <Button 
@@ -488,52 +443,14 @@ export function CliqueManager({ instanceId, instanceTitle = 'Quest', targetCliqu
               Create cliques to organize participants for this quest.
             </p>
             <Button 
-              onClick={() => {
-                setNewCliqueName(`${instanceTitle} Clique 1`);
-                setShowCreateDialog(true);
-              }}
+              onClick={() => setIsBuilderOpen(true)}
             >
               <Plus className="h-4 w-4 mr-2" />
-              Create First Clique
+              Create Cliques
             </Button>
           </CardContent>
         </Card>
       )}
-
-      {/* Create Clique Dialog */}
-      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create New Clique</DialogTitle>
-            <DialogDescription>
-              Create an empty clique and then assign members to it.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="clique-name">Clique Name</Label>
-              <Input
-                id="clique-name"
-                value={newCliqueName}
-                onChange={(e) => setNewCliqueName(e.target.value)}
-                placeholder="e.g., Party at Moontower Clique 1"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleCreateClique}
-              disabled={isCreatingClique || !newCliqueName.trim()}
-            >
-              {isCreatingClique && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Create Clique
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Broadcast Modal */}
       <InstanceBroadcastModal

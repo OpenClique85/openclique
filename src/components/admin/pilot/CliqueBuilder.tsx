@@ -281,6 +281,16 @@ export function CliqueBuilder({
   const handleSave = async () => {
     setIsSaving(true);
     try {
+      // First, get the quest_id from the instance
+      const { data: instanceData, error: instanceError } = await supabase
+        .from('quest_instances')
+        .select('quest_id')
+        .eq('id', instanceId)
+        .single();
+
+      if (instanceError) throw new Error('Could not find quest instance');
+      const questId = instanceData.quest_id;
+
       // 1. Get or create cliques in DB
       const cliqueIdMap = new Map<string, string>(); // local id -> db id
 
@@ -291,6 +301,7 @@ export function CliqueBuilder({
             const { data, error } = await supabase
               .from('quest_squads')
               .insert({
+                quest_id: questId,
                 instance_id: instanceId,
                 squad_name: clique.name,
               } as any)
