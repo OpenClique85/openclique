@@ -296,6 +296,17 @@ export default function QuestCard() {
       {/* Header */}
       <div className="bg-primary text-primary-foreground p-4 sm:p-6 pb-6 sm:pb-8">
         <div className="max-w-lg mx-auto">
+          {/* Back to warm-up navigation */}
+          {isSquadWarmingUp && participant?.squad_id && (
+            <Link 
+              to={`/warmup/${participant.squad_id}`}
+              className="inline-flex items-center gap-1 text-sm text-primary-foreground/80 hover:text-primary-foreground mb-3"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Warm-Up Chat
+            </Link>
+          )}
+          
           <div className="flex items-center gap-3 mb-4">
             <span className="text-3xl sm:text-4xl">{instance.icon}</span>
             <div>
