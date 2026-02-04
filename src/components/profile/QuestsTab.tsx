@@ -16,13 +16,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { ContinueYourJourney } from '@/components/progression/ContinueYourJourney';
 import { RewardClaimCard, RewardClaimModal } from '@/components/rewards';
 import { ActiveQuestCard } from './ActiveQuestCard';
+import { MobileCollapsibleSection } from './MobileCollapsibleSection';
 import { CancelModal } from '@/components/CancelModal';
 import { usePinnedQuests, useUnpinQuest } from '@/hooks/usePinnedQuests';
 import { useQuests } from '@/hooks/useQuests';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Calendar, Star, CheckCircle, Gift, Sparkles, Search, Bookmark, X, Zap } from 'lucide-react';
+import { Loader2, Calendar, Star, CheckCircle, Gift, Sparkles, Search, Bookmark, X, Zap, History } from 'lucide-react';
 import { format, isToday as checkIsToday } from 'date-fns';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -383,13 +384,15 @@ export function QuestsTab({ userId }: QuestsTabProps) {
         </Button>
       </div>
 
-      {/* Pinned Quests */}
+      {/* Pinned Quests - Collapsible on mobile */}
       {pinnedQuestsWithData.length > 0 && (
-        <section>
-          <h3 className="text-lg font-display font-semibold mb-3 flex items-center gap-2">
-            <Bookmark className="h-5 w-5 text-primary" />
-            Saved for Later ({pinnedQuestsWithData.length})
-          </h3>
+        <MobileCollapsibleSection
+          title="Saved for Later"
+          icon={<Bookmark className="h-5 w-5 text-primary" />}
+          count={pinnedQuestsWithData.length}
+          defaultOpenMobile={false}
+          defaultOpenDesktop={true}
+        >
           <div className="grid gap-3 sm:grid-cols-2">
             {pinnedQuestsWithData.map((quest: any) => (
               <Card 
@@ -426,7 +429,7 @@ export function QuestsTab({ userId }: QuestsTabProps) {
               </Card>
             ))}
           </div>
-        </section>
+        </MobileCollapsibleSection>
       )}
 
       {/* Your Rewards */}
@@ -482,13 +485,14 @@ export function QuestsTab({ userId }: QuestsTabProps) {
         </section>
       )}
       
-      {/* Upcoming Quests */}
-      <section>
-        <h3 className="text-lg font-display font-semibold mb-3 flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-primary" />
-          Upcoming ({upcomingSignups.length})
-        </h3>
-        
+      {/* Upcoming Quests - Collapsible on mobile */}
+      <MobileCollapsibleSection
+        title="Upcoming"
+        icon={<Calendar className="h-5 w-5 text-primary" />}
+        count={upcomingSignups.length}
+        defaultOpenMobile={false}
+        defaultOpenDesktop={true}
+      >
         {upcomingSignups.length === 0 && todaySignups.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="py-8 text-center">
@@ -513,15 +517,18 @@ export function QuestsTab({ userId }: QuestsTabProps) {
             ))}
           </div>
         )}
-      </section>
+      </MobileCollapsibleSection>
       
-      {/* Past Quests */}
+      {/* Past Quests - Collapsible on mobile */}
       {pastSignups.length > 0 && (
-        <section>
-          <h3 className="text-lg font-display font-semibold mb-3 text-muted-foreground">
-            Past Quests ({pastSignups.length})
-          </h3>
-          
+        <MobileCollapsibleSection
+          title="Past Quests"
+          icon={<History className="h-5 w-5 text-muted-foreground" />}
+          count={pastSignups.length}
+          variant="muted"
+          defaultOpenMobile={false}
+          defaultOpenDesktop={true}
+        >
           <div className="space-y-3">
             {pastSignups.map((signup) => {
               const isPast = signup.quest.start_datetime && new Date(signup.quest.start_datetime) < now;
@@ -532,11 +539,11 @@ export function QuestsTab({ userId }: QuestsTabProps) {
               return (
                 <Card key={signup.id} className="bg-muted/30">
                   <CardContent className="py-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="flex items-center gap-3">
                         <span className="text-2xl opacity-60">{signup.quest.icon || '🎯'}</span>
                         <div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <p className="font-medium">{signup.quest.title}</p>
                             {signup.quest.is_sponsored && (
                               <Badge variant="outline" className="text-sunset/60 border-sunset/40 text-xs">
@@ -553,22 +560,22 @@ export function QuestsTab({ userId }: QuestsTabProps) {
                         </div>
                       </div>
                       
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 ml-11 sm:ml-0">
                         <Badge variant={STATUS_BADGES[signup.status || 'pending'].variant}>
                           {STATUS_BADGES[signup.status || 'pending'].label}
                         </Badge>
                         
                         {canLeaveFeedback && (
                           hasFeedback ? (
-                            <Button variant="ghost" size="sm" disabled className="text-muted-foreground">
-                              <CheckCircle className="h-4 w-4 mr-1" />
-                              Feedback Sent
+                            <Button variant="ghost" size="sm" disabled className="text-muted-foreground text-xs">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Done
                             </Button>
                           ) : (
-                            <Button variant="outline" size="sm" asChild>
+                            <Button variant="outline" size="sm" asChild className="text-xs">
                               <Link to={`/feedback/${signup.quest.id}`}>
-                                <Star className="h-4 w-4 mr-1" />
-                                Leave Feedback
+                                <Star className="h-3 w-3 mr-1" />
+                                Feedback
                               </Link>
                             </Button>
                           )
@@ -580,7 +587,7 @@ export function QuestsTab({ userId }: QuestsTabProps) {
               );
             })}
           </div>
-        </section>
+        </MobileCollapsibleSection>
       )}
       
       {/* Cancel Modal */}

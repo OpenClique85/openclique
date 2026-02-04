@@ -5,12 +5,14 @@
 import { useState } from 'react';
 import { useContacts } from '@/hooks/useContacts';
 import { useLFG } from '@/hooks/useLFG';
+import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
+import { FindPeopleSection } from '@/components/profile/FindPeopleSection';
 import { 
   Users, 
   UserPlus, 
@@ -33,6 +35,7 @@ interface ContactsTabProps {
 }
 
 export function ContactsTab({ userId }: ContactsTabProps) {
+  const { profile } = useAuth();
   const { 
     contacts, 
     pendingRequests, 
@@ -55,6 +58,9 @@ export function ContactsTab({ userId }: ContactsTabProps) {
 
   return (
     <div className="space-y-6">
+      {/* Connect with People Section - moved here from Profile header */}
+      <FindPeopleSection friendCode={profile?.friend_code} />
+
       {/* Pending Requests Banner */}
       {pendingRequests.length > 0 && (
         <Card className="border-primary/30 bg-primary/5">
