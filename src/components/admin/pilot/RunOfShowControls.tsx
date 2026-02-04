@@ -385,7 +385,12 @@ export function RunOfShowControls({ instance }: RunOfShowControlsProps) {
         {/* Recent Sends Log */}
         <RecentSendsLog instanceId={instance.id} />
       </div>
-    </div>
+      </TabsContent>
+
+      <TabsContent value="cliques">
+        <ActiveCliquesPanel instanceId={instance.id} />
+      </TabsContent>
+    </Tabs>
   );
 }
 
