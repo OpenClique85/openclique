@@ -31,6 +31,7 @@ import { SQUAD_STATUS_LABELS, SQUAD_STATUS_STYLES, SquadStatus } from '@/lib/squ
 import { EndQuestDialog } from './EndQuestDialog';
 import { ProofGalleryPanel } from './ProofGalleryPanel';
 import { QuestObjectivesPanel } from './QuestObjectivesPanel';
+import { FeedbackExportPanel } from './FeedbackExportPanel';
 
 type QuestInstance = Tables<'quest_instances'>;
 
@@ -440,6 +441,13 @@ export function RunOfShowControls({ instance }: RunOfShowControlsProps) {
               </div>
             </CardContent>
           </Card>
+
+          {/* Feedback Export */}
+          <FeedbackExportPanel 
+            instanceId={instance.id}
+            questId={instance.quest_id}
+            title="Export Instance Data"
+          />
 
           {/* Recent Sends Log */}
           <RecentSendsLog instanceId={instance.id} />

@@ -101,3 +101,9 @@ verify_jwt = false
 
 [functions.simulate-bot-reply]
 verify_jwt = false
+
+[functions.export-admin-feedback]
+verify_jwt = false
+
+[functions.process-clique-saves]
+verify_jwt = false
