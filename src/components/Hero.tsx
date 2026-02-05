@@ -44,6 +44,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { HERO, SOCIAL_PROOF } from "@/constants/content";
 import logo from "@/assets/logo.png";
+import wordmark from "@/assets/logo-wordmark.png";
 import concertCrowd from "@/assets/austin/concert-crowd.jpg";
 import { ChevronDown, Smartphone } from "lucide-react";
 import {
@@ -86,10 +87,10 @@ export function Hero() {
           </div>
 
           {/* -------------------------------------------------------------- */}
-          {/* LOGO */}
+          {/* WORDMARK LOGO */}
           {/* -------------------------------------------------------------- */}
           <div className="flex justify-center mb-8 animate-fade-in [animation-delay:50ms]">
-            <img src={logo} alt="OpenClique" className="h-16 md:h-20 hover:scale-105 transition-transform duration-300 drop-shadow-lg" />
+            <img src={wordmark} alt="OpenClique" className="h-14 md:h-18 lg:h-20 hover:scale-105 transition-transform duration-300 drop-shadow-lg" />
           </div>
 
           {/* -------------------------------------------------------------- */}
