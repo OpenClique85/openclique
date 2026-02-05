@@ -475,6 +475,8 @@ export default function FeedbackFlow() {
                 currentStep={currentStep}
                 totalSteps={4}
                 completedSteps={completedSteps}
+                totalXPEarned={totalXPEarned}
+                maxXP={maxXP}
               />
 
               {/* Step content */}
