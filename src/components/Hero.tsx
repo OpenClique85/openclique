@@ -89,7 +89,7 @@ export function Hero() {
           {/* LOGO */}
           {/* -------------------------------------------------------------- */}
           <div className="flex justify-center mb-8 animate-fade-in [animation-delay:50ms]">
-            <img src={logo} alt="OpenClique" className="h-16 md:h-20" />
+            <img src={logo} alt="OpenClique" className="h-16 md:h-20 hover:scale-105 transition-transform duration-300" />
           </div>
 
           {/* -------------------------------------------------------------- */}
