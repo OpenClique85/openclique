@@ -186,100 +186,171 @@ export function SquadWarmUpRoom({ squadId, onInstructionsUnlocked }: SquadWarmUp
           <CheckCircle2 className="h-4 w-4 text-emerald-600" />
           <AlertTitle className="text-emerald-700 dark:text-emerald-300">Squad Approved!</AlertTitle>
           <AlertDescription className="text-emerald-600 dark:text-emerald-400">
-            Quest instructions are now unlocked. Check your quest details page for briefing info.
+            Quest instructions are now unlocked. Use this chat to coordinate with your squad.
           </AlertDescription>
         </Alert>
       )}
 
-      {/* Main Content Grid */}
-      {!isApproved && (
-        <div className="grid lg:grid-cols-2 gap-4 sm:gap-6">
-          {/* Chat Section */}
-          <Card className="flex flex-col h-[300px] sm:h-[400px]">
-            <CardHeader className="pb-2 px-4 sm:px-6">
-              <CardTitle className="text-base flex items-center gap-2">
-                <MessageCircle className="h-4 w-4" />
-                Squad Chat
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex-1 flex flex-col px-4 sm:px-6 overflow-hidden">
-              <ScrollArea className="flex-1 pr-2 sm:pr-4">
-                <div className="space-y-3">
-                  {messages.length === 0 && (
-                    <p className="text-muted-foreground text-sm text-center py-4">
-                      Be the first to say hello! 👋
-                    </p>
+      {/* Quest Objectives - Show when approved */}
+      {isApproved && questInstance?.objectives && (
+        <Collapsible open={objectivesOpen} onOpenChange={setObjectivesOpen}>
+          <Card>
+            <CollapsibleTrigger asChild>
+              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors pb-3">
+                <CardTitle className="text-base flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <Target className="h-4 w-4 text-primary" />
+                    Quest Objectives
+                  </span>
+                  {objectivesOpen ? (
+                    <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
                   )}
-                  {messages.map((msg) => {
-                    const isBuggs = msg.sender_type === 'buggs';
-                    const isAdmin = msg.sender_type === 'admin';
-                    const isSystem = msg.sender_type === 'system';
-                    const isPromptResponse = msg.message.startsWith('📝 **Prompt Response:**');
-                    
-                    return (
-                      <div
-                        key={msg.id}
-                        className={`flex flex-col rounded-lg p-2 ${
-                          isBuggs 
-                            ? 'bg-orange-500/10 border border-orange-500/30' 
-                            : isAdmin
-                              ? 'bg-primary/5 border border-primary/20'
-                              : isSystem
-                                ? 'bg-muted border border-border'
-                                : isPromptResponse
-                                  ? 'bg-primary/5 border border-primary/20'
-                                  : ''
-                        }`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-sm">
-                            {isBuggs ? '🐰 BUGGS' : isAdmin ? '🛡️ Admin' : isSystem ? '⚙️ System' : msg.sender_name}
-                          </span>
-                          {isPromptResponse && (
-                            <Badge variant="outline" className="text-[10px] h-4">
-                              Prompt Response
-                            </Badge>
-                          )}
-                          <span className="text-xs text-muted-foreground ml-auto">
-                            {format(new Date(msg.created_at), 'h:mm a')}
-                          </span>
-                        </div>
-                        <p className="text-sm mt-1">{msg.message}</p>
-                      </div>
-                    );
-                  })}
-                  <div ref={messagesEndRef} />
+                </CardTitle>
+              </CardHeader>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <CardContent className="pt-0 space-y-4">
+                {/* Objectives List */}
+                <div className="space-y-2">
+                  {questInstance.objectives.split('\n').filter(Boolean).map((obj, i) => (
+                    <div key={i} className="flex items-start gap-2 text-sm">
+                      <span className="text-muted-foreground">-</span>
+                      <span>{obj.replace(/^[-•]\s*/, '')}</span>
+                    </div>
+                  ))}
                 </div>
-              </ScrollArea>
-              
-              <Separator className="my-2 sm:my-3" />
-              
-              <div className="flex gap-2">
-                <Textarea
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  placeholder="Say something to your squad..."
-                  className="min-h-[50px] sm:min-h-[60px] resize-none text-sm"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSendChat();
-                    }
-                  }}
-                />
-                <Button
-                  size="icon"
-                  onClick={handleSendChat}
-                  disabled={!chatInput.trim() || isSending}
-                  className="min-h-[48px] min-w-[48px]"
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardContent>
+                
+                {/* Location Info */}
+                {questInstance.meeting_point_name && (
+                  <div className="flex items-start gap-2 pt-2 border-t">
+                    <MapPin className="h-4 w-4 text-primary mt-0.5" />
+                    <div>
+                      <p className="font-medium text-sm">{questInstance.meeting_point_name}</p>
+                      {questInstance.meeting_point_address && (
+                        <p className="text-xs text-muted-foreground">{questInstance.meeting_point_address}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+                
+                {/* What to Bring */}
+                {questInstance.what_to_bring && (
+                  <div className="flex items-start gap-2 pt-2 border-t">
+                    <Backpack className="h-4 w-4 text-primary mt-0.5" />
+                    <div>
+                      <p className="font-medium text-sm">What to Bring</p>
+                      <p className="text-sm text-muted-foreground">{questInstance.what_to_bring}</p>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Safety Notes */}
+                {questInstance.safety_notes && (
+                  <div className="flex items-start gap-2 pt-2 border-t">
+                    <ShieldAlert className="h-4 w-4 text-amber-500 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-sm">Safety Notes</p>
+                      <p className="text-sm text-muted-foreground">{questInstance.safety_notes}</p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </CollapsibleContent>
           </Card>
+        </Collapsible>
+      )}
 
-          {/* Prompt & Readiness Section */}
+      {/* Main Content - Always show chat, show warm-up tasks only when not approved */}
+      <div className={`grid gap-4 sm:gap-6 ${!isApproved ? 'lg:grid-cols-2' : ''}`}>
+        {/* Chat Section - Always visible */}
+        <Card className={`flex flex-col ${isApproved ? 'h-[400px] sm:h-[500px]' : 'h-[300px] sm:h-[400px]'}`}>
+          <CardHeader className="pb-2 px-4 sm:px-6">
+            <CardTitle className="text-base flex items-center gap-2">
+              <MessageCircle className="h-4 w-4" />
+              Squad Chat
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex-1 flex flex-col px-4 sm:px-6 overflow-hidden">
+            <ScrollArea className="flex-1 pr-2 sm:pr-4">
+              <div className="space-y-3">
+                {messages.length === 0 && (
+                  <p className="text-muted-foreground text-sm text-center py-4">
+                    Be the first to say hello! 👋
+                  </p>
+                )}
+                {messages.map((msg) => {
+                  const isBuggs = msg.sender_type === 'buggs';
+                  const isAdmin = msg.sender_type === 'admin';
+                  const isSystem = msg.sender_type === 'system';
+                  const isPromptResponse = msg.message.startsWith('📝 **Prompt Response:**');
+                  
+                  return (
+                    <div
+                      key={msg.id}
+                      className={`flex flex-col rounded-lg p-2 ${
+                        isBuggs 
+                          ? 'bg-orange-500/10 border border-orange-500/30' 
+                          : isAdmin
+                            ? 'bg-primary/10 border border-primary/30'
+                            : isSystem
+                              ? 'bg-muted border border-border'
+                              : isPromptResponse
+                                ? 'bg-primary/5 border border-primary/20'
+                                : ''
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className={`font-medium text-sm ${isBuggs ? 'text-orange-600' : isAdmin ? 'text-primary' : ''}`}>
+                          {isBuggs ? '🐰 BUGGS' : isAdmin ? '🛡️ OpenClique Team' : isSystem ? '⚙️ System' : msg.sender_name}
+                        </span>
+                        {isPromptResponse && (
+                          <Badge variant="outline" className="text-[10px] h-4">
+                            Prompt Response
+                          </Badge>
+                        )}
+                        <span className="text-xs text-muted-foreground ml-auto">
+                          {format(new Date(msg.created_at), 'h:mm a')}
+                        </span>
+                      </div>
+                      <p className="text-sm mt-1 whitespace-pre-wrap">{msg.message}</p>
+                    </div>
+                  );
+                })}
+                <div ref={messagesEndRef} />
+              </div>
+            </ScrollArea>
+            
+            <Separator className="my-2 sm:my-3" />
+            
+            <div className="flex gap-2">
+              <Textarea
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                placeholder="Say something to your squad..."
+                className="min-h-[50px] sm:min-h-[60px] resize-none text-sm"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendChat();
+                  }
+                }}
+              />
+              <Button
+                size="icon"
+                onClick={handleSendChat}
+                disabled={!chatInput.trim() || isSending}
+                className="min-h-[48px] min-w-[48px]"
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Prompt & Readiness Section - Only during warm-up */}
+        {!isApproved && (
           <div className="space-y-4">
             {/* Warm-Up Prompt */}
             <Card className={hasAnsweredPrompt ? 'border-emerald-500/30 bg-emerald-500/5' : ''}>
@@ -386,8 +457,8 @@ export function SquadWarmUpRoom({ squadId, onInstructionsUnlocked }: SquadWarmUp
               </Alert>
             )}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Member Profile Sheet */}
       <MemberProfileSheet
