@@ -141,6 +141,8 @@ export function ActiveCliquesPanel({ instanceId }: ActiveCliquesPanelProps) {
             <div className="space-y-3">
               {cliques.map((clique) => {
                 const statusStyles = SQUAD_STATUS_STYLES[clique.status] || SQUAD_STATUS_STYLES.approved;
+                const canComplete = ['active', 'approved'].includes(clique.status) && clique.memberCount > 0;
+                const isCompleted = clique.status === 'completed';
                 
                 return (
                   <div
