@@ -150,6 +150,16 @@ export function FeedbackComplete({ totalXPEarned, xpBreakdown, questTitle, quest
         )}
       </div>
 
+      {/* Keep Your Clique - Premium Feature */}
+      {squadId && instanceId && (
+        <div className="max-w-sm mx-auto">
+          <KeepCliquePrompt
+            squadId={squadId}
+            instanceId={instanceId}
+          />
+        </div>
+      )}
+
       {/* Media Upload Section */}
       {user && (
         <div className="max-w-sm mx-auto">
