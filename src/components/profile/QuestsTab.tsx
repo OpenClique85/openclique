@@ -421,6 +421,9 @@ export function QuestsTab({ userId }: QuestsTabProps) {
 
   return (
     <div className="space-y-8">
+      {/* Pending Feedback Requests */}
+      <PendingFeedbackSection userId={userId} />
+
       {/* Header with Browse CTA */}
       <div className="flex items-center justify-between">
         <div>
