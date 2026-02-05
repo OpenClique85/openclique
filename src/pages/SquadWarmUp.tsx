@@ -7,6 +7,7 @@
  * - Confirm readiness
  * 
  * Accessed via /warmup/:squadId - requires authentication.
+ * @updated 2026-02-05
  */
 
 import { useParams, useNavigate, Link } from 'react-router-dom';
