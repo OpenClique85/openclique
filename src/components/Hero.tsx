@@ -55,32 +55,32 @@ import {
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden">
+    <section className="relative overflow-hidden texture-overlay">
       {/* ------------------------------------------------------------------ */}
       {/* BACKGROUND: Concert image with low opacity */}
       {/* ------------------------------------------------------------------ */}
       <div 
-        className="absolute inset-0 opacity-20 -z-10"
+        className="absolute inset-0 opacity-15 -z-10"
         style={{
           backgroundImage: `url(${concertCrowd})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center top',
         }}
       />
-      {/* Gradient overlay: blends background into brand colors */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background/95 to-accent/10 -z-10" />
+      {/* Gradient overlay: dynamic coral-to-magenta diagonal */}
+      <div className="absolute inset-0 gradient-hero -z-10" />
       
       {/* ------------------------------------------------------------------ */}
       {/* MAIN CONTENT CONTAINER */}
       {/* ------------------------------------------------------------------ */}
-      <div className="container mx-auto px-4 py-16 md:py-24 lg:py-32">
+      <div className="container mx-auto px-4 py-16 md:py-24 lg:py-32 relative z-10">
         <div className="max-w-3xl mx-auto text-center">
           
           {/* -------------------------------------------------------------- */}
-          {/* TAGLINE BADGE */}
+          {/* TAGLINE BADGE - Now solid coral */}
           {/* -------------------------------------------------------------- */}
           <div className="flex justify-center mb-6 animate-fade-in">
-            <Badge variant="outline" className="px-4 py-1.5 text-sm font-medium border-primary/30 bg-primary/5 text-primary">
+            <Badge className="badge-solid px-4 py-1.5 text-sm font-medium shadow-lg">
               {HERO.tagline}
             </Badge>
           </div>
@@ -89,7 +89,7 @@ export function Hero() {
           {/* LOGO */}
           {/* -------------------------------------------------------------- */}
           <div className="flex justify-center mb-8 animate-fade-in [animation-delay:50ms]">
-            <img src={logo} alt="OpenClique" className="h-16 md:h-20 hover:scale-105 transition-transform duration-300" />
+            <img src={logo} alt="OpenClique" className="h-16 md:h-20 hover:scale-105 transition-transform duration-300 drop-shadow-lg" />
           </div>
 
           {/* -------------------------------------------------------------- */}
