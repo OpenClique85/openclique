@@ -28,6 +28,9 @@ import { format } from 'date-fns';
 import type { Tables } from '@/integrations/supabase/types';
 import { SquadChatViewer } from '@/components/admin/SquadChatViewer';
 import { SQUAD_STATUS_LABELS, SQUAD_STATUS_STYLES, SquadStatus } from '@/lib/squadLifecycle';
+import { EndQuestDialog } from './EndQuestDialog';
+import { ProofGalleryPanel } from './ProofGalleryPanel';
+import { QuestObjectivesPanel } from './QuestObjectivesPanel';
 
 type QuestInstance = Tables<'quest_instances'>;
 
