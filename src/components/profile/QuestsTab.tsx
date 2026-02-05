@@ -582,18 +582,25 @@ export function QuestsTab({ userId }: QuestsTabProps) {
                 {pastSignups.map((signup) => {
                   const isPast = signup.quest.start_datetime && new Date(signup.quest.start_datetime) < now;
                   const wasAttending = ['confirmed', 'completed'].includes(signup.status || '');
+                  const isCompleted = signup.status === 'completed';
                   const canLeaveFeedback = isPast && wasAttending;
                   const hasFeedback = feedbackSubmitted.has(signup.quest_id);
 
                   return (
-                    <Card key={signup.id} className="bg-muted/30">
+                    <Card key={signup.id} className={isCompleted ? "bg-primary/5 border-primary/20" : "bg-muted/30"}>
                       <CardContent className="py-4">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                           <div className="flex items-center gap-3">
-                            <span className="text-2xl opacity-60">{signup.quest.icon || '🎯'}</span>
+                            <span className="text-2xl">{signup.quest.icon || '🎯'}</span>
                             <div>
                               <div className="flex items-center gap-2 flex-wrap">
                                 <p className="font-medium">{signup.quest.title}</p>
+                                {isCompleted && (
+                                  <Badge variant="default" className="bg-emerald-500/90 text-xs gap-1">
+                                    <CheckCircle className="h-3 w-3" />
+                                    Completed
+                                  </Badge>
+                                )}
                                 {signup.quest.is_sponsored && (
                                   <Badge variant="outline" className="text-sunset/60 border-sunset/40 text-xs">
                                     <Sparkles className="h-3 w-3 mr-1" />
@@ -610,21 +617,23 @@ export function QuestsTab({ userId }: QuestsTabProps) {
                           </div>
 
                           <div className="flex items-center gap-2 ml-11 sm:ml-0">
-                            <Badge variant={STATUS_BADGES[signup.status || 'pending'].variant}>
-                              {STATUS_BADGES[signup.status || 'pending'].label}
-                            </Badge>
+                            {!isCompleted && (
+                              <Badge variant={STATUS_BADGES[signup.status || 'pending'].variant}>
+                                {STATUS_BADGES[signup.status || 'pending'].label}
+                              </Badge>
+                            )}
 
                             {canLeaveFeedback &&
                               (hasFeedback ? (
-                                <Button variant="ghost" size="sm" disabled className="text-muted-foreground text-xs">
+                                <Button variant="ghost" size="sm" disabled className="text-emerald-600 text-xs">
                                   <CheckCircle className="h-3 w-3 mr-1" />
-                                  Done
+                                  Feedback Done
                                 </Button>
                               ) : (
-                                <Button variant="outline" size="sm" asChild className="text-xs">
+                                <Button variant="default" size="sm" asChild className="text-xs gap-1">
                                   <Link to={`/feedback/${signup.quest.id}`}>
-                                    <Star className="h-3 w-3 mr-1" />
-                                    Feedback
+                                    <Zap className="h-3 w-3" />
+                                    Give Feedback (+XP)
                                   </Link>
                                 </Button>
                               ))}
