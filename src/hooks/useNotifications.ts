@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 export interface Notification {
   id: string;
   user_id: string;
-  type: 'quest_recommendation' | 'quest_shared' | 'referral_accepted' | 'signup_confirmed' | 'quest_reminder' | 'general';
+  type: 'quest_recommendation' | 'quest_shared' | 'referral_accepted' | 'signup_confirmed' | 'quest_reminder' | 'quest_complete' | 'general';
   title: string;
   body: string | null;
   quest_id: string | null;
