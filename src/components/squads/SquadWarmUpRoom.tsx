@@ -41,6 +41,7 @@ export function SquadWarmUpRoom({ squadId, onInstructionsUnlocked }: SquadWarmUp
     hasConfirmedReadiness,
     progress,
     sendMessage,
+    sendMessageWithMedia,
     submitPromptResponse,
     confirmReadiness,
     isSending,

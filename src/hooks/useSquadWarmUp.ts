@@ -354,9 +354,11 @@ export function useSquadWarmUp(squadId: string | null) {
     hasConfirmedReadiness,
     progress: calculateProgress(),
     sendMessage: sendMessage.mutate,
+    sendMessageWithMedia: (mediaUrl: string, isProof: boolean) => 
+      sendMessageWithMedia.mutate({ mediaUrl, isProof }),
     submitPromptResponse: submitPromptResponse.mutate,
     confirmReadiness: confirmReadiness.mutate,
-    isSending: sendMessage.isPending,
+    isSending: sendMessage.isPending || sendMessageWithMedia.isPending,
     isSubmittingPrompt: submitPromptResponse.isPending,
     isConfirmingReadiness: confirmReadiness.isPending,
   };
