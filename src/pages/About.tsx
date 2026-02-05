@@ -261,10 +261,10 @@ export default function About() {
                   return (
                     <div
                       key={value.title}
-                      className="text-center p-6 bg-card rounded-xl border border-border"
+                      className="text-center p-6 bg-card rounded-xl border border-border hover:shadow-lg hover:-translate-y-1 hover:border-primary/30 transition-all duration-300"
                     >
                       {IconComponent && (
-                        <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                        <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
                           <IconComponent className="w-7 h-7 text-primary" />
                         </div>
                       )}
