@@ -10,8 +10,8 @@ export default function Install() {
   if (isInstalled || isStandalone) {
     return (
       <div className="min-h-dvh bg-background flex flex-col items-center justify-center px-6 py-12">
-        <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mb-6">
-          <CheckCircle2 className="h-8 w-8 text-green-500" />
+        <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+          <CheckCircle2 className="h-8 w-8 text-primary" />
         </div>
         <h1 className="text-2xl font-bold text-foreground text-center mb-2">
           Already Installed!

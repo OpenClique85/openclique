@@ -43,6 +43,8 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { TutorialProvider, TutorialOverlay, TutorialPrompt } from "./components/tutorial";
 import { MobileActionBar } from "./components/MobileActionBar";
 import { FloatingHelpButton } from "./components/support/FloatingHelpButton";
+import { InstallPrompt } from "./components/pwa/InstallPrompt";
+import { OfflineIndicator } from "./components/pwa/OfflineIndicator";
 
 // -----------------------------------------------------------------------------
 // LOADING FALLBACK: Displayed while lazy components load
