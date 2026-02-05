@@ -594,6 +594,18 @@ export function CliqueManager({ instanceId, instanceTitle = 'Quest', targetCliqu
         instanceId={instanceId}
         instanceTitle={instanceTitle}
       />
+
+      {/* Complete Clique Dialog */}
+      {completingClique && (
+        <CompleteCliqueDialog
+          open={!!completingClique}
+          onOpenChange={(open) => !open && setCompletingClique(null)}
+          cliqueId={completingClique.id}
+          cliqueName={completingClique.name}
+          memberCount={completingClique.memberCount}
+          instanceId={instanceId}
+        />
+      )}
     </div>
   );
 }

@@ -237,6 +237,18 @@ export function ActiveCliquesPanel({ instanceId }: ActiveCliquesPanelProps) {
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Complete Clique Dialog */}
+      {completingClique && (
+        <CompleteCliqueDialog
+          open={!!completingClique}
+          onOpenChange={(open) => !open && setCompletingClique(null)}
+          cliqueId={completingClique.id}
+          cliqueName={completingClique.name}
+          memberCount={completingClique.memberCount}
+          instanceId={instanceId}
+        />
+      )}
     </>
   );
 }
