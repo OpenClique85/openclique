@@ -1,12 +1,6 @@
 import { Link } from "react-router-dom";
-import { ChevronDown } from "lucide-react";
+import { Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import sunsetGathering from "@/assets/austin/sunset-gathering.jpg";
 
 export function CTASection() {
@@ -27,10 +21,10 @@ export function CTASection() {
         <div className="max-w-3xl mx-auto text-center">
           
           <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
-            Ready to find your quest?
+            Ready to find your clique?
           </h2>
           <p className="text-background/70 text-lg mb-8 max-w-2xl mx-auto">
-            Browse open quests and join your first adventure.
+            Join a quest and meet your people IRL.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button
@@ -38,36 +32,19 @@ export function CTASection() {
               asChild
               className="w-full sm:w-auto text-base px-8 bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              <Link to="/quests">Find Your Quest</Link>
+              <Link to="/auth">Join Now</Link>
             </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  size="lg"
-                  className="w-full sm:w-auto text-base px-8 bg-sunset text-sunset-foreground hover:bg-sunset/90"
-                >
-                  Get Involved
-                  <ChevronDown className="ml-2 h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="center" className="w-48">
-                <DropdownMenuItem asChild>
-                  <Link to="/creators" className="w-full cursor-pointer">
-                    For Creators
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/partners" className="w-full cursor-pointer">
-                    Partner With Us
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/work-with-us" className="w-full cursor-pointer">
-                    Work With Us
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Button
+              size="lg"
+              variant="outline"
+              asChild
+              className="w-full sm:w-auto text-base px-8 border-background/30 text-background hover:bg-background/10"
+            >
+              <Link to="/install">
+                <Smartphone className="mr-2 h-5 w-5" />
+                Download App
+              </Link>
+            </Button>
           </div>
         </div>
       </div>
