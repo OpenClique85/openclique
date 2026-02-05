@@ -1742,14 +1742,21 @@ export type Database = {
           id: string
           interview_opt_in: boolean | null
           is_testimonial_approved: boolean | null
+          nps_score: number | null
+          preferred_clique_members: string[] | null
           private_notes: string | null
           quest_id: string
           rating_1_5: number | null
           recommendation_text: string | null
+          sponsor_enhancement: string | null
           submitted_at: string
           testimonial_text: string | null
           user_id: string
+          venue_improvement_notes: string | null
+          venue_interest_rating: number | null
+          venue_revisit_intent: string | null
           would_do_again: boolean | null
+          would_invite_friend: boolean | null
         }
         Insert: {
           belonging_delta?: number | null
@@ -1760,14 +1767,21 @@ export type Database = {
           id?: string
           interview_opt_in?: boolean | null
           is_testimonial_approved?: boolean | null
+          nps_score?: number | null
+          preferred_clique_members?: string[] | null
           private_notes?: string | null
           quest_id: string
           rating_1_5?: number | null
           recommendation_text?: string | null
+          sponsor_enhancement?: string | null
           submitted_at?: string
           testimonial_text?: string | null
           user_id: string
+          venue_improvement_notes?: string | null
+          venue_interest_rating?: number | null
+          venue_revisit_intent?: string | null
           would_do_again?: boolean | null
+          would_invite_friend?: boolean | null
         }
         Update: {
           belonging_delta?: number | null
@@ -1778,14 +1792,21 @@ export type Database = {
           id?: string
           interview_opt_in?: boolean | null
           is_testimonial_approved?: boolean | null
+          nps_score?: number | null
+          preferred_clique_members?: string[] | null
           private_notes?: string | null
           quest_id?: string
           rating_1_5?: number | null
           recommendation_text?: string | null
+          sponsor_enhancement?: string | null
           submitted_at?: string
           testimonial_text?: string | null
           user_id?: string
+          venue_improvement_notes?: string | null
+          venue_interest_rating?: number | null
+          venue_revisit_intent?: string | null
           would_do_again?: boolean | null
+          would_invite_friend?: boolean | null
         }
         Relationships: [
           {
@@ -1968,9 +1989,15 @@ export type Database = {
         Row: {
           admin_message: string | null
           completed_at: string | null
+          completion_time_seconds: number | null
           created_at: string
+          expires_at: string | null
           id: string
+          instance_id: string | null
           quest_id: string
+          reminder_sent_3d: boolean | null
+          reminder_sent_6d: boolean | null
+          started_at: string | null
           status: string
           user_id: string
           xp_basic: number
@@ -1981,9 +2008,15 @@ export type Database = {
         Insert: {
           admin_message?: string | null
           completed_at?: string | null
+          completion_time_seconds?: number | null
           created_at?: string
+          expires_at?: string | null
           id?: string
+          instance_id?: string | null
           quest_id: string
+          reminder_sent_3d?: boolean | null
+          reminder_sent_6d?: boolean | null
+          started_at?: string | null
           status?: string
           user_id: string
           xp_basic?: number
@@ -1994,9 +2027,15 @@ export type Database = {
         Update: {
           admin_message?: string | null
           completed_at?: string | null
+          completion_time_seconds?: number | null
           created_at?: string
+          expires_at?: string | null
           id?: string
+          instance_id?: string | null
           quest_id?: string
+          reminder_sent_3d?: boolean | null
+          reminder_sent_6d?: boolean | null
+          started_at?: string | null
           status?: string
           user_id?: string
           xp_basic?: number
@@ -2005,6 +2044,20 @@ export type Database = {
           xp_testimonial?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "feedback_requests_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "quest_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_requests_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "quest_instances_public"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "feedback_requests_quest_id_fkey"
             columns: ["quest_id"]
@@ -5755,7 +5808,11 @@ export type Database = {
           hide_reason: string | null
           id: string
           is_pinned: boolean | null
+          is_proof_submission: boolean | null
+          media_type: string | null
+          media_url: string | null
           message: string
+          proof_status: string | null
           reactions: Json | null
           sender_id: string
           sender_type: string | null
@@ -5769,7 +5826,11 @@ export type Database = {
           hide_reason?: string | null
           id?: string
           is_pinned?: boolean | null
+          is_proof_submission?: boolean | null
+          media_type?: string | null
+          media_url?: string | null
           message: string
+          proof_status?: string | null
           reactions?: Json | null
           sender_id: string
           sender_type?: string | null
@@ -5783,7 +5844,11 @@ export type Database = {
           hide_reason?: string | null
           id?: string
           is_pinned?: boolean | null
+          is_proof_submission?: boolean | null
+          media_type?: string | null
+          media_url?: string | null
           message?: string
+          proof_status?: string | null
           reactions?: Json | null
           sender_id?: string
           sender_type?: string | null
