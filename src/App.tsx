@@ -147,6 +147,9 @@ const SponsorProfile = lazy(() => import("./pages/SponsorProfile"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 
+// PWA
+const Install = lazy(() => import("./pages/Install"));
+
 // -----------------------------------------------------------------------------
 // SETUP: Initialize data fetching client with optimized defaults
 // -----------------------------------------------------------------------------
