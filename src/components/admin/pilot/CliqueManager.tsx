@@ -17,12 +17,14 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Users, Wand2, Lock, 
   Loader2, AlertCircle,
-  Megaphone, ArrowLeftRight, Unlock, Plus, User, Play, ThermometerSun
+  Megaphone, ArrowLeftRight, Unlock, Plus, User, Play, ThermometerSun,
+  CheckCircle2
 } from 'lucide-react';
 import { auditLog } from '@/lib/auditLog';
 import { InstanceBroadcastModal } from './InstanceBroadcastModal';
 import { CliqueBuilder } from './CliqueBuilder';
 import { CliqueSwapModal } from './CliqueSwapModal';
+import { CompleteCliqueDialog } from './CompleteCliqueDialog';
 import { SQUAD_STATUS_LABELS, SQUAD_STATUS_STYLES, SquadStatus } from '@/lib/squadLifecycle';
 
 interface CliqueWithMembers {
