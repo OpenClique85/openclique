@@ -73,6 +73,10 @@ export function SquadWarmUpRoom({ squadId, onInstructionsUnlocked }: SquadWarmUp
     setChatInput('');
   };
 
+  const handleMediaSend = (mediaUrl: string, isProof: boolean) => {
+    sendMessageWithMedia(mediaUrl, isProof);
+  };
+
   const handleSubmitPrompt = () => {
     if (!promptResponse.trim()) return;
     submitPromptResponse(promptResponse.trim());
