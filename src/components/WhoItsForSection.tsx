@@ -54,8 +54,8 @@ export function WhoItsForSection() {
   };
 
   return (
-    <section className="py-16 md:py-20 bg-muted/50">
-      <div className="container mx-auto px-4">
+    <section className="py-16 md:py-20 bg-muted/50 texture-overlay">
+      <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto">
           {/* Section Header */}
           <div className="text-center mb-10">
@@ -76,11 +76,11 @@ export function WhoItsForSection() {
                 <button
                   key={persona.id}
                   onClick={() => handlePersonaClick(persona)}
-                  className="group bg-card border border-border rounded-xl p-5 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 text-left cursor-pointer"
+                  className="card-glow group bg-card border border-border rounded-xl p-5 transition-all duration-300 hover:border-primary/40 hover:-translate-y-2 text-left cursor-pointer"
                 >
                   <div className="flex items-start gap-4">
-                    {/* Icon */}
-                    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
+                    {/* Icon with gradient */}
+                    <div className="icon-gradient flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center group-hover:scale-110 transition-all duration-300 shadow-md">
                       <Icon className="w-5 h-5 text-primary" />
                     </div>
                     
@@ -115,12 +115,12 @@ export function WhoItsForSection() {
                   <button
                     key={persona.id}
                     onClick={() => handleOrgPersonaClick(persona)}
-                    className="group bg-card border border-border rounded-xl p-5 transition-all duration-300 hover:border-accent/30 hover:shadow-lg hover:shadow-accent/5 hover:-translate-y-1 cursor-pointer text-left"
+                    className="accent-glow group bg-card border border-border rounded-xl p-5 transition-all duration-300 hover:border-accent/40 hover:-translate-y-2 cursor-pointer text-left"
                   >
                     <div className="flex items-start gap-4">
-                      {/* Icon */}
-                      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 group-hover:scale-110 transition-all duration-300">
-                        <Icon className="w-5 h-5 text-accent-foreground" />
+                      {/* Icon with accent gradient */}
+                      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-accent/20 to-accent/10 flex items-center justify-center group-hover:scale-110 transition-all duration-300 shadow-md">
+                        <Icon className="w-5 h-5 text-accent" />
                       </div>
                       
                       {/* Text */}
@@ -129,7 +129,7 @@ export function WhoItsForSection() {
                           <h3 className="font-display font-semibold text-foreground mb-0.5">
                             {persona.label}
                           </h3>
-                          <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:text-accent-foreground transition-all -translate-x-1 group-hover:translate-x-0" />
+                          <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:text-accent transition-all -translate-x-1 group-hover:translate-x-0" />
                         </div>
                         <p className="text-sm text-muted-foreground leading-snug">
                           {persona.description}
