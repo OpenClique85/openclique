@@ -291,6 +291,8 @@ export function SquadWarmUpRoom({ squadId, onInstructionsUnlocked }: SquadWarmUp
                   const isAdmin = msg.sender_type === 'admin';
                   const isSystem = msg.sender_type === 'system';
                   const isPromptResponse = msg.message.startsWith('📝 **Prompt Response:**');
+                  const hasMedia = !!(msg as any).media_url;
+                  const isProof = (msg as any).is_proof_submission;
                   
                   return (
                     <div
@@ -316,10 +318,22 @@ export function SquadWarmUpRoom({ squadId, onInstructionsUnlocked }: SquadWarmUp
                             Prompt Response
                           </Badge>
                         )}
+                        {isProof && (
+                          <Badge className="text-[10px] h-4 bg-amber-500/20 text-amber-700 border-amber-500/30">
+                            🏆 Proof
+                          </Badge>
+                        )}
                         <span className="text-xs text-muted-foreground ml-auto">
                           {format(new Date(msg.created_at), 'h:mm a')}
                         </span>
                       </div>
+                      {hasMedia && (
+                        <img 
+                          src={(msg as any).media_url} 
+                          alt="Shared photo"
+                          className="mt-2 rounded-lg max-h-48 object-contain"
+                        />
+                      )}
                       <p className="text-sm mt-1 whitespace-pre-wrap">{msg.message}</p>
                     </div>
                   );
