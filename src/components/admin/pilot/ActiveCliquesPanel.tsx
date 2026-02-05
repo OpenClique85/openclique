@@ -41,6 +41,7 @@ interface ActiveClique {
 
 export function ActiveCliquesPanel({ instanceId }: ActiveCliquesPanelProps) {
   const [selectedClique, setSelectedClique] = useState<{ id: string; name: string } | null>(null);
+  const [completingClique, setCompletingClique] = useState<{ id: string; name: string; memberCount: number } | null>(null);
 
   // Fetch approved/active cliques
   const { data: cliques, isLoading } = useQuery({
