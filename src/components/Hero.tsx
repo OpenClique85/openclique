@@ -43,7 +43,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { HERO, SOCIAL_PROOF } from "@/constants/content";
-import logo from "@/assets/logo.png";
+import wordmark from "@/assets/openclique-wordmark.png";
 import concertCrowd from "@/assets/austin/concert-crowd.jpg";
 import { ChevronDown, Smartphone } from "lucide-react";
 import {
@@ -86,10 +86,15 @@ export function Hero() {
           </div>
 
           {/* -------------------------------------------------------------- */}
-          {/* LOGO */}
+          {/* WORDMARK */}
           {/* -------------------------------------------------------------- */}
           <div className="flex justify-center mb-8 animate-fade-in [animation-delay:50ms]">
-            <img src={logo} alt="OpenClique" className="h-16 md:h-20 hover:scale-105 transition-transform duration-300" />
+            <img 
+              src={wordmark} 
+              alt="OpenClique" 
+              className="h-12 sm:h-16 md:h-20 lg:h-24 hover:scale-105 transition-transform duration-300"
+              style={{ filter: 'brightness(0) saturate(100%) invert(56%) sepia(52%) saturate(5765%) hue-rotate(147deg) brightness(92%) contrast(87%)' }}
+            />
           </div>
 
           {/* -------------------------------------------------------------- */}
