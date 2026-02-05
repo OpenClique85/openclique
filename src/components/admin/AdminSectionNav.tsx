@@ -218,7 +218,7 @@ export function AdminSectionNav({ activeTab, onTabChange }: AdminSectionNavProps
   };
 
   return (
-    <nav className="space-y-1">
+    <nav className="space-y-0.5">
       {ADMIN_SECTIONS.map((section) => {
         const isExpanded = expandedSections.includes(section.id);
         const hasActiveTab = section.tabs.some(tab => tab.id === activeTab);
@@ -232,35 +232,36 @@ export function AdminSectionNav({ activeTab, onTabChange }: AdminSectionNavProps
             <CollapsibleTrigger asChild>
               <Button
                 variant="ghost"
+                size="sm"
                 className={cn(
-                  'w-full justify-between font-medium',
+                  'w-full justify-between font-medium text-xs sm:text-sm h-8 sm:h-9 px-2',
                   hasActiveTab && 'bg-muted'
                 )}
               >
-                <span className="flex items-center gap-2">
+                <span className="flex items-center gap-1.5 truncate">
                   {section.icon}
-                  {section.label}
+                  <span className="truncate">{section.label}</span>
                 </span>
                 {isExpanded ? (
-                  <ChevronDown className="h-4 w-4" />
+                  <ChevronDown className="h-3.5 w-3.5 flex-shrink-0" />
                 ) : (
-                  <ChevronRight className="h-4 w-4" />
+                  <ChevronRight className="h-3.5 w-3.5 flex-shrink-0" />
                 )}
               </Button>
             </CollapsibleTrigger>
-            <CollapsibleContent className="pl-6 space-y-1 pt-1">
+            <CollapsibleContent className="pl-4 sm:pl-6 space-y-0.5 pt-0.5">
               {section.tabs.map((tab) => (
                 <Button
                   key={tab.id}
                   variant="ghost"
                   size="sm"
                   className={cn(
-                    'w-full justify-start text-sm',
+                    'w-full justify-start text-xs sm:text-sm h-7 sm:h-8 px-2',
                     activeTab === tab.id && 'bg-primary/10 text-primary font-medium'
                   )}
                   onClick={() => handleTabClick(tab.id, section.id)}
                 >
-                  {tab.label}
+                  <span className="truncate">{tab.label}</span>
                 </Button>
               ))}
             </CollapsibleContent>
