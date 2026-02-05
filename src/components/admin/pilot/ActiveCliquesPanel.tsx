@@ -180,14 +180,32 @@ export function ActiveCliquesPanel({ instanceId }: ActiveCliquesPanelProps) {
                       </div>
                     </div>
                     
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSelectedClique({ id: clique.id, name: clique.squad_name })}
-                    >
-                      <Eye className="h-4 w-4 mr-1" />
-                      View Chat
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      {/* Complete Button - only for active/approved cliques */}
+                      {canComplete && (
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={() => setCompletingClique({ 
+                            id: clique.id, 
+                            name: clique.squad_name, 
+                            memberCount: clique.memberCount 
+                          })}
+                        >
+                          <CheckCircle2 className="h-4 w-4 mr-1" />
+                          Complete
+                        </Button>
+                      )}
+                      
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelectedClique({ id: clique.id, name: clique.squad_name })}
+                      >
+                        <Eye className="h-4 w-4 mr-1" />
+                        View Chat
+                      </Button>
+                    </div>
                   </div>
                 );
               })}
