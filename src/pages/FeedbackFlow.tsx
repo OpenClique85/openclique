@@ -102,16 +102,30 @@ export default function FeedbackFlow() {
         setQuest({ title: questData.title, icon: questData.icon || '🎯' });
       }
 
-      // Check for feedback_request
+      // Check for feedback_request and get squad info
       const { data: requestData } = await supabase
         .from('feedback_requests')
-        .select('*')
+        .select('*, instance_id')
         .eq('quest_id', questId)
         .eq('user_id', user.id)
         .maybeSingle();
 
       if (requestData) {
         setFeedbackRequest(requestData as FeedbackRequest);
+        setInstanceId(requestData.instance_id);
+        
+        // Get the user's squad for this instance
+        if (requestData.instance_id) {
+          const { data: squadMember } = await supabase
+            .from('squad_members')
+            .select('squad_id')
+            .eq('user_id', user.id)
+            .maybeSingle();
+          
+          if (squadMember) {
+            setSquadId(squadMember.squad_id);
+          }
+        }
       }
 
       // Check if already submitted basic feedback
