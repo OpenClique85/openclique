@@ -344,12 +344,16 @@ export function SquadWarmUpRoom({ squadId, onInstructionsUnlocked }: SquadWarmUp
             
             <Separator className="my-2 sm:my-3" />
             
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-end">
+              <ChatMediaPicker 
+                onMediaSelected={handleMediaSend}
+                disabled={isSending}
+              />
               <Textarea
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
                 placeholder="Say something to your squad..."
-                className="min-h-[50px] sm:min-h-[60px] resize-none text-sm"
+                className="min-h-[50px] sm:min-h-[60px] resize-none text-sm flex-1"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
