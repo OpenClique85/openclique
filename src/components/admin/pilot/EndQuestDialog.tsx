@@ -109,7 +109,7 @@ export function EndQuestDialog({
       const feedbackMaxXP = 225; // xp_basic + xp_extended + xp_pricing + xp_testimonial
       const notifications = uniqueUserIds.map(userId => ({
         user_id: userId,
-        type: 'quest_complete',
+        type: 'feedback_request' as const,
         title: `🎉 Quest Complete: ${instanceTitle}`,
         body: `You earned +${completionXP} XP! Give feedback to earn up to ${feedbackMaxXP} more.`,
         quest_id: instanceData.quest_id,

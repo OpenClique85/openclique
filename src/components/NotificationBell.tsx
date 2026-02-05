@@ -21,7 +21,6 @@ const notificationIcons: Record<Notification['type'], React.ReactNode> = {
   referral_accepted: <Users className="h-4 w-4 text-emerald-500" />,
   signup_confirmed: <Check className="h-4 w-4 text-emerald-500" />,
   quest_reminder: <Calendar className="h-4 w-4 text-amber-500" />,
-  quest_complete: <PartyPopper className="h-4 w-4 text-primary" />,
   general: <MessageSquare className="h-4 w-4 text-muted-foreground" />,
 };
 
