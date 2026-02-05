@@ -8,7 +8,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { format } from 'date-fns';
-import { Send, Users, CheckCircle2, MessageCircle, Lock, Clock, Target, MapPin, Backpack, ShieldAlert, ChevronDown, ChevronUp } from 'lucide-react';
+import { Send, Users, CheckCircle2, MessageCircle, Lock, Clock, Target, MapPin, Backpack, ShieldAlert, ChevronDown, ChevronUp, Image as ImageIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -22,6 +22,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { useSquadWarmUp } from '@/hooks/useSquadWarmUp';
 import { SQUAD_STATUS_LABELS, shouldShowInstructions, SquadStatus } from '@/lib/squadLifecycle';
 import { MemberProfileSheet } from './MemberProfileSheet';
+import { ChatMediaPicker } from './ChatMediaPicker';
 
 interface SquadWarmUpRoomProps {
   squadId: string;
@@ -40,6 +41,7 @@ export function SquadWarmUpRoom({ squadId, onInstructionsUnlocked }: SquadWarmUp
     hasConfirmedReadiness,
     progress,
     sendMessage,
+    sendMessageWithMedia,
     submitPromptResponse,
     confirmReadiness,
     isSending,
@@ -70,6 +72,10 @@ export function SquadWarmUpRoom({ squadId, onInstructionsUnlocked }: SquadWarmUp
     if (!chatInput.trim()) return;
     sendMessage(chatInput.trim());
     setChatInput('');
+  };
+
+  const handleMediaSend = (mediaUrl: string, isProof: boolean) => {
+    sendMessageWithMedia(mediaUrl, isProof);
   };
 
   const handleSubmitPrompt = () => {
@@ -285,6 +291,8 @@ export function SquadWarmUpRoom({ squadId, onInstructionsUnlocked }: SquadWarmUp
                   const isAdmin = msg.sender_type === 'admin';
                   const isSystem = msg.sender_type === 'system';
                   const isPromptResponse = msg.message.startsWith('📝 **Prompt Response:**');
+                  const hasMedia = !!(msg as any).media_url;
+                  const isProof = (msg as any).is_proof_submission;
                   
                   return (
                     <div
@@ -310,10 +318,22 @@ export function SquadWarmUpRoom({ squadId, onInstructionsUnlocked }: SquadWarmUp
                             Prompt Response
                           </Badge>
                         )}
+                        {isProof && (
+                          <Badge className="text-[10px] h-4 bg-amber-500/20 text-amber-700 border-amber-500/30">
+                            🏆 Proof
+                          </Badge>
+                        )}
                         <span className="text-xs text-muted-foreground ml-auto">
                           {format(new Date(msg.created_at), 'h:mm a')}
                         </span>
                       </div>
+                      {hasMedia && (
+                        <img 
+                          src={(msg as any).media_url} 
+                          alt="Shared photo"
+                          className="mt-2 rounded-lg max-h-48 object-contain"
+                        />
+                      )}
                       <p className="text-sm mt-1 whitespace-pre-wrap">{msg.message}</p>
                     </div>
                   );
@@ -324,12 +344,16 @@ export function SquadWarmUpRoom({ squadId, onInstructionsUnlocked }: SquadWarmUp
             
             <Separator className="my-2 sm:my-3" />
             
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-end">
+              <ChatMediaPicker 
+                onMediaSelected={handleMediaSend}
+                disabled={isSending}
+              />
               <Textarea
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
                 placeholder="Say something to your squad..."
-                className="min-h-[50px] sm:min-h-[60px] resize-none text-sm"
+                className="min-h-[50px] sm:min-h-[60px] resize-none text-sm flex-1"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
 
 const FEELINGS = [
@@ -23,6 +24,8 @@ interface FeedbackStep1Props {
     rating: number;
     repeatIntent: string;
     feelings: string[];
+    npsScore: number;
+    wouldInviteFriend: boolean | null;
   }) => void;
   isSubmitting: boolean;
   xpReward: number;
@@ -33,6 +36,8 @@ export function FeedbackStep1({ onSubmit, isSubmitting, xpReward }: FeedbackStep
   const [hoverRating, setHoverRating] = useState(0);
   const [repeatIntent, setRepeatIntent] = useState('');
   const [feelings, setFeelings] = useState<string[]>([]);
+  const [npsScore, setNpsScore] = useState(5);
+  const [wouldInviteFriend, setWouldInviteFriend] = useState<boolean | null>(null);
 
   const toggleFeeling = (value: string) => {
     if (feelings.includes(value)) {
@@ -49,7 +54,7 @@ export function FeedbackStep1({ onSubmit, isSubmitting, xpReward }: FeedbackStep
 
   const handleSubmit = () => {
     if (!canSubmit) return;
-    onSubmit({ rating, repeatIntent, feelings });
+    onSubmit({ rating, repeatIntent, feelings, npsScore, wouldInviteFriend });
   };
 
   return (
@@ -138,6 +143,61 @@ export function FeedbackStep1({ onSubmit, isSubmitting, xpReward }: FeedbackStep
               {feeling.label}
             </button>
           ))}
+        </div>
+      </div>
+
+      {/* NPS Score */}
+      <div className="space-y-4">
+        <label className="text-sm font-medium text-foreground">
+          How likely are you to join another OpenClique quest?
+        </label>
+        <div className="px-4">
+          <Slider
+            value={[npsScore]}
+            onValueChange={(v) => setNpsScore(v[0])}
+            min={0}
+            max={10}
+            step={1}
+            className="w-full"
+          />
+          <div className="flex justify-between text-xs text-muted-foreground mt-2">
+            <span>0 - Not likely</span>
+            <span className="font-medium text-foreground">{npsScore}</span>
+            <span>10 - Extremely likely</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Would invite friend */}
+      <div className="space-y-3">
+        <label className="text-sm font-medium text-foreground">
+          Would you invite a friend to OpenClique?
+        </label>
+        <div className="flex gap-3 justify-center">
+          <button
+            type="button"
+            onClick={() => setWouldInviteFriend(true)}
+            className={cn(
+              "px-6 py-3 rounded-full text-sm font-medium transition-all border-2",
+              wouldInviteFriend === true
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-background text-foreground border-border hover:border-primary/50"
+            )}
+          >
+            Yes! 🎉
+          </button>
+          <button
+            type="button"
+            onClick={() => setWouldInviteFriend(false)}
+            className={cn(
+              "px-6 py-3 rounded-full text-sm font-medium transition-all border-2",
+              wouldInviteFriend === false
+                ? "bg-muted text-muted-foreground border-muted"
+                : "bg-background text-foreground border-border hover:border-muted"
+            )}
+          >
+            Not yet
+          </button>
         </div>
       </div>
 

@@ -110,6 +110,8 @@ export default function FeedbackFlow() {
     rating: number;
     repeatIntent: string;
     feelings: string[];
+    npsScore: number;
+    wouldInviteFriend: boolean | null;
   }) => {
     if (!questId || !user) return;
     setIsSubmitting(true);
@@ -124,6 +126,8 @@ export default function FeedbackFlow() {
           rating_1_5: data.rating,
           would_do_again: data.repeatIntent === 'yes' ? true : data.repeatIntent === 'no' ? false : null,
           feelings: data.feelings,
+          nps_score: data.npsScore,
+          would_invite_friend: data.wouldInviteFriend,
         })
         .select('id')
         .single();
@@ -173,6 +177,7 @@ export default function FeedbackFlow() {
     comfortScore: number;
     groupFit: string;
     reconnectIntent: string;
+    preferredCliqueMembers: string[];
   }) => {
     if (!feedbackId || !user) return;
     setIsSubmitting(true);
@@ -192,6 +197,14 @@ export default function FeedbackFlow() {
         });
 
       if (error) throw error;
+
+      // Update feedback with preferred clique members if any
+      if (data.preferredCliqueMembers.length > 0) {
+        await supabase
+          .from('feedback')
+          .update({ preferred_clique_members: data.preferredCliqueMembers })
+          .eq('id', feedbackId);
+      }
 
       // Award XP
       await awardXP.mutateAsync({
@@ -460,8 +473,10 @@ export default function FeedbackFlow() {
                 />
               )}
 
-              {currentStep === 2 && (
+              {currentStep === 2 && questId && user && (
                 <FeedbackStep2
+                  questId={questId}
+                  currentUserId={user.id}
                   onSubmit={handleStep2Submit}
                   onSkip={handleSkipStep}
                   isSubmitting={isSubmitting}

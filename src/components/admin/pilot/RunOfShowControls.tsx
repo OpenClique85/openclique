@@ -28,6 +28,9 @@ import { format } from 'date-fns';
 import type { Tables } from '@/integrations/supabase/types';
 import { SquadChatViewer } from '@/components/admin/SquadChatViewer';
 import { SQUAD_STATUS_LABELS, SQUAD_STATUS_STYLES, SquadStatus } from '@/lib/squadLifecycle';
+import { EndQuestDialog } from './EndQuestDialog';
+import { ProofGalleryPanel } from './ProofGalleryPanel';
+import { QuestObjectivesPanel } from './QuestObjectivesPanel';
 
 type QuestInstance = Tables<'quest_instances'>;
 
@@ -415,38 +418,26 @@ export function RunOfShowControls({ instance }: RunOfShowControlsProps) {
           </CardContent>
         </Card>
 
-        {/* Quick Actions & Recent Sends */}
+        {/* Objectives + Actions Column */}
         <div className="space-y-6">
-          {/* Quick Actions */}
+          {/* Quest Objectives */}
+          <QuestObjectivesPanel objectives={instance.objectives as string | null} />
+          
+          {/* End Quest Action */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Quick Actions</CardTitle>
+              <CardTitle className="text-base">Quest Controls</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
-              <Button
-                variant="outline"
-                className="w-full justify-start"
-                onClick={() => handleTemplateSelect('reminder_24h')}
-              >
-                <Clock className="h-4 w-4 mr-2" />
-                Send 24-Hour Reminder
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full justify-start"
-                onClick={() => handleTemplateSelect('check_in_open')}
-              >
-                <CheckCircle className="h-4 w-4 mr-2" />
-                Send Check-In Open Notice
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full justify-start"
-                onClick={() => handleTemplateSelect('feedback_request')}
-              >
-                <Bell className="h-4 w-4 mr-2" />
-                Request Feedback
-              </Button>
+            <CardContent className="space-y-4">
+              <EndQuestDialog
+                instanceId={instance.id}
+                instanceTitle={instance.title}
+                cliques={cliques.map(c => ({ id: c.id, memberCount: c.memberCount }))}
+              />
+              
+              <div className="text-xs text-muted-foreground">
+                Ends quest, marks it complete, and sends feedback requests to all {cliques.reduce((sum, c) => sum + c.memberCount, 0)} participants.
+              </div>
             </CardContent>
           </Card>
 
@@ -454,6 +445,12 @@ export function RunOfShowControls({ instance }: RunOfShowControlsProps) {
           <RecentSendsLog instanceId={instance.id} />
         </div>
       </div>
+
+      {/* Proof Gallery */}
+      <ProofGalleryPanel 
+        instanceId={instance.id} 
+        cliques={cliques.map(c => ({ id: c.id, squad_name: c.squad_name }))}
+      />
 
       {/* Chat Viewer Sheet */}
       <Sheet open={!!selectedClique} onOpenChange={(open) => !open && setSelectedClique(null)}>

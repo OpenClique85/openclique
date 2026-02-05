@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
+import { CliqueMemberSelector } from './CliqueMemberSelector';
 
 const QUEST_ASPECTS = [
   { value: 'clear_objective', label: 'Clear objective' },
@@ -26,13 +27,15 @@ const GROUP_FIT_OPTIONS = [
 ];
 
 const RECONNECT_OPTIONS = [
-  { value: 'whole_group', label: 'Yes, the whole group' },
-  { value: 'some_people', label: 'Yes, 1-2 people' },
-  { value: 'no', label: 'No' },
-  { value: 'not_sure', label: 'Not sure' },
+  { value: 'yes_everyone', label: 'Yes, the whole group!' },
+  { value: 'yes_some', label: 'Yes, some members' },
+  { value: 'maybe', label: 'Maybe, if quest is interesting' },
+  { value: 'no', label: 'Probably not' },
 ];
 
 interface FeedbackStep2Props {
+  questId: string;
+  currentUserId: string;
   onSubmit: (data: {
     workedWell: string[];
     workedPoorly: string[];
@@ -41,13 +44,14 @@ interface FeedbackStep2Props {
     comfortScore: number;
     groupFit: string;
     reconnectIntent: string;
+    preferredCliqueMembers: string[];
   }) => void;
   onSkip: () => void;
   isSubmitting: boolean;
   xpReward: number;
 }
 
-export function FeedbackStep2({ onSubmit, onSkip, isSubmitting, xpReward }: FeedbackStep2Props) {
+export function FeedbackStep2({ questId, currentUserId, onSubmit, onSkip, isSubmitting, xpReward }: FeedbackStep2Props) {
   const [workedWell, setWorkedWell] = useState<string[]>([]);
   const [workedPoorly, setWorkedPoorly] = useState<string[]>([]);
   const [lengthRating, setLengthRating] = useState('');
@@ -55,6 +59,7 @@ export function FeedbackStep2({ onSubmit, onSkip, isSubmitting, xpReward }: Feed
   const [comfortScore, setComfortScore] = useState(3);
   const [groupFit, setGroupFit] = useState('');
   const [reconnectIntent, setReconnectIntent] = useState('');
+  const [preferredCliqueMembers, setPreferredCliqueMembers] = useState<string[]>([]);
 
   const toggleAspect = (
     value: string,
@@ -79,8 +84,11 @@ export function FeedbackStep2({ onSubmit, onSkip, isSubmitting, xpReward }: Feed
       comfortScore,
       groupFit,
       reconnectIntent,
+      preferredCliqueMembers,
     });
   };
+
+  const showMemberSelector = reconnectIntent === 'yes_some';
 
   return (
     <div className="space-y-8">
@@ -223,14 +231,19 @@ export function FeedbackStep2({ onSubmit, onSkip, isSubmitting, xpReward }: Feed
       {/* Reconnect intent */}
       <div className="space-y-3">
         <label className="text-sm font-medium text-foreground">
-          Would you want to see anyone from this group again?
+          Would you quest with this group again?
         </label>
         <div className="flex gap-2 justify-center flex-wrap">
           {RECONNECT_OPTIONS.map((option) => (
             <button
               key={option.value}
               type="button"
-              onClick={() => setReconnectIntent(option.value)}
+              onClick={() => {
+                setReconnectIntent(option.value);
+                if (option.value !== 'yes_some') {
+                  setPreferredCliqueMembers([]);
+                }
+              }}
               className={cn(
                 "px-4 py-2 rounded-full text-sm transition-all border",
                 reconnectIntent === option.value
@@ -243,6 +256,18 @@ export function FeedbackStep2({ onSubmit, onSkip, isSubmitting, xpReward }: Feed
           ))}
         </div>
       </div>
+
+      {/* Clique Member Selector - shown when "yes_some" is selected */}
+      {showMemberSelector && (
+        <div className="bg-muted/50 rounded-lg p-4 border">
+          <CliqueMemberSelector
+            questId={questId}
+            currentUserId={currentUserId}
+            selectedMembers={preferredCliqueMembers}
+            onSelectionChange={setPreferredCliqueMembers}
+          />
+        </div>
+      )}
 
       {/* Actions */}
       <div className="pt-4 flex gap-3">
