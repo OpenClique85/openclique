@@ -53,7 +53,10 @@ export default function FeedbackFlow() {
   const awardXP = useAwardXP();
   const { toastState, showXPToast, hideXPToast } = useXPToast();
 
+  const navigate = useNavigate();
   const [quest, setQuest] = useState<{ title: string; icon: string } | null>(null);
+  const [squadId, setSquadId] = useState<string | null>(null);
+  const [instanceId, setInstanceId] = useState<string | null>(null);
   const [feedbackRequest, setFeedbackRequest] = useState<FeedbackRequest | null>(null);
   const [feedbackId, setFeedbackId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
