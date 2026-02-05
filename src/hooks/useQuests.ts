@@ -227,7 +227,7 @@ export const transformQuest = (dbQuest: DbQuest & { sponsor_profiles?: { name: s
   };
 };
 
-// Fetch quests from database
+// Fetch quests from database (filters out past quests client-side as safety net)
 export function useQuests() {
   return useQuery({
     queryKey: ['quests'],
@@ -243,7 +243,18 @@ export function useQuests() {
       
       if (error) throw error;
       
-      return (data || []).map(transformQuest);
+      const now = new Date();
+      
+      // Filter out quests where end_datetime has passed
+      // This is a client-side safety net in addition to the auto-close edge function
+      return (data || [])
+        .filter(quest => {
+          // Keep quests with no end date
+          if (!quest.end_datetime) return true;
+          // Keep quests that haven't ended yet
+          return new Date(quest.end_datetime) >= now;
+        })
+        .map(transformQuest);
     },
   });
 }

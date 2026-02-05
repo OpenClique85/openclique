@@ -192,7 +192,7 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/how-it-works" element={<HowItWorks />} />
                 <Route path="/about" element={<About />} />
-                <Route path="/pricing" element={<Pricing />} />
+                
                 <Route path="/quests" element={<Quests />} />
                 <Route path="/quests/:slug" element={<QuestDetail />} />
                 <Route path="/quest-card/:token" element={<QuestCard />} />

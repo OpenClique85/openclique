@@ -116,22 +116,38 @@ export function Hero() {
           {/* Primary: "Find Your Quest" (solid button, links to /quests) */}
           {/* Secondary: "Get Involved" dropdown with creator/partner links */}
           {/* -------------------------------------------------------------- */}
+          {/* PRIMARY CTAs: Join Now + Download App side by side */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in [animation-delay:350ms]">
             {/* Primary CTA - Main conversion goal */}
             <Button size="lg" asChild className="w-full sm:w-auto text-base px-10 py-6 text-lg font-semibold">
               <Link to="/auth?signup=true">{HERO.primaryCta}</Link>
             </Button>
             
-            {/* Secondary CTA - Dropdown for other user types */}
+            {/* Download App - Now next to Join Now */}
+            <Button 
+              variant="outline" 
+              size="lg" 
+              asChild 
+              className="w-full sm:w-auto text-base px-6 gap-2"
+            >
+              <Link to="/install">
+                <Smartphone className="h-4 w-4" />
+                Download App
+              </Link>
+            </Button>
+          </div>
+
+          {/* SECONDARY CTA: Get Involved - Smaller, below primary buttons */}
+          <div className="mt-6 animate-fade-in [animation-delay:450ms]">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button 
-                  variant="outline" 
-                  size="lg" 
-                  className="w-full sm:w-auto text-base px-6 gap-2"
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-sm text-muted-foreground hover:text-foreground gap-1"
                 >
                   Get Involved
-                  <ChevronDown className="h-4 w-4" />
+                  <ChevronDown className="h-3 w-3" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="center" className="w-48 bg-background border border-border z-50">
@@ -155,23 +171,6 @@ export function Hero() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          </div>
-
-          {/* -------------------------------------------------------------- */}
-          {/* DOWNLOAD APP BUTTON */}
-          {/* -------------------------------------------------------------- */}
-          <div className="mt-8 animate-fade-in [animation-delay:450ms]">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              asChild 
-              className="gap-2 text-muted-foreground hover:text-foreground"
-            >
-              <Link to="/install">
-                <Smartphone className="h-4 w-4" />
-                Download the App
-              </Link>
-            </Button>
           </div>
 
           {/* -------------------------------------------------------------- */}

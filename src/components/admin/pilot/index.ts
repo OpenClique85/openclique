@@ -28,3 +28,4 @@ export { AdminWarmUpPanel } from './AdminWarmUpPanel';
 export { CliqueManager } from './CliqueManager';
 export { CliqueBuilder } from './CliqueBuilder';
 export { FeedbackExportPanel } from './FeedbackExportPanel';
+export { CompleteCliqueDialog } from './CompleteCliqueDialog';
