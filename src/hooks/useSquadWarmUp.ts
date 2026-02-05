@@ -49,6 +49,11 @@ interface SquadWithInstance {
     title: string;
     scheduled_date: string;
     start_time: string;
+    objectives: string | null;
+    meeting_point_name: string | null;
+    meeting_point_address: string | null;
+    what_to_bring: string | null;
+    safety_notes: string | null;
   } | null;
 }
 
