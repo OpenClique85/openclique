@@ -225,6 +225,36 @@ export function useSquadWarmUp(squadId: string | null) {
     },
   });
 
+  // Send message with media
+  const sendMessageWithMedia = useMutation({
+    mutationFn: async ({ mediaUrl, isProof }: { mediaUrl: string; isProof: boolean }) => {
+      if (!squadId || !user) throw new Error('Not authenticated');
+      
+      const { error } = await supabase
+        .from('squad_chat_messages')
+        .insert({
+          squad_id: squadId,
+          sender_id: user.id,
+          message: isProof ? '📸 Quest Proof submitted' : '📷 Shared a photo',
+          sender_type: 'user',
+          media_url: mediaUrl,
+          media_type: 'image',
+          is_proof_submission: isProof,
+          proof_status: 'approved', // Default to approved
+        });
+      
+      if (error) throw error;
+    },
+    onSuccess: (_, variables) => {
+      if (variables.isProof) {
+        toast.success('Quest proof submitted! 🏆');
+      }
+    },
+    onError: (error) => {
+      toast.error('Failed to send photo', { description: error.message });
+    },
+  });
+
   // Submit prompt response
   const submitPromptResponse = useMutation({
     mutationFn: async (response: string) => {
