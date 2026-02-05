@@ -468,13 +468,38 @@ export default function FeedbackFlow() {
 
       <main className="flex-1 container mx-auto px-4 py-8 max-w-lg">
         {!isComplete && (
-          <Link
-            to="/my-quests"
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to My Quests
-          </Link>
+          <div className="flex items-center justify-between mb-6">
+            <Link
+              to="/my-quests"
+              className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to My Quests
+            </Link>
+            
+            {/* Exit with confirmation */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <X className="h-4 w-4" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Leave Feedback?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Your progress is saved. You can return anytime before the deadline.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Stay</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => navigate('/profile?tab=quests')}>
+                    Leave
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         )}
 
         {isComplete ? (
@@ -483,6 +508,8 @@ export default function FeedbackFlow() {
             xpBreakdown={xpBreakdown}
             questTitle={quest.title}
             questId={questId}
+            squadId={squadId}
+            instanceId={instanceId}
           />
         ) : (
           <Card>
