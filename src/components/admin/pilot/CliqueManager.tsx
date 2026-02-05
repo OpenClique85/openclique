@@ -422,7 +422,10 @@ export function CliqueManager({ instanceId, instanceTitle = 'Quest', targetCliqu
           {cliques.map((clique) => {
             const isLocked = !!clique.locked_at;
             const isWarmingUp = ['warming_up', 'ready_for_review', 'approved'].includes(clique.status);
-            const canStartWarmUp = isLocked && !isWarmingUp && clique.members.length > 0;
+            const isActive = clique.status === 'active' || clique.status === 'approved';
+            const isCompleted = clique.status === 'completed';
+            const canStartWarmUp = isLocked && !isWarmingUp && !isCompleted && clique.members.length > 0;
+            const canComplete = isActive && clique.members.length > 0;
             const statusStyles = SQUAD_STATUS_STYLES[clique.status] || SQUAD_STATUS_STYLES.confirmed;
             
             return (
