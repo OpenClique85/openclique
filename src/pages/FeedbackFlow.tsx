@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { useAwardXP } from '@/hooks/useUserXP';
 import { XPAwardToast, useXPToast } from '@/components/XPAwardToast';
+import { useFeedbackDraft } from '@/hooks/useFeedbackDraft';
 import {
   FeedbackProgress,
   FeedbackStep1,
