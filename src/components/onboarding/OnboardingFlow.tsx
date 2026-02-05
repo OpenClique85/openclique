@@ -27,7 +27,6 @@ type OnboardingStep = 'age' | 'terms' | 'safety' | 'complete';
 
 export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
   const [step, setStep] = useState<OnboardingStep>('age');
-  const [termsAccepted, setTermsAccepted] = useState(false);
   const [showSafetyModal, setShowSafetyModal] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -59,17 +58,24 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
 
   const saveTermsAgreement = useMutation({
     mutationFn: async () => {
-      // Log consent
-      const { error } = await supabase
-        .from('user_consent_log')
-        .insert({
-          user_id: userId,
-          consent_type: 'terms_and_privacy',
-          consent_given: true,
-          consent_version: '2025-02',
-        });
+      // Log consent for all required sections
+      const consentEntries = [
+        { consent_type: 'terms_of_service', consent_version: '2025-02' },
+        { consent_type: 'privacy_policy', consent_version: '2025-02' },
+        { consent_type: 'community_guidelines', consent_version: '2025-02' },
+        { consent_type: 'safety_acknowledgment', consent_version: '2025-02' },
+      ];
 
-      if (error) throw error;
+      for (const entry of consentEntries) {
+        const { error } = await supabase
+          .from('user_consent_log')
+          .insert({
+            user_id: userId,
+            consent_given: true,
+            ...entry,
+          });
+        if (error) throw error;
+      }
 
       // Update profile consent timestamp
       await supabase
@@ -97,14 +103,6 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
   };
 
   const handleTermsAccepted = () => {
-    if (!termsAccepted) {
-      toast({
-        variant: 'destructive',
-        title: 'Agreement required',
-        description: 'Please agree to the Terms of Service and Privacy Policy to continue.',
-      });
-      return;
-    }
     saveTermsAgreement.mutate();
   };
 
@@ -123,91 +121,21 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
     );
   }
 
-  // Terms Agreement Step
+  // Terms Agreement Step (with scroll requirement)
   if (step === 'terms') {
     return (
-      <div className="flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center space-y-4">
-            <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-              <FileText className="h-8 w-8 text-primary" />
-            </div>
-            <CardTitle className="text-2xl font-display">Quick Legal Stuff</CardTitle>
-            <CardDescription className="text-base">
-              To use {BRAND.name}, you need to agree to our terms.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-4">
-              {/* Terms Summary */}
-              <div className="p-4 bg-muted/50 rounded-lg space-y-3">
-                <h4 className="font-medium flex items-center gap-2">
-                  <FileText className="h-4 w-4" />
-                  Terms of Service
-                </h4>
-                <ul className="text-sm text-muted-foreground space-y-1">
-                  <li>• You're responsible for your own safety at quests</li>
-                  <li>• We don't conduct background checks on users</li>
-                  <li>• Meet in public places and trust your instincts</li>
-                </ul>
-              </div>
-
-              <div className="p-4 bg-muted/50 rounded-lg space-y-3">
-                <h4 className="font-medium flex items-center gap-2">
-                  <Shield className="h-4 w-4" />
-                  Privacy Policy
-                </h4>
-                <ul className="text-sm text-muted-foreground space-y-1">
-                  <li>• We only collect data needed to run the service</li>
-                  <li>• You control your data (view, download, delete anytime)</li>
-                  <li>• We never sell your information</li>
-                </ul>
-              </div>
-            </div>
-
-            {/* Checkbox */}
-            <div className="flex items-start space-x-3 p-3 border rounded-lg">
-              <Checkbox
-                id="terms-agree"
-                checked={termsAccepted}
-                onCheckedChange={(checked) => setTermsAccepted(checked === true)}
-              />
-              <Label htmlFor="terms-agree" className="text-sm cursor-pointer leading-relaxed">
-                I confirm I'm 18+ and agree to the{' '}
-                <Link to="/terms" target="_blank" className="text-primary hover:underline">
-                  Terms of Service
-                </Link>{' '}
-                and{' '}
-                <Link to="/privacy" target="_blank" className="text-primary hover:underline">
-                  Privacy Policy
-                </Link>
-              </Label>
-            </div>
-
-            <Button 
-              className="w-full" 
-              onClick={handleTermsAccepted}
-              disabled={saveTermsAgreement.isPending}
-            >
-              {saveTermsAgreement.isPending ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                'I Agree'
-              )}
-            </Button>
-          </CardContent>
-        </Card>
-
+      <>
+        <TermsConsentStep 
+          onAccept={handleTermsAccepted}
+          isSubmitting={saveTermsAgreement.isPending}
+        />
         <SafetyGuidelines
           open={showSafetyModal}
           onOpenChange={setShowSafetyModal}
           onAcknowledge={handleSafetyAcknowledged}
           showDontShowAgain={false}
         />
-      </div>
+      </>
     );
   }
 
