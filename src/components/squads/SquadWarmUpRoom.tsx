@@ -51,6 +51,7 @@ export function SquadWarmUpRoom({ squadId, onInstructionsUnlocked }: SquadWarmUp
   const [promptResponse, setPromptResponse] = useState('');
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
   const [profileSheetOpen, setProfileSheetOpen] = useState(false);
+  const [objectivesOpen, setObjectivesOpen] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll chat
