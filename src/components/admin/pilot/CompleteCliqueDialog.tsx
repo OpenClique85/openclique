@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import {
   Dialog,
   DialogContent,
@@ -40,10 +41,13 @@ export function CompleteCliqueDialog({
   instanceId,
 }: CompleteCliqueDialogProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [isCompleting, setIsCompleting] = useState(false);
 
   const handleComplete = async () => {
+    if (!user?.id) return;
+    
     setIsCompleting(true);
     try {
       // 1. Get quest info for XP calculation
@@ -141,12 +145,12 @@ export function CompleteCliqueDialog({
         console.error('Failed to send completion notifications:', notifyErr);
       }
 
-      // 7. Send system message to clique chat
+      // 7. Send system message to clique chat (using admin as sender)
       await supabase.from('squad_chat_messages').insert({
         squad_id: cliqueId,
-        sender_id: null,
-        message_type: 'system',
-        content: `🎉 Quest completed! All members have been awarded ${xpAward} XP. Submit your feedback within 7 days to earn bonus XP!`,
+        sender_id: user.id,
+        sender_type: 'system',
+        message: `🎉 Quest completed! All members have been awarded ${xpAward} XP. Submit your feedback within 7 days to earn bonus XP!`,
       });
 
       // 8. Audit log
@@ -188,7 +192,7 @@ export function CompleteCliqueDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <CheckCircle2 className="h-5 w-5 text-green-600" />
+            <CheckCircle2 className="h-5 w-5 text-primary" />
             Complete Clique
           </DialogTitle>
           <DialogDescription>
@@ -206,15 +210,15 @@ export function CompleteCliqueDialog({
             <p className="font-medium">This will:</p>
             <ul className="space-y-2 text-muted-foreground">
               <li className="flex items-center gap-2">
-                <Trophy className="h-4 w-4 text-amber-500" />
+                <Trophy className="h-4 w-4 text-accent-foreground" />
                 Award 50% of quest XP to all members
               </li>
               <li className="flex items-center gap-2">
-                <MessageSquare className="h-4 w-4 text-blue-500" />
+                <MessageSquare className="h-4 w-4 text-primary" />
                 Create feedback requests (7-day window)
               </li>
               <li className="flex items-center gap-2">
-                <Bell className="h-4 w-4 text-purple-500" />
+                <Bell className="h-4 w-4 text-secondary-foreground" />
                 Notify members of completion
               </li>
             </ul>
@@ -232,7 +236,6 @@ export function CompleteCliqueDialog({
           <Button
             onClick={handleComplete}
             disabled={isCompleting}
-            className="bg-green-600 hover:bg-green-700"
           >
             {isCompleting ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
