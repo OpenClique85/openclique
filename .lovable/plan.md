@@ -1,256 +1,160 @@
 
-# Corrected Implementation Plan
 
-## Summary of Clarifications
+# Visual Redesign Experiment: Homepage Color & Style Refresh
 
-The user clarified the following important distinctions:
+## Current State Analysis
 
-1. **Quest Completion is per-instance/clique, not global** - Admins complete quests at the clique or instance level, not as a global "end all" action
-2. **Archival is time-based** - Quests are removed from the public queue when their `end_datetime` passes the current date, not when manually marked complete
-3. **Current "End Quest" dialog needs adjustment** - The existing `EndQuestDialog.tsx` ends the entire instance at once, which should remain as an option, but clique-level completion should also be available
+Your current design uses:
+- **Primary:** Teal (#14B8A6 / HSL 174 84% 40%) - clean but very "safe/corporate"
+- **Accent:** Amber (#F59E0B / HSL 43 96% 50%) - warm but underused
+- **Background:** Warm white (#FAFAF9) - nice but lacks personality
+- **Typography:** Sora (headings) + Inter (body) - solid, modern choices
 
----
-
-## Current Issues Found
-
-### Issue 1: Past Quests Still Showing
-Database query revealed:
-- **"DND-Lite Karaoke BRUNCH"** has `end_datetime: 2026-01-31 22:00:00` (5 days ago)
-- Status is still `open`
-- This quest is still appearing in the public `/quests` page
-
-**Root Cause:** There's no automatic process to close/archive quests when their `end_datetime` passes. The existing `auto_archive_instances` function only archives instances that have been in `completed` status for 7 days.
-
-### Issue 2: Clique-Level Completion Not Available
-The current `EndQuestDialog.tsx` only supports instance-level completion (completing all cliques at once). There's no UI for completing individual cliques.
+The overall effect is polished but reads more "SaaS dashboard" than "Austin adventure app."
 
 ---
 
-## Planned Changes
+## Proposed Direction: "Austin Neon Nights"
 
-### 1. Remove Pricing Page (As Previously Approved)
+Inspired by Austin's music venues, neon signs, and sunset skylines. Bold, confident, and unapologetically fun.
 
-**Files to modify:**
-| File | Change |
-|------|--------|
-| `src/App.tsx` | Remove `Pricing` lazy import and `/pricing` route |
-| `src/constants/content.ts` | Remove "Pricing" from `NAV_LINKS` array |
+### New Primary Palette
 
----
+| Role | Current | Proposed | Hex | HSL |
+|------|---------|----------|-----|-----|
+| **Primary** | Teal | Electric Coral | #FF6B6B | 0 100% 71% |
+| **Secondary** | Light gray | Dusty Sage | #94B49F | 145 25% 65% |
+| **Accent** | Amber | Hot Pink/Magenta | #E040FB | 291 96% 62% |
+| **Background** | Warm white | Cream | #FFFBF5 | 40 100% 98% |
+| **Foreground** | Navy ink | Rich Charcoal | #1A1A2E | 240 33% 14% |
 
-### 2. Reorganize Hero CTAs (As Previously Approved)
+### Why This Works for OpenClique
 
-**Current layout:**
-```
-[Join Now]    [Get Involved ▼]
-        [📱 Download the App]
-```
+1. **Electric Coral (#FF6B6B)** - Energetic, inviting, memorable. Says "adventure" not "enterprise software"
+2. **Dusty Sage (#94B49F)** - Balances the energy, feels organic/Austin outdoor vibes
+3. **Hot Pink/Magenta (#E040FB)** - Pop of personality for highlights, badges, special moments
+4. **Cream background** - Warmer than pure white, easier on eyes, feels welcoming
+5. **Rich charcoal** - Sophisticated dark without being harsh black
 
-**New layout:**
-```
-[Join Now]    [📱 Download App]
-        Get Involved ▼
-```
+### Visual Personality Shift
 
-**Changes to `src/components/Hero.tsx`:**
-- Move "Download the App" button to primary row next to "Join Now"
-- Change it from `ghost` variant to `outline` variant
-- Move "Get Involved" dropdown below as smaller, less prominent text-link style
-
----
-
-### 3. Auto-Close Past Quests Based on Time
-
-Create a new database function and edge function that automatically marks quests as `closed` when their `end_datetime` passes.
-
-#### 3a. New Database Function
-
-```sql
-CREATE OR REPLACE FUNCTION auto_close_past_quests()
-RETURNS INTEGER
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-DECLARE
-  v_closed_count INTEGER;
-BEGIN
-  WITH closed AS (
-    UPDATE quests
-    SET status = 'closed'
-    WHERE status = 'open'
-      AND end_datetime IS NOT NULL
-      AND end_datetime < NOW()
-    RETURNING id
-  )
-  SELECT COUNT(*) INTO v_closed_count FROM closed;
-  
-  RETURN v_closed_count;
-END;
-$$;
-```
-
-#### 3b. New Edge Function: `auto-close-past-quests`
-
-Create `supabase/functions/auto-close-past-quests/index.ts` to call this function on a schedule.
-
-#### 3c. Also Add Frontend Filter
-
-Update `src/hooks/useQuests.ts` to filter out quests where `end_datetime < now()` regardless of status, as a client-side safety net.
-
----
-
-### 4. Add Clique-Level Completion
-
-Create a new component `CompleteCliqueDialog.tsx` that allows admins to:
-- Complete individual cliques within an instance
-- Award XP to members of that specific clique
-- Send feedback requests to those clique members only
-- Mark the clique's squad status as `completed`
-
-This component will be added to the `CliqueManager.tsx` and `ActiveCliquesPanel.tsx` components.
-
-#### New Component: `CompleteCliqueDialog.tsx`
-
-**Features:**
-- Takes a single `cliqueId` and `cliqueName` as props
-- Shows member count for that clique
-- On confirm:
-  1. Updates `quest_squads.status` to `completed`
-  2. Awards completion XP to members of that clique only
-  3. Creates feedback requests for those members
-  4. Sends notification to clique members
-  5. Sends system message to clique chat
-
-#### Integration Points
-
-**`CliqueManager.tsx`:**
-- Add a "Complete" button on each clique card (next to the lock/unlock button)
-- Only visible when clique status is `active` or `approved`
-
-**`ActiveCliquesPanel.tsx`:**
-- Add "Complete Clique" action button in the clique list
-- Available for cliques with status `active` or `approved`
-
----
-
-### 5. Instance Auto-Archive Based on All Cliques Completed
-
-Update the instance lifecycle so that when ALL cliques within an instance are marked `completed`, the instance automatically transitions to `completed` status.
-
-This can be done via a database trigger:
-
-```sql
-CREATE OR REPLACE FUNCTION check_instance_completion()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-DECLARE
-  v_instance_id UUID;
-  v_total_cliques INTEGER;
-  v_completed_cliques INTEGER;
-BEGIN
-  -- Get the instance ID for this squad
-  SELECT instance_id INTO v_instance_id 
-  FROM quest_squads 
-  WHERE id = NEW.id;
-  
-  IF v_instance_id IS NULL THEN
-    RETURN NEW;
-  END IF;
-  
-  -- Count total and completed cliques
-  SELECT 
-    COUNT(*),
-    COUNT(*) FILTER (WHERE status = 'completed')
-  INTO v_total_cliques, v_completed_cliques
-  FROM quest_squads
-  WHERE instance_id = v_instance_id
-    AND status NOT IN ('cancelled', 'archived');
-  
-  -- If all cliques are completed, complete the instance
-  IF v_total_cliques > 0 AND v_total_cliques = v_completed_cliques THEN
-    UPDATE quest_instances
-    SET status = 'completed'
-    WHERE id = v_instance_id
-      AND status NOT IN ('completed', 'archived', 'cancelled');
-  END IF;
-  
-  RETURN NEW;
-END;
-$$;
-
-CREATE TRIGGER on_squad_status_change
-AFTER UPDATE OF status ON quest_squads
-FOR EACH ROW
-WHEN (NEW.status = 'completed')
-EXECUTE FUNCTION check_instance_completion();
+```text
+BEFORE (Corporate Teal):        AFTER (Austin Energy):
+┌───────────────────────┐       ┌───────────────────────┐
+│  ████ Safe            │       │  ████ Bold            │
+│  ████ Professional    │  -->  │  ████ Adventurous     │
+│  ████ Forgettable     │       │  ████ Memorable       │
+└───────────────────────┘       └───────────────────────┘
 ```
 
 ---
 
-## File Change Summary
+## Implementation Approach
 
-### New Files
+### Phase 1: Homepage-Only Experiment
 
-| File | Purpose |
-|------|---------|
-| `src/components/admin/pilot/CompleteCliqueDialog.tsx` | UI for completing individual cliques |
-| `supabase/functions/auto-close-past-quests/index.ts` | Edge function to auto-close past quests |
+We will create a **homepage-specific CSS override** that applies the new palette only to the Index page. This lets you experiment without affecting the rest of the app.
 
-### Modified Files
+**New file:** `src/styles/home-experiment.css`
+
+This file will define CSS custom properties that override the base theme only within a `.home-experiment` wrapper class applied to the Index page.
+
+### Phase 2: Component Tweaks
+
+Beyond just colors, we will add visual personality through:
+
+| Element | Current | Proposed |
+|---------|---------|----------|
+| **Hero gradient** | Subtle teal/amber | Bold coral-to-magenta diagonal gradient |
+| **Badges** | Outline with teal | Solid coral with white text |
+| **Card borders** | Subtle gray | Slightly thicker with hover glow effect |
+| **Section backgrounds** | Alternating muted | Subtle texture/pattern overlays |
+| **CTA buttons** | Flat teal | Coral with subtle gradient + glow on hover |
+
+### Files to Modify
 
 | File | Changes |
 |------|---------|
-| `src/App.tsx` | Remove Pricing import and route |
-| `src/constants/content.ts` | Remove Pricing from NAV_LINKS |
-| `src/components/Hero.tsx` | Reorganize CTAs |
-| `src/hooks/useQuests.ts` | Add client-side filter for past quests |
-| `src/components/admin/pilot/CliqueManager.tsx` | Add Complete button per clique |
-| `src/components/admin/pilot/ActiveCliquesPanel.tsx` | Add Complete action per clique |
-| `src/components/admin/pilot/index.ts` | Export CompleteCliqueDialog |
-
-### Database Migration
-
-| Change | Description |
-|--------|-------------|
-| `auto_close_past_quests()` function | Closes quests when end_datetime passes |
-| `check_instance_completion()` trigger | Auto-completes instance when all cliques done |
+| `src/styles/home-experiment.css` | NEW - experimental color variables |
+| `src/pages/Index.tsx` | Add wrapper class + import experimental styles |
+| `src/components/Hero.tsx` | New gradient treatment, badge styling |
+| `src/components/HowItWorksMini.tsx` | Updated icon/number accent colors |
+| `src/components/BenefitsSection.tsx` | Card hover effects with new accent |
+| `src/components/WhoItsForSection.tsx` | Persona card accent updates |
+| `src/components/CTASection.tsx` | New background gradient, button treatment |
 
 ---
 
-## Technical Architecture
+## Alternative Palettes to Consider
 
-```text
-QUEST LIFECYCLE (Corrected):
+If Electric Coral feels too bold, here are two backup directions:
 
-┌─────────────┐      (admin creates)       ┌──────────────┐
-│   draft     │ ──────────────────────────→│    open      │
-└─────────────┘                            └──────┬───────┘
-                                                  │
-                    ┌─────────────────────────────┴───────────────────┐
-                    │                                                 │
-                    ▼ (end_datetime passes)                          ▼ (admin closes)
-            ┌──────────────┐                                  ┌──────────────┐
-            │    closed    │←─────────────────────────────────│  cancelled   │
-            └──────────────┘                                  └──────────────┘
+### Option B: "Sunset Austin" (Warmer, earthier)
 
+| Role | Color | Hex |
+|------|-------|-----|
+| Primary | Burnt Sienna | #E07A5F |
+| Secondary | Sage Green | #81B29A |
+| Accent | Dusty Rose | #F2CC8F |
+| Background | Ivory | #FAF7F2 |
 
-INSTANCE/CLIQUE LIFECYCLE:
+### Option C: "Neon Violet" (Bolder, nightlife-inspired)
 
-┌─────────────────────────────────────────────────────────────────────────┐
-│                        QUEST INSTANCE                                    │
-│                                                                          │
-│   ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐         │
-│   │ Clique A │    │ Clique B │    │ Clique C │    │ Clique D │         │
-│   │  active  │    │ completed│    │  active  │    │ completed│         │
-│   └──────────┘    └──────────┘    └──────────┘    └──────────┘         │
-│                                                                          │
-│   Instance Status: live                                                  │
-│   (auto-completes when ALL cliques are completed)                       │
-└─────────────────────────────────────────────────────────────────────────┘
+| Role | Color | Hex |
+|------|-------|-----|
+| Primary | Electric Violet | #7C3AED |
+| Secondary | Mint | #6EE7B7 |
+| Accent | Hot Orange | #FB923C |
+| Background | Near Black | #0F0F1A |
+
+---
+
+## What You Will See After Implementation
+
+The homepage will feature:
+
+1. **Bold coral primary buttons** that pop against the cream background
+2. **Gradient overlays** on the hero that feel dynamic and adventurous
+3. **Magenta accent highlights** for special elements (badges, icons on hover)
+4. **Subtle texture** or grain overlay for added depth
+5. **More pronounced shadows and glows** on cards for a premium feel
+
+This is fully reversible - we are adding an experimental layer, not replacing your core design system. If you love it, we can roll it out globally. If not, we simply remove the wrapper class.
+
+---
+
+## Technical Details
+
+### Experimental CSS Variables
+
+The new `home-experiment.css` will define:
+
+```css
+.home-experiment {
+  --primary: 0 100% 71%;           /* Electric Coral */
+  --primary-foreground: 0 0% 100%;
+  --accent: 291 96% 62%;           /* Hot Pink */
+  --accent-foreground: 0 0% 100%;
+  --background: 40 100% 98%;       /* Cream */
+  --foreground: 240 33% 14%;       /* Rich Charcoal */
+  --muted: 145 25% 92%;            /* Light sage */
+  --muted-foreground: 240 20% 40%;
+  --ring: 0 100% 71%;
+}
+```
+
+### Gradient Treatment for Hero
+
+Replace the current `from-primary/10 via-background/95 to-accent/10` with a more dynamic diagonal gradient using the new coral and magenta tones.
+
+### Button Glow Effect
+
+Add a subtle `box-shadow` on hover that uses the primary color for a "neon glow" effect:
+
+```css
+.home-experiment button[data-primary]:hover {
+  box-shadow: 0 0 20px hsl(0 100% 71% / 0.4);
+}
 ```
 
 ---
@@ -258,12 +162,11 @@ INSTANCE/CLIQUE LIFECYCLE:
 ## Testing Checklist
 
 After implementation:
-- [ ] Pricing page returns 404 when accessed directly
-- [ ] No "Pricing" link in navbar
-- [ ] Hero shows "Join Now" and "Download App" side by side
-- [ ] "Get Involved" dropdown appears smaller, below primary CTAs
-- [ ] Past quests (end_datetime < now) don't appear on /quests page
-- [ ] Admin can complete individual cliques from CliqueManager
-- [ ] Completing a clique awards XP only to that clique's members
-- [ ] Completing all cliques auto-completes the instance
-- [ ] The existing "End Quest & Send Feedback" button still works for bulk completion
+- [ ] Homepage displays new color palette
+- [ ] Other pages (Quests, About, etc.) retain original teal theme
+- [ ] All text remains readable with sufficient contrast
+- [ ] Buttons have visible hover/active states
+- [ ] Dark mode compatibility (if applicable)
+- [ ] Cards and badges use new accent colors appropriately
+- [ ] Overall vibe feels more "Austin fun" than "corporate SaaS"
+
