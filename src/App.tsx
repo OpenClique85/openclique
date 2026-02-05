@@ -183,6 +183,9 @@ const App = () => (
             <MobileActionBar />
             {/* Floating help button */}
             <FloatingHelpButton />
+            {/* PWA components */}
+            <OfflineIndicator />
+            <InstallPrompt />
             
             <Suspense fallback={<PageLoader />}>
               <Routes>
