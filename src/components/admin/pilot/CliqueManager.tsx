@@ -57,6 +57,7 @@ export function CliqueManager({ instanceId, instanceTitle = 'Quest', targetCliqu
   const [isSwapOpen, setIsSwapOpen] = useState(false);
   const [isLockingAll, setIsLockingAll] = useState(false);
   const [startingWarmUpId, setStartingWarmUpId] = useState<string | null>(null);
+  const [completingClique, setCompletingClique] = useState<{ id: string; name: string; memberCount: number } | null>(null);
 
   // Fetch cliques with members (using instance_id)
   const { data: cliques, isLoading } = useQuery({
