@@ -89,7 +89,7 @@ export function Hero() {
           {/* LOGO */}
           {/* -------------------------------------------------------------- */}
           <div className="flex justify-center mb-8 animate-fade-in [animation-delay:50ms]">
-            <img src={logo} alt="OpenClique" className="h-16 md:h-20" />
+            <img src={logo} alt="OpenClique" className="h-16 md:h-20 hover:scale-105 transition-transform duration-300" />
           </div>
 
           {/* -------------------------------------------------------------- */}
@@ -119,7 +119,7 @@ export function Hero() {
           {/* PRIMARY CTAs: Join Now + Download App side by side */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in [animation-delay:350ms]">
             {/* Primary CTA - Main conversion goal */}
-            <Button size="lg" asChild className="w-full sm:w-auto text-base px-10 py-6 text-lg font-semibold">
+            <Button size="lg" asChild className="w-full sm:w-auto text-base px-10 py-6 text-lg font-semibold hover:scale-[1.02] transition-transform duration-200">
               <Link to="/auth?signup=true">{HERO.primaryCta}</Link>
             </Button>
             
@@ -128,7 +128,7 @@ export function Hero() {
               variant="outline" 
               size="lg" 
               asChild 
-              className="w-full sm:w-auto text-base px-6 gap-2"
+              className="w-full sm:w-auto text-base px-6 gap-2 hover:scale-[1.02] transition-transform duration-200"
             >
               <Link to="/install">
                 <Smartphone className="h-4 w-4" />

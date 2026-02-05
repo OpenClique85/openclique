@@ -146,7 +146,7 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
     <div 
       className={cn(
         "flex-shrink-0 w-[300px] md:w-[340px] h-[280px] bg-card rounded-2xl p-6 border border-border shadow-sm",
-        "transition-all duration-300 hover:shadow-md hover:border-primary/20",
+        "transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-primary/30",
         "flex flex-col",
         isExpandable && "cursor-pointer"
       )}
@@ -158,10 +158,10 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
           <img 
             src={testimonial.avatar} 
             alt={testimonial.name}
-            className="w-12 h-12 rounded-full object-cover ring-2 ring-primary/20"
+            className="w-12 h-12 rounded-full object-cover ring-2 ring-primary/20 transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
-          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold ring-2 ring-primary/20">
+          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold ring-2 ring-primary/20 transition-transform duration-300 group-hover:scale-105">
             {testimonial.name[0]}
           </div>
         )}

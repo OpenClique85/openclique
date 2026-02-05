@@ -28,13 +28,13 @@ export function HowItWorksMini() {
             {steps.map((step, index) => {
               const Icon = step.icon;
               return (
-                <div key={step.title} className="flex flex-col items-center text-center">
+                <div key={step.title} className="group flex flex-col items-center text-center">
                   {/* Step number + icon */}
                   <div className="relative mb-4">
-                    <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+                    <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
                       <Icon className="w-6 h-6 text-primary" />
                     </div>
-                    <span className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">
+                    <span className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                       {index + 1}
                     </span>
                   </div>

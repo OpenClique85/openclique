@@ -146,7 +146,7 @@ export default function About() {
                 {ABOUT.team.map((member) => (
                   <div
                     key={member.name}
-                    className="bg-card rounded-xl p-6 border border-border text-center hover:shadow-lg transition-shadow"
+                    className="bg-card rounded-xl p-6 border border-border text-center hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
                   >
                     <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-4 border-primary/20">
                       <img
@@ -170,8 +170,8 @@ export default function About() {
                 {/* --- BUGGS Team Card (Hardcoded) --- */}
                 {/* BUGGS is our AI mascot, always shown as a team member */}
                 {/* To edit BUGGS info, change the text below directly */}
-                <div className="bg-card rounded-xl p-6 border border-border text-center hover:shadow-lg transition-shadow">
-                  <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-4 border-primary/20">
+                <div className="bg-card rounded-xl p-6 border border-border text-center hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                  <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-4 border-primary/20 hover:border-primary/40 transition-colors">
                     <img
                       src={buggsReal}
                       alt="BUGGS the rabbit"
@@ -222,7 +222,7 @@ export default function About() {
                 {ABOUT.traction.map((item) => (
                   <div
                     key={item.image}
-                    className="bg-card rounded-xl overflow-hidden border border-border hover:shadow-lg transition-all hover:-translate-y-1"
+                    className="bg-card rounded-xl overflow-hidden border border-border hover:shadow-xl hover:-translate-y-2 transition-all duration-300"
                   >
                     <div className="aspect-video overflow-hidden">
                       <img
@@ -261,10 +261,10 @@ export default function About() {
                   return (
                     <div
                       key={value.title}
-                      className="text-center p-6 bg-card rounded-xl border border-border"
+                      className="text-center p-6 bg-card rounded-xl border border-border hover:shadow-lg hover:-translate-y-1 hover:border-primary/30 transition-all duration-300"
                     >
                       {IconComponent && (
-                        <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                        <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
                           <IconComponent className="w-7 h-7 text-primary" />
                         </div>
                       )}

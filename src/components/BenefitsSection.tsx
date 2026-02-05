@@ -37,7 +37,7 @@ export function BenefitsSection() {
             return (
               <div
                 key={benefit.title}
-                className="group relative bg-card rounded-xl overflow-hidden border border-border hover:border-primary/50 hover:shadow-lg transition-all duration-300 flex flex-col"
+                className="group relative bg-card rounded-xl overflow-hidden border border-border hover:border-primary/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 {/* Background image accent */}
