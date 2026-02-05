@@ -1,411 +1,163 @@
 
-# Quest Completion Flow Enhancement Plan
+# PWA Implementation Plan for OpenClique
 
 ## Overview
 
-This plan addresses the full lifecycle when an admin ends a quest: awarding XP, updating databases, celebrating completion, enabling optional clique persistence (premium feature), and improving the feedback UX.
+Transform OpenClique into an installable Progressive Web App that users can add to their home screen. The app will work offline, load fast, and feel native while maintaining full connection to the backend.
 
 ---
 
-## Current State Analysis
+## What Users Will Get
 
-**What's working:**
-- `EndQuestDialog.tsx` creates `feedback_requests` and sends chat notifications
-- `award_quest_xp()` RPC exists and handles XP + achievements + streaks
-- `useEntitlements` hook checks `personal_scope` for premium features
-- `premium_interest` table tracks pilot users
-
-**Gaps identified:**
-1. Admin "End Quest" doesn't award completion XP (50% base)
-2. No celebration UI when quest ends (user-facing)
-3. `quest_signups.completed_at` not set on End Quest
-4. No "Skip Testimonial" option (only "Skip" button exists but no explicit "No thanks")
-5. No "Keep Clique" prompt post-completion
-6. No navigation out of feedback flow mid-form
-7. Notifications not created when quest ends
-8. Quest history doesn't show completion state prominently
+- **Install from browser** — Tap "Add to Home Screen" (iOS) or see install prompt (Android/Chrome)
+- **App icon on phone** — OpenClique icon sits alongside other apps
+- **Full-screen experience** — No browser chrome, feels like a native app
+- **Offline support** — Core pages cached, graceful offline messaging
+- **Fast loading** — Service worker caches assets for instant startup
 
 ---
 
-## Phase 1: Database Schema Updates
+## Technical Implementation
 
-### 1.1 New Table: `clique_save_requests`
-Tracks mutual selection for clique persistence.
+### 1. Install vite-plugin-pwa
 
-```sql
-CREATE TABLE clique_save_requests (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  instance_id uuid NOT NULL REFERENCES quest_instances(id),
-  squad_id uuid NOT NULL REFERENCES squads(id),
-  requester_id uuid NOT NULL REFERENCES profiles(id),
-  selected_member_ids uuid[] NOT NULL DEFAULT '{}',
-  wants_to_save boolean NOT NULL DEFAULT true,
-  premium_acknowledged boolean DEFAULT false,
-  created_at timestamptz DEFAULT now(),
-  processed_at timestamptz,
-  UNIQUE(instance_id, requester_id)
-);
+Add the PWA plugin that handles service worker generation, manifest creation, and caching strategies.
+
+```
+vite-plugin-pwa
 ```
 
-### 1.2 New Column: `quest_signups.completion_xp_awarded`
-Track whether base XP was awarded for completion.
+### 2. Configure vite.config.ts
 
-```sql
-ALTER TABLE quest_signups
-ADD COLUMN IF NOT EXISTS completion_xp_awarded boolean DEFAULT false;
-```
+Add PWA plugin with:
+- **App manifest** — Name, icons, colors, display mode
+- **Service worker** — Auto-generated with Workbox
+- **Caching strategy** — Cache-first for assets, network-first for API calls
+- **Offline fallback** — Show cached content when offline
 
-### 1.3 RLS Policies
+### 3. Create PWA Icons
 
-```sql
--- clique_save_requests
-ALTER TABLE clique_save_requests ENABLE ROW LEVEL SECURITY;
+Generate required icon sizes in `/public`:
+- `pwa-192x192.png` — Standard icon
+- `pwa-512x512.png` — Splash screen / high-res
+- `apple-touch-icon-180x180.png` — iOS home screen
 
-CREATE POLICY "Users can view own save requests"
-ON clique_save_requests FOR SELECT
-USING (requester_id = auth.uid());
+### 4. Update index.html
 
-CREATE POLICY "Users can create own save requests"
-ON clique_save_requests FOR INSERT
-WITH CHECK (requester_id = auth.uid());
+Add mobile-optimized meta tags:
+- `apple-mobile-web-app-capable` — Enable standalone mode on iOS
+- `apple-mobile-web-app-status-bar-style` — Status bar theming
+- `theme-color` — Browser UI color matching brand
+- Apple touch icon link
 
-CREATE POLICY "Users can update own save requests"
-ON clique_save_requests FOR UPDATE
-USING (requester_id = auth.uid());
+### 5. Create Install Page (`/install`)
 
--- Rate limit: users can only create 1 request per instance
--- Enforced by UNIQUE constraint
-```
+Dedicated page with:
+- Platform detection (iOS vs Android)
+- Step-by-step install instructions with visuals
+- "Add to Home Screen" prompt trigger (Android/Chrome)
+- Benefits of installing (notifications, quick access)
 
----
+### 6. Add Install Prompt Component
 
-## Phase 2: End Quest Flow Enhancement
+Show a dismissible banner/prompt:
+- Detect if app is installable but not installed
+- Show on key moments (after signup, quest join)
+- Remember dismissal in localStorage
 
-### 2.1 Modify `EndQuestDialog.tsx`
+### 7. Offline UI Component
 
-**Current behavior:**
-- Updates instance status
-- Creates feedback_requests
-- Sends chat message
-
-**Add:**
-1. Award 50% base XP to each participant:
-   ```typescript
-   // For each member:
-   await supabase.rpc('award_xp', {
-     p_user_id: member.user_id,
-     p_amount: Math.floor(quest.base_xp * 0.5),
-     p_source: 'quest_complete',
-     p_source_id: instanceId,
-   });
-   ```
-
-2. Update `quest_signups.completed_at` and `completion_xp_awarded`:
-   ```typescript
-   await supabase
-     .from('quest_signups')
-     .update({ 
-       status: 'completed',
-       completed_at: new Date().toISOString(),
-       completion_xp_awarded: true,
-     })
-     .eq('instance_id', instanceId)
-     .in('status', ['confirmed', 'pending']);
-   ```
-
-3. Create notifications for all participants:
-   ```typescript
-   const notifications = members.map(m => ({
-     user_id: m.user_id,
-     type: 'quest_complete',
-     title: `Quest Complete: ${instanceTitle}`,
-     body: `You earned ${Math.floor(quest.base_xp * 0.5)} XP! Give feedback to earn up to ${feedbackMaxXP} more.`,
-   }));
-   await supabase.from('notifications').insert(notifications);
-   ```
-
-4. Trigger achievement checks:
-   ```typescript
-   for (const member of members) {
-     await supabase.rpc('check_and_unlock_achievements', { p_user_id: member.user_id });
-   }
-   ```
-
-### 2.2 Add Notification Type
-
-Add `'quest_complete'` to the notification types enum if not present (check DB types).
+Create an offline indicator:
+- Detect network status
+- Show toast/banner when offline
+- Queue actions for when back online (future enhancement)
 
 ---
 
-## Phase 3: User-Facing Quest Completion Celebration
+## File Changes
 
-### 3.1 New Component: `QuestCompleteModal.tsx`
+### New Files (4)
+| File | Purpose |
+|------|---------|
+| `public/pwa-192x192.png` | App icon (192x192) |
+| `public/pwa-512x512.png` | High-res icon (512x512) |
+| `public/apple-touch-icon-180x180.png` | iOS icon |
+| `src/pages/Install.tsx` | Install instructions page |
+| `src/components/pwa/InstallPrompt.tsx` | Install banner component |
+| `src/components/pwa/OfflineIndicator.tsx` | Offline status display |
+| `src/hooks/usePWAInstall.ts` | Install prompt logic |
 
-Location: `src/components/quests/QuestCompleteModal.tsx`
-
-**Trigger:** When user opens their quest detail (via profile) and quest just completed
-
-**Features:**
-- Confetti animation (or party emoji burst)
-- Show XP earned badge: "+{baseXP/2} XP Earned!"
-- "Keep Your Clique?" prompt (if eligible)
-- CTA buttons: "Give Feedback (+{xp} XP)" / "View Quest History"
-
-### 3.2 User Quest Card Enhancement
-
-**Modify:** `QuestsTab.tsx` completed quest display
-
-**Add:**
-- 🎉 "Completed!" badge with checkmark
-- "Give Feedback" button if feedback_request pending
-- "Feedback Submitted" if already done
-- XP earned indicator
+### Modified Files (4)
+| File | Changes |
+|------|---------|
+| `vite.config.ts` | Add VitePWA plugin configuration |
+| `index.html` | Add PWA meta tags and apple-touch-icon |
+| `src/App.tsx` | Add Install route and OfflineIndicator |
+| `package.json` | Add vite-plugin-pwa dependency |
 
 ---
 
-## Phase 4: "Keep Your Clique" Premium Feature
+## PWA Manifest Configuration
 
-### 4.1 New Component: `KeepCliqueModal.tsx`
-
-Location: `src/components/cliques/KeepCliqueModal.tsx`
-
-**Flow:**
-1. Show after quest completion (in QuestCompleteModal or FeedbackComplete)
-2. List clique members with checkboxes
-3. "Who would you quest with again?" multi-select
-4. Premium gate:
-   - If `hasPersonalPremium()` → proceed
-   - If not → show "This is a Premium Feature" upsell
-   - CTA: "Join Premium Pilot" opens `PremiumInterestModal`
-5. On confirm → insert `clique_save_request`
-
-### 4.2 Mutual Match Processing
-
-**New Edge Function or DB Trigger:** `process-clique-saves`
-
-**Logic:**
-1. After both users select each other:
-   ```sql
-   -- Find mutual selections for same instance + squad
-   SELECT a.requester_id, b.requester_id
-   FROM clique_save_requests a
-   JOIN clique_save_requests b 
-     ON a.instance_id = b.instance_id 
-     AND a.squad_id = b.squad_id
-     AND a.requester_id = ANY(b.selected_member_ids)
-     AND b.requester_id = ANY(a.selected_member_ids)
-   WHERE a.processed_at IS NULL;
-   ```
-2. Create persistent squad with mutual members
-3. Insert into `squad_members` with `persistent_squad_id`
-4. Notify matched members
-
-### 4.3 Premium Check Integration
-
-Use existing `useEntitlements` hook:
-```typescript
-const { hasPersonalPremium, shouldShowPremiumUpsell } = useEntitlements();
-
-if (!hasPersonalPremium()) {
-  return <PremiumUpsellCard feature="clique_persistence" />;
+```json
+{
+  "name": "OpenClique",
+  "short_name": "OpenClique",
+  "description": "You've got a squad waiting. Find your people, join adventures.",
+  "theme_color": "#7c3aed",
+  "background_color": "#0f0f0f",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/",
+  "icons": [
+    { "src": "pwa-192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "pwa-512x512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "pwa-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
 }
 ```
 
 ---
 
-## Phase 5: Feedback UX Improvements
+## Service Worker Strategy
 
-### 5.1 Add "No Thanks" Option to Testimonial Step
-
-**Modify:** `FeedbackStep4.tsx`
-
-**Current:** "Skip" and "Submit"
-**Change to:** 
-- "No Thanks, I'm Done" → marks complete without testimonial XP
-- "Submit Testimonial" → earns XP
-
-```tsx
-<div className="pt-4 flex gap-3">
-  <Button variant="ghost" onClick={onSkip} className="flex-1">
-    No Thanks, I'm Done
-  </Button>
-  <Button 
-    onClick={handleSubmit} 
-    disabled={!canSubmit || isSubmitting}
-    className="flex-1"
-  >
-    {isSubmitting ? 'Saving...' : hasTestimonialText ? `Submit (+${xpReward} XP)` : 'Skip Step'}
-  </Button>
-</div>
-```
-
-### 5.2 Add Exit Navigation
-
-**Modify:** `FeedbackFlow.tsx`
-
-**Add:** Exit button in header with confirmation dialog:
-```tsx
-<AlertDialog>
-  <AlertDialogTrigger asChild>
-    <Button variant="ghost" size="sm">
-      <X className="h-4 w-4" />
-    </Button>
-  </AlertDialogTrigger>
-  <AlertDialogContent>
-    <AlertDialogTitle>Leave Feedback?</AlertDialogTitle>
-    <AlertDialogDescription>
-      Your progress is saved. You can return anytime before the deadline.
-    </AlertDialogDescription>
-    <AlertDialogFooter>
-      <AlertDialogCancel>Stay</AlertDialogCancel>
-      <AlertDialogAction onClick={() => navigate('/profile?tab=quests')}>
-        Leave
-      </AlertDialogAction>
-    </AlertDialogFooter>
-  </AlertDialogContent>
-</AlertDialog>
-```
-
-### 5.3 Integrate "Keep Clique" After Feedback Complete
-
-**Modify:** `FeedbackComplete.tsx`
-
-**Add:** After XP summary, before suggested quests:
-```tsx
-{squadId && (
-  <KeepCliquePrompt 
-    squadId={squadId}
-    instanceId={instanceId}
-    onComplete={() => setShowKeepCliqueModal(false)}
-  />
-)}
-```
+| Resource Type | Strategy | Reason |
+|---------------|----------|--------|
+| Static assets (JS, CSS, images) | Cache-first | Fast loads, versioned by build |
+| HTML pages | Network-first | Always fresh content |
+| API calls (Supabase) | Network-only | Real-time data required |
+| Fonts | Cache-first | Rarely change |
 
 ---
 
-## Phase 6: Profile & History Updates
+## Install Flow UX
 
-### 6.1 Quest History Card Enhancement
+**Android/Chrome:**
+1. User visits site → Browser shows install banner
+2. Or: User taps menu → "Install App"
+3. App added to home screen
 
-**Modify:** `QuestsTab.tsx` - Completed quests section
-
-**Display for completed quests:**
-- ✅ Completion badge with date
-- XP earned indicator
-- Feedback status (Pending/Submitted)
-- "Keep Clique" status if applicable
-
-### 6.2 Notification Updates
-
-**Add notification icons/handling in:**
-- `NotificationBell.tsx` for `quest_complete` type
-- `Notifications.tsx` page
-
----
-
-## File Changes Summary
-
-### New Files (4)
-| File | Purpose |
-|------|---------|
-| `src/components/quests/QuestCompleteModal.tsx` | Celebration modal on quest completion |
-| `src/components/cliques/KeepCliqueModal.tsx` | Member selection for clique persistence |
-| `src/components/cliques/KeepCliquePrompt.tsx` | Inline prompt in FeedbackComplete |
-| `supabase/functions/process-clique-saves/index.ts` | Process mutual matches |
-
-### Modified Files (8)
-| File | Changes |
-|------|---------|
-| `EndQuestDialog.tsx` | Add XP award, signup updates, notifications |
-| `FeedbackStep4.tsx` | Add "No Thanks" button |
-| `FeedbackFlow.tsx` | Add exit button with confirmation |
-| `FeedbackComplete.tsx` | Integrate KeepCliquePrompt |
-| `QuestsTab.tsx` | Enhance completed quest display |
-| `NotificationBell.tsx` | Add quest_complete icon |
-| `Notifications.tsx` | Handle quest_complete type |
-| `useNotifications.ts` | Add type if needed |
-
-### Database Migrations (2)
-1. Create `clique_save_requests` table with RLS
-2. Add `completion_xp_awarded` column to `quest_signups`
-
----
-
-## Security & Risk Analysis
-
-### Security Measures
-
-| Concern | Mitigation |
-|---------|------------|
-| Clique save spam | UNIQUE constraint on (instance_id, requester_id); rate-limited to 1 per quest |
-| Premium bypass | Server-side check in edge function before creating persistent squad |
-| XP double-award | Check `completion_xp_awarded` flag before awarding |
-| Unauthorized clique joins | RLS policies ensure users can only submit own requests |
-| Fake member selection | Validate selected members were actually in same squad |
-
-### Rate Limits
-
-| Action | Limit |
-|--------|-------|
-| Clique save request | 1 per instance per user (DB constraint) |
-| Feedback submission | 1 per quest per user (existing) |
-| Premium interest | 1 per user (upsert on conflict) |
-
-### RLS Policies Summary
-
-```sql
--- clique_save_requests
-SELECT: requester_id = auth.uid()
-INSERT: requester_id = auth.uid()
-UPDATE: requester_id = auth.uid() AND processed_at IS NULL
-DELETE: (none - preserve for analytics)
-```
-
----
-
-## Risk Assessment
-
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| User confusion with premium gate | Medium | Low | Clear copy: "This feature requires Premium - currently free during pilot" |
-| Mutual match never happens | Medium | Low | Show "Waiting for matches" status; remind in 24h |
-| XP inflation from quest completion | Low | Medium | 50% base XP is reasonable; tracked in xp_transactions |
-| Edge function cold starts | Low | Low | Use scheduled cron for match processing |
-| Users abandon feedback for clique feature | Medium | Medium | Keep clique prompt AFTER feedback complete |
-
----
-
-## Improvements Over Current System
-
-1. **Complete XP flow**: Users get 50% XP just for completing + up to 250 XP for feedback = ~350-400 XP total per quest
-2. **Celebration moment**: Quest completion now has emotional payoff
-3. **Clique persistence**: Converts one-time groups into lasting connections (core OpenClique value)
-4. **Premium monetization path**: Natural upsell at moment of high engagement
-5. **Better feedback UX**: Clear exit, explicit "No" option, auto-save
-6. **Full audit trail**: All completions, XP awards, and clique saves tracked
-
----
-
-## Implementation Order
-
-1. **Database migrations** - Foundation
-2. **EndQuestDialog enhancements** - Core completion flow
-3. **Feedback UX improvements** - Quick wins
-4. **KeepCliqueModal + KeepCliquePrompt** - Premium feature
-5. **QuestCompleteModal** - Celebration UI
-6. **Profile/history updates** - Polish
-7. **Edge function for match processing** - Background automation
+**iOS Safari:**
+1. User visits `/install` page
+2. See step-by-step: "Tap Share → Add to Home Screen"
+3. Visual guide with screenshots
 
 ---
 
 ## Testing Checklist
 
-- [ ] Admin ends quest → participants receive XP + notification
-- [ ] Quest signup status updates to completed
-- [ ] Feedback flow: can exit mid-form and return
-- [ ] Testimonial step: "No Thanks" works without error
-- [ ] Non-premium user sees upsell when trying to save clique
-- [ ] Premium user can submit clique save request
-- [ ] Mutual matches create persistent squad
-- [ ] All data persists correctly in database
-- [ ] Achievement unlocks trigger on completion
+- [ ] PWA installs on Android Chrome
+- [ ] PWA installs on iOS Safari (manual steps)
+- [ ] App launches in standalone mode (no browser chrome)
+- [ ] Offline indicator shows when disconnected
+- [ ] Cached pages load when offline
+- [ ] Install prompt appears at appropriate moments
+- [ ] Icons display correctly on home screen
+
+---
+
+## Future Enhancements (Not in This PR)
+
+- **Push notifications** — Requires service worker + backend setup
+- **Background sync** — Queue offline actions
+- **App shortcuts** — Quick actions from long-press on icon
