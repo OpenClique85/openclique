@@ -177,6 +177,7 @@ export default function FeedbackFlow() {
     comfortScore: number;
     groupFit: string;
     reconnectIntent: string;
+    preferredCliqueMembers: string[];
   }) => {
     if (!feedbackId || !user) return;
     setIsSubmitting(true);
@@ -196,6 +197,14 @@ export default function FeedbackFlow() {
         });
 
       if (error) throw error;
+
+      // Update feedback with preferred clique members if any
+      if (data.preferredCliqueMembers.length > 0) {
+        await supabase
+          .from('feedback')
+          .update({ preferred_clique_members: data.preferredCliqueMembers })
+          .eq('id', feedbackId);
+      }
 
       // Award XP
       await awardXP.mutateAsync({
