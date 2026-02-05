@@ -1,13 +1,14 @@
 /**
  * Squad Warm-Up Room
  * 
- * User-facing component for squad warm-up phase.
- * Includes chat, prompt response, and readiness confirmation.
+ * User-facing component for squad chat and coordination.
+ * Persists through entire quest lifecycle - from warm-up through completion.
+ * Includes chat, objectives display, prompt response, and readiness confirmation.
  */
 
 import { useState, useRef, useEffect } from 'react';
 import { format } from 'date-fns';
-import { Send, Users, CheckCircle2, MessageCircle, Lock, Clock } from 'lucide-react';
+import { Send, Users, CheckCircle2, MessageCircle, Lock, Clock, Target, MapPin, Backpack, ShieldAlert, ChevronDown, ChevronUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -17,6 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useSquadWarmUp } from '@/hooks/useSquadWarmUp';
 import { SQUAD_STATUS_LABELS, shouldShowInstructions, SquadStatus } from '@/lib/squadLifecycle';
 import { MemberProfileSheet } from './MemberProfileSheet';
