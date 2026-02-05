@@ -525,6 +525,22 @@ export function CliqueManager({ instanceId, instanceTitle = 'Quest', targetCliqu
                       Start Warm-Up
                     </Button>
                   )}
+                  
+                  {/* Complete Clique Button */}
+                  {canComplete && (
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => setCompletingClique({ 
+                        id: clique.id, 
+                        name: clique.name, 
+                        memberCount: clique.members.length 
+                      })}
+                    >
+                      <CheckCircle2 className="h-4 w-4 mr-2" />
+                      Complete Clique
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             );
