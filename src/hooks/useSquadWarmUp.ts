@@ -28,6 +28,10 @@ interface ChatMessage {
   sender_type: 'user' | 'admin' | 'buggs' | 'system';
   created_at: string;
   sender_name?: string;
+  media_url?: string | null;
+  media_type?: string | null;
+  is_proof_submission?: boolean;
+  proof_status?: string | null;
 }
 
 interface WarmUpPrompt {
