@@ -159,34 +159,47 @@ export default function Admin() {
   };
 
   return (
-    <div className="min-h-dvh bg-background flex flex-col">
+    <div className="min-h-dvh bg-background flex flex-col overflow-x-hidden">
       <Navbar />
       
-      <main className="flex-1 container mx-auto px-4 py-8">
-        {/* Key Stats Dashboard */}
-        <PlatformStats />
-
-        <div className="mb-8">
-          <h1 className="text-3xl font-display font-bold text-foreground">Quest Ops Console</h1>
-          <p className="text-muted-foreground mt-1">Manage quests, partners, and gamification</p>
-        </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-8">
-          {/* Sidebar Navigation */}
-          <aside className="hidden lg:block">
-            <div className="sticky top-24">
-              <AdminSectionNav activeTab={activeTab} onTabChange={setActiveTab} />
-            </div>
-          </aside>
-
-          {/* Mobile Navigation */}
-          <div className="lg:hidden mb-4">
-            <AdminSectionNav activeTab={activeTab} onTabChange={setActiveTab} />
+      <main className="flex-1 w-full max-w-full overflow-x-hidden">
+        <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6">
+          {/* Key Stats Dashboard - Compact on mobile */}
+          <div className="mb-4">
+            <PlatformStats />
           </div>
 
-          {/* Content */}
-          <div className="min-w-0">
-            {renderContent()}
+          {/* Header - Smaller on mobile */}
+          <div className="mb-4 sm:mb-6">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-display font-bold text-foreground">Quest Ops Console</h1>
+            <p className="text-sm text-muted-foreground mt-1 hidden sm:block">Manage quests, partners, and gamification</p>
+          </div>
+          
+          <div className="flex flex-col lg:flex-row lg:gap-6">
+            {/* Sidebar Navigation - Desktop only */}
+            <aside className="hidden lg:block lg:w-56 xl:w-64 flex-shrink-0">
+              <div className="sticky top-20 max-h-[calc(100dvh-6rem)] overflow-y-auto pr-2">
+                <AdminSectionNav activeTab={activeTab} onTabChange={setActiveTab} />
+              </div>
+            </aside>
+
+            {/* Mobile Navigation - Collapsible drawer style */}
+            <div className="lg:hidden mb-4">
+              <details className="group">
+                <summary className="flex items-center justify-between p-3 bg-muted rounded-lg cursor-pointer list-none">
+                  <span className="font-medium text-sm">Navigation Menu</span>
+                  <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" />
+                </summary>
+                <div className="mt-2 max-h-[50vh] overflow-y-auto bg-card border rounded-lg p-2">
+                  <AdminSectionNav activeTab={activeTab} onTabChange={setActiveTab} />
+                </div>
+              </details>
+            </div>
+
+            {/* Content - Full width with overflow handling */}
+            <div className="flex-1 min-w-0 overflow-x-auto">
+              {renderContent()}
+            </div>
           </div>
         </div>
       </main>
