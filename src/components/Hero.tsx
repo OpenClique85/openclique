@@ -43,7 +43,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { HERO, SOCIAL_PROOF } from "@/constants/content";
-import logo from "@/assets/logo.png";
+import wordmark from "@/assets/openclique-wordmark.png";
 import concertCrowd from "@/assets/austin/concert-crowd.jpg";
 import { ChevronDown, Smartphone } from "lucide-react";
 import {
