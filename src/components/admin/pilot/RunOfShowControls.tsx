@@ -31,6 +31,7 @@ import { SQUAD_STATUS_LABELS, SQUAD_STATUS_STYLES, SquadStatus } from '@/lib/squ
 import { EndQuestDialog } from './EndQuestDialog';
 import { ProofGalleryPanel } from './ProofGalleryPanel';
 import { QuestObjectivesPanel } from './QuestObjectivesPanel';
+import { FeedbackExportPanel } from './FeedbackExportPanel';
 
 type QuestInstance = Tables<'quest_instances'>;
 
