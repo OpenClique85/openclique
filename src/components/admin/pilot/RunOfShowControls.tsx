@@ -442,6 +442,13 @@ export function RunOfShowControls({ instance }: RunOfShowControlsProps) {
             </CardContent>
           </Card>
 
+          {/* Feedback Export */}
+          <FeedbackExportPanel 
+            instanceId={instance.id}
+            questId={instance.quest_id}
+            title="Export Instance Data"
+          />
+
           {/* Recent Sends Log */}
           <RecentSendsLog instanceId={instance.id} />
         </div>
