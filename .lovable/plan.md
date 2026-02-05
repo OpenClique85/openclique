@@ -1,300 +1,411 @@
 
-# Revised Plan: In-Chat Photo Upload + Enhanced Feedback System
+# Quest Completion Flow Enhancement Plan
 
-## Summary
+## Overview
 
-This plan integrates **in-chat photo uploads** with admin approval, **enhanced feedback questions** (NPS, venue, clique member selection), and an **"End Quest" admin action** that triggers the feedback flow. Key improvements over the original proposal:
+This plan addresses the full lifecycle when an admin ends a quest: awarding XP, updating databases, celebrating completion, enabling optional clique persistence (premium feature), and improving the feedback UX.
 
-- **Streamlined feedback**: 12 core questions instead of 17 (reduces abandonment)
-- **Default photo approval**: Photos auto-approve unless flagged (reduces admin bottleneck)
-- **Auto-save drafts**: localStorage-based persistence for feedback forms
-- **Smart reminders**: Only send if feedback status is not 'completed'
+---
+
+## Current State Analysis
+
+**What's working:**
+- `EndQuestDialog.tsx` creates `feedback_requests` and sends chat notifications
+- `award_quest_xp()` RPC exists and handles XP + achievements + streaks
+- `useEntitlements` hook checks `personal_scope` for premium features
+- `premium_interest` table tracks pilot users
+
+**Gaps identified:**
+1. Admin "End Quest" doesn't award completion XP (50% base)
+2. No celebration UI when quest ends (user-facing)
+3. `quest_signups.completed_at` not set on End Quest
+4. No "Skip Testimonial" option (only "Skip" button exists but no explicit "No thanks")
+5. No "Keep Clique" prompt post-completion
+6. No navigation out of feedback flow mid-form
+7. Notifications not created when quest ends
+8. Quest history doesn't show completion state prominently
 
 ---
 
 ## Phase 1: Database Schema Updates
 
-### 1.1 Add Media Columns to `squad_chat_messages`
+### 1.1 New Table: `clique_save_requests`
+Tracks mutual selection for clique persistence.
 
 ```sql
-ALTER TABLE squad_chat_messages 
-ADD COLUMN IF NOT EXISTS media_url text,
-ADD COLUMN IF NOT EXISTS media_type text CHECK (media_type IN ('image', 'video')),
-ADD COLUMN IF NOT EXISTS is_proof_submission boolean DEFAULT false,
-ADD COLUMN IF NOT EXISTS proof_status text DEFAULT 'approved' CHECK (proof_status IN ('pending', 'approved', 'rejected'));
+CREATE TABLE clique_save_requests (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  instance_id uuid NOT NULL REFERENCES quest_instances(id),
+  squad_id uuid NOT NULL REFERENCES squads(id),
+  requester_id uuid NOT NULL REFERENCES profiles(id),
+  selected_member_ids uuid[] NOT NULL DEFAULT '{}',
+  wants_to_save boolean NOT NULL DEFAULT true,
+  premium_acknowledged boolean DEFAULT false,
+  created_at timestamptz DEFAULT now(),
+  processed_at timestamptz,
+  UNIQUE(instance_id, requester_id)
+);
 ```
 
-**Note**: Default `proof_status = 'approved'` reduces admin workload. Admins can reject if needed.
-
-### 1.2 Extend `feedback` Table for NPS & Venue Questions
+### 1.2 New Column: `quest_signups.completion_xp_awarded`
+Track whether base XP was awarded for completion.
 
 ```sql
-ALTER TABLE feedback
-ADD COLUMN IF NOT EXISTS nps_score integer CHECK (nps_score BETWEEN 0 AND 10),
-ADD COLUMN IF NOT EXISTS would_invite_friend boolean,
-ADD COLUMN IF NOT EXISTS venue_interest_rating integer CHECK (venue_interest_rating BETWEEN 1 AND 5),
-ADD COLUMN IF NOT EXISTS venue_revisit_intent text,
-ADD COLUMN IF NOT EXISTS sponsor_enhancement text,
-ADD COLUMN IF NOT EXISTS venue_improvement_notes text,
-ADD COLUMN IF NOT EXISTS preferred_clique_members uuid[];
+ALTER TABLE quest_signups
+ADD COLUMN IF NOT EXISTS completion_xp_awarded boolean DEFAULT false;
 ```
 
-### 1.3 Extend `feedback_requests` for Expiry & Reminders
+### 1.3 RLS Policies
 
 ```sql
-ALTER TABLE feedback_requests
-ADD COLUMN IF NOT EXISTS instance_id uuid REFERENCES quest_instances(id),
-ADD COLUMN IF NOT EXISTS expires_at timestamptz,
-ADD COLUMN IF NOT EXISTS reminder_sent_3d boolean DEFAULT false,
-ADD COLUMN IF NOT EXISTS reminder_sent_6d boolean DEFAULT false,
-ADD COLUMN IF NOT EXISTS started_at timestamptz,
-ADD COLUMN IF NOT EXISTS completion_time_seconds integer;
+-- clique_save_requests
+ALTER TABLE clique_save_requests ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own save requests"
+ON clique_save_requests FOR SELECT
+USING (requester_id = auth.uid());
+
+CREATE POLICY "Users can create own save requests"
+ON clique_save_requests FOR INSERT
+WITH CHECK (requester_id = auth.uid());
+
+CREATE POLICY "Users can update own save requests"
+ON clique_save_requests FOR UPDATE
+USING (requester_id = auth.uid());
+
+-- Rate limit: users can only create 1 request per instance
+-- Enforced by UNIQUE constraint
 ```
 
 ---
 
-## Phase 2: In-Chat Photo Upload (User Side)
+## Phase 2: End Quest Flow Enhancement
 
-### 2.1 New Component: `ChatMediaPicker.tsx`
+### 2.1 Modify `EndQuestDialog.tsx`
 
-Location: `src/components/squads/ChatMediaPicker.tsx`
+**Current behavior:**
+- Updates instance status
+- Creates feedback_requests
+- Sends chat message
 
-**Features**:
-- Camera capture button (mobile-optimized)
-- Gallery/file selection button
-- Image preview before send
-- Optional "Submit as Quest Proof" toggle
-- Client-side image compression (max 2MB)
-- Upload to existing `ugc-media` storage bucket
+**Add:**
+1. Award 50% base XP to each participant:
+   ```typescript
+   // For each member:
+   await supabase.rpc('award_xp', {
+     p_user_id: member.user_id,
+     p_amount: Math.floor(quest.base_xp * 0.5),
+     p_source: 'quest_complete',
+     p_source_id: instanceId,
+   });
+   ```
 
-**UI Flow**:
-1. User taps camera icon next to send button
-2. Selects photo from camera/gallery
-3. Preview appears with optional "Quest Proof" checkbox
-4. Sends message with attached image
+2. Update `quest_signups.completed_at` and `completion_xp_awarded`:
+   ```typescript
+   await supabase
+     .from('quest_signups')
+     .update({ 
+       status: 'completed',
+       completed_at: new Date().toISOString(),
+       completion_xp_awarded: true,
+     })
+     .eq('instance_id', instanceId)
+     .in('status', ['confirmed', 'pending']);
+   ```
 
-### 2.2 Modify `SquadWarmUpRoom.tsx`
+3. Create notifications for all participants:
+   ```typescript
+   const notifications = members.map(m => ({
+     user_id: m.user_id,
+     type: 'quest_complete',
+     title: `Quest Complete: ${instanceTitle}`,
+     body: `You earned ${Math.floor(quest.base_xp * 0.5)} XP! Give feedback to earn up to ${feedbackMaxXP} more.`,
+   }));
+   await supabase.from('notifications').insert(notifications);
+   ```
 
-**Changes**:
-- Import and render `ChatMediaPicker` next to chat input
-- Update `sendMessage` mutation to handle `media_url` and `is_proof_submission`
-- Render image messages with photo preview in chat bubbles
-- Photos marked as proof show a "Proof Submitted" badge
+4. Trigger achievement checks:
+   ```typescript
+   for (const member of members) {
+     await supabase.rpc('check_and_unlock_achievements', { p_user_id: member.user_id });
+   }
+   ```
 
-### 2.3 Modify `useSquadWarmUp.ts`
+### 2.2 Add Notification Type
 
-**Changes**:
-- Add `sendMessageWithMedia` mutation that accepts optional `mediaUrl`, `mediaType`, `isProof`
-- Handle storage upload within the hook or expect pre-uploaded URL
-
----
-
-## Phase 3: Admin Run of Show Enhancements
-
-### 3.1 Replace Quick Actions with Quest Objectives Panel
-
-Location: Modify `src/components/admin/pilot/RunOfShowControls.tsx`
-
-**Remove**: Current "Quick Actions" card (lines 419-451)
-
-**Add**: New `QuestObjectivesPanel` component
-
-**Features**:
-- Display objectives from `quest_instances.objectives` (parsed from newline-separated or JSON)
-- Show as checklist items for admin reference
-- Each objective displays completion status if trackable
-
-### 3.2 New Component: `ProofGalleryPanel.tsx`
-
-Location: `src/components/admin/pilot/ProofGalleryPanel.tsx`
-
-**Features**:
-- Grid of photos from `squad_chat_messages` where `is_proof_submission = true`
-- Filter by clique dropdown
-- Each photo shows: thumbnail, submitter name, timestamp, current status
-- Quick approve/reject buttons (updates `proof_status`)
-- Photos default to approved; admin can reject flagged content
-- Link to related objective if available
-
-### 3.3 New Component: `EndQuestDialog.tsx`
-
-Location: `src/components/admin/pilot/EndQuestDialog.tsx`
-
-**Trigger**: New "End Quest & Send Feedback" button in Run of Show
-
-**Flow**:
-1. Confirmation modal shows participant count
-2. On confirm:
-   - Update `quest_instances.status` to 'completed'
-   - Create `feedback_requests` for all active participants:
-     - Set `instance_id` and `quest_id`
-     - Set `expires_at` to 7 days from now
-     - Set `status` to 'pending'
-   - Send system chat message to all cliques: "Quest complete! Check your profile to give feedback and earn XP."
-3. Show success with response tracking card
-
-### 3.4 Feedback Response Tracker
-
-Add to Run of Show controls:
-
-**Display**:
-- "Feedback Response Rate: 18/23 (78%)" - live updated
-- Status breakdown: Completed / In Progress / Not Started
+Add `'quest_complete'` to the notification types enum if not present (check DB types).
 
 ---
 
-## Phase 4: Enhanced Feedback Form
+## Phase 3: User-Facing Quest Completion Celebration
 
-### 4.1 Streamlined 12-Question Flow
+### 3.1 New Component: `QuestCompleteModal.tsx`
 
-Keep existing 4-step structure but enhance with new questions:
+Location: `src/components/quests/QuestCompleteModal.tsx`
 
-**Step 1: Quick Pulse (Enhanced)**
-- Star rating 1-5 (existing)
-- "Would you do another quest like this?" (existing)
-- Feelings multi-select (existing)
-- **NEW**: NPS 0-10 slider: "How likely to join another OpenClique quest?"
-- **NEW**: "Would you invite a friend?" Yes/No
+**Trigger:** When user opens their quest detail (via profile) and quest just completed
 
-**Step 2: Quest & Group (Enhanced)**
-- What worked best/weakest (existing)
-- Length rating (existing)
-- Confusion notes (existing)
-- Comfort score (existing)
-- **NEW**: "Would you quest with this group again?" with options:
-  - "Yes, with everyone!"
-  - "Yes, with some members" → triggers member selector
-  - "Maybe, if quest is interesting"
-  - "Probably not"
-- **NEW**: `CliqueMemberSelector` - shows avatars of clique members only (from `squad_members` + `profiles`)
+**Features:**
+- Confetti animation (or party emoji burst)
+- Show XP earned badge: "+{baseXP/2} XP Earned!"
+- "Keep Your Clique?" prompt (if eligible)
+- CTA buttons: "Give Feedback (+{xp} XP)" / "View Quest History"
 
-**Step 2B: Venue & Sponsor (New Optional Step)**
-- Star rating: "How interested in [Venue Name]?"
-- "Visit again?" Yes/No/Already regular
-- If sponsor: "Did [Brand] enhance experience?" 4 options
-- Optional text: "What would improve venue/brand quest?"
+### 3.2 User Quest Card Enhancement
 
-**Step 3: Pricing (existing)**
-- Keep as-is
+**Modify:** `QuestsTab.tsx` completed quest display
 
-**Step 4: Testimonial (existing)**
-- Keep as-is
-
-### 4.2 New Component: `CliqueMemberSelector.tsx`
-
-Location: `src/components/feedback/CliqueMemberSelector.tsx`
-
-**Props**: `squadId`, `currentUserId`, `onSelect`
-
-**Features**:
-- Fetch clique members from `squad_members` for the user's squad
-- Display avatar + name for each member
-- Multi-select checkboxes
-- Store selected member IDs in `feedback.preferred_clique_members`
-
-### 4.3 Auto-Save Draft (localStorage)
-
-**Modify `FeedbackFlow.tsx`**:
-- Save form state to `localStorage` with key `feedback_draft_${questId}`
-- Restore on page load if draft exists
-- Clear draft on successful submission
-- Auto-save every 30 seconds
-
-### 4.4 XP Calculation Update
-
-| Source | XP |
-|--------|-----|
-| Step 1 (Quick Pulse + NPS) | 30 XP |
-| Step 2 (Quest/Group + Clique) | 50 XP |
-| Step 2B (Venue/Sponsor) | 20 XP |
-| Step 3 (Pricing) | 50 XP |
-| Step 4 (Testimonial) | 100 XP |
-
-**Total possible**: ~250 XP
-
-### 4.5 Progress Bar Enhancement
-
-**Modify `FeedbackProgress.tsx`**:
-- Show XP earned so far as animated counter
-- Display "Earn up to 250 XP" at start
+**Add:**
+- 🎉 "Completed!" badge with checkmark
+- "Give Feedback" button if feedback_request pending
+- "Feedback Submitted" if already done
+- XP earned indicator
 
 ---
 
-## Phase 5: User Access Points
+## Phase 4: "Keep Your Clique" Premium Feature
 
-### 5.1 Profile Hub - Pending Actions
+### 4.1 New Component: `KeepCliqueModal.tsx`
 
-**Modify profile page or create `PendingActionsSection.tsx`**:
-- Query `feedback_requests` where `user_id = current_user` AND `status != 'full_complete'` AND `expires_at > now()`
-- Display card with quest icon, name, XP reward, days remaining badge
-- Click navigates to `/feedback/${questId}`
+Location: `src/components/cliques/KeepCliqueModal.tsx`
 
-### 5.2 Quest History Enhancement
+**Flow:**
+1. Show after quest completion (in QuestCompleteModal or FeedbackComplete)
+2. List clique members with checkboxes
+3. "Who would you quest with again?" multi-select
+4. Premium gate:
+   - If `hasPersonalPremium()` → proceed
+   - If not → show "This is a Premium Feature" upsell
+   - CTA: "Join Premium Pilot" opens `PremiumInterestModal`
+5. On confirm → insert `clique_save_request`
 
-- Show "Give Feedback" button if feedback_request exists and not complete
-- Show "Feedback Submitted" after completion
+### 4.2 Mutual Match Processing
+
+**New Edge Function or DB Trigger:** `process-clique-saves`
+
+**Logic:**
+1. After both users select each other:
+   ```sql
+   -- Find mutual selections for same instance + squad
+   SELECT a.requester_id, b.requester_id
+   FROM clique_save_requests a
+   JOIN clique_save_requests b 
+     ON a.instance_id = b.instance_id 
+     AND a.squad_id = b.squad_id
+     AND a.requester_id = ANY(b.selected_member_ids)
+     AND b.requester_id = ANY(a.selected_member_ids)
+   WHERE a.processed_at IS NULL;
+   ```
+2. Create persistent squad with mutual members
+3. Insert into `squad_members` with `persistent_squad_id`
+4. Notify matched members
+
+### 4.3 Premium Check Integration
+
+Use existing `useEntitlements` hook:
+```typescript
+const { hasPersonalPremium, shouldShowPremiumUpsell } = useEntitlements();
+
+if (!hasPersonalPremium()) {
+  return <PremiumUpsellCard feature="clique_persistence" />;
+}
+```
+
+---
+
+## Phase 5: Feedback UX Improvements
+
+### 5.1 Add "No Thanks" Option to Testimonial Step
+
+**Modify:** `FeedbackStep4.tsx`
+
+**Current:** "Skip" and "Submit"
+**Change to:** 
+- "No Thanks, I'm Done" → marks complete without testimonial XP
+- "Submit Testimonial" → earns XP
+
+```tsx
+<div className="pt-4 flex gap-3">
+  <Button variant="ghost" onClick={onSkip} className="flex-1">
+    No Thanks, I'm Done
+  </Button>
+  <Button 
+    onClick={handleSubmit} 
+    disabled={!canSubmit || isSubmitting}
+    className="flex-1"
+  >
+    {isSubmitting ? 'Saving...' : hasTestimonialText ? `Submit (+${xpReward} XP)` : 'Skip Step'}
+  </Button>
+</div>
+```
+
+### 5.2 Add Exit Navigation
+
+**Modify:** `FeedbackFlow.tsx`
+
+**Add:** Exit button in header with confirmation dialog:
+```tsx
+<AlertDialog>
+  <AlertDialogTrigger asChild>
+    <Button variant="ghost" size="sm">
+      <X className="h-4 w-4" />
+    </Button>
+  </AlertDialogTrigger>
+  <AlertDialogContent>
+    <AlertDialogTitle>Leave Feedback?</AlertDialogTitle>
+    <AlertDialogDescription>
+      Your progress is saved. You can return anytime before the deadline.
+    </AlertDialogDescription>
+    <AlertDialogFooter>
+      <AlertDialogCancel>Stay</AlertDialogCancel>
+      <AlertDialogAction onClick={() => navigate('/profile?tab=quests')}>
+        Leave
+      </AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
+```
+
+### 5.3 Integrate "Keep Clique" After Feedback Complete
+
+**Modify:** `FeedbackComplete.tsx`
+
+**Add:** After XP summary, before suggested quests:
+```tsx
+{squadId && (
+  <KeepCliquePrompt 
+    squadId={squadId}
+    instanceId={instanceId}
+    onComplete={() => setShowKeepCliqueModal(false)}
+  />
+)}
+```
+
+---
+
+## Phase 6: Profile & History Updates
+
+### 6.1 Quest History Card Enhancement
+
+**Modify:** `QuestsTab.tsx` - Completed quests section
+
+**Display for completed quests:**
+- ✅ Completion badge with date
+- XP earned indicator
+- Feedback status (Pending/Submitted)
+- "Keep Clique" status if applicable
+
+### 6.2 Notification Updates
+
+**Add notification icons/handling in:**
+- `NotificationBell.tsx` for `quest_complete` type
+- `Notifications.tsx` page
 
 ---
 
 ## File Changes Summary
 
-### New Files (6)
+### New Files (4)
 | File | Purpose |
 |------|---------|
-| `src/components/squads/ChatMediaPicker.tsx` | In-chat photo upload UI |
-| `src/components/admin/pilot/QuestObjectivesPanel.tsx` | Quest objectives checklist for admin |
-| `src/components/admin/pilot/ProofGalleryPanel.tsx` | Photo proof review grid |
-| `src/components/admin/pilot/EndQuestDialog.tsx` | End quest confirmation + feedback trigger |
-| `src/components/feedback/CliqueMemberSelector.tsx` | Clique member multi-select |
-| `src/components/feedback/FeedbackStepVenue.tsx` | Venue/sponsor questions |
+| `src/components/quests/QuestCompleteModal.tsx` | Celebration modal on quest completion |
+| `src/components/cliques/KeepCliqueModal.tsx` | Member selection for clique persistence |
+| `src/components/cliques/KeepCliquePrompt.tsx` | Inline prompt in FeedbackComplete |
+| `supabase/functions/process-clique-saves/index.ts` | Process mutual matches |
 
-### Modified Files (7)
+### Modified Files (8)
 | File | Changes |
 |------|---------|
-| `src/components/squads/SquadWarmUpRoom.tsx` | Add ChatMediaPicker, render image messages |
-| `src/hooks/useSquadWarmUp.ts` | Add sendMessageWithMedia mutation |
-| `src/components/admin/pilot/RunOfShowControls.tsx` | Replace Quick Actions with Objectives + Proof Gallery + End Quest button |
-| `src/pages/FeedbackFlow.tsx` | Add NPS, venue step, auto-save, member selection |
-| `src/components/feedback/FeedbackStep1.tsx` | Add NPS slider and invite friend question |
-| `src/components/feedback/FeedbackStep2.tsx` | Add clique member selection |
-| `src/components/feedback/FeedbackProgress.tsx` | Show XP earned counter |
+| `EndQuestDialog.tsx` | Add XP award, signup updates, notifications |
+| `FeedbackStep4.tsx` | Add "No Thanks" button |
+| `FeedbackFlow.tsx` | Add exit button with confirmation |
+| `FeedbackComplete.tsx` | Integrate KeepCliquePrompt |
+| `QuestsTab.tsx` | Enhance completed quest display |
+| `NotificationBell.tsx` | Add quest_complete icon |
+| `Notifications.tsx` | Handle quest_complete type |
+| `useNotifications.ts` | Add type if needed |
 
-### Database Migrations (3)
-1. Add media columns to `squad_chat_messages`
-2. Add NPS/venue/member columns to `feedback`
-3. Add expiry/reminder columns to `feedback_requests`
+### Database Migrations (2)
+1. Create `clique_save_requests` table with RLS
+2. Add `completion_xp_awarded` column to `quest_signups`
+
+---
+
+## Security & Risk Analysis
+
+### Security Measures
+
+| Concern | Mitigation |
+|---------|------------|
+| Clique save spam | UNIQUE constraint on (instance_id, requester_id); rate-limited to 1 per quest |
+| Premium bypass | Server-side check in edge function before creating persistent squad |
+| XP double-award | Check `completion_xp_awarded` flag before awarding |
+| Unauthorized clique joins | RLS policies ensure users can only submit own requests |
+| Fake member selection | Validate selected members were actually in same squad |
+
+### Rate Limits
+
+| Action | Limit |
+|--------|-------|
+| Clique save request | 1 per instance per user (DB constraint) |
+| Feedback submission | 1 per quest per user (existing) |
+| Premium interest | 1 per user (upsert on conflict) |
+
+### RLS Policies Summary
+
+```sql
+-- clique_save_requests
+SELECT: requester_id = auth.uid()
+INSERT: requester_id = auth.uid()
+UPDATE: requester_id = auth.uid() AND processed_at IS NULL
+DELETE: (none - preserve for analytics)
+```
+
+---
+
+## Risk Assessment
+
+| Risk | Likelihood | Impact | Mitigation |
+|------|------------|--------|------------|
+| User confusion with premium gate | Medium | Low | Clear copy: "This feature requires Premium - currently free during pilot" |
+| Mutual match never happens | Medium | Low | Show "Waiting for matches" status; remind in 24h |
+| XP inflation from quest completion | Low | Medium | 50% base XP is reasonable; tracked in xp_transactions |
+| Edge function cold starts | Low | Low | Use scheduled cron for match processing |
+| Users abandon feedback for clique feature | Medium | Medium | Keep clique prompt AFTER feedback complete |
+
+---
+
+## Improvements Over Current System
+
+1. **Complete XP flow**: Users get 50% XP just for completing + up to 250 XP for feedback = ~350-400 XP total per quest
+2. **Celebration moment**: Quest completion now has emotional payoff
+3. **Clique persistence**: Converts one-time groups into lasting connections (core OpenClique value)
+4. **Premium monetization path**: Natural upsell at moment of high engagement
+5. **Better feedback UX**: Clear exit, explicit "No" option, auto-save
+6. **Full audit trail**: All completions, XP awards, and clique saves tracked
 
 ---
 
 ## Implementation Order
 
-1. **Database migrations** - Foundation for all features
-2. **ChatMediaPicker + SquadWarmUpRoom update** - User-facing photo upload
-3. **ProofGalleryPanel + QuestObjectivesPanel** - Admin can see photos and objectives
-4. **EndQuestDialog** - Admin can trigger feedback
-5. **Enhanced feedback steps** - NPS, venue, clique member selection
-6. **Auto-save + Progress bar** - UX polish
-7. **Pending Actions in profile** - User can find their feedback requests
+1. **Database migrations** - Foundation
+2. **EndQuestDialog enhancements** - Core completion flow
+3. **Feedback UX improvements** - Quick wins
+4. **KeepCliqueModal + KeepCliquePrompt** - Premium feature
+5. **QuestCompleteModal** - Celebration UI
+6. **Profile/history updates** - Polish
+7. **Edge function for match processing** - Background automation
 
 ---
 
-## Technical Notes
+## Testing Checklist
 
-### Storage
-- Reuse existing `ugc-media` bucket
-- Client-side compression before upload (max 2MB)
-- Store only URLs in database
-
-### Real-time
-- Admin proof gallery auto-refreshes via Supabase realtime on `squad_chat_messages`
-- Image messages appear instantly via existing chat subscription
-
-### Privacy
-- Clique member preferences stored in `feedback.preferred_clique_members` as UUID array
-- Used only for matching algorithms, not displayed publicly
-
-### Risk Mitigations Applied
-- Default photo approval reduces admin bottleneck
-- 12 questions instead of 17 reduces form abandonment
-- localStorage auto-save prevents data loss
-- Reminder logic checks status before sending
+- [ ] Admin ends quest → participants receive XP + notification
+- [ ] Quest signup status updates to completed
+- [ ] Feedback flow: can exit mid-form and return
+- [ ] Testimonial step: "No Thanks" works without error
+- [ ] Non-premium user sees upsell when trying to save clique
+- [ ] Premium user can submit clique save request
+- [ ] Mutual matches create persistent squad
+- [ ] All data persists correctly in database
+- [ ] Achievement unlocks trigger on completion
