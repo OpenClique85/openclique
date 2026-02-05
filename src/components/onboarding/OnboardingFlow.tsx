@@ -4,23 +4,19 @@
  * =============================================================================
  * Multi-step onboarding that includes:
  * 1. Age verification
- * 2. Terms & Privacy agreement
+ * 2. Terms & Privacy agreement (with scroll requirement)
  * 3. Safety guidelines (first-time)
  */
 
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { CheckCircle2, FileText, Shield, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { AgeVerification } from '@/components/safety/AgeVerification';
 import { SafetyGuidelines } from '@/components/safety/SafetyGuidelines';
-import { BRAND } from '@/constants/content';
-import { Link } from 'react-router-dom';
+import { TermsConsentStep } from './TermsConsentStep';
 
 interface OnboardingFlowProps {
   userId: string;

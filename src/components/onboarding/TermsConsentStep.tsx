@@ -144,7 +144,7 @@ export function TermsConsentStep({ onAccept, isSubmitting }: TermsConsentStepPro
               <span>Scroll to read all sections</span>
               <span className={cn(
                 'transition-colors',
-                hasScrolledToBottom ? 'text-emerald-600 font-medium' : ''
+                hasScrolledToBottom ? 'text-primary font-medium' : ''
               )}>
                 {hasScrolledToBottom ? (
                   <span className="flex items-center gap-1">
@@ -160,7 +160,7 @@ export function TermsConsentStep({ onAccept, isSubmitting }: TermsConsentStepPro
               value={scrollProgress} 
               className={cn(
                 'h-2 transition-colors',
-                hasScrolledToBottom ? '[&>div]:bg-emerald-500' : ''
+                hasScrolledToBottom ? '[&>div]:bg-primary' : ''
               )} 
             />
           </div>
