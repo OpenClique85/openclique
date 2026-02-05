@@ -53,7 +53,6 @@ import { FAQTeaser } from "@/components/help";
 import { CTASection } from "@/components/CTASection";
 import { Footer } from "@/components/Footer";
 import BuggsFloating from "@/components/BuggsFloating";
-import "@/styles/home-experiment.css";
 
 /**
  * Index Page Component
@@ -61,13 +60,10 @@ import "@/styles/home-experiment.css";
  * This is the main homepage component. It assembles all the marketing sections
  * in order. To change the order of sections, rearrange the components below.
  * To remove a section, simply delete or comment out the component.
- * 
- * EXPERIMENT: Using .home-experiment class to test "Austin Neon Nights" palette.
- * Remove the class to revert to original teal theme.
  */
 const Index = () => {
   return (
-    <div className="home-experiment min-h-dvh flex flex-col">
+    <div className="min-h-dvh flex flex-col">
       {/* ============ NAVIGATION ============ */}
       <Navbar />
       

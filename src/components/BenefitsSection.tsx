@@ -19,8 +19,8 @@ const benefitImages: Record<number, string> = {
 
 export function BenefitsSection() {
   return (
-    <section className="py-16 md:py-24 texture-overlay">
-      <div className="container mx-auto px-4 relative z-10">
+    <section className="py-16 md:py-24">
+      <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
             Built for Real Connection
@@ -37,12 +37,12 @@ export function BenefitsSection() {
             return (
               <div
                 key={benefit.title}
-                className="card-glow group relative bg-card rounded-xl overflow-hidden border border-border hover:border-primary/40 hover:-translate-y-2 transition-all duration-300 flex flex-col"
+                className="group relative bg-card rounded-xl overflow-hidden border border-border hover:border-primary/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 {/* Background image accent */}
                 <div 
-                  className="absolute inset-0 opacity-0 group-hover:opacity-15 transition-opacity duration-500"
+                  className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500"
                   style={{
                     backgroundImage: `url(${backgroundImage})`,
                     backgroundSize: 'cover',
@@ -51,7 +51,7 @@ export function BenefitsSection() {
                 />
                 
                 <div className="relative z-10 p-6 flex-grow">
-                  <div className="icon-gradient w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-all duration-300 shadow-md">
+                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
                     <Icon className="w-6 h-6 text-primary" />
                   </div>
                   <h3 className="font-display text-xl font-semibold text-foreground mb-2">

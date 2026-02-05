@@ -44,7 +44,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { HERO, SOCIAL_PROOF } from "@/constants/content";
 import logo from "@/assets/logo.png";
-import wordmark from "@/assets/logo-wordmark.png";
 import concertCrowd from "@/assets/austin/concert-crowd.jpg";
 import { ChevronDown, Smartphone } from "lucide-react";
 import {
@@ -56,41 +55,41 @@ import {
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden texture-overlay">
+    <section className="relative overflow-hidden">
       {/* ------------------------------------------------------------------ */}
       {/* BACKGROUND: Concert image with low opacity */}
       {/* ------------------------------------------------------------------ */}
       <div 
-        className="absolute inset-0 opacity-15 -z-10"
+        className="absolute inset-0 opacity-20 -z-10"
         style={{
           backgroundImage: `url(${concertCrowd})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center top',
         }}
       />
-      {/* Gradient overlay: dynamic coral-to-magenta diagonal */}
-      <div className="absolute inset-0 gradient-hero -z-10" />
+      {/* Gradient overlay: blends background into brand colors */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background/95 to-accent/10 -z-10" />
       
       {/* ------------------------------------------------------------------ */}
       {/* MAIN CONTENT CONTAINER */}
       {/* ------------------------------------------------------------------ */}
-      <div className="container mx-auto px-4 py-16 md:py-24 lg:py-32 relative z-10">
+      <div className="container mx-auto px-4 py-16 md:py-24 lg:py-32">
         <div className="max-w-3xl mx-auto text-center">
           
           {/* -------------------------------------------------------------- */}
-          {/* TAGLINE BADGE - Now solid coral */}
+          {/* TAGLINE BADGE */}
           {/* -------------------------------------------------------------- */}
           <div className="flex justify-center mb-6 animate-fade-in">
-            <Badge className="badge-solid px-4 py-1.5 text-sm font-medium shadow-lg">
+            <Badge variant="outline" className="px-4 py-1.5 text-sm font-medium border-primary/30 bg-primary/5 text-primary">
               {HERO.tagline}
             </Badge>
           </div>
 
           {/* -------------------------------------------------------------- */}
-          {/* WORDMARK LOGO */}
+          {/* LOGO */}
           {/* -------------------------------------------------------------- */}
           <div className="flex justify-center mb-8 animate-fade-in [animation-delay:50ms]">
-            <img src={wordmark} alt="OpenClique" className="h-14 md:h-18 lg:h-20 hover:scale-105 transition-transform duration-300 drop-shadow-lg" />
+            <img src={logo} alt="OpenClique" className="h-16 md:h-20 hover:scale-105 transition-transform duration-300" />
           </div>
 
           {/* -------------------------------------------------------------- */}
@@ -119,8 +118,8 @@ export function Hero() {
           {/* -------------------------------------------------------------- */}
           {/* PRIMARY CTAs: Join Now + Download App side by side */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in [animation-delay:350ms]">
-            {/* Primary CTA - Main conversion goal with neon glow */}
-            <Button size="lg" asChild className="btn-glow w-full sm:w-auto text-base px-10 py-6 text-lg font-semibold hover:scale-[1.02] transition-all duration-200">
+            {/* Primary CTA - Main conversion goal */}
+            <Button size="lg" asChild className="w-full sm:w-auto text-base px-10 py-6 text-lg font-semibold hover:scale-[1.02] transition-transform duration-200">
               <Link to="/auth?signup=true">{HERO.primaryCta}</Link>
             </Button>
             
@@ -129,7 +128,7 @@ export function Hero() {
               variant="outline" 
               size="lg" 
               asChild 
-              className="w-full sm:w-auto text-base px-6 gap-2 hover:scale-[1.02] transition-all duration-200 hover:border-primary/50"
+              className="w-full sm:w-auto text-base px-6 gap-2 hover:scale-[1.02] transition-transform duration-200"
             >
               <Link to="/install">
                 <Smartphone className="h-4 w-4" />
