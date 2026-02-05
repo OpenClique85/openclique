@@ -78,19 +78,11 @@ export function CompleteCliqueDialog({
       const xpAward = Math.floor((questData.base_xp || 100) * 0.5);
       
       for (const userId of memberUserIds) {
-        // Add XP transaction
-        await supabase.from('xp_transactions').insert({
-          user_id: userId,
-          amount: xpAward,
-          source_type: 'quest_completion',
-          source_id: squadData.quest_id,
-          description: `Completed quest: ${questData.title} (with ${cliqueName})`,
-        });
-
-        // Update user profile XP total
-        await supabase.rpc('increment_user_xp', { 
-          target_user_id: userId, 
-          xp_amount: xpAward 
+        // Add XP transaction using the award_quest_xp function
+        await supabase.rpc('award_quest_xp', { 
+          p_user_id: userId, 
+          p_quest_id: squadData.quest_id,
+          p_xp_amount: xpAward,
         });
       }
 
