@@ -43,6 +43,8 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { TutorialProvider, TutorialOverlay, TutorialPrompt } from "./components/tutorial";
 import { MobileActionBar } from "./components/MobileActionBar";
 import { FloatingHelpButton } from "./components/support/FloatingHelpButton";
+import { InstallPrompt } from "./components/pwa/InstallPrompt";
+import { OfflineIndicator } from "./components/pwa/OfflineIndicator";
 
 // -----------------------------------------------------------------------------
 // LOADING FALLBACK: Displayed while lazy components load
@@ -145,6 +147,9 @@ const SponsorProfile = lazy(() => import("./pages/SponsorProfile"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 
+// PWA
+const Install = lazy(() => import("./pages/Install"));
+
 // -----------------------------------------------------------------------------
 // SETUP: Initialize data fetching client with optimized defaults
 // -----------------------------------------------------------------------------
@@ -178,6 +183,9 @@ const App = () => (
             <MobileActionBar />
             {/* Floating help button */}
             <FloatingHelpButton />
+            {/* PWA components */}
+            <OfflineIndicator />
+            <InstallPrompt />
             
             <Suspense fallback={<PageLoader />}>
               <Routes>
@@ -263,6 +271,9 @@ const App = () => (
                 {/* LEGAL PAGES */}
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/terms" element={<Terms />} />
+                
+                {/* PWA */}
+                <Route path="/install" element={<Install />} />
                 
                 {/* 404 */}
                 <Route path="*" element={<NotFound />} />
