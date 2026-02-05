@@ -69,7 +69,6 @@ const About = lazy(() => import("./pages/About"));
 const Quests = lazy(() => import("./pages/Quests"));
 const QuestDetail = lazy(() => import("./pages/QuestDetail"));
 const QuestCard = lazy(() => import("./pages/QuestCard"));
-const Pricing = lazy(() => import("./pages/Pricing"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Auth pages
