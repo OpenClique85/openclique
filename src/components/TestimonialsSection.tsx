@@ -146,7 +146,7 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
     <div 
       className={cn(
         "flex-shrink-0 w-[300px] md:w-[340px] h-[280px] bg-card rounded-2xl p-6 border border-border shadow-sm",
-        "transition-all duration-300 hover:shadow-md hover:border-primary/20",
+        "transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-primary/30",
         "flex flex-col",
         isExpandable && "cursor-pointer"
       )}
