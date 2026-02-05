@@ -9,18 +9,35 @@ import { Target, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface QuestObjectivesPanelProps {
-  objectives: string | null;
+  objectives: unknown;
   className?: string;
 }
 
 export function QuestObjectivesPanel({ objectives, className }: QuestObjectivesPanelProps) {
   if (!objectives) return null;
 
-  const objectivesList = objectives
-    .split('\n')
-    .map(o => o.trim())
-    .filter(Boolean)
-    .map(o => o.replace(/^[-•]\s*/, ''));
+  // Handle different objective formats: string, string[], or JSON object
+  let objectivesList: string[] = [];
+  
+  if (typeof objectives === 'string') {
+    objectivesList = objectives
+      .split('\n')
+      .map(o => o.trim())
+      .filter(Boolean)
+      .map(o => o.replace(/^[-•]\s*/, ''));
+  } else if (Array.isArray(objectives)) {
+    objectivesList = objectives
+      .map(o => (typeof o === 'string' ? o : JSON.stringify(o)))
+      .filter(Boolean);
+  } else if (typeof objectives === 'object' && objectives !== null) {
+    // If it's an object with an objectives array or similar structure
+    const obj = objectives as Record<string, unknown>;
+    if (Array.isArray(obj.items)) {
+      objectivesList = obj.items.map((o: unknown) => (typeof o === 'string' ? o : JSON.stringify(o)));
+    } else if (Array.isArray(obj.objectives)) {
+      objectivesList = obj.objectives.map((o: unknown) => (typeof o === 'string' ? o : JSON.stringify(o)));
+    }
+  }
 
   if (objectivesList.length === 0) return null;
 
