@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { FeedbackMediaUpload } from './FeedbackMediaUpload';
+import { KeepCliquePrompt } from '@/components/cliques';
 
 interface XPBreakdown {
   source: string;
@@ -29,9 +30,11 @@ interface FeedbackCompleteProps {
   xpBreakdown: XPBreakdown[];
   questTitle: string;
   questId?: string;
+  squadId?: string | null;
+  instanceId?: string | null;
 }
 
-export function FeedbackComplete({ totalXPEarned, xpBreakdown, questTitle, questId }: FeedbackCompleteProps) {
+export function FeedbackComplete({ totalXPEarned, xpBreakdown, questTitle, questId, squadId, instanceId }: FeedbackCompleteProps) {
   const { user } = useAuth();
   const [suggestedQuests, setSuggestedQuests] = useState<SuggestedQuest[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
