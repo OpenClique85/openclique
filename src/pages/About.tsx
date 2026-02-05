@@ -222,7 +222,7 @@ export default function About() {
                 {ABOUT.traction.map((item) => (
                   <div
                     key={item.image}
-                    className="bg-card rounded-xl overflow-hidden border border-border hover:shadow-lg transition-all hover:-translate-y-1"
+                    className="bg-card rounded-xl overflow-hidden border border-border hover:shadow-xl hover:-translate-y-2 transition-all duration-300"
                   >
                     <div className="aspect-video overflow-hidden">
                       <img
