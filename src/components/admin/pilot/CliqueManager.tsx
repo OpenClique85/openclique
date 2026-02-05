@@ -17,12 +17,14 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Users, Wand2, Lock, 
   Loader2, AlertCircle,
-  Megaphone, ArrowLeftRight, Unlock, Plus, User, Play, ThermometerSun
+  Megaphone, ArrowLeftRight, Unlock, Plus, User, Play, ThermometerSun,
+  CheckCircle2
 } from 'lucide-react';
 import { auditLog } from '@/lib/auditLog';
 import { InstanceBroadcastModal } from './InstanceBroadcastModal';
 import { CliqueBuilder } from './CliqueBuilder';
 import { CliqueSwapModal } from './CliqueSwapModal';
+import { CompleteCliqueDialog } from './CompleteCliqueDialog';
 import { SQUAD_STATUS_LABELS, SQUAD_STATUS_STYLES, SquadStatus } from '@/lib/squadLifecycle';
 
 interface CliqueWithMembers {
@@ -55,6 +57,7 @@ export function CliqueManager({ instanceId, instanceTitle = 'Quest', targetCliqu
   const [isSwapOpen, setIsSwapOpen] = useState(false);
   const [isLockingAll, setIsLockingAll] = useState(false);
   const [startingWarmUpId, setStartingWarmUpId] = useState<string | null>(null);
+  const [completingClique, setCompletingClique] = useState<{ id: string; name: string; memberCount: number } | null>(null);
 
   // Fetch cliques with members (using instance_id)
   const { data: cliques, isLoading } = useQuery({
@@ -419,7 +422,10 @@ export function CliqueManager({ instanceId, instanceTitle = 'Quest', targetCliqu
           {cliques.map((clique) => {
             const isLocked = !!clique.locked_at;
             const isWarmingUp = ['warming_up', 'ready_for_review', 'approved'].includes(clique.status);
-            const canStartWarmUp = isLocked && !isWarmingUp && clique.members.length > 0;
+            const isActive = clique.status === 'active' || clique.status === 'approved';
+            const isCompleted = clique.status === 'completed';
+            const canStartWarmUp = isLocked && !isWarmingUp && !isCompleted && clique.members.length > 0;
+            const canComplete = isActive && clique.members.length > 0;
             const statusStyles = SQUAD_STATUS_STYLES[clique.status] || SQUAD_STATUS_STYLES.confirmed;
             
             return (
@@ -519,6 +525,22 @@ export function CliqueManager({ instanceId, instanceTitle = 'Quest', targetCliqu
                       Start Warm-Up
                     </Button>
                   )}
+                  
+                  {/* Complete Clique Button */}
+                  {canComplete && (
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => setCompletingClique({ 
+                        id: clique.id, 
+                        name: clique.name, 
+                        memberCount: clique.members.length 
+                      })}
+                    >
+                      <CheckCircle2 className="h-4 w-4 mr-2" />
+                      Complete Clique
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             );
@@ -572,6 +594,18 @@ export function CliqueManager({ instanceId, instanceTitle = 'Quest', targetCliqu
         instanceId={instanceId}
         instanceTitle={instanceTitle}
       />
+
+      {/* Complete Clique Dialog */}
+      {completingClique && (
+        <CompleteCliqueDialog
+          open={!!completingClique}
+          onOpenChange={(open) => !open && setCompletingClique(null)}
+          cliqueId={completingClique.id}
+          cliqueName={completingClique.name}
+          memberCount={completingClique.memberCount}
+          instanceId={instanceId}
+        />
+      )}
     </div>
   );
 }

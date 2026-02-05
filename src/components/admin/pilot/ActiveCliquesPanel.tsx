@@ -1,7 +1,8 @@
 /**
  * Active Cliques Panel
  * 
- * Shows approved cliques in Run of Show with ability to monitor their chats.
+ * Shows approved cliques in Run of Show with ability to monitor their chats
+ * and complete individual cliques.
  */
 
 import { useState } from 'react';
@@ -23,6 +24,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { SquadChatViewer } from '@/components/admin/SquadChatViewer';
+import { CompleteCliqueDialog } from './CompleteCliqueDialog';
 import { SQUAD_STATUS_LABELS, SQUAD_STATUS_STYLES, SquadStatus } from '@/lib/squadLifecycle';
 
 interface ActiveCliquesPanelProps {
@@ -39,6 +41,7 @@ interface ActiveClique {
 
 export function ActiveCliquesPanel({ instanceId }: ActiveCliquesPanelProps) {
   const [selectedClique, setSelectedClique] = useState<{ id: string; name: string } | null>(null);
+  const [completingClique, setCompletingClique] = useState<{ id: string; name: string; memberCount: number } | null>(null);
 
   // Fetch approved/active cliques
   const { data: cliques, isLoading } = useQuery({
@@ -138,6 +141,8 @@ export function ActiveCliquesPanel({ instanceId }: ActiveCliquesPanelProps) {
             <div className="space-y-3">
               {cliques.map((clique) => {
                 const statusStyles = SQUAD_STATUS_STYLES[clique.status] || SQUAD_STATUS_STYLES.approved;
+                const canComplete = ['active', 'approved'].includes(clique.status) && clique.memberCount > 0;
+                const isCompleted = clique.status === 'completed';
                 
                 return (
                   <div
@@ -175,14 +180,32 @@ export function ActiveCliquesPanel({ instanceId }: ActiveCliquesPanelProps) {
                       </div>
                     </div>
                     
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSelectedClique({ id: clique.id, name: clique.squad_name })}
-                    >
-                      <Eye className="h-4 w-4 mr-1" />
-                      View Chat
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      {/* Complete Button - only for active/approved cliques */}
+                      {canComplete && (
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={() => setCompletingClique({ 
+                            id: clique.id, 
+                            name: clique.squad_name, 
+                            memberCount: clique.memberCount 
+                          })}
+                        >
+                          <CheckCircle2 className="h-4 w-4 mr-1" />
+                          Complete
+                        </Button>
+                      )}
+                      
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelectedClique({ id: clique.id, name: clique.squad_name })}
+                      >
+                        <Eye className="h-4 w-4 mr-1" />
+                        View Chat
+                      </Button>
+                    </div>
                   </div>
                 );
               })}
@@ -214,6 +237,18 @@ export function ActiveCliquesPanel({ instanceId }: ActiveCliquesPanelProps) {
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Complete Clique Dialog */}
+      {completingClique && (
+        <CompleteCliqueDialog
+          open={!!completingClique}
+          onOpenChange={(open) => !open && setCompletingClique(null)}
+          cliqueId={completingClique.id}
+          cliqueName={completingClique.name}
+          memberCount={completingClique.memberCount}
+          instanceId={instanceId}
+        />
+      )}
     </>
   );
 }

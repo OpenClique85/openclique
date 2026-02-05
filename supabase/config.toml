@@ -107,3 +107,6 @@ verify_jwt = false
 
 [functions.process-clique-saves]
 verify_jwt = false
+
+[functions.auto-close-past-quests]
+verify_jwt = false
