@@ -473,8 +473,10 @@ export default function FeedbackFlow() {
                 />
               )}
 
-              {currentStep === 2 && (
+              {currentStep === 2 && questId && user && (
                 <FeedbackStep2
+                  questId={questId}
+                  currentUserId={user.id}
                   onSubmit={handleStep2Submit}
                   onSkip={handleSkipStep}
                   isSubmitting={isSubmitting}
