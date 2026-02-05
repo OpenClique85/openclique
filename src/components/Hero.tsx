@@ -45,7 +45,7 @@ import { Badge } from "@/components/ui/badge";
 import { HERO, SOCIAL_PROOF } from "@/constants/content";
 import logo from "@/assets/logo.png";
 import concertCrowd from "@/assets/austin/concert-crowd.jpg";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Smartphone } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -158,9 +158,26 @@ export function Hero() {
           </div>
 
           {/* -------------------------------------------------------------- */}
+          {/* DOWNLOAD APP BUTTON */}
+          {/* -------------------------------------------------------------- */}
+          <div className="mt-8 animate-fade-in [animation-delay:450ms]">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              asChild 
+              className="gap-2 text-muted-foreground hover:text-foreground"
+            >
+              <Link to="/install">
+                <Smartphone className="h-4 w-4" />
+                Download the App
+              </Link>
+            </Button>
+          </div>
+
+          {/* -------------------------------------------------------------- */}
           {/* SOCIAL PROOF: Builds trust and encourages exploration */}
           {/* -------------------------------------------------------------- */}
-          <div className="mt-8 animate-fade-in [animation-delay:450ms] flex flex-col items-center gap-2">
+          <div className="mt-4 animate-fade-in [animation-delay:550ms] flex flex-col items-center gap-2">
             {/* Status message (e.g., "Now accepting Austin pilot members") */}
             <p className="text-sm text-muted-foreground">
               {SOCIAL_PROOF.message}
