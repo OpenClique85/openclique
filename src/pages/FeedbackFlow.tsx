@@ -110,6 +110,8 @@ export default function FeedbackFlow() {
     rating: number;
     repeatIntent: string;
     feelings: string[];
+    npsScore: number;
+    wouldInviteFriend: boolean | null;
   }) => {
     if (!questId || !user) return;
     setIsSubmitting(true);
@@ -124,6 +126,8 @@ export default function FeedbackFlow() {
           rating_1_5: data.rating,
           would_do_again: data.repeatIntent === 'yes' ? true : data.repeatIntent === 'no' ? false : null,
           feelings: data.feelings,
+          nps_score: data.npsScore,
+          would_invite_friend: data.wouldInviteFriend,
         })
         .select('id')
         .single();
