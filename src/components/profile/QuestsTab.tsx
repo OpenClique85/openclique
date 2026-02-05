@@ -14,6 +14,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { ContinueYourJourney } from '@/components/progression/ContinueYourJourney';
+import { PendingFeedbackSection } from './PendingFeedbackSection';
 import { RewardClaimCard, RewardClaimModal } from '@/components/rewards';
 import { ActiveQuestCard } from './ActiveQuestCard';
 import { MobileCollapsibleSection } from './MobileCollapsibleSection';
