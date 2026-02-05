@@ -119,7 +119,7 @@ export function Hero() {
           {/* PRIMARY CTAs: Join Now + Download App side by side */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in [animation-delay:350ms]">
             {/* Primary CTA - Main conversion goal */}
-            <Button size="lg" asChild className="w-full sm:w-auto text-base px-10 py-6 text-lg font-semibold">
+            <Button size="lg" asChild className="w-full sm:w-auto text-base px-10 py-6 text-lg font-semibold hover:scale-[1.02] transition-transform duration-200">
               <Link to="/auth?signup=true">{HERO.primaryCta}</Link>
             </Button>
             
