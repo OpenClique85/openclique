@@ -1,7 +1,8 @@
 /**
  * Active Cliques Panel
  * 
- * Shows approved cliques in Run of Show with ability to monitor their chats.
+ * Shows approved cliques in Run of Show with ability to monitor their chats
+ * and complete individual cliques.
  */
 
 import { useState } from 'react';
@@ -23,6 +24,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { SquadChatViewer } from '@/components/admin/SquadChatViewer';
+import { CompleteCliqueDialog } from './CompleteCliqueDialog';
 import { SQUAD_STATUS_LABELS, SQUAD_STATUS_STYLES, SquadStatus } from '@/lib/squadLifecycle';
 
 interface ActiveCliquesPanelProps {
