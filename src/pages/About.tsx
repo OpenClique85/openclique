@@ -146,7 +146,7 @@ export default function About() {
                 {ABOUT.team.map((member) => (
                   <div
                     key={member.name}
-                    className="bg-card rounded-xl p-6 border border-border text-center hover:shadow-lg transition-shadow"
+                    className="bg-card rounded-xl p-6 border border-border text-center hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
                   >
                     <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-4 border-primary/20">
                       <img
