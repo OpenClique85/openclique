@@ -45,7 +45,7 @@ import { Badge } from "@/components/ui/badge";
 import { HERO, SOCIAL_PROOF } from "@/constants/content";
 import logo from "@/assets/logo.png";
 import concertCrowd from "@/assets/austin/concert-crowd.jpg";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Smartphone } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
