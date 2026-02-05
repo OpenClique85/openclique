@@ -8,7 +8,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { format } from 'date-fns';
-import { Send, Users, CheckCircle2, MessageCircle, Lock, Clock, Target, MapPin, Backpack, ShieldAlert, ChevronDown, ChevronUp } from 'lucide-react';
+import { Send, Users, CheckCircle2, MessageCircle, Lock, Clock, Target, MapPin, Backpack, ShieldAlert, ChevronDown, ChevronUp, Image as ImageIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -22,6 +22,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { useSquadWarmUp } from '@/hooks/useSquadWarmUp';
 import { SQUAD_STATUS_LABELS, shouldShowInstructions, SquadStatus } from '@/lib/squadLifecycle';
 import { MemberProfileSheet } from './MemberProfileSheet';
+import { ChatMediaPicker } from './ChatMediaPicker';
 
 interface SquadWarmUpRoomProps {
   squadId: string;
