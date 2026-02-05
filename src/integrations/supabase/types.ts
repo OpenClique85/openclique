@@ -972,6 +972,78 @@ export type Database = {
           },
         ]
       }
+      clique_save_requests: {
+        Row: {
+          created_at: string | null
+          id: string
+          instance_id: string
+          premium_acknowledged: boolean | null
+          processed_at: string | null
+          requester_id: string
+          selected_member_ids: string[]
+          squad_id: string
+          wants_to_save: boolean
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          instance_id: string
+          premium_acknowledged?: boolean | null
+          processed_at?: string | null
+          requester_id: string
+          selected_member_ids?: string[]
+          squad_id: string
+          wants_to_save?: boolean
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          instance_id?: string
+          premium_acknowledged?: boolean | null
+          processed_at?: string | null
+          requester_id?: string
+          selected_member_ids?: string[]
+          squad_id?: string
+          wants_to_save?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clique_save_requests_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "quest_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clique_save_requests_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "quest_instances_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clique_save_requests_requester_id_fkey"
+            columns: ["requester_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clique_save_requests_requester_id_fkey"
+            columns: ["requester_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clique_save_requests_squad_id_fkey"
+            columns: ["squad_id"]
+            isOneToOne: false
+            referencedRelation: "squads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       collaboration_messages: {
         Row: {
           attachments: Json | null
@@ -4394,6 +4466,7 @@ export type Database = {
           check_in_verified: boolean | null
           checked_in_at: string | null
           completed_at: string | null
+          completion_xp_awarded: boolean | null
           id: string
           instance_id: string | null
           last_activity_at: string | null
@@ -4419,6 +4492,7 @@ export type Database = {
           check_in_verified?: boolean | null
           checked_in_at?: string | null
           completed_at?: string | null
+          completion_xp_awarded?: boolean | null
           id?: string
           instance_id?: string | null
           last_activity_at?: string | null
@@ -4444,6 +4518,7 @@ export type Database = {
           check_in_verified?: boolean | null
           checked_in_at?: string | null
           completed_at?: string | null
+          completion_xp_awarded?: boolean | null
           id?: string
           instance_id?: string | null
           last_activity_at?: string | null
