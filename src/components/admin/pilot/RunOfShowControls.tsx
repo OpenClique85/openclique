@@ -421,7 +421,7 @@ export function RunOfShowControls({ instance }: RunOfShowControlsProps) {
         {/* Objectives + Actions Column */}
         <div className="space-y-6">
           {/* Quest Objectives */}
-          <QuestObjectivesPanel objectives={instance.objectives as string | null} />
+          <QuestObjectivesPanel objectives={instance.objectives} />
           
           {/* End Quest Action */}
           <Card>
