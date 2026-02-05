@@ -3,3 +3,4 @@
  */
 
 export { OnboardingFlow } from './OnboardingFlow';
+export { TermsConsentStep } from './TermsConsentStep';
