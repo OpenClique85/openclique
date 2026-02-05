@@ -158,8 +158,17 @@ export function TutorialProvider({ children }: TutorialProviderProps) {
   const [shouldShowTutorial, setShouldShowTutorial] = useState(false);
   const [completedActions, setCompletedActions] = useState<Set<TutorialAction>>(new Set());
 
+  // TUTORIAL DISABLED: Set to true to re-enable when ready
+  const TUTORIAL_ENABLED = false;
+
   // Check if user should see tutorial (new user, hasn't completed)
   useEffect(() => {
+    // Tutorial is currently disabled
+    if (!TUTORIAL_ENABLED) {
+      setShouldShowTutorial(false);
+      return;
+    }
+    
     if (profile && !profile.tutorial_completed_at) {
       setShouldShowTutorial(true);
       
