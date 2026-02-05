@@ -128,7 +128,7 @@ export function Hero() {
               variant="outline" 
               size="lg" 
               asChild 
-              className="w-full sm:w-auto text-base px-6 gap-2"
+              className="w-full sm:w-auto text-base px-6 gap-2 hover:scale-[1.02] transition-transform duration-200"
             >
               <Link to="/install">
                 <Smartphone className="h-4 w-4" />
