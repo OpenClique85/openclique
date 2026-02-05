@@ -5,3 +5,5 @@ export { FeedbackStep3 } from './FeedbackStep3';
 export { FeedbackStep4 } from './FeedbackStep4';
 export { FeedbackComplete } from './FeedbackComplete';
 export { FeedbackMediaUpload } from './FeedbackMediaUpload';
+export { FeedbackStepVenue } from './FeedbackStepVenue';
+export { CliqueMemberSelector } from './CliqueMemberSelector';
