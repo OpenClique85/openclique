@@ -13,12 +13,15 @@ import { useNotifications, useUnreadCount, useMarkAsRead, useMarkAllAsRead, type
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 
+import { PartyPopper } from 'lucide-react';
+
 const notificationIcons: Record<Notification['type'], React.ReactNode> = {
   quest_recommendation: <Gift className="h-4 w-4 text-primary" />,
   quest_shared: <Users className="h-4 w-4 text-purple-500" />,
   referral_accepted: <Users className="h-4 w-4 text-emerald-500" />,
   signup_confirmed: <Check className="h-4 w-4 text-emerald-500" />,
   quest_reminder: <Calendar className="h-4 w-4 text-amber-500" />,
+  quest_complete: <PartyPopper className="h-4 w-4 text-primary" />,
   general: <MessageSquare className="h-4 w-4 text-muted-foreground" />,
 };
 
