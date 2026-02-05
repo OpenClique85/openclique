@@ -149,23 +149,25 @@ export function FeedbackStep4({ onSubmit, onSkip, isSubmitting, xpReward }: Feed
       </div>
 
       {/* Actions */}
-      <div className="pt-4 flex gap-3">
-        <Button
-          variant="outline"
-          onClick={onSkip}
-          className="flex-1"
-          size="lg"
-        >
-          Skip
-        </Button>
-        <Button
-          onClick={handleSubmit}
-          disabled={!canSubmit || isSubmitting}
-          className="flex-1"
-          size="lg"
-        >
-          {isSubmitting ? 'Saving...' : `Submit (+${xpReward} XP)`}
-        </Button>
+      <div className="pt-4 flex flex-col gap-3">
+        <div className="flex gap-3">
+          <Button
+            variant="ghost"
+            onClick={onSkip}
+            className="flex-1 text-muted-foreground"
+            size="lg"
+          >
+            No Thanks, I'm Done
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={!canSubmit || isSubmitting}
+            className="flex-1"
+            size="lg"
+          >
+            {isSubmitting ? 'Saving...' : hasTestimonialText ? `Submit (+${xpReward} XP)` : 'Skip Step'}
+          </Button>
+        </div>
       </div>
     </div>
   );

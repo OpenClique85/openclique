@@ -13,6 +13,8 @@ import { useNotifications, useUnreadCount, useMarkAsRead, useMarkAllAsRead, type
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 
+import { PartyPopper } from 'lucide-react';
+
 const notificationIcons: Record<Notification['type'], React.ReactNode> = {
   quest_recommendation: <Gift className="h-4 w-4 text-primary" />,
   quest_shared: <Users className="h-4 w-4 text-purple-500" />,

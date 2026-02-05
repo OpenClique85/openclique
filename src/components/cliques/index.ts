@@ -107,3 +107,13 @@ export { CliqueChat } from './CliqueChat';
 
 /** Shared memories, achievements, and clique history */
 export { CliqueLoreTab } from './CliqueLoreTab';
+
+// -----------------------------------------------------------------------------
+// PERSISTENCE & MATCHING
+// -----------------------------------------------------------------------------
+
+/** Inline prompt shown after feedback completion for clique persistence */
+export { KeepCliquePrompt } from './KeepCliquePrompt';
+
+/** Modal for selecting clique members to keep */
+export { KeepCliqueModal } from './KeepCliqueModal';

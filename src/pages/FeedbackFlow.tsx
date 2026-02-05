@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Navbar } from '@/components/Navbar';
@@ -7,10 +7,21 @@ import { Footer } from '@/components/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Loader2, ArrowLeft, CheckCircle2, X } from 'lucide-react';
 import { useAwardXP } from '@/hooks/useUserXP';
 import { XPAwardToast, useXPToast } from '@/components/XPAwardToast';
 import { useFeedbackDraft } from '@/hooks/useFeedbackDraft';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import {
   FeedbackProgress,
   FeedbackStep1,
@@ -42,7 +53,10 @@ export default function FeedbackFlow() {
   const awardXP = useAwardXP();
   const { toastState, showXPToast, hideXPToast } = useXPToast();
 
+  const navigate = useNavigate();
   const [quest, setQuest] = useState<{ title: string; icon: string } | null>(null);
+  const [squadId, setSquadId] = useState<string | null>(null);
+  const [instanceId, setInstanceId] = useState<string | null>(null);
   const [feedbackRequest, setFeedbackRequest] = useState<FeedbackRequest | null>(null);
   const [feedbackId, setFeedbackId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -88,16 +102,30 @@ export default function FeedbackFlow() {
         setQuest({ title: questData.title, icon: questData.icon || '🎯' });
       }
 
-      // Check for feedback_request
+      // Check for feedback_request and get squad info
       const { data: requestData } = await supabase
         .from('feedback_requests')
-        .select('*')
+        .select('*, instance_id')
         .eq('quest_id', questId)
         .eq('user_id', user.id)
         .maybeSingle();
 
       if (requestData) {
         setFeedbackRequest(requestData as FeedbackRequest);
+        setInstanceId(requestData.instance_id);
+        
+        // Get the user's squad for this instance
+        if (requestData.instance_id) {
+          const { data: squadMember } = await supabase
+            .from('squad_members')
+            .select('squad_id')
+            .eq('user_id', user.id)
+            .maybeSingle();
+          
+          if (squadMember) {
+            setSquadId(squadMember.squad_id);
+          }
+        }
       }
 
       // Check if already submitted basic feedback
@@ -440,13 +468,38 @@ export default function FeedbackFlow() {
 
       <main className="flex-1 container mx-auto px-4 py-8 max-w-lg">
         {!isComplete && (
-          <Link
-            to="/my-quests"
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to My Quests
-          </Link>
+          <div className="flex items-center justify-between mb-6">
+            <Link
+              to="/my-quests"
+              className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to My Quests
+            </Link>
+            
+            {/* Exit with confirmation */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <X className="h-4 w-4" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Leave Feedback?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Your progress is saved. You can return anytime before the deadline.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Stay</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => navigate('/profile?tab=quests')}>
+                    Leave
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         )}
 
         {isComplete ? (
@@ -455,6 +508,8 @@ export default function FeedbackFlow() {
             xpBreakdown={xpBreakdown}
             questTitle={quest.title}
             questId={questId}
+            squadId={squadId}
+            instanceId={instanceId}
           />
         ) : (
           <Card>

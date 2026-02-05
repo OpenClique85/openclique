@@ -47,7 +47,19 @@ export function EndQuestDialog({
     mutationFn: async () => {
       if (!user) throw new Error('Not authenticated');
 
-      // 1. Update quest instance status to completed
+      // 1. Get quest info for XP calculation
+      const { data: instanceData, error: questError } = await supabase
+        .from('quest_instances')
+        .select('quest_id, quests(base_xp, title)')
+        .eq('id', instanceId)
+        .single();
+
+      if (questError) throw questError;
+
+      const baseXP = (instanceData?.quests as any)?.base_xp || 100;
+      const completionXP = Math.floor(baseXP * 0.5);
+
+      // 2. Update quest instance status to completed
       const { error: instanceError } = await supabase
         .from('quest_instances')
         .update({ status: 'completed' })
@@ -55,7 +67,7 @@ export function EndQuestDialog({
 
       if (instanceError) throw instanceError;
 
-      // 2. Get all participants from all cliques
+      // 3. Get all participants from all cliques
       const squadIds = cliques.map(c => c.id);
       const { data: members, error: membersError } = await supabase
         .from('squad_members')
@@ -65,19 +77,50 @@ export function EndQuestDialog({
 
       if (membersError) throw membersError;
 
-      // 3. Get the quest_id from the instance
-      const { data: instanceData, error: questError } = await supabase
-        .from('quest_instances')
-        .select('quest_id')
-        .eq('id', instanceId)
-        .single();
+      // 4. Update quest_signups to completed and award XP
+      const uniqueUserIds = [...new Set(members.map(m => m.user_id))];
+      
+      // Update signups to completed
+      await supabase
+        .from('quest_signups')
+        .update({ 
+          status: 'completed',
+          completed_at: new Date().toISOString(),
+          completion_xp_awarded: true,
+        })
+        .eq('instance_id', instanceId)
+        .in('status', ['confirmed', 'pending']);
 
-      if (questError) throw questError;
+      // 5. Award 50% base XP to each participant
+      for (const userId of uniqueUserIds) {
+        try {
+          await supabase.rpc('award_xp', {
+            p_user_id: userId,
+            p_amount: completionXP,
+            p_source: 'quest_complete',
+            p_source_id: instanceId,
+          });
+        } catch (xpError) {
+          console.warn(`Failed to award XP to ${userId}:`, xpError);
+        }
+      }
+
+      // 6. Create notifications for all participants
+      const feedbackMaxXP = 225; // xp_basic + xp_extended + xp_pricing + xp_testimonial
+      const notifications = uniqueUserIds.map(userId => ({
+        user_id: userId,
+        type: 'feedback_request' as const,
+        title: `🎉 Quest Complete: ${instanceTitle}`,
+        body: `You earned +${completionXP} XP! Give feedback to earn up to ${feedbackMaxXP} more.`,
+        quest_id: instanceData.quest_id,
+      }));
+
+      await supabase.from('notifications').insert(notifications);
 
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 7); // 7 days from now
 
-      // 4. Create feedback_requests for each participant
+      // 7. Create feedback_requests for each participant
       const feedbackRequests = members.map((member) => ({
         quest_id: instanceData.quest_id,
         user_id: member.user_id,
@@ -100,8 +143,8 @@ export function EndQuestDialog({
           });
       }
 
-      // 5. Send system message to all clique chats
-      const systemMessage = "🎉 **Quest Complete!** Check your profile to give feedback and earn up to 250 XP.";
+      // 8. Send system message to all clique chats
+      const systemMessage = `🎉 **Quest Complete!** You earned +${completionXP} XP. Check your profile to give feedback and earn up to ${feedbackMaxXP} more.`;
       
       for (const squadId of squadIds) {
         await supabase
@@ -114,26 +157,38 @@ export function EndQuestDialog({
           });
       }
 
-      // 6. Log the event
+      // 9. Trigger achievement checks
+      for (const userId of uniqueUserIds) {
+        try {
+          await supabase.rpc('check_and_unlock_achievements', { p_user_id: userId });
+        } catch (achError) {
+          console.warn(`Failed to check achievements for ${userId}:`, achError);
+        }
+      }
+
+      // 10. Log the event
       await supabase.rpc('log_quest_event', {
         p_instance_id: instanceId,
         p_event_type: 'quest_ended' as any,
         p_actor_type: 'admin',
         p_payload: {
-          participant_count: members.length,
+          participant_count: uniqueUserIds.length,
           clique_count: squadIds.length,
           feedback_requests_created: feedbackRequests.length,
+          xp_awarded_per_user: completionXP,
+          total_xp_awarded: completionXP * uniqueUserIds.length,
         }
       });
 
       return {
-        participantCount: members.length,
+        participantCount: uniqueUserIds.length,
         cliqueCount: squadIds.length,
+        xpAwarded: completionXP,
       };
     },
     onSuccess: (data) => {
       toast.success('Quest ended successfully!', {
-        description: `Feedback requests sent to ${data.participantCount} participants.`,
+        description: `${data.participantCount} participants each earned +${data.xpAwarded} XP. Feedback requests sent.`,
       });
       queryClient.invalidateQueries({ queryKey: ['instance-cliques-ros', instanceId] });
       queryClient.invalidateQueries({ queryKey: ['quest-instance', instanceId] });
