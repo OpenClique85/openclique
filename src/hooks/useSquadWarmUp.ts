@@ -49,6 +49,11 @@ interface SquadWithInstance {
     title: string;
     scheduled_date: string;
     start_time: string;
+    objectives: string | null;
+    meeting_point_name: string | null;
+    meeting_point_address: string | null;
+    what_to_bring: string | null;
+    safety_notes: string | null;
   } | null;
 }
 
@@ -76,7 +81,7 @@ export function useSquadWarmUp(squadId: string | null) {
       const instanceId = data.instance_id || data.quest_id;
       const { data: instance } = await supabase
         .from('quest_instances')
-        .select('id, title, scheduled_date, start_time')
+        .select('id, title, scheduled_date, start_time, objectives, meeting_point_name, meeting_point_address, what_to_bring, safety_notes')
         .eq('id', instanceId)
         .single();
       
