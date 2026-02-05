@@ -9241,6 +9241,7 @@ export type Database = {
       }
       auto_archive_instances: { Args: never; Returns: number }
       auto_archive_squads: { Args: never; Returns: number }
+      auto_close_past_quests: { Args: never; Returns: number }
       award_quest_xp: {
         Args: { p_quest_id: string; p_user_id: string }
         Returns: number
