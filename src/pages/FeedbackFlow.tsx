@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { useAwardXP } from '@/hooks/useUserXP';
 import { XPAwardToast, useXPToast } from '@/components/XPAwardToast';
+import { useFeedbackDraft } from '@/hooks/useFeedbackDraft';
 import {
   FeedbackProgress,
   FeedbackStep1,
@@ -54,11 +55,23 @@ export default function FeedbackFlow() {
   const [totalXPEarned, setTotalXPEarned] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
 
+  // Auto-save draft hook
+  const { draft, saveDraft, clearDraft, hasDraft, isLoaded: isDraftLoaded } = useFeedbackDraft(questId);
+
   // Default XP values if no feedback_request exists
   const xpBasic = feedbackRequest?.xp_basic ?? 25;
   const xpExtended = feedbackRequest?.xp_extended ?? 50;
   const xpPricing = feedbackRequest?.xp_pricing ?? 50;
   const xpTestimonial = feedbackRequest?.xp_testimonial ?? 100;
+  const maxXP = xpBasic + xpExtended + xpPricing + xpTestimonial;
+
+  // Restore draft on load
+  useEffect(() => {
+    if (isDraftLoaded && hasDraft && draft?.currentStep) {
+      // Optionally restore step position (user can resume)
+      // For now, we let individual step components restore their data
+    }
+  }, [isDraftLoaded, hasDraft, draft]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -462,6 +475,8 @@ export default function FeedbackFlow() {
                 currentStep={currentStep}
                 totalSteps={4}
                 completedSteps={completedSteps}
+                totalXPEarned={totalXPEarned}
+                maxXP={maxXP}
               />
 
               {/* Step content */}

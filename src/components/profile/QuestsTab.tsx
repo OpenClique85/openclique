@@ -14,6 +14,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { ContinueYourJourney } from '@/components/progression/ContinueYourJourney';
+import { PendingFeedbackSection } from './PendingFeedbackSection';
 import { RewardClaimCard, RewardClaimModal } from '@/components/rewards';
 import { ActiveQuestCard } from './ActiveQuestCard';
 import { MobileCollapsibleSection } from './MobileCollapsibleSection';
@@ -420,6 +421,9 @@ export function QuestsTab({ userId }: QuestsTabProps) {
 
   return (
     <div className="space-y-8">
+      {/* Pending Feedback Requests */}
+      <PendingFeedbackSection userId={userId} />
+
       {/* Header with Browse CTA */}
       <div className="flex items-center justify-between">
         <div>
