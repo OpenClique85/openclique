@@ -38,7 +38,7 @@ export function CTASection() {
               size="lg"
               variant="outline"
               asChild
-              className="w-full sm:w-auto text-base px-8 border-white text-white bg-white/10 hover:bg-white/20"
+              className="w-full sm:w-auto text-base px-8 bg-white text-foreground border-white hover:bg-white/90"
             >
               <Link to="/install">
                 <Smartphone className="mr-2 h-5 w-5" />
