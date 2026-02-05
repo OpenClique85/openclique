@@ -272,6 +272,9 @@ const App = () => (
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/terms" element={<Terms />} />
                 
+                {/* PWA */}
+                <Route path="/install" element={<Install />} />
+                
                 {/* 404 */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
