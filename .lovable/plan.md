@@ -1,250 +1,194 @@
 
-# Waitlist-Gated Launch: "Join the Waitlist" + Beta User Access
+
+# Enhanced Install Page: QR Code + Smart Device Detection
 
 ## Overview
 
-Transform the homepage from open signup to a **waitlist-first model** where:
-1. **General visitors** → "Join the Waitlist" (email capture, no account yet)
-2. **Beta users with invite codes** → "Beta Access" button → normal auth flow
-3. **Existing users** → "Sign In" (unchanged)
+Redesign the `/install` page to work in **two contexts**:
+1. **Desktop/Print** — Show a QR code that visitors can scan with their phone
+2. **Mobile** — Show smart, platform-specific install instructions (iOS vs Android)
 
-This creates a lead capture funnel while keeping the pilot invite-code-gated.
+This makes the page useful for both social sharing (texts, emails) and physical materials (event posters, cards).
 
 ---
 
 ## What Users Will See
 
-### Homepage Hero & CTA Section
+### On Desktop (or when sharing the link in print materials)
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                                                              │
-│           You've got a clique waiting.                       │
-│           You just haven't met them yet.                     │
+│                    Install OpenClique                        │
 │                                                              │
-│   ┌─────────────────────┐   ┌─────────────────────┐         │
-│   │  Join the Waitlist  │   │    Beta Access      │         │
-│   │    (primary CTA)    │   │   (outline button)  │         │
-│   └─────────────────────┘   └─────────────────────┘         │
+│              ┌─────────────────────────┐                    │
+│              │                         │                    │
+│              │      [QR CODE]          │                    │
+│              │                         │                    │
+│              │   openclique.lovable.app│                    │
+│              │                         │                    │
+│              └─────────────────────────┘                    │
 │                                                              │
-│              Already have an account? Sign in →              │
+│         Scan with your phone's camera to install            │
+│                                                              │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │ Zap  Instant Access — Launch from your home screen     │ │
+│  │ Bell Stay Updated — Get notified about your squads     │ │
+│  │ Wifi Works Offline — Browse quests without internet    │ │
+│  └────────────────────────────────────────────────────────┘ │
+│                                                              │
+│                    ← Back to app                             │
 │                                                              │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Waitlist Modal Flow
-
-When clicking "Join the Waitlist":
+### On iPhone/iPad
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                   Join the Waitlist                          │
-│                                                              │
-│   We're launching in Austin. Be the first to know            │
-│   when we open up new spots.                                 │
+│                    Install OpenClique                        │
+│        Add to your home screen for the best experience       │
 │                                                              │
 │   ┌─────────────────────────────────────────────────────┐   │
-│   │  Email *                                             │   │
-│   │  yourname@email.com                                  │   │
+│   │ Zap  Instant Access                                  │   │
+│   │ Bell Stay Updated                                    │   │
+│   │ Wifi Works Offline                                   │   │
 │   └─────────────────────────────────────────────────────┘   │
 │                                                              │
 │   ┌─────────────────────────────────────────────────────┐   │
-│   │  Name (optional)                                     │   │
-│   │  First name or nickname                              │   │
+│   │  Install on iPhone/iPad                              │   │
+│   │                                                      │   │
+│   │  1. Tap the Share button (bottom of Safari)          │   │
+│   │  2. Tap "Add to Home Screen"                         │   │
+│   │  3. Tap "Add" to confirm                             │   │
 │   └─────────────────────────────────────────────────────┘   │
 │                                                              │
-│   What brings you to OpenClique?                             │
-│   [ ] New to Austin, looking to meet people                  │
-│   [ ] Remote worker seeking IRL connections                  │
-│   [ ] Looking for hobby/activity groups                      │
-│   [ ] Just curious about the concept                         │
-│                                                              │
-│   How did you hear about us? (optional)                      │
-│   ┌─────────────────────────────────────────────────────┐   │
-│   │  Friend referral, Instagram, etc.                    │   │
-│   └─────────────────────────────────────────────────────┘   │
-│                                                              │
-│              ┌─────────────────────────┐                    │
-│              │    Join the Waitlist    │                    │
-│              └─────────────────────────┘                    │
-│                                                              │
-│   Have an invite code? Enter it here →                      │
+│                    ← Back to app                             │
 │                                                              │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-After submission:
+### On Android (with Chrome install support)
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                         You're in! 🎉                        │
+│                    Install OpenClique                        │
 │                                                              │
-│   We'll let you know when we're ready to welcome you.        │
-│   Keep an eye on your inbox for updates and early access.    │
+│   ┌─────────────────────────────────────────────────────┐   │
+│   │ Zap  Instant Access                                  │   │
+│   │ Bell Stay Updated                                    │   │
+│   │ Wifi Works Offline                                   │   │
+│   └─────────────────────────────────────────────────────┘   │
 │                                                              │
-│   In the meantime:                                           │
-│   • Follow us on Instagram for Austin event highlights       │
-│   • Browse upcoming quests (no account needed)               │
+│   ┌─────────────────────────────────────────────────────┐   │
+│   │  Install on Android                                  │   │
+│   │                                                      │   │
+│   │  Click below to add OpenClique to your home screen.  │   │
+│   │                                                      │   │
+│   │  ┌─────────────────────────────────────────────┐    │   │
+│   │  │         Install OpenClique                  │    │   │
+│   │  └─────────────────────────────────────────────┘    │   │
+│   └─────────────────────────────────────────────────────┘   │
 │                                                              │
-│              ┌─────────────────────────┐                    │
-│              │    Browse Quests →      │                    │
-│              └─────────────────────────┘                    │
+│                    ← Back to app                             │
 │                                                              │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Admin Panel: Waitlist Manager
+## Key Changes
 
-New tab in **Growth** section → "Waitlist"
+### 1. Add QR Code Generation
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  Waitlist                                       [Export CSV] │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  Total: 247  │  This Week: 34  │  Converted: 12             │
-│                                                              │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │ Search by email or name...                           │   │
-│  └──────────────────────────────────────────────────────┘   │
-│                                                              │
-│  ┌────────────────────────────────────────────────────────┐ │
-│  │ Email              │ Name    │ Interest     │ Joined   │ │
-│  ├────────────────────┼─────────┼──────────────┼──────────┤ │
-│  │ alex@example.com   │ Alex    │ New to town  │ Feb 5    │ │
-│  │ sam@gmail.com      │ —       │ Remote work  │ Feb 4    │ │
-│  │ jordan@company.co  │ Jordan  │ Hobbies      │ Feb 3    │ │
-│  └────────────────────────────────────────────────────────┘ │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
-```
+Install the `qrcode.react` library to generate QR codes client-side. The QR code will point to:
+- `https://openclique.lovable.app/install`
 
-**Export formats:**
-- **CSV download** — Compatible with Gmail contacts, Mailchimp, etc.
-- Columns: email, name, interest, referral_source, joined_at
+This ensures anyone scanning gets taken straight to the install page on their phone.
+
+### 2. Smart Device Detection
+
+Use the existing `useIsMobile` hook and `usePWAInstall` hook to determine:
+
+| Condition | What to show |
+|-----------|--------------|
+| Desktop browser | QR code prominently + benefits |
+| iOS mobile | iOS-specific instructions (Share > Add to Home Screen) |
+| Android + Chrome (installable) | Big "Install" button that triggers native prompt |
+| Android + other browser | Manual instructions for Chrome menu |
+
+### 3. Fix Scrolling Bug
+
+The current page doesn't scroll properly on smaller devices. We'll:
+- Add `overflow-y-auto` to the content container
+- Use `pb-safe` for safe area padding at bottom
+- Ensure the "Back to app" button is always reachable
 
 ---
 
 ## Technical Implementation
 
-### 1. Database: New `waitlist` Table
-
-```sql
-CREATE TABLE public.waitlist (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  email TEXT NOT NULL UNIQUE,
-  name TEXT,
-  interest TEXT,                    -- What brings you here
-  referral_source TEXT,             -- How did you hear about us
-  created_at TIMESTAMPTZ DEFAULT now(),
-  converted_at TIMESTAMPTZ,         -- When they became a real user
-  converted_user_id UUID REFERENCES auth.users(id),
-  notes TEXT                        -- Admin notes
-);
-
--- RLS: Only admins can read, anyone can insert their own
-ALTER TABLE public.waitlist ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Anyone can join waitlist" 
-  ON public.waitlist FOR INSERT 
-  WITH CHECK (true);
-
-CREATE POLICY "Admins can view waitlist" 
-  ON public.waitlist FOR SELECT 
-  USING (public.has_role(auth.uid(), 'admin'));
-
-CREATE POLICY "Admins can update waitlist" 
-  ON public.waitlist FOR UPDATE 
-  USING (public.has_role(auth.uid(), 'admin'));
-```
-
-### 2. New Components
-
-| File | Purpose |
-|------|---------|
-| `src/components/WaitlistModal.tsx` | Modal with form for email capture |
-| `src/components/admin/WaitlistManager.tsx` | Admin panel view + export |
-
-### 3. Modified Components
+### Files to Modify
 
 | File | Changes |
 |------|---------|
-| `src/components/Hero.tsx` | Replace "Join Now" with "Join the Waitlist" + add "Beta Access" button |
-| `src/components/CTASection.tsx` | Same changes as Hero |
-| `src/constants/content.ts` | Update `HERO.primaryCta` to "Join the Waitlist" |
-| `src/components/admin/AdminSectionNav.tsx` | Add "Waitlist" tab to Growth section |
-| `src/pages/Admin.tsx` | Wire up WaitlistManager component |
+| `src/pages/Install.tsx` | Complete redesign with QR code section + device-aware layouts |
+| `package.json` | Add `qrcode.react` dependency |
 
-### 4. Form Validation (zod)
+### New Dependencies
 
-```typescript
-const waitlistSchema = z.object({
-  email: z.string().email("Please enter a valid email").max(255),
-  name: z.string().max(100).optional(),
-  interest: z.string().max(50).optional(),
-  referral_source: z.string().max(200).optional(),
-});
+```json
+"qrcode.react": "^4.2.0"
 ```
 
-### 5. Export Edge Function
+This is a lightweight (~10KB) React component for generating QR codes with no server-side requirements.
 
-An edge function `export-waitlist` that:
-- Queries the waitlist table
-- Returns CSV with proper headers
-- Only accessible to admins
+### Updated Install Page Structure
 
----
+```text
+Install.tsx
+├── Already Installed State (unchanged)
+├── Desktop View
+│   ├── QR Code (large, scannable)
+│   ├── URL text below QR
+│   ├── "Scan to install" instruction
+│   └── Benefits list (compact)
+└── Mobile View
+    ├── Header with benefits
+    └── Platform-specific instructions
+        ├── iOS: Manual 3-step instructions
+        └── Android: Install button OR manual steps
+```
 
-## Changes Summary
+### Device Detection Logic
 
-| Category | Files |
-|----------|-------|
-| **New Database** | `waitlist` table with RLS |
-| **New Components** | `WaitlistModal.tsx`, `WaitlistManager.tsx` |
-| **New Edge Function** | `export-waitlist` (CSV export) |
-| **Modified - Homepage** | `Hero.tsx`, `CTASection.tsx` |
-| **Modified - Content** | `content.ts` (CTA text) |
-| **Modified - Admin** | `AdminSectionNav.tsx`, `Admin.tsx` |
+```typescript
+const isMobile = useIsMobile();
+const { isIOS, isInstallable } = usePWAInstall();
 
----
-
-## User Flows After Implementation
-
-### Flow A: New Visitor
-1. Lands on homepage
-2. Clicks "Join the Waitlist"
-3. Fills in email + optional info
-4. Sees success message
-5. Data stored in `waitlist` table
-6. Can still browse quests (public)
-
-### Flow B: User with Invite Code
-1. Lands on homepage
-2. Clicks "Beta Access"
-3. Enters invite code + creates account
-4. Gains full access to platform
-
-### Flow C: Existing Beta User
-1. Lands on homepage
-2. Clicks "Sign In" link (or "Beta Access")
-3. Normal login flow
-
-### Flow D: Admin Exports List
-1. Goes to Admin → Growth → Waitlist
-2. Sees all entries with search/filter
-3. Clicks "Export CSV"
-4. Downloads file, imports to Mailchimp/Gmail
+// Desktop: show QR
+// Mobile + iOS: show Safari instructions  
+// Mobile + Android + installable: show Install button
+// Mobile + Android + not installable: show Chrome menu instructions
+```
 
 ---
 
-## Why This Approach Works for OpenClique
+## Why This Works for OpenClique
 
-- **Builds anticipation** — Waitlist creates scarcity and FOMO
-- **Collects warm leads** — Email list for announcements
-- **Filters for intent** — Interest field shows who's serious
-- **Maintains exclusivity** — Invite codes still gate actual access
-- **Export-friendly** — Works with any email tool you already use
-- **Low friction** — No password needed for waitlist
+- **Event-ready** — Print the page or screenshot the QR for flyers, posters, table cards
+- **Text/email friendly** — Share the `/install` link and it just works on mobile
+- **Zero friction** — No app store, no waiting for approval, instant install
+- **Platform-smart** — Users see exactly what they need, nothing confusing
+
+---
+
+## Summary of Changes
+
+| Category | Details |
+|----------|---------|
+| **New dependency** | `qrcode.react` for client-side QR generation |
+| **Modified file** | `src/pages/Install.tsx` — redesigned with QR + smart detection |
+| **Bug fix** | Scrolling issue on mobile — add proper overflow handling |
+| **QR target URL** | `https://openclique.lovable.app/install` |
 
