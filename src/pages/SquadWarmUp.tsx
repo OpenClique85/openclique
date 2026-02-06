@@ -34,50 +34,56 @@ export default function SquadWarmUp() {
     queryFn: async () => {
       if (!squadId || !user) throw new Error('Not authenticated');
 
-      // Get squad with instance info
-      const { data: squad, error: squadError } = await supabase
-        .from('quest_squads')
-        .select(`
-          id,
-          squad_name,
-          status,
-          quest_instances(
+      try {
+        // Get squad with instance info
+        const { data: squad, error: squadError } = await supabase
+          .from('quest_squads')
+          .select(`
             id,
-            title,
-            icon,
-            scheduled_date,
-            start_time,
-            quest_card_token
-          )
-        `)
-        .eq('id', squadId)
-        .single();
+            squad_name,
+            status,
+            quest_instances(
+              id,
+              title,
+              icon,
+              scheduled_date,
+              start_time,
+              quest_card_token
+            )
+          `)
+          .eq('id', squadId)
+          .single();
 
-      if (squadError) throw squadError;
+        if (squadError) throw squadError;
 
-      // Check if user is a member
-       const { data: membership, error: memberError } = await supabase
-        .from('squad_members')
-        .select('id, role')
-        .eq('squad_id', squadId)
-        .eq('user_id', user.id)
-         .neq('status', 'dropped')
-         .limit(1)
-         .maybeSingle();
+        // Check if user is a member
+        const { data: membership, error: memberError } = await supabase
+          .from('squad_members')
+          .select('id, role')
+          .eq('squad_id', squadId)
+          .eq('user_id', user.id)
+          .neq('status', 'dropped')
+          .limit(1)
+          .maybeSingle();
 
-       if (memberError || !membership) {
-        throw new Error('You are not a member of this squad');
+        if (memberError || !membership) {
+          throw new Error('You are not a member of this squad');
+        }
+
+        const instance = squad.quest_instances as any;
+
+        return {
+          squad,
+          membership,
+          instance,
+        };
+      } catch (err) {
+        console.error('Error loading squad warm-up:', err);
+        throw err;
       }
-
-      const instance = squad.quest_instances as any;
-
-      return {
-        squad,
-        membership,
-        instance,
-      };
     },
     enabled: !!squadId && !!user && !authLoading,
+    retry: 2,
   });
 
   // Loading states
