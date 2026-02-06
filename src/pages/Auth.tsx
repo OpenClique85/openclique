@@ -52,7 +52,7 @@ export default function Auth() {
   
   useEffect(() => {
     if (urlInviteCode) {
-      setInviteCode(urlInviteCode);
+      setInviteCode(urlInviteCode.toUpperCase());
     }
   }, [urlInviteCode]);
   

@@ -145,6 +145,19 @@ export function Hero() {
                 Beta Access
               </Link>
             </Button>
+
+            {/* Download App button */}
+            <Button 
+              variant="ghost" 
+              size="lg" 
+              asChild 
+              className="w-full sm:w-auto text-base px-6 gap-2 hover:scale-[1.02] transition-transform duration-200"
+            >
+              <Link to="/install">
+                <Smartphone className="h-4 w-4" />
+                Download App
+              </Link>
+            </Button>
           </div>
           
           {/* Sign in link for existing users */}

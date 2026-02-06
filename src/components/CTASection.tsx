@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { KeyRound } from "lucide-react";
+import { KeyRound, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import sunsetGathering from "@/assets/austin/sunset-gathering.jpg";
 import { WaitlistModal } from "@/components/WaitlistModal";
@@ -49,6 +49,17 @@ export function CTASection() {
                 <Link to="/auth?signup=true">
                   <KeyRound className="mr-2 h-5 w-5" />
                   Beta Access
+                </Link>
+              </Button>
+              <Button
+                size="lg"
+                variant="ghost"
+                asChild
+                className="w-full sm:w-auto text-base px-8 text-background/80 hover:text-background hover:bg-background/10 hover:scale-[1.02] transition-all duration-200"
+              >
+                <Link to="/install">
+                  <Smartphone className="mr-2 h-5 w-5" />
+                  Download App
                 </Link>
               </Button>
             </div>
