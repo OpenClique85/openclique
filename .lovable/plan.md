@@ -1,172 +1,250 @@
 
+# Waitlist-Gated Launch: "Join the Waitlist" + Beta User Access
 
-# Visual Redesign Experiment: Homepage Color & Style Refresh
+## Overview
 
-## Current State Analysis
+Transform the homepage from open signup to a **waitlist-first model** where:
+1. **General visitors** → "Join the Waitlist" (email capture, no account yet)
+2. **Beta users with invite codes** → "Beta Access" button → normal auth flow
+3. **Existing users** → "Sign In" (unchanged)
 
-Your current design uses:
-- **Primary:** Teal (#14B8A6 / HSL 174 84% 40%) - clean but very "safe/corporate"
-- **Accent:** Amber (#F59E0B / HSL 43 96% 50%) - warm but underused
-- **Background:** Warm white (#FAFAF9) - nice but lacks personality
-- **Typography:** Sora (headings) + Inter (body) - solid, modern choices
-
-The overall effect is polished but reads more "SaaS dashboard" than "Austin adventure app."
+This creates a lead capture funnel while keeping the pilot invite-code-gated.
 
 ---
 
-## Proposed Direction: "Austin Neon Nights"
+## What Users Will See
 
-Inspired by Austin's music venues, neon signs, and sunset skylines. Bold, confident, and unapologetically fun.
+### Homepage Hero & CTA Section
 
-### New Primary Palette
+```
+┌─────────────────────────────────────────────────────────────┐
+│                                                              │
+│           You've got a clique waiting.                       │
+│           You just haven't met them yet.                     │
+│                                                              │
+│   ┌─────────────────────┐   ┌─────────────────────┐         │
+│   │  Join the Waitlist  │   │    Beta Access      │         │
+│   │    (primary CTA)    │   │   (outline button)  │         │
+│   └─────────────────────┘   └─────────────────────┘         │
+│                                                              │
+│              Already have an account? Sign in →              │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
 
-| Role | Current | Proposed | Hex | HSL |
-|------|---------|----------|-----|-----|
-| **Primary** | Teal | Electric Coral | #FF6B6B | 0 100% 71% |
-| **Secondary** | Light gray | Dusty Sage | #94B49F | 145 25% 65% |
-| **Accent** | Amber | Hot Pink/Magenta | #E040FB | 291 96% 62% |
-| **Background** | Warm white | Cream | #FFFBF5 | 40 100% 98% |
-| **Foreground** | Navy ink | Rich Charcoal | #1A1A2E | 240 33% 14% |
+### Waitlist Modal Flow
 
-### Why This Works for OpenClique
+When clicking "Join the Waitlist":
 
-1. **Electric Coral (#FF6B6B)** - Energetic, inviting, memorable. Says "adventure" not "enterprise software"
-2. **Dusty Sage (#94B49F)** - Balances the energy, feels organic/Austin outdoor vibes
-3. **Hot Pink/Magenta (#E040FB)** - Pop of personality for highlights, badges, special moments
-4. **Cream background** - Warmer than pure white, easier on eyes, feels welcoming
-5. **Rich charcoal** - Sophisticated dark without being harsh black
+```
+┌─────────────────────────────────────────────────────────────┐
+│                   Join the Waitlist                          │
+│                                                              │
+│   We're launching in Austin. Be the first to know            │
+│   when we open up new spots.                                 │
+│                                                              │
+│   ┌─────────────────────────────────────────────────────┐   │
+│   │  Email *                                             │   │
+│   │  yourname@email.com                                  │   │
+│   └─────────────────────────────────────────────────────┘   │
+│                                                              │
+│   ┌─────────────────────────────────────────────────────┐   │
+│   │  Name (optional)                                     │   │
+│   │  First name or nickname                              │   │
+│   └─────────────────────────────────────────────────────┘   │
+│                                                              │
+│   What brings you to OpenClique?                             │
+│   [ ] New to Austin, looking to meet people                  │
+│   [ ] Remote worker seeking IRL connections                  │
+│   [ ] Looking for hobby/activity groups                      │
+│   [ ] Just curious about the concept                         │
+│                                                              │
+│   How did you hear about us? (optional)                      │
+│   ┌─────────────────────────────────────────────────────┐   │
+│   │  Friend referral, Instagram, etc.                    │   │
+│   └─────────────────────────────────────────────────────┘   │
+│                                                              │
+│              ┌─────────────────────────┐                    │
+│              │    Join the Waitlist    │                    │
+│              └─────────────────────────┘                    │
+│                                                              │
+│   Have an invite code? Enter it here →                      │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
 
-### Visual Personality Shift
+After submission:
 
-```text
-BEFORE (Corporate Teal):        AFTER (Austin Energy):
-┌───────────────────────┐       ┌───────────────────────┐
-│  ████ Safe            │       │  ████ Bold            │
-│  ████ Professional    │  -->  │  ████ Adventurous     │
-│  ████ Forgettable     │       │  ████ Memorable       │
-└───────────────────────┘       └───────────────────────┘
+```
+┌─────────────────────────────────────────────────────────────┐
+│                         You're in! 🎉                        │
+│                                                              │
+│   We'll let you know when we're ready to welcome you.        │
+│   Keep an eye on your inbox for updates and early access.    │
+│                                                              │
+│   In the meantime:                                           │
+│   • Follow us on Instagram for Austin event highlights       │
+│   • Browse upcoming quests (no account needed)               │
+│                                                              │
+│              ┌─────────────────────────┐                    │
+│              │    Browse Quests →      │                    │
+│              └─────────────────────────┘                    │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Implementation Approach
+## Admin Panel: Waitlist Manager
 
-### Phase 1: Homepage-Only Experiment
+New tab in **Growth** section → "Waitlist"
 
-We will create a **homepage-specific CSS override** that applies the new palette only to the Index page. This lets you experiment without affecting the rest of the app.
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Waitlist                                       [Export CSV] │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Total: 247  │  This Week: 34  │  Converted: 12             │
+│                                                              │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │ Search by email or name...                           │   │
+│  └──────────────────────────────────────────────────────┘   │
+│                                                              │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │ Email              │ Name    │ Interest     │ Joined   │ │
+│  ├────────────────────┼─────────┼──────────────┼──────────┤ │
+│  │ alex@example.com   │ Alex    │ New to town  │ Feb 5    │ │
+│  │ sam@gmail.com      │ —       │ Remote work  │ Feb 4    │ │
+│  │ jordan@company.co  │ Jordan  │ Hobbies      │ Feb 3    │ │
+│  └────────────────────────────────────────────────────────┘ │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
 
-**New file:** `src/styles/home-experiment.css`
+**Export formats:**
+- **CSV download** — Compatible with Gmail contacts, Mailchimp, etc.
+- Columns: email, name, interest, referral_source, joined_at
 
-This file will define CSS custom properties that override the base theme only within a `.home-experiment` wrapper class applied to the Index page.
+---
 
-### Phase 2: Component Tweaks
+## Technical Implementation
 
-Beyond just colors, we will add visual personality through:
+### 1. Database: New `waitlist` Table
 
-| Element | Current | Proposed |
-|---------|---------|----------|
-| **Hero gradient** | Subtle teal/amber | Bold coral-to-magenta diagonal gradient |
-| **Badges** | Outline with teal | Solid coral with white text |
-| **Card borders** | Subtle gray | Slightly thicker with hover glow effect |
-| **Section backgrounds** | Alternating muted | Subtle texture/pattern overlays |
-| **CTA buttons** | Flat teal | Coral with subtle gradient + glow on hover |
+```sql
+CREATE TABLE public.waitlist (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email TEXT NOT NULL UNIQUE,
+  name TEXT,
+  interest TEXT,                    -- What brings you here
+  referral_source TEXT,             -- How did you hear about us
+  created_at TIMESTAMPTZ DEFAULT now(),
+  converted_at TIMESTAMPTZ,         -- When they became a real user
+  converted_user_id UUID REFERENCES auth.users(id),
+  notes TEXT                        -- Admin notes
+);
 
-### Files to Modify
+-- RLS: Only admins can read, anyone can insert their own
+ALTER TABLE public.waitlist ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can join waitlist" 
+  ON public.waitlist FOR INSERT 
+  WITH CHECK (true);
+
+CREATE POLICY "Admins can view waitlist" 
+  ON public.waitlist FOR SELECT 
+  USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can update waitlist" 
+  ON public.waitlist FOR UPDATE 
+  USING (public.has_role(auth.uid(), 'admin'));
+```
+
+### 2. New Components
+
+| File | Purpose |
+|------|---------|
+| `src/components/WaitlistModal.tsx` | Modal with form for email capture |
+| `src/components/admin/WaitlistManager.tsx` | Admin panel view + export |
+
+### 3. Modified Components
 
 | File | Changes |
 |------|---------|
-| `src/styles/home-experiment.css` | NEW - experimental color variables |
-| `src/pages/Index.tsx` | Add wrapper class + import experimental styles |
-| `src/components/Hero.tsx` | New gradient treatment, badge styling |
-| `src/components/HowItWorksMini.tsx` | Updated icon/number accent colors |
-| `src/components/BenefitsSection.tsx` | Card hover effects with new accent |
-| `src/components/WhoItsForSection.tsx` | Persona card accent updates |
-| `src/components/CTASection.tsx` | New background gradient, button treatment |
+| `src/components/Hero.tsx` | Replace "Join Now" with "Join the Waitlist" + add "Beta Access" button |
+| `src/components/CTASection.tsx` | Same changes as Hero |
+| `src/constants/content.ts` | Update `HERO.primaryCta` to "Join the Waitlist" |
+| `src/components/admin/AdminSectionNav.tsx` | Add "Waitlist" tab to Growth section |
+| `src/pages/Admin.tsx` | Wire up WaitlistManager component |
 
----
+### 4. Form Validation (zod)
 
-## Alternative Palettes to Consider
-
-If Electric Coral feels too bold, here are two backup directions:
-
-### Option B: "Sunset Austin" (Warmer, earthier)
-
-| Role | Color | Hex |
-|------|-------|-----|
-| Primary | Burnt Sienna | #E07A5F |
-| Secondary | Sage Green | #81B29A |
-| Accent | Dusty Rose | #F2CC8F |
-| Background | Ivory | #FAF7F2 |
-
-### Option C: "Neon Violet" (Bolder, nightlife-inspired)
-
-| Role | Color | Hex |
-|------|-------|-----|
-| Primary | Electric Violet | #7C3AED |
-| Secondary | Mint | #6EE7B7 |
-| Accent | Hot Orange | #FB923C |
-| Background | Near Black | #0F0F1A |
-
----
-
-## What You Will See After Implementation
-
-The homepage will feature:
-
-1. **Bold coral primary buttons** that pop against the cream background
-2. **Gradient overlays** on the hero that feel dynamic and adventurous
-3. **Magenta accent highlights** for special elements (badges, icons on hover)
-4. **Subtle texture** or grain overlay for added depth
-5. **More pronounced shadows and glows** on cards for a premium feel
-
-This is fully reversible - we are adding an experimental layer, not replacing your core design system. If you love it, we can roll it out globally. If not, we simply remove the wrapper class.
-
----
-
-## Technical Details
-
-### Experimental CSS Variables
-
-The new `home-experiment.css` will define:
-
-```css
-.home-experiment {
-  --primary: 0 100% 71%;           /* Electric Coral */
-  --primary-foreground: 0 0% 100%;
-  --accent: 291 96% 62%;           /* Hot Pink */
-  --accent-foreground: 0 0% 100%;
-  --background: 40 100% 98%;       /* Cream */
-  --foreground: 240 33% 14%;       /* Rich Charcoal */
-  --muted: 145 25% 92%;            /* Light sage */
-  --muted-foreground: 240 20% 40%;
-  --ring: 0 100% 71%;
-}
+```typescript
+const waitlistSchema = z.object({
+  email: z.string().email("Please enter a valid email").max(255),
+  name: z.string().max(100).optional(),
+  interest: z.string().max(50).optional(),
+  referral_source: z.string().max(200).optional(),
+});
 ```
 
-### Gradient Treatment for Hero
+### 5. Export Edge Function
 
-Replace the current `from-primary/10 via-background/95 to-accent/10` with a more dynamic diagonal gradient using the new coral and magenta tones.
-
-### Button Glow Effect
-
-Add a subtle `box-shadow` on hover that uses the primary color for a "neon glow" effect:
-
-```css
-.home-experiment button[data-primary]:hover {
-  box-shadow: 0 0 20px hsl(0 100% 71% / 0.4);
-}
-```
+An edge function `export-waitlist` that:
+- Queries the waitlist table
+- Returns CSV with proper headers
+- Only accessible to admins
 
 ---
 
-## Testing Checklist
+## Changes Summary
 
-After implementation:
-- [ ] Homepage displays new color palette
-- [ ] Other pages (Quests, About, etc.) retain original teal theme
-- [ ] All text remains readable with sufficient contrast
-- [ ] Buttons have visible hover/active states
-- [ ] Dark mode compatibility (if applicable)
-- [ ] Cards and badges use new accent colors appropriately
-- [ ] Overall vibe feels more "Austin fun" than "corporate SaaS"
+| Category | Files |
+|----------|-------|
+| **New Database** | `waitlist` table with RLS |
+| **New Components** | `WaitlistModal.tsx`, `WaitlistManager.tsx` |
+| **New Edge Function** | `export-waitlist` (CSV export) |
+| **Modified - Homepage** | `Hero.tsx`, `CTASection.tsx` |
+| **Modified - Content** | `content.ts` (CTA text) |
+| **Modified - Admin** | `AdminSectionNav.tsx`, `Admin.tsx` |
+
+---
+
+## User Flows After Implementation
+
+### Flow A: New Visitor
+1. Lands on homepage
+2. Clicks "Join the Waitlist"
+3. Fills in email + optional info
+4. Sees success message
+5. Data stored in `waitlist` table
+6. Can still browse quests (public)
+
+### Flow B: User with Invite Code
+1. Lands on homepage
+2. Clicks "Beta Access"
+3. Enters invite code + creates account
+4. Gains full access to platform
+
+### Flow C: Existing Beta User
+1. Lands on homepage
+2. Clicks "Sign In" link (or "Beta Access")
+3. Normal login flow
+
+### Flow D: Admin Exports List
+1. Goes to Admin → Growth → Waitlist
+2. Sees all entries with search/filter
+3. Clicks "Export CSV"
+4. Downloads file, imports to Mailchimp/Gmail
+
+---
+
+## Why This Approach Works for OpenClique
+
+- **Builds anticipation** — Waitlist creates scarcity and FOMO
+- **Collects warm leads** — Email list for announcements
+- **Filters for intent** — Interest field shows who's serious
+- **Maintains exclusivity** — Invite codes still gate actual access
+- **Export-friendly** — Works with any email tool you already use
+- **Low friction** — No password needed for waitlist
 
