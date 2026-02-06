@@ -13,6 +13,7 @@ import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useUserSearch } from '@/hooks/useUserSearch';
 import { useAuth } from '@/hooks/useAuth';
 import { UserSearchCard } from '@/components/social/UserSearchCard';
+import { UserPublicProfileDrawer } from '@/components/social/UserPublicProfileDrawer';
 
 export default function UserSearch() {
   const navigate = useNavigate();
@@ -22,12 +23,14 @@ export default function UserSearch() {
   // Get initial search from URL (e.g., ?code=XXXX or ?q=name)
   const initialQuery = searchParams.get('code') || searchParams.get('q') || '';
   const [query, setQuery] = useState(initialQuery);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   
   const { data: results = [], isLoading } = useUserSearch(query);
   
   const handleViewProfile = (userId: string) => {
-    // TODO: Implement user profile preview drawer
-    console.log('View profile:', userId);
+    setSelectedUserId(userId);
+    setDrawerOpen(true);
   };
   
   const handleInviteToClique = (userId: string) => {
@@ -130,6 +133,14 @@ export default function UserSearch() {
       </main>
       
       <Footer />
+      
+      {/* Profile Drawer */}
+      <UserPublicProfileDrawer
+        userId={selectedUserId}
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        onInviteToClique={handleInviteToClique}
+      />
     </div>
   );
 }

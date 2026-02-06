@@ -11,6 +11,7 @@ import { Copy, Share2, Check, QrCode, Search, Users, Loader2 } from 'lucide-reac
 import { useToast } from '@/hooks/use-toast';
 import { useUserSearch, UserSearchResult } from '@/hooks/useUserSearch';
 import { UserSearchCard } from '@/components/social/UserSearchCard';
+import { UserPublicProfileDrawer } from '@/components/social/UserPublicProfileDrawer';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface FindPeopleSectionProps {
@@ -22,6 +23,8 @@ export function FindPeopleSection({ friendCode }: FindPeopleSectionProps) {
   const [copied, setCopied] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   
   const { data: results = [], isLoading } = useUserSearch(query);
   
@@ -72,7 +75,8 @@ export function FindPeopleSection({ friendCode }: FindPeopleSectionProps) {
   };
   
   const handleViewProfile = (userId: string) => {
-    console.log('View profile:', userId);
+    setSelectedUserId(userId);
+    setDrawerOpen(true);
   };
   
   const handleInviteToClique = (userId: string) => {
@@ -80,6 +84,13 @@ export function FindPeopleSection({ friendCode }: FindPeopleSectionProps) {
   };
   
   return (
+    <>
+      <UserPublicProfileDrawer
+        userId={selectedUserId}
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        onInviteToClique={handleInviteToClique}
+      />
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-lg flex items-center gap-2">
@@ -205,5 +216,6 @@ export function FindPeopleSection({ friendCode }: FindPeopleSectionProps) {
         </p>
       </CardContent>
     </Card>
+    </>
   );
 }
