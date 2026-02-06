@@ -39,22 +39,28 @@
  * =============================================================================
  */
 
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { HERO, SOCIAL_PROOF } from "@/constants/content";
 import logo from "@/assets/logo.png";
 import concertCrowd from "@/assets/austin/concert-crowd.jpg";
-import { ChevronDown, Smartphone } from "lucide-react";
+import { ChevronDown, Smartphone, KeyRound } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { WaitlistModal } from "@/components/WaitlistModal";
 
 export function Hero() {
+  const [waitlistOpen, setWaitlistOpen] = useState(false);
+
   return (
+    <>
+      <WaitlistModal open={waitlistOpen} onOpenChange={setWaitlistOpen} />
     <section className="relative overflow-hidden">
       {/* ------------------------------------------------------------------ */}
       {/* BACKGROUND: Concert image with low opacity */}
@@ -116,26 +122,38 @@ export function Hero() {
           {/* Primary: "Find Your Quest" (solid button, links to /quests) */}
           {/* Secondary: "Get Involved" dropdown with creator/partner links */}
           {/* -------------------------------------------------------------- */}
-          {/* PRIMARY CTAs: Join Now + Download App side by side */}
+          {/* PRIMARY CTAs: Join the Waitlist + Beta Access side by side */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in [animation-delay:350ms]">
-            {/* Primary CTA - Main conversion goal */}
-            <Button size="lg" asChild className="w-full sm:w-auto text-base px-10 py-6 text-lg font-semibold hover:scale-[1.02] transition-transform duration-200">
-              <Link to="/auth?signup=true">{HERO.primaryCta}</Link>
+            {/* Primary CTA - Waitlist signup */}
+            <Button 
+              size="lg" 
+              onClick={() => setWaitlistOpen(true)}
+              className="w-full sm:w-auto text-base px-10 py-6 text-lg font-semibold hover:scale-[1.02] transition-transform duration-200"
+            >
+              Join the Waitlist
             </Button>
             
-            {/* Download App - Now next to Join Now */}
+            {/* Beta Access - For users with invite codes */}
             <Button 
               variant="outline" 
               size="lg" 
               asChild 
               className="w-full sm:w-auto text-base px-6 gap-2 hover:scale-[1.02] transition-transform duration-200"
             >
-              <Link to="/install">
-                <Smartphone className="h-4 w-4" />
-                Download App
+              <Link to="/auth?signup=true">
+                <KeyRound className="h-4 w-4" />
+                Beta Access
               </Link>
             </Button>
           </div>
+          
+          {/* Sign in link for existing users */}
+          <p className="mt-4 text-sm text-muted-foreground animate-fade-in [animation-delay:400ms]">
+            Already have an account?{" "}
+            <Link to="/auth" className="text-primary hover:underline font-medium">
+              Sign in →
+            </Link>
+          </p>
 
           {/* SECONDARY CTA: Get Involved - Smaller, below primary buttons */}
           <div className="mt-6 animate-fade-in [animation-delay:450ms]">
@@ -192,5 +210,6 @@ export function Hero() {
         </div>
       </div>
     </section>
+    </>
   );
 }

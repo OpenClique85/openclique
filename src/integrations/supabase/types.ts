@@ -7944,6 +7944,42 @@ export type Database = {
         }
         Relationships: []
       }
+      waitlist: {
+        Row: {
+          converted_at: string | null
+          converted_user_id: string | null
+          created_at: string
+          email: string
+          id: string
+          interest: string | null
+          name: string | null
+          notes: string | null
+          referral_source: string | null
+        }
+        Insert: {
+          converted_at?: string | null
+          converted_user_id?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          interest?: string | null
+          name?: string | null
+          notes?: string | null
+          referral_source?: string | null
+        }
+        Update: {
+          converted_at?: string | null
+          converted_user_id?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          interest?: string | null
+          name?: string | null
+          notes?: string | null
+          referral_source?: string | null
+        }
+        Relationships: []
+      }
       wrapped_cards: {
         Row: {
           card_data: Json
