@@ -20,7 +20,7 @@
  * =============================================================================
  */
 
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 
 // -----------------------------------------------------------------------------
 // IMPORTS: UI Components (notifications and tooltips)
@@ -45,6 +45,7 @@ import { MobileActionBar } from "./components/MobileActionBar";
 import { FloatingHelpButton } from "./components/support/FloatingHelpButton";
 import { InstallPrompt } from "./components/pwa/InstallPrompt";
 import { OfflineIndicator } from "./components/pwa/OfflineIndicator";
+import { toast } from "sonner";
 
 // -----------------------------------------------------------------------------
 // LOADING FALLBACK: Displayed while lazy components load
@@ -166,7 +167,30 @@ const queryClient = new QueryClient({
 // -----------------------------------------------------------------------------
 // MAIN APP COMPONENT
 // -----------------------------------------------------------------------------
-const App = () => (
+const App = () => {
+  // Global error handler for unhandled promise rejections
+  useEffect(() => {
+    const handleRejection = (event: PromiseRejectionEvent) => {
+      console.error("Unhandled promise rejection:", event.reason);
+      toast.error("Something went wrong. Please try again.");
+      event.preventDefault();
+    };
+
+    const handleError = (event: ErrorEvent) => {
+      console.error("Uncaught error:", event.error);
+      // Don't show toast for every error, just log it
+    };
+
+    window.addEventListener("unhandledrejection", handleRejection);
+    window.addEventListener("error", handleError);
+    
+    return () => {
+      window.removeEventListener("unhandledrejection", handleRejection);
+      window.removeEventListener("error", handleError);
+    };
+  }, []);
+
+  return (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TutorialProvider>
@@ -283,6 +307,7 @@ const App = () => (
       </TutorialProvider>
     </AuthProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;
