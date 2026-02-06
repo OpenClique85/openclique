@@ -17,6 +17,15 @@ import { OnboardingFeedbackModal } from '@/components/OnboardingFeedbackModal';
 const emailSchema = z.string().email('Please enter a valid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
 
+// Valid beta access codes - case insensitive
+const VALID_BETA_CODES = ['TESTER-2025', 'CREATOR-2025', 'ORG-2025', 'SPONSOR-2025'];
+
+const isValidBetaCode = (code: string): boolean => {
+  const normalizedCode = code.trim().toUpperCase();
+  // Check if it's a valid beta code OR a friend invite code (starts with FRIEND-)
+  return VALID_BETA_CODES.includes(normalizedCode) || normalizedCode.startsWith('FRIEND-');
+};
+
 export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,7 +34,7 @@ export default function Auth() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string; confirmPassword?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string; confirmPassword?: string; inviteCode?: string }>({});
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [redemptionId, setRedemptionId] = useState<string | undefined>();
   const [inviteCodeLabel, setInviteCodeLabel] = useState<string | null>(null);
@@ -65,8 +74,8 @@ export default function Auth() {
     }
   }, [user, redemptionId, navigate, from]);
 
-  const validateForm = (checkPassword = true, checkConfirmPassword = false) => {
-    const newErrors: { email?: string; password?: string; confirmPassword?: string } = {};
+  const validateForm = (checkPassword = true, checkConfirmPassword = false, requireInviteCode = false) => {
+    const newErrors: { email?: string; password?: string; confirmPassword?: string; inviteCode?: string } = {};
     
     try {
       emailSchema.parse(email);
@@ -89,6 +98,15 @@ export default function Auth() {
     if (checkConfirmPassword) {
       if (password !== confirmPassword) {
         newErrors.confirmPassword = 'Passwords do not match';
+      }
+    }
+
+    // Validate invite code for signup
+    if (requireInviteCode) {
+      if (!inviteCode.trim()) {
+        newErrors.inviteCode = 'Beta access code is required to create an account';
+      } else if (!isValidBetaCode(inviteCode)) {
+        newErrors.inviteCode = 'Invalid beta access code. Please check your code and try again.';
       }
     }
     
@@ -173,7 +191,8 @@ export default function Auth() {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm(true, true)) return;
+    // Require valid invite code for signup
+    if (!validateForm(true, true, true)) return;
     
     setIsSubmitting(true);
     const { error } = await signUp(email, password);
@@ -388,25 +407,37 @@ export default function Auth() {
           </CardHeader>
           
           <CardContent>
-            {/* Invite code input (if not from URL) */}
-            {!urlInviteCode && (
-              <div className="mb-6">
-                <div className="space-y-2">
-                  <Label htmlFor="invite-code">Have an invite code? (optional)</Label>
-                  <div className="relative">
-                    <Ticket className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="invite-code"
-                      type="text"
-                      placeholder="COFOUNDER-2025"
-                      value={inviteCode}
-                      onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
-                      className="pl-10 uppercase"
-                    />
-                  </div>
+            {/* Invite code input - required for signup */}
+            <div className="mb-6">
+              <div className="space-y-2">
+                <Label htmlFor="invite-code" className="flex items-center gap-1">
+                  Beta Access Code
+                  <span className="text-destructive">*</span>
+                </Label>
+                <div className="relative">
+                  <Ticket className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="invite-code"
+                    type="text"
+                    placeholder="TESTER-2025"
+                    value={inviteCode}
+                    onChange={(e) => {
+                      setInviteCode(e.target.value.toUpperCase());
+                      // Clear error when user types
+                      if (errors.inviteCode) {
+                        setErrors(prev => ({ ...prev, inviteCode: undefined }));
+                      }
+                    }}
+                    className={`pl-10 uppercase ${errors.inviteCode ? 'border-destructive' : ''}`}
+                    disabled={!!urlInviteCode}
+                  />
                 </div>
+                {errors.inviteCode && <p className="text-sm text-destructive">{errors.inviteCode}</p>}
+                <p className="text-xs text-muted-foreground">
+                  OpenClique is currently in private beta. You need a valid access code to create an account.
+                </p>
               </div>
-            )}
+            </div>
 
             <Tabs defaultValue={signupFlag || inviteCode || questSlug ? "signup" : "signin"} className="space-y-6">
               <TabsList className="grid w-full grid-cols-2">
