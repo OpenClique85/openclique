@@ -8526,6 +8526,9 @@ export type Database = {
           created_at: string | null
           display_name: string | null
           id: string | null
+          public_preferences: Json | null
+          show_xp_and_badges: boolean | null
+          username: string | null
           visibility_level: string | null
         }
         Insert: {
@@ -8533,6 +8536,9 @@ export type Database = {
           created_at?: string | null
           display_name?: never
           id?: string | null
+          public_preferences?: never
+          show_xp_and_badges?: never
+          username?: string | null
           visibility_level?: never
         }
         Update: {
@@ -8540,6 +8546,9 @@ export type Database = {
           created_at?: string | null
           display_name?: never
           id?: string | null
+          public_preferences?: never
+          show_xp_and_badges?: never
+          username?: string | null
           visibility_level?: never
         }
         Relationships: []
@@ -9243,6 +9252,25 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles_public"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_traits_public: {
+        Row: {
+          category: string | null
+          display_name: string | null
+          emoji: string | null
+          importance: number | null
+          trait_slug: string | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_traits_trait_slug_fkey"
+            columns: ["trait_slug"]
+            isOneToOne: false
+            referencedRelation: "trait_library"
+            referencedColumns: ["slug"]
           },
         ]
       }
