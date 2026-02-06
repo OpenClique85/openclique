@@ -616,6 +616,77 @@ export type Database = {
           },
         ]
       }
+      clique_chat_messages: {
+        Row: {
+          clique_id: string
+          created_at: string
+          id: string
+          is_pinned: boolean
+          media_type: string | null
+          media_url: string | null
+          message: string
+          reactions: Json | null
+          sender_id: string
+          sender_type: string
+          thread_id: string | null
+        }
+        Insert: {
+          clique_id: string
+          created_at?: string
+          id?: string
+          is_pinned?: boolean
+          media_type?: string | null
+          media_url?: string | null
+          message: string
+          reactions?: Json | null
+          sender_id: string
+          sender_type?: string
+          thread_id?: string | null
+        }
+        Update: {
+          clique_id?: string
+          created_at?: string
+          id?: string
+          is_pinned?: boolean
+          media_type?: string | null
+          media_url?: string | null
+          message?: string
+          reactions?: Json | null
+          sender_id?: string
+          sender_type?: string
+          thread_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clique_chat_messages_clique_id_fkey"
+            columns: ["clique_id"]
+            isOneToOne: false
+            referencedRelation: "squads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clique_chat_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clique_chat_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clique_chat_messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "clique_chat_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clique_invitations: {
         Row: {
           created_at: string
