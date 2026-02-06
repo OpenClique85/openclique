@@ -1,119 +1,154 @@
 
-# Plan: BUGGS PWA Icon + Clique Chat System
+# Public User Profile System
 
-## Overview
-Two main changes are needed:
-1. **PWA Icon Update**: Replace current icon with BUGGS face + "OC" branding
-2. **Clique Chat System**: Enable persistent cliques (like "Bagel Boys") to have group chat lobbies with quest suggestion capabilities
+## Problem
+Users can set their preferences (social style, interests, goals, vibe preferences, etc.) but these never appear publicly. When viewing other users in cliques or search results, you only see their name and city. There's no way to get a sense of who someone is before joining a group with them.
 
----
+## Solution Overview
+Create a rich public profile view that shows:
+- Basic info (name, username, area, member since)
+- Social vibe indicators (group size preference, energy level, etc.)
+- Quest interests and preferences
+- Public traits (from the algorithm)
+- XP level and featured badges (if privacy allows)
 
-## Part 1: PWA Icon Update
-
-### What Needs to Change
-The current PWA icon is a purple gradient with people silhouettes. You want BUGGS (the bunny mascot) with "OC" text above him.
-
-### Implementation
-1. **Create new icon assets** based on the uploaded BUGGS face image with "OC" text added
-   - `public/pwa-192x192.png` - 192x192 version
-   - `public/pwa-512x512.png` - 512x512 version  
-   - `public/apple-touch-icon-180x180.png` - iOS version
-   - `public/favicon.png` - Browser tab icon
-
-2. **Design specifications**:
-   - Background: Light/white circle with mint/teal border ring (as shown in uploaded image)
-   - "OC" text positioned above BUGGS head
-   - BUGGS face centered in the icon
-
-**Note**: This requires creating new graphic assets. You'll need to provide or approve a designed icon with the "OC" text added above BUGGS before I can implement it.
+All of this will respect user privacy settings.
 
 ---
 
-## Part 2: Clique Chat System
+## Database Changes
 
-### Current Architecture
-- `squads` table = **persistent cliques** (like "Bagel Boys")
-- `quest_squads` table = **temporary instance-based groups** (for specific quest runs)
-- `squad_chat_messages.squad_id` currently references ONLY `quest_squads`
-- Persistent cliques have NO chat functionality
-
-### What's Needed
-Enable persistent cliques to have their own group chat lobbies where members can:
-- Send/receive real-time messages
-- Suggest quests to the group
-- View member activity
-
-### Database Changes
-A new `clique_chat_messages` table will be created for persistent clique chat (keeping existing `squad_chat_messages` for quest-based groups):
+### 1. Create Enhanced Public Profile View
+Replace the minimal `profiles_public` view with a richer one that includes:
 
 ```text
-┌─────────────────────────────────────┐
-│       clique_chat_messages          │
-├─────────────────────────────────────┤
-│ id (uuid, primary key)              │
-│ clique_id (uuid) → squads.id        │
-│ sender_id (uuid) → profiles.id      │
-│ message (text)                      │
-│ sender_type (text)                  │
-│ created_at (timestamp)              │
-│ is_pinned (boolean)                 │
-│ thread_id (uuid, self-reference)    │
-│ reactions (jsonb)                   │
-│ media_url (text)                    │
-│ media_type (text)                   │
-└─────────────────────────────────────┘
+profiles_public (enhanced view)
+├── id, display_name, username, city, created_at
+├── visibility_level (from privacy_settings)
+├── public_preferences (filtered JSONB with only shareable data)
+│   ├── interests (quest types they like)
+│   ├── social_style (group size, vibe preference)
+│   ├── context_tags (new to city, remote/WFH, etc.)
+│   └── demographics (area, school if show_school_publicly=true)
+└── show_xp_and_badges flag
 ```
 
-RLS policies:
-- Members can read messages from their own cliques
-- Members can insert messages to their own cliques
-- Admins have full access
+The view will:
+- Return full data for "public" visibility users
+- Return limited data for "squad-only" users (only visible to clique members - handled by frontend)
+- Return placeholder for "private" users
 
-### Frontend Changes
+### 2. Create Public User Traits View
+A new `user_traits_public` view that joins `user_traits` with `trait_library` but only returns traits marked as `visibility = 'public'`:
 
-1. **Add Chat Tab to CliqueDetail page** (`src/pages/CliqueDetail.tsx`)
-   - Add 5th tab: "Chat" with MessageSquare icon
-   - Include chat component and quest suggestion button
-
-2. **Create CliquePersistentChat component** (`src/components/cliques/CliquePersistentChat.tsx`)
-   - Real-time chat using Supabase realtime
-   - Message display with sender names and timestamps
-   - Input field with send button
-   - Auto-scroll to latest messages
-
-3. **Integrate SuggestQuestModal in chat view**
-   - Button to open quest suggestion modal
-   - Already exists at `src/components/cliques/SuggestQuestModal.tsx`
-
-4. **Update component exports** (`src/components/cliques/index.ts`)
+```text
+user_traits_public
+├── user_id
+├── trait_slug
+├── display_name (from trait_library)
+├── emoji
+├── category
+└── importance
+```
 
 ---
 
-## Technical Implementation Details
+## Frontend Changes
 
-### Files to Create
-- `src/components/cliques/CliquePersistentChat.tsx` - New chat component for persistent cliques
+### 1. New Component: `UserPublicProfileDrawer`
+**Location:** `src/components/social/UserPublicProfileDrawer.tsx`
 
-### Files to Modify
-- `src/pages/CliqueDetail.tsx` - Add Chat tab with chat component and quest suggestion
-- `src/components/cliques/index.ts` - Export new component
-- PWA icon files in `public/` directory
+A slide-out drawer (using Vaul) that displays:
 
-### Database Migration
-New table and RLS policies for `clique_chat_messages`
+```text
+┌─────────────────────────────────────────┐
+│  [Avatar]  Display Name      [@username]│
+│            📍 East Austin               │
+│            Member since Jan 2026        │
+├─────────────────────────────────────────┤
+│  💬 Social Vibe                         │
+│  ┌─────┐ ┌─────┐ ┌─────┐               │
+│  │Small│ │Chill│ │Slow │               │
+│  │Group│ │Vibe │ │Warm │               │
+│  └─────┘ └─────┘ └─────┘               │
+├─────────────────────────────────────────┤
+│  ✨ Interests                           │
+│  🍽️ Food & Drink  🎵 Live Music        │
+│  🌳 Outdoors                            │
+├─────────────────────────────────────────┤
+│  🧠 Algorithm Traits                    │
+│  🏠 Cozy Energy  ⚖️ Balanced Explorer   │
+├─────────────────────────────────────────┤
+│  🏆 Level 4 • 450 XP                    │
+│  [Badge] [Badge]                        │
+├─────────────────────────────────────────┤
+│  [Add Contact] [Invite to Clique] [Poke]│
+└─────────────────────────────────────────┘
+```
+
+### 2. New Hook: `useUserPublicProfile`
+**Location:** `src/hooks/useUserPublicProfile.ts`
+
+Fetches:
+- Public profile data from `profiles_public`
+- Public traits from `user_traits_public`
+- XP/level if privacy allows
+- Featured badges if privacy allows
+
+### 3. Integration Points
+Update these locations to use the new drawer:
+- `UserSearch.tsx` - the `handleViewProfile` function
+- `CliqueDetail.tsx` - clicking on member names
+- `UserSearchCard.tsx` - clicking the card
+- `FindPeopleSection.tsx` - search results
 
 ---
 
-## Sequence of Work
+## Privacy Enforcement
 
-1. Database migration to create `clique_chat_messages` table with RLS
-2. Create `CliquePersistentChat` component
-3. Update `CliqueDetail.tsx` to add Chat tab
-4. Update component exports
-5. Create new PWA icon assets (pending your approval of design)
+The system will respect these privacy settings:
+
+| Privacy Setting | Effect on Public Profile |
+|-----------------|-------------------------|
+| `profile_visibility: public` | Full profile visible |
+| `profile_visibility: squad-only` | Only visible to clique members |
+| `profile_visibility: private` | Shows "Private User" placeholder |
+| `show_xp_and_badges: false` | Hides XP level and badges |
+| `demographics.show_school_publicly: false` | Hides school info |
+
+Individual traits respect their own `visibility` field.
 
 ---
 
-## Questions Before Proceeding
+## Files to Create
 
-For the PWA icon: Would you like me to proceed with the BUGGS face image you uploaded and add "OC" text above it programmatically, or do you have a finished icon design ready to use?
+1. `src/components/social/UserPublicProfileDrawer.tsx` - Main drawer component
+2. `src/hooks/useUserPublicProfile.ts` - Data fetching hook
+3. Database migration for enhanced `profiles_public` view
+4. Database migration for new `user_traits_public` view
+
+## Files to Modify
+
+1. `src/pages/UserSearch.tsx` - Wire up drawer
+2. `src/pages/CliqueDetail.tsx` - Add clickable member names
+3. `src/components/social/UserSearchCard.tsx` - Already supports onClick, no change needed
+4. `src/components/profile/FindPeopleSection.tsx` - Wire up drawer
+
+---
+
+## Technical Details
+
+### View Security
+Both views use `security_invoker = true` to respect RLS policies.
+
+### Badge Display
+Featured badges are limited to 3 to keep the UI clean.
+
+### Preference Mapping
+The drawer will map preference keys to human-readable labels:
+- `small_3_5` → "Small groups (3-5)"
+- `vibe_preference: 2` → "Chill vibes"
+- `remote_wfh` → "Remote/WFH"
+
+### Loading States
+Skeleton loading for smooth UX while fetching profile data.
