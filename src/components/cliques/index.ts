@@ -102,8 +102,11 @@ export { CliqueRolesManager } from './CliqueRolesManager';
 /** Settings modal for clique configuration */
 export { CliqueSettingsModal } from './CliqueSettingsModal';
 
-/** Real-time group chat interface */
+/** Real-time group chat interface (for quest-based squads) */
 export { CliqueChat } from './CliqueChat';
+
+/** Real-time group chat for persistent cliques */
+export { CliquePersistentChat } from './CliquePersistentChat';
 
 /** Shared memories, achievements, and clique history */
 export { CliqueLoreTab } from './CliqueLoreTab';

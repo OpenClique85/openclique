@@ -20,6 +20,7 @@ import { useToast } from '@/hooks/use-toast';
 import { CliqueRolesManager } from '@/components/cliques/CliqueRolesManager';
 import { CliqueSettingsModal } from '@/components/cliques/CliqueSettingsModal';
 import { CliqueApplicationsInbox } from '@/components/cliques/CliqueApplicationsInbox';
+import { CliquePersistentChat } from '@/components/cliques/CliquePersistentChat';
 import { GetHelpButton } from '@/components/support';
 import { 
   Loader2, 
@@ -84,7 +85,7 @@ export default function CliqueDetail() {
   const [showLeaveDialog, setShowLeaveDialog] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
-  const [activeTab, setActiveTab] = useState('members');
+  const [activeTab, setActiveTab] = useState('chat');
 
   const currentMember = members.find(m => m.user_id === user?.id);
   const isLeader = currentMember?.role === 'leader';
@@ -358,7 +359,11 @@ export default function CliqueDetail() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="chat" className="gap-1">
+              <MessageSquare className="h-4 w-4" />
+              <span className="hidden sm:inline">Chat</span>
+            </TabsTrigger>
             <TabsTrigger value="members" className="gap-1">
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Members</span>
@@ -376,6 +381,22 @@ export default function CliqueDetail() {
               <span className="hidden sm:inline">Lore</span>
             </TabsTrigger>
           </TabsList>
+
+          {/* Chat Tab */}
+          <TabsContent value="chat">
+            {!isArchived ? (
+              <CliquePersistentChat 
+                cliqueId={cliqueId!} 
+                cliqueName={clique.name} 
+              />
+            ) : (
+              <Card>
+                <CardContent className="py-12 text-center text-muted-foreground">
+                  Chat is disabled for archived cliques.
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
 
           {/* Members Tab */}
           <TabsContent value="members">
