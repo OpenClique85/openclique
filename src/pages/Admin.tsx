@@ -52,6 +52,7 @@ import { PromptManager } from '@/components/admin/ai/PromptManager';
 import { OrgApplicationsManager } from '@/components/admin/OrgApplicationsManager';
 import { ModerationDashboard } from '@/components/admin/ModerationDashboard';
 import { PilotDemandDashboard, TierAccountsView, TierApplicationsManager, ARRForecasting } from '@/components/admin/payments';
+import { WaitlistManager } from '@/components/admin/WaitlistManager';
 
 export default function Admin() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
@@ -120,6 +121,7 @@ export default function Admin() {
       case 'messaging': return <MessagingCenter />;
       case 'notification-console': return <NotificationConsole />;
       // Growth
+      case 'waitlist': return <WaitlistManager />;
       case 'invite-codes': return <InviteCodesManager />;
       case 'friend-referrals': return <ReferralAnalytics />;
       case 'onboarding-feedback': return <OnboardingFeedbackManager />;

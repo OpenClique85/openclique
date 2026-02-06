@@ -110,3 +110,6 @@ verify_jwt = false
 
 [functions.auto-close-past-quests]
 verify_jwt = false
+
+[functions.export-waitlist]
+verify_jwt = false
