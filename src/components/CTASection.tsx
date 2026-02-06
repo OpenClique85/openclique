@@ -53,9 +53,9 @@ export function CTASection() {
               </Button>
               <Button
                 size="lg"
-                variant="ghost"
+                variant="outline"
                 asChild
-                className="w-full sm:w-auto text-base px-8 text-background/80 hover:text-background hover:bg-background/10 hover:scale-[1.02] transition-all duration-200"
+                className="w-full sm:w-auto text-base px-8 bg-background/10 text-background border-background/40 hover:bg-background/20 hover:border-background/60 hover:scale-[1.02] transition-all duration-200"
               >
                 <Link to="/install">
                   <Smartphone className="mr-2 h-5 w-5" />
