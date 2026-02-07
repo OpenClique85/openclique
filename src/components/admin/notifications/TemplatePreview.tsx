@@ -22,14 +22,13 @@ const TEMPLATES = {
     name: 'Quest Confirmation',
     description: 'Sent when a user is confirmed for a quest',
     subject: "🎉 You're In!",
-    variables: ['display_name', 'quest_name', 'quest_date', 'quest_location', 'squad_size', 'whatsapp_link'],
+    variables: ['display_name', 'quest_name', 'quest_date', 'quest_location', 'squad_size'],
     defaultVars: {
       display_name: 'Alex',
       quest_name: 'Morning Hike at Mount Bonnell',
       quest_date: 'Saturday, Feb 15 at 8:00 AM',
       quest_location: 'Mount Bonnell Trailhead',
       squad_size: '4-6',
-      whatsapp_link: 'https://chat.whatsapp.com/example',
     },
   },
   quest_reminder: {
@@ -319,13 +318,7 @@ function generateTemplateHtml(template: TemplateKey, vars: Record<string, string
             <p style="margin: 0 0 10px 0;"><strong>📍 Where:</strong> ${escapeHtml(vars.quest_location || 'TBD')}</p>
             <p style="margin: 0;"><strong>👥 Squad Size:</strong> ${escapeHtml(vars.squad_size || '3-6')} people</p>
           </div>
-          ${vars.whatsapp_link ? `
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="${escapeHtml(vars.whatsapp_link)}" style="background: #25D366; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">
-                💬 Join Your Squad's WhatsApp
-              </a>
-            </div>
-          ` : ''}
+          <p style="font-size: 14px; color: #666; margin-top: 20px;">Check the app to see your squad details and get ready!</p>
           <p style="font-size: 14px; color: #666;">See you there!</p>
           <p style="font-size: 14px; color: #666;">— The OpenClique Team</p>
         </div>

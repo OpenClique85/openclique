@@ -45,13 +45,7 @@ const templates: Record<string, (vars: Record<string, string>) => string> = {
         <p style="margin: 0;"><strong>👥 Squad Size:</strong> ${escapeHtml(vars.squad_size || "3-6")} people</p>
       </div>
       
-      ${vars.whatsapp_link ? `
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="${escapeHtml(vars.whatsapp_link)}" style="background: #25D366; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">
-            💬 Join Your Squad's WhatsApp
-          </a>
-        </div>
-      ` : ""}
+      <p style="font-size: 14px; color: #666; margin-top: 20px;">Check the app to see your squad details and get ready!</p>
       
       <p style="font-size: 14px; color: #666;">See you there!</p>
       <p style="font-size: 14px; color: #666;">— The OpenClique Team</p>

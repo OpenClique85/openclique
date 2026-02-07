@@ -1,9 +1,7 @@
-import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Users, MapPin, Link2, Check, Loader2, UserPlus } from 'lucide-react';
+import { Users, MapPin, Check, Loader2, UserPlus } from 'lucide-react';
 
 interface SquadMember {
   user_id: string;
@@ -23,7 +21,7 @@ interface SquadSuggestion {
 interface SquadCardProps {
   squad: SquadSuggestion;
   squadIndex: number;
-  onConfirm: (squad: SquadSuggestion, whatsappLink: string) => Promise<void>;
+  onConfirm: (squad: SquadSuggestion) => Promise<void>;
   isConfirming: boolean;
 }
 
@@ -39,8 +37,6 @@ const AREA_LABELS: Record<string, string> = {
 };
 
 export function SquadCard({ squad, squadIndex, onConfirm, isConfirming }: SquadCardProps) {
-  const [whatsappLink, setWhatsappLink] = useState('');
-  
   const compatPercent = Math.round(squad.compatibility_score * 100);
   const compatColor = compatPercent >= 75 
     ? 'bg-emerald-100 text-emerald-700' 
@@ -98,23 +94,10 @@ export function SquadCard({ squad, squadIndex, onConfirm, isConfirming }: SquadC
           ))}
         </div>
 
-        {/* WhatsApp link input */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium flex items-center gap-2">
-            <Link2 className="h-4 w-4" />
-            WhatsApp Group Link (optional)
-          </label>
-          <Input
-            placeholder="https://chat.whatsapp.com/..."
-            value={whatsappLink}
-            onChange={(e) => setWhatsappLink(e.target.value)}
-          />
-        </div>
-
         {/* Confirm button */}
         <Button 
           className="w-full"
-          onClick={() => onConfirm(squad, whatsappLink)}
+          onClick={() => onConfirm(squad)}
           disabled={isConfirming}
         >
           {isConfirming ? (

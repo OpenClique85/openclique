@@ -95,7 +95,7 @@ export function SquadRecommendationModal({
     }
   };
 
-  const confirmSquad = async (squad: SquadSuggestion, whatsappLink: string, squadIndex: number) => {
+  const confirmSquad = async (squad: SquadSuggestion, squadIndex: number) => {
     setConfirmingSquad(squadIndex);
     try {
       const { data: sessionData } = await supabase.auth.getSession();
@@ -108,7 +108,6 @@ export function SquadRecommendationModal({
           quest_id: questId,
           squad_name: squad.suggested_name,
           status: 'confirmed',
-          whatsapp_link: whatsappLink || null,
           compatibility_score: squad.compatibility_score,
           confirmed_at: new Date().toISOString(),
         })
@@ -146,9 +145,7 @@ export function SquadRecommendationModal({
           type: 'signup_confirmed',
           quest_id: questId,
           user_ids: userIds,
-          custom_message: whatsappLink 
-            ? `You've been confirmed! Join your squad's WhatsApp group.`
-            : `You've been confirmed for ${questTitle}!`,
+          custom_message: `You've been confirmed for ${questTitle}! Check the app for details.`,
         },
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
@@ -175,7 +172,7 @@ export function SquadRecommendationModal({
   const confirmAllSquads = async () => {
     for (let i = 0; i < squads.length; i++) {
       if (!confirmedSquads.has(i)) {
-        await confirmSquad(squads[i], '', i);
+        await confirmSquad(squads[i], i);
       }
     }
     onSquadsConfirmed();
@@ -264,7 +261,7 @@ export function SquadRecommendationModal({
                       <SquadCard
                         squad={squad}
                         squadIndex={idx}
-                        onConfirm={(s, link) => confirmSquad(s, link, idx)}
+                        onConfirm={(s) => confirmSquad(s, idx)}
                         isConfirming={confirmingSquad === idx}
                       />
                     </div>
