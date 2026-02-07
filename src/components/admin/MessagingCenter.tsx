@@ -59,7 +59,8 @@ See you soon!
 Today's the day! {{quest_title}} is happening at {{quest_time}}.
 
 📍 Meeting Point: {{meeting_location}}
-📱 Join the WhatsApp group if you haven't: {{whatsapp_link}}
+
+Check the app for your squad details and any last-minute updates.
 
 See you soon!
 - The OpenClique Team`
@@ -260,7 +261,7 @@ export function MessagingCenter() {
                 className="font-mono text-sm"
               />
               <p className="text-xs text-muted-foreground">
-                Available variables: {'{{display_name}}'}, {'{{quest_title}}'}, {'{{quest_date}}'}, {'{{quest_time}}'}, {'{{meeting_location}}'}, {'{{whatsapp_link}}'}, {'{{my_quests_url}}'}, {'{{feedback_url}}'}, {'{{briefing}}'}
+                Available variables: {'{{display_name}}'}, {'{{quest_title}}'}, {'{{quest_date}}'}, {'{{quest_time}}'}, {'{{meeting_location}}'}, {'{{my_quests_url}}'}, {'{{feedback_url}}'}, {'{{briefing}}'}
               </p>
             </div>
           </div>

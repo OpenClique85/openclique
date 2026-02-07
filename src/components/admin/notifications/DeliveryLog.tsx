@@ -194,7 +194,7 @@ export function DeliveryLog() {
               <SelectItem value="email">Email</SelectItem>
               <SelectItem value="email_invite">Email Invite</SelectItem>
               <SelectItem value="admin_dm">Admin DM</SelectItem>
-              <SelectItem value="whatsapp">WhatsApp</SelectItem>
+              <SelectItem value="push">Push Notification</SelectItem>
             </SelectContent>
           </Select>
         </div>
