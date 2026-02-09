@@ -271,6 +271,7 @@ export default function QuestBuilder() {
         start_datetime: formData.start_datetime || null,
         end_datetime: formData.end_datetime || null,
         duration_notes: formData.duration_notes || null,
+        duration_steps: formData.duration_steps && formData.duration_steps.length > 0 ? formData.duration_steps : null,
         default_duration_minutes: formData.default_duration_minutes || 120,
         full_description: formData.full_description || null,
         highlights: formData.highlights.length > 0 ? formData.highlights : null,
