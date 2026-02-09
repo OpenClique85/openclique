@@ -53,6 +53,7 @@ import { OrgApplicationsManager } from '@/components/admin/OrgApplicationsManage
 import { ModerationDashboard } from '@/components/admin/ModerationDashboard';
 import { PilotDemandDashboard, TierAccountsView, TierApplicationsManager, ARRForecasting } from '@/components/admin/payments';
 import { WaitlistManager } from '@/components/admin/WaitlistManager';
+import { TutorialQuestAnalytics } from '@/components/admin/TutorialQuestAnalytics';
 
 export default function Admin() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
@@ -125,6 +126,7 @@ export default function Admin() {
       case 'invite-codes': return <InviteCodesManager />;
       case 'friend-referrals': return <ReferralAnalytics />;
       case 'onboarding-feedback': return <OnboardingFeedbackManager />;
+      case 'tutorial-analytics': return <TutorialQuestAnalytics />;
       // Payments & Premium
       case 'pilot-demand': return <PilotDemandDashboard />;
       case 'tier-accounts': return <TierAccountsView />;

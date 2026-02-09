@@ -18,6 +18,7 @@ import { Toggle } from '@/components/ui/toggle';
 
 import buggsFace from '@/assets/buggs-face.png';
 import foodTruckScene from '@/assets/austin/food-truck-scene.jpg';
+import { TutorialQuestBanner } from '@/components/tutorial-quest';
 
 const CATEGORY_CONFIG = {
   culture: { icon: '🎭', title: 'Culture & Arts' },
@@ -339,6 +340,11 @@ const Quests = () => {
             </section>
           </>
         )}
+
+        {/* Tutorial Quest Banner */}
+        <div className="px-4 max-w-6xl mx-auto">
+          <TutorialQuestBanner />
+        </div>
 
         {/* Loading State */}
         {isLoading && (
