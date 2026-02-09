@@ -79,7 +79,7 @@ export function WhoItsForSection() {
                 <button
                   key={persona.id}
                   onClick={() => handlePersonaClick(persona)}
-                  className="group bg-card border border-border rounded-xl p-5 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 text-left cursor-pointer"
+                  className="group bg-card border border-border rounded-2xl p-5 transition-all duration-300 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 text-left cursor-pointer"
                 >
                   <div className="flex items-start gap-4">
                     {/* Icon */}
