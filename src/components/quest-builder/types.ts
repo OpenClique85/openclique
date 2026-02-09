@@ -52,6 +52,7 @@ export interface QuestFormData {
   start_datetime: string;
   end_datetime: string;
   duration_notes: string;
+  duration_steps: Array<{ label: string; minutes: number }>;
   default_duration_minutes: number;
   
   // Step 3: Constraints (Hard Filters)
