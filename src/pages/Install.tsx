@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useNavigate } from 'react-router-dom';
+import { PUBLISHED_URL } from '@/lib/config';
 
-const INSTALL_URL = 'https://openclique.lovable.app/install';
+const INSTALL_URL = `${PUBLISHED_URL}/install`;
 
 const benefits = [
   { icon: Zap, title: 'Instant Access', description: 'Launch from your home screen' },
