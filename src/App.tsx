@@ -147,6 +147,9 @@ const SponsorProfile = lazy(() => import("./pages/SponsorProfile"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 
+// Tutorial
+const TutorialQuest = lazy(() => import("./pages/TutorialQuest"));
+
 // PWA
 const Install = lazy(() => import("./pages/Install"));
 
