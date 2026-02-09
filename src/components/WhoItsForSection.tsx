@@ -54,15 +54,18 @@ export function WhoItsForSection() {
   };
 
   return (
-    <section className="py-16 md:py-20 bg-muted/50">
+    <section className="py-20 md:py-24 bg-muted/50 relative">
+      {/* Top divider */}
+      <div className="section-divider absolute top-0 left-0 right-0" />
+      
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto">
           {/* Section Header */}
-          <div className="text-center mb-10">
-            <h2 className="font-display text-3xl font-bold text-foreground mb-3">
+          <div className="text-center mb-12">
+            <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3">
               Who's OpenClique For?
             </h2>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-lg">
               If any of these sound like you, you're in the right place.
             </p>
           </div>
@@ -76,7 +79,7 @@ export function WhoItsForSection() {
                 <button
                   key={persona.id}
                   onClick={() => handlePersonaClick(persona)}
-                  className="group bg-card border border-border rounded-xl p-5 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 text-left cursor-pointer"
+                  className="group bg-card border border-border rounded-2xl p-5 transition-all duration-300 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 text-left cursor-pointer"
                 >
                   <div className="flex items-start gap-4">
                     {/* Icon */}
@@ -115,7 +118,7 @@ export function WhoItsForSection() {
                   <button
                     key={persona.id}
                     onClick={() => handleOrgPersonaClick(persona)}
-                    className="group bg-card border border-border rounded-xl p-5 transition-all duration-300 hover:border-accent/30 hover:shadow-lg hover:shadow-accent/5 hover:-translate-y-1 cursor-pointer text-left"
+                    className="group bg-card border border-border rounded-2xl p-5 transition-all duration-300 hover:border-accent/30 hover:shadow-xl hover:shadow-accent/5 hover:-translate-y-1 cursor-pointer text-left"
                   >
                     <div className="flex items-start gap-4">
                       {/* Icon */}

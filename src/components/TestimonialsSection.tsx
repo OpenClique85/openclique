@@ -145,8 +145,8 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
   return (
     <div 
       className={cn(
-        "flex-shrink-0 w-[300px] md:w-[340px] h-[280px] bg-card rounded-2xl p-6 border border-border shadow-sm",
-        "transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-primary/30",
+        "flex-shrink-0 w-[300px] md:w-[340px] bg-card rounded-2xl p-6 border border-border shadow-sm",
+        "transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 hover:border-primary/30",
         "flex flex-col",
         isExpandable && "cursor-pointer"
       )}
@@ -236,11 +236,14 @@ export function TestimonialsSection() {
   };
 
   return (
-    <section className="py-16 md:py-24 bg-muted/30 overflow-hidden">
+    <section className="py-20 md:py-28 bg-muted/30 overflow-hidden relative">
+      {/* Top divider */}
+      <div className="section-divider absolute top-0 left-0 right-0" />
+      
       <div className="container mx-auto px-4">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
+        <div className="text-center mb-14">
+          <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
             Real Stories from Real Cliques
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
