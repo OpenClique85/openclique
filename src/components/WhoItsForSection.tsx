@@ -54,15 +54,18 @@ export function WhoItsForSection() {
   };
 
   return (
-    <section className="py-16 md:py-20 bg-muted/50">
+    <section className="py-20 md:py-24 bg-muted/50 relative">
+      {/* Top divider */}
+      <div className="section-divider absolute top-0 left-0 right-0" />
+      
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto">
           {/* Section Header */}
-          <div className="text-center mb-10">
-            <h2 className="font-display text-3xl font-bold text-foreground mb-3">
+          <div className="text-center mb-12">
+            <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3">
               Who's OpenClique For?
             </h2>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-lg">
               If any of these sound like you, you're in the right place.
             </p>
           </div>
