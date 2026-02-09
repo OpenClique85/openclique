@@ -4086,6 +4086,9 @@ export type Database = {
           preferences: Json | null
           privacy_settings: Json | null
           tutorial_completed_at: string | null
+          tutorial_quest_completed_at: string | null
+          tutorial_quest_dismissed_count: number | null
+          tutorial_quest_step: number | null
           tutorial_steps_completed: Json | null
           updated_at: string
           username: string | null
@@ -4105,6 +4108,9 @@ export type Database = {
           preferences?: Json | null
           privacy_settings?: Json | null
           tutorial_completed_at?: string | null
+          tutorial_quest_completed_at?: string | null
+          tutorial_quest_dismissed_count?: number | null
+          tutorial_quest_step?: number | null
           tutorial_steps_completed?: Json | null
           updated_at?: string
           username?: string | null
@@ -4124,6 +4130,9 @@ export type Database = {
           preferences?: Json | null
           privacy_settings?: Json | null
           tutorial_completed_at?: string | null
+          tutorial_quest_completed_at?: string | null
+          tutorial_quest_dismissed_count?: number | null
+          tutorial_quest_step?: number | null
           tutorial_steps_completed?: Json | null
           updated_at?: string
           username?: string | null
