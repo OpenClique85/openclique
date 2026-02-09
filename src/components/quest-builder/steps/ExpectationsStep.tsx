@@ -52,13 +52,18 @@ export function ExpectationsStep({ formData, updateFormData }: ExpectationsStepP
           onChange={(e) => updateFormData({ what_to_bring: e.target.value })}
           rows={5}
         />
-        <AIFieldSuggester
-          fieldName="what_to_bring"
-          fieldLabel="What to Bring"
-          currentValue={formData.what_to_bring}
-          onSuggestion={(value) => updateFormData({ what_to_bring: value })}
-          questContext={questContext}
-        />
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            Help participants prepare by listing what they should bring.
+          </p>
+          <AIFieldSuggester
+            fieldName="what_to_bring"
+            fieldLabel="What to Bring"
+            currentValue={formData.what_to_bring}
+            onSuggestion={(value) => updateFormData({ what_to_bring: value })}
+            questContext={questContext}
+          />
+        </div>
       </div>
 
       {/* Dress Code */}

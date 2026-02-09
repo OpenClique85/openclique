@@ -158,6 +158,9 @@ export default function QuestBuilder() {
           ? new Date(existingQuest.end_datetime).toISOString().slice(0, 16) 
           : '',
         duration_notes: existingQuest.duration_notes || '',
+        duration_steps: Array.isArray(existingQuest.duration_steps) 
+          ? (existingQuest.duration_steps as Array<{ label: string; minutes: number }>)
+          : [{ label: '', minutes: 30 }],
         default_duration_minutes: existingQuest.default_duration_minutes || 120,
         full_description: existingQuest.full_description || '',
         highlights: (existingQuest.highlights as string[] | null) || [],
@@ -271,6 +274,7 @@ export default function QuestBuilder() {
         start_datetime: formData.start_datetime || null,
         end_datetime: formData.end_datetime || null,
         duration_notes: formData.duration_notes || null,
+        duration_steps: formData.duration_steps && formData.duration_steps.length > 0 ? formData.duration_steps : null,
         default_duration_minutes: formData.default_duration_minutes || 120,
         full_description: formData.full_description || null,
         highlights: formData.highlights.length > 0 ? formData.highlights : null,

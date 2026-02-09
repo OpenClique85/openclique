@@ -451,31 +451,6 @@ const QuestModal = ({ quest, open, onOpenChange }: QuestModalProps) => {
               </section>
             )}
 
-            {/* Objectives */}
-            {quest.objectives && (
-              <section className="space-y-2">
-                <h4 className="font-display font-semibold text-foreground flex items-center gap-2">
-                  <Target className="w-4 h-4 text-primary" />
-                  Quest Objectives
-                </h4>
-                <p className="text-muted-foreground text-sm whitespace-pre-line">
-                  {quest.objectives}
-                </p>
-              </section>
-            )}
-
-            {/* Success Criteria */}
-            {quest.successCriteria && (
-              <section className="space-y-2">
-                <h4 className="font-display font-semibold text-foreground flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-primary" />
-                  How You'll Know You Succeeded
-                </h4>
-                <p className="text-muted-foreground text-sm whitespace-pre-line">
-                  {quest.successCriteria}
-                </p>
-              </section>
-            )}
 
             {/* Rewards */}
             {quest.rewards && (

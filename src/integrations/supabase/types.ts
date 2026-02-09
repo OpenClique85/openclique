@@ -4768,6 +4768,7 @@ export type Database = {
           deleted_at: string | null
           dress_code: string | null
           duration_notes: string | null
+          duration_steps: Json | null
           emergency_contact: string | null
           end_datetime: string | null
           estimated_cost_max: number | null
@@ -4854,6 +4855,7 @@ export type Database = {
           deleted_at?: string | null
           dress_code?: string | null
           duration_notes?: string | null
+          duration_steps?: Json | null
           emergency_contact?: string | null
           end_datetime?: string | null
           estimated_cost_max?: number | null
@@ -4944,6 +4946,7 @@ export type Database = {
           deleted_at?: string | null
           dress_code?: string | null
           duration_notes?: string | null
+          duration_steps?: Json | null
           emergency_contact?: string | null
           end_datetime?: string | null
           estimated_cost_max?: number | null

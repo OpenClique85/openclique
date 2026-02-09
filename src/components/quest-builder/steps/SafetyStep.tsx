@@ -1,7 +1,5 @@
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { QuestFormData } from '../types';
 import { Shield } from 'lucide-react';
 import { AIFieldSuggester } from '../AIFieldSuggester';
@@ -10,13 +8,6 @@ interface SafetyStepProps {
   formData: QuestFormData;
   updateFormData: (updates: Partial<QuestFormData>) => void;
 }
-
-const AGE_OPTIONS = [
-  { value: 'all-ages', label: 'All Ages Welcome' },
-  { value: '18+', label: '18+ Only' },
-  { value: '21+', label: '21+ Only' },
-  { value: 'family', label: 'Family-Friendly (Kids Welcome)' },
-];
 
 export function SafetyStep({ formData, updateFormData }: SafetyStepProps) {
   const questContext = {
@@ -42,29 +33,6 @@ export function SafetyStep({ formData, updateFormData }: SafetyStepProps) {
             </p>
           </div>
         </div>
-      </div>
-
-      {/* Age Restriction */}
-      <div className="space-y-2">
-        <Label className="text-base font-medium">Age Restriction</Label>
-        <Select
-          value={formData.age_restriction}
-          onValueChange={(value) => updateFormData({ age_restriction: value })}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select age requirement" />
-          </SelectTrigger>
-          <SelectContent>
-            {AGE_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <p className="text-sm text-muted-foreground">
-          This should match the constraints set in Step 3.
-        </p>
       </div>
 
       {/* Safety Notes */}
@@ -94,20 +62,6 @@ export function SafetyStep({ formData, updateFormData }: SafetyStepProps) {
             questContext={questContext}
           />
         </div>
-      </div>
-
-      {/* Emergency Contact */}
-      <div className="space-y-2">
-        <Label htmlFor="emergency_contact" className="text-base font-medium">Emergency Contact Info</Label>
-        <Input
-          id="emergency_contact"
-          placeholder="How participants can reach you during the event (e.g., @yourname on the app)"
-          value={formData.emergency_contact}
-          onChange={(e) => updateFormData({ emergency_contact: e.target.value })}
-        />
-        <p className="text-sm text-muted-foreground">
-          This will be shared with participants on the day of the event. Use in-app contact methods only.
-        </p>
       </div>
     </div>
   );

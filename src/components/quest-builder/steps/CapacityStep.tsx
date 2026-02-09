@@ -1,10 +1,9 @@
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { QuestFormData } from '../types';
-import { Users, DollarSign, Gift, Repeat, UsersRound } from 'lucide-react';
+import { Users, Gift, Repeat, UsersRound } from 'lucide-react';
 import { RewardTemplateSelector } from '../RewardTemplateSelector';
 
 interface CapacityStepProps {
@@ -96,23 +95,6 @@ export function CapacityStep({ formData, updateFormData }: CapacityStepProps) {
         </div>
         <p className="text-sm text-muted-foreground">
           Smaller squads (4-6) create stronger connections. Participants will be grouped into squads of this size.
-        </p>
-      </div>
-
-      {/* Cost */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <DollarSign className="w-4 h-4 text-muted-foreground" />
-          <Label htmlFor="cost_description" className="text-base font-medium">Cost to Participants</Label>
-        </div>
-        <Input
-          id="cost_description"
-          placeholder="e.g., Free, $20 per person, $15 (first drink sponsored)"
-          value={formData.cost_description}
-          onChange={(e) => updateFormData({ cost_description: e.target.value })}
-        />
-        <p className="text-sm text-muted-foreground">
-          Be specific about what's included and any out-of-pocket expenses.
         </p>
       </div>
 

@@ -1,0 +1,1 @@
+ALTER TABLE public.quests ADD COLUMN duration_steps JSONB;
