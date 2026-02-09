@@ -95,7 +95,7 @@ export default function TutorialQuest() {
         )}
 
         {/* Step content */}
-        <div className="flex-1 flex items-center justify-center px-4 py-6 md:py-10">
+        <div className="flex-1 px-4 py-6 md:py-10 overflow-y-auto">
           <div className="w-full max-w-lg">
             {step === 0 && <TutorialLobbyStep />}
             {step === 1 && <TutorialPromptStep onValid={setValid} />}
