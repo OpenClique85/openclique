@@ -51,12 +51,12 @@ const BuggsFloating = ({
       aria-label="Find your clique"
     >
       {message && (
-        <div className="bg-card border border-border rounded-xl px-4 py-2 shadow-lg max-w-[200px] animate-fade-in group-hover:bg-accent transition-colors">
+        <div className="relative bg-card border border-border rounded-xl px-4 py-2.5 shadow-lg max-w-[200px] animate-fade-in group-hover:border-primary/30 transition-colors">
           <p className="text-sm text-muted-foreground">{message}</p>
-          <div className="absolute -bottom-1 right-4 w-3 h-3 bg-card border-r border-b border-border transform rotate-45 group-hover:bg-accent transition-colors" />
+          <div className="absolute -bottom-[5px] right-4 w-2.5 h-2.5 bg-card border-r border-b border-border transform rotate-45 group-hover:border-primary/30 transition-colors" />
         </div>
       )}
-      <div className="w-14 h-14 rounded-full bg-background border-2 border-primary/20 shadow-lg flex items-center justify-center group-hover:scale-110 transition-transform overflow-hidden">
+      <div className="w-14 h-14 rounded-full bg-background border-2 border-primary/30 shadow-lg flex items-center justify-center group-hover:scale-110 transition-all duration-300 overflow-hidden animate-pulse-ring">
         <img 
           src={buggsImage} 
           alt="BUGGS - Your clique guide"

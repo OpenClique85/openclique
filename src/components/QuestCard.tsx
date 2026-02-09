@@ -1,30 +1,19 @@
-import { Link } from 'react-router-dom';
-import { Calendar, DollarSign, Clock, Users, Gift, ExternalLink, Star, Sparkles, Flame } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 import type { Quest } from '@/hooks/useQuests';
-import { useQuestRating } from '@/hooks/useQuestRatings';
-import { useCreatorSlug } from '@/hooks/useCreatorSlugs';
-import { useQuestStats } from '@/hooks/useQuestStats';
 import { Badge } from '@/components/ui/badge';
-import logo from '@/assets/oc-icon.png';
+import { Sparkles } from 'lucide-react';
 
-const QUEST_STATUS_CONFIG: Record<Quest['status'], { label: string; color: string; ctaDisabled?: boolean }> = {
+const QUEST_STATUS_CONFIG: Record<Quest['status'], { label: string; color: string }> = {
   'open': { label: 'Open', color: 'green' },
   'closed': { label: 'Full', color: 'yellow' },
-  'coming-soon': { label: 'Coming Soon', color: 'gray', ctaDisabled: true },
-  'completed': { label: 'Completed', color: 'muted', ctaDisabled: true },
+  'coming-soon': { label: 'Coming Soon', color: 'gray' },
+  'completed': { label: 'Completed', color: 'muted' },
 };
 
 interface QuestCardProps {
   quest: Quest;
   onClick: () => void;
 }
-
-const themeColorStyles: Record<Quest['themeColor'], string> = {
-  pink: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300',
-  green: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
-  amber: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
-  purple: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
-};
 
 const statusColorStyles: Record<string, string> = {
   green: 'bg-emerald-100 text-emerald-700 border-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700',
@@ -35,186 +24,69 @@ const statusColorStyles: Record<string, string> = {
 
 const QuestCard = ({ quest, onClick }: QuestCardProps) => {
   const statusConfig = QUEST_STATUS_CONFIG[quest.status];
-  const statusLabel = statusConfig.label;
   const statusStyles = statusColorStyles[statusConfig.color];
-  const themeStyles = themeColorStyles[quest.themeColor];
-  
-  // Fetch rating for this quest
-  const { rating, reviewCount } = useQuestRating(quest.id);
-  
-  // Fetch creator slug for linking
-  const { data: creatorInfo } = useCreatorSlug(
-    quest.creatorType === 'community' ? quest.creatorId : undefined
-  );
-
-  // Fetch live signup and squad stats
-  const { data: questStats } = useQuestStats(quest.id);
-  const signupCount = questStats?.signupCount || 0;
-  const squadCount = questStats?.squadCount || 0;
-  const isPopular = signupCount >= 5; // Show "hot" indicator if 5+ signups
-
-  const handleCreatorClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-  };
 
   return (
     <button
       onClick={onClick}
-      className="w-full h-full text-left bg-card border border-border rounded-xl overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 flex flex-col"
+      className="w-full h-full text-left bg-card border border-border rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 flex flex-col group"
       aria-label={`View details for ${quest.title}`}
     >
-      {/* Hero Image */}
-      <div className="relative h-40 w-full overflow-hidden flex-shrink-0">
+      {/* Hero Image with overlaid info */}
+      <div className="relative h-44 w-full overflow-hidden flex-shrink-0">
         <img 
           src={quest.image} 
           alt={quest.imageAlt}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
-        {/* Status Badge Overlay */}
-        <span className={`absolute top-3 right-3 text-xs font-medium px-2.5 py-1 rounded-full border backdrop-blur-sm ${statusStyles}`}>
-          {statusLabel}
+        {/* Gradient overlay for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+        
+        {/* Status Badge */}
+        <span className={`absolute top-3 right-3 text-xs font-medium px-2.5 py-1 rounded-full border backdrop-blur-sm tracking-wide ${statusStyles}`}>
+          {statusConfig.label}
         </span>
+        
         {/* Sponsored Badge */}
         {quest.isSponsored && (
           <Badge 
             variant="secondary" 
-            className="absolute top-3 left-3 text-xs backdrop-blur-sm bg-sunset/90 text-white border-sunset hover:bg-sunset"
+            className="absolute top-3 left-3 text-xs backdrop-blur-sm bg-sunset/90 text-white border-sunset hover:bg-sunset tracking-wide"
           >
             <Sparkles className="h-3 w-3 mr-1" />
             Sponsored
           </Badge>
         )}
-        {/* Theme Tag Overlay */}
-        <span className={`absolute bottom-3 left-3 text-xs font-medium px-2.5 py-1 rounded-full backdrop-blur-sm ${themeStyles}`}>
-          {quest.theme}
-        </span>
+
+        {/* Title overlaid on image */}
+        <div className="absolute bottom-3 left-3 right-3">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl" role="img" aria-hidden="true">
+              {quest.icon}
+            </span>
+            <h3 className="font-display text-lg font-semibold text-white drop-shadow-md line-clamp-2">
+              {quest.title}
+            </h3>
+          </div>
+        </div>
       </div>
 
       <div className="p-5 flex flex-col flex-1">
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-3">
-          <span className="text-3xl" role="img" aria-hidden="true">
-            {quest.icon}
-          </span>
-          <h3 className="font-display text-lg font-semibold text-foreground">
-            {quest.title}
-          </h3>
+        {/* Date */}
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
+          <Calendar className="w-4 h-4 shrink-0 text-primary" />
+          <span>{quest.metadata.date}</span>
         </div>
 
-        {/* Metadata Grid */}
-        <div className="grid grid-cols-2 gap-2 mb-3 text-sm">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Calendar className="w-4 h-4 shrink-0" />
-            <span className="truncate">{quest.metadata.date}</span>
-          </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <DollarSign className="w-4 h-4 shrink-0" />
-            <span className="truncate">{quest.metadata.cost}</span>
-          </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Clock className="w-4 h-4 shrink-0" />
-            <span className="truncate">{quest.metadata.duration}</span>
-          </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Users className="w-4 h-4 shrink-0" />
-            <span className="truncate">{quest.metadata.squadSize}</span>
-          </div>
-        </div>
-
-        {/* Signup & Squad Stats */}
-        <div className="flex items-center gap-3 mb-3 text-sm">
-          <div className="flex items-center gap-1.5 text-muted-foreground">
-            <Users className="w-4 h-4" />
-            <span className="font-medium text-foreground">{signupCount}</span>
-            <span>signed up</span>
-          </div>
-          {squadCount > 0 && (
-            <div className="flex items-center gap-1.5 text-muted-foreground">
-              <span className="text-foreground font-medium">{squadCount}</span>
-              <span>squad{squadCount !== 1 ? 's' : ''}</span>
-            </div>
-          )}
-          {isPopular && (
-            <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 gap-1">
-              <Flame className="h-3 w-3" />
-              Popular
-            </Badge>
-          )}
-        </div>
-
-        {/* Description - fixed height with line clamp */}
-        <p className="text-muted-foreground text-sm mb-3 line-clamp-2 min-h-[2.5rem]">
+        {/* Description */}
+        <p className="text-muted-foreground text-sm mb-4 line-clamp-2 leading-relaxed flex-1">
           {quest.shortDescription}
         </p>
 
-        {/* Rewards Preview - fixed height */}
-        <div className={`flex items-start gap-2 text-sm font-medium mb-3 rounded-lg p-2.5 min-h-[3.5rem] ${
-          quest.isSponsored 
-            ? 'bg-sunset/10 text-sunset' 
-            : 'bg-primary/5 text-primary'
-        }`}>
-          <Gift className="w-4 h-4 shrink-0 mt-0.5" />
-          <div className="flex-1 line-clamp-2">
-            <span>{quest.rewards}</span>
-            {quest.isSponsored && quest.sponsorName && (
-              <span className="block text-xs opacity-75 mt-0.5">
-                Sponsored by {quest.sponsorName}
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Rating + Creator Attribution Row - pushed to bottom */}
-        <div className="flex items-center justify-between mt-auto pt-2">
-          <div className="flex items-center gap-3">
-            {/* Star Rating - only show if there are reviews */}
-            {reviewCount > 0 && rating !== null && (
-              <div className="flex items-center gap-1 text-sm">
-                <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                <span className="font-medium text-foreground">{rating.toFixed(1)}</span>
-                <span className="text-muted-foreground">({reviewCount})</span>
-              </div>
-            )}
-            
-            {/* Creator Attribution */}
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              {quest.creatorType === 'openclique' || !quest.creatorType ? (
-                <>
-                  <img src={logo} alt="OpenClique" className="w-4 h-4 rounded-full" />
-                  <span>OpenClique</span>
-                </>
-              ) : quest.creatorType === 'community' ? (
-                <>
-                  <span className="w-4 h-4 rounded-full bg-creator/20 flex items-center justify-center text-[10px]">👤</span>
-                  {creatorInfo?.slug ? (
-                    <Link
-                      to={`/creators/${creatorInfo.slug}`}
-                      onClick={handleCreatorClick}
-                      className="hover:text-primary hover:underline transition-colors"
-                    >
-                      {quest.creatorName || 'Community'}
-                    </Link>
-                  ) : (
-                    <span>{quest.creatorName || 'Community'}</span>
-                  )}
-                  {quest.creatorSocialUrl && (
-                    <ExternalLink className="w-3 h-3 text-primary" />
-                  )}
-                </>
-              ) : (
-                <>
-                  <span className="w-4 h-4 rounded-full bg-sunset/20 flex items-center justify-center text-[10px]">🤝</span>
-                  <span>{quest.creatorName || 'Partner'}</span>
-                </>
-              )}
-            </div>
-          </div>
-          
-          {/* View Details Link */}
-          <span className="text-primary font-medium text-sm inline-flex items-center gap-1">
-            Details →
-          </span>
-        </div>
+        {/* View Quest CTA */}
+        <span className="text-primary font-semibold text-sm inline-flex items-center gap-1 group-hover:gap-2 transition-all">
+          View Quest →
+        </span>
       </div>
     </button>
   );
