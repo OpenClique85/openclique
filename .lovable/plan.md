@@ -1,123 +1,100 @@
 
-# Tutorial Quest: Solo Walkthrough with Strong Nudge
+# Quest Builder Cleanup and Duration Steps
 
 ## Overview
-A self-contained, solo interactive tutorial that teaches users the core quest mechanics (lobby, ice-breaker prompt, photo submission, quest timeline) through a guided walkthrough narrated by BUGGS. It requires no admin involvement -- users start and complete it entirely on their own.
-
-## Database Changes
-
-### Add columns to `profiles` table
-- `tutorial_quest_completed_at` (timestamptz, nullable) -- when the tutorial quest was finished
-- `tutorial_quest_step` (int, default 0) -- tracks progress so users can resume
-- `tutorial_quest_dismissed_count` (int, default 0) -- how many times the nudge banner was dismissed (stops showing after 3)
-
-No new tables needed. The existing `award_xp` RPC handles XP rewards.
+Six targeted changes to the quest builder and quest detail modal to remove redundancies, align UI consistency, and replace the free-text duration notes with a structured step-based approach.
 
 ---
 
-## New Files
+## 1. Replace "Duration Notes" with Structured Steps (TimingStep)
 
-### 1. `src/pages/TutorialQuest.tsx`
-Full-page protected route at `/tutorial-quest`. Contains:
-- A progress bar (5 dots) at the top
-- Step content area in the center
-- Back/Next navigation at the bottom
-- "Skip Tutorial" link in the top-right corner (with confirmation dialog)
-- Mobile-first layout (works great on all screen sizes)
-- On completion: calls `award_xp` with 50 XP, sets `tutorial_quest_completed_at`, navigates to `/quests`
+Replace the free-text `duration_notes` field with a dynamic step builder where creators define quest phases (e.g., "Icebreaker," "Main Activity," "Wrap-up"), each with a slider for duration in minutes.
 
-### 2. `src/components/tutorial-quest/TutorialQuestBanner.tsx`
-Pinned banner shown at the top of the Quests page for users who haven't completed the tutorial. Features:
-- BUGGS face image (from `buggs-face.png`) with speech bubble
-- "Complete your training quest to get the most out of OpenClique!"
-- Primary CTA: "Start Training Quest" linking to `/tutorial-quest`
-- "Skip for now" dismiss button (increments `tutorial_quest_dismissed_count`)
-- Hidden after 3 dismissals or after completion
-- Warm, inviting design matching the app's teal/amber palette
+**Data model change:**
+- Add a new column `duration_steps` (JSONB, nullable) to the `quests` table to store an array like:
+  ```json
+  [
+    { "label": "Icebreaker", "minutes": 15 },
+    { "label": "Main Activity", "minutes": 60 },
+    { "label": "Wrap-up", "minutes": 15 }
+  ]
+  ```
+- Keep `duration_notes` for backward compatibility but stop rendering it in the builder for new quests.
 
-### 3. `src/components/tutorial-quest/TutorialLobbyStep.tsx`
-Simulated clique lobby showing:
-- A mock clique card with 4 fake members (avatar placeholders, names, one trait badge each)
-- BUGGS narrates: "This is your clique. Before each quest, you'll see who you're adventuring with."
-- Highlights the member list, clique name, and role badges with subtle callouts
-- "Got it" button to proceed
+**UI:**
+- Starts with 1 step pre-filled ("Step 1", 30 min).
+- "Add Step" button (max 8 steps).
+- Each step has a text input for the label and a slider (5-180 min, step 5).
+- Remove button per step (min 1 step).
+- Total duration auto-calculated and displayed at the bottom.
 
-### 4. `src/components/tutorial-quest/TutorialPromptStep.tsx`
-Ice-breaker practice:
-- Shows a prompt card: "What's a food you could eat every day and never get tired of?"
-- Text input area (requires 10+ characters to enable Next)
-- BUGGS: "Before each quest, you'll answer a fun prompt so your clique gets to know you."
-- Input is not saved anywhere -- purely practice
+**Form data type update:**
+- Add `duration_steps: Array<{ label: string; minutes: number }>` to `QuestFormData`.
+- Default: `[{ label: '', minutes: 30 }]`.
 
-### 5. `src/components/tutorial-quest/TutorialPhotoStep.tsx`
-Photo upload practice:
-- Shows a camera/upload UI matching the real proof submission pattern
-- Prompt: "Show us your current view -- wherever you are right now!"
-- Accepts a photo via file input or camera (mobile)
-- Photo is displayed as a preview but NOT persisted to storage
-- BUGGS: "During quests, you submit photos as proof of completion."
-
-### 6. `src/components/tutorial-quest/TutorialTimelineStep.tsx`
-Quest journey walkthrough:
-- Shows a vertical timeline with 4 stages: Recruiting, Warm-up, Live, Completed
-- Each stage has a brief description of what happens
-- Current stage is highlighted (animated)
-- BUGGS: "Every quest follows this journey. You'll always know where you are."
-
-### 7. `src/components/tutorial-quest/TutorialCompleteStep.tsx`
-Celebration screen:
-- Confetti-style animation (CSS keyframes, no external library)
-- Large "You earned 50 XP!" badge with sparkle icon
-- BUGGS (hopping pose): "You're ready! Go find your first real quest."
-- Two CTAs: "Browse Quests" (primary) and "Set Up Profile" (secondary outline)
-
-### 8. `src/components/admin/TutorialQuestAnalytics.tsx`
-Admin analytics panel showing:
-- Total users who completed the tutorial quest
-- Completion rate (completed / total registered users)
-- Average step reached (for users who dropped off)
-- Dismissal rate (how many users dismissed the banner 3 times)
-- Simple table of recent completions (user, date, time to complete)
-- Data sourced directly from `profiles` table queries
+**Quest detail modal:**
+- Display these steps in the detail modal so users can see the quest timeline breakdown.
 
 ---
 
-## Modified Files
+## 2. Align "What to Bring" AI Suggester (ExpectationsStep)
 
-### `src/App.tsx`
-- Add lazy import for `TutorialQuest` page
-- Add protected route: `/tutorial-quest`
+Currently the `AIFieldSuggester` for "What to Bring" sits below the textarea (left-aligned), while "Dress Code" and "Physical Requirements" have theirs in a `justify-between` row on the right.
 
-### `src/pages/Quests.tsx`
-- Import and render `TutorialQuestBanner` above the quest content (after the header, before loading/quest rows)
-- Banner only shows for authenticated users who haven't completed the tutorial
-
-### `src/components/admin/AdminSectionNav.tsx`
-- Add "Tutorial Analytics" tab to the "Growth" section
-
-### `src/pages/Admin.tsx`
-- Import `TutorialQuestAnalytics`
-- Add `case 'tutorial-analytics'` to the `renderContent` switch
+**Fix:** Wrap the "What to Bring" helper text and AI suggester in the same `flex items-center justify-between` layout used by the other fields.
 
 ---
 
-## BUGGS Integration
-Each tutorial step uses the BUGGS face image (`src/assets/buggs-face.png`) displayed as a small avatar (40x40) with a speech bubble beside it. The completion step uses the hopping pose (`buggs-hopping.png`) for celebration. This matches the existing BUGGS patterns used in the Quests page and BuggsFloating component.
+## 3. Remove Duplicate Age Restriction (SafetyStep)
+
+The "Age Restriction" select in SafetyStep duplicates what is already captured in ConstraintsStep (`constraints_age_requirement`). 
+
+**Fix:** Remove the entire Age Restriction section from SafetyStep. The `age_restriction` field in `QuestFormData` becomes unused by the builder (keep it in the type for backward compat but stop rendering it).
 
 ---
 
-## Mobile-First Design
-- All step components use responsive padding (`px-4 md:px-8`)
-- Progress dots are touch-friendly (min 44px tap targets)
-- Photo step uses `accept="image/*" capture="environment"` for native camera on mobile
-- Navigation buttons are full-width on mobile, inline on desktop
-- Banner on Quests page stacks vertically on small screens
+## 4. Remove Emergency Contact Section (SafetyStep)
+
+Per the plan, emergency help will be handled via a help button in the squad lobby, not a static field.
+
+**Fix:** Remove the "Emergency Contact Info" section from SafetyStep entirely.
 
 ---
 
-## Privacy and Data
-- No real quest entries, signups, or squad records are created
-- The practice prompt answer is held in local component state only
-- The practice photo is displayed as a blob URL preview, never uploaded
-- Only profile columns are updated: `tutorial_quest_completed_at`, `tutorial_quest_step`, `tutorial_quest_dismissed_count`
-- XP is awarded once via the existing `award_xp` RPC
+## 5. Remove "Cost to Participants" from CapacityStep
+
+Cost is already captured in the Constraints step as `constraints_budget_level` (Free / Low / Medium / High / Mixed).
+
+**Fix:** Remove the `cost_description` input from CapacityStep. The field remains in the data type but is no longer prompted during creation.
+
+---
+
+## 6. Hide "Quest Objectives" and "How You'll Know You Succeeded" from QuestModal
+
+These are internal creator/admin fields and should not be shown to participants in the quest detail view.
+
+**Fix:** Remove the two sections (lines ~454-478) from `QuestModal.tsx` that render `quest.objectives` and `quest.successCriteria`.
+
+---
+
+## Files to Modify
+
+| File | Change |
+|------|--------|
+| `supabase/migrations/...` | Add `duration_steps JSONB` column to `quests` |
+| `src/components/quest-builder/types.ts` | Add `duration_steps` field to `QuestFormData` and defaults |
+| `src/components/quest-builder/steps/TimingStep.tsx` | Replace duration notes textarea with step builder UI |
+| `src/components/quest-builder/steps/ExpectationsStep.tsx` | Fix AI suggester alignment for "What to Bring" |
+| `src/components/quest-builder/steps/SafetyStep.tsx` | Remove Age Restriction and Emergency Contact sections |
+| `src/components/quest-builder/steps/CapacityStep.tsx` | Remove Cost to Participants section |
+| `src/components/QuestModal.tsx` | Remove objectives and success criteria sections |
+| Quest submission logic (wherever `duration_notes` is persisted) | Also persist `duration_steps` to the new column |
+
+---
+
+## Technical Notes
+
+- The `duration_steps` JSONB column avoids needing a separate table for a simple ordered list.
+- Existing quests with only `duration_notes` will still display correctly since we are not removing the column.
+- The step builder uses the existing `Slider` and `Input` components already in the project.
+- No new dependencies required.
