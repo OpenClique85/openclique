@@ -34,6 +34,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 // -----------------------------------------------------------------------------
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ScrollToTop } from "@/components/ScrollToTop";
 
 // -----------------------------------------------------------------------------
 // IMPORTS: Core providers and components (not lazy - always needed)
