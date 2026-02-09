@@ -98,23 +98,6 @@ export function CapacityStep({ formData, updateFormData }: CapacityStepProps) {
         </p>
       </div>
 
-      {/* Cost */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <DollarSign className="w-4 h-4 text-muted-foreground" />
-          <Label htmlFor="cost_description" className="text-base font-medium">Cost to Participants</Label>
-        </div>
-        <Input
-          id="cost_description"
-          placeholder="e.g., Free, $20 per person, $15 (first drink sponsored)"
-          value={formData.cost_description}
-          onChange={(e) => updateFormData({ cost_description: e.target.value })}
-        />
-        <p className="text-sm text-muted-foreground">
-          Be specific about what's included and any out-of-pocket expenses.
-        </p>
-      </div>
-
       {/* Rewards */}
       <div className="space-y-3">
         <div className="flex items-center gap-2">

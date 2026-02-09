@@ -158,6 +158,9 @@ export default function QuestBuilder() {
           ? new Date(existingQuest.end_datetime).toISOString().slice(0, 16) 
           : '',
         duration_notes: existingQuest.duration_notes || '',
+        duration_steps: Array.isArray(existingQuest.duration_steps) 
+          ? (existingQuest.duration_steps as Array<{ label: string; minutes: number }>)
+          : [{ label: '', minutes: 30 }],
         default_duration_minutes: existingQuest.default_duration_minutes || 120,
         full_description: existingQuest.full_description || '',
         highlights: (existingQuest.highlights as string[] | null) || [],

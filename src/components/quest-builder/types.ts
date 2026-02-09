@@ -124,6 +124,7 @@ export const defaultFormData: QuestFormData = {
   start_datetime: '',
   end_datetime: '',
   duration_notes: '',
+  duration_steps: [{ label: '', minutes: 30 }],
   default_duration_minutes: 120,
   
   // Constraints
