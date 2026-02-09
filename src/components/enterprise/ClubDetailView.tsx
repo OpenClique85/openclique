@@ -356,7 +356,7 @@ export function ClubDetailView({ clubId, onBack }: ClubDetailViewProps) {
   };
 
   const copyInviteLink = (code: string) => {
-    const link = `${window.location.origin}/join?code=${code}`;
+    const link = `${PUBLISHED_URL}/auth?club=${code}`;
     navigator.clipboard.writeText(link);
     toast.success('Invite link copied!');
   };
