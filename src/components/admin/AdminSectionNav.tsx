@@ -136,6 +136,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
       { id: 'invite-codes', label: 'Codes & Keys' },
       { id: 'friend-referrals', label: 'Friend Referrals' },
       { id: 'onboarding-feedback', label: 'Onboarding Feedback' },
+      { id: 'tutorial-analytics', label: 'Tutorial Analytics' },
       { id: 'analytics', label: 'Analytics' },
     ],
   },

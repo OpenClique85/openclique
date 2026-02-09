@@ -341,6 +341,11 @@ const Quests = () => {
           </>
         )}
 
+        {/* Tutorial Quest Banner */}
+        <div className="px-4 max-w-6xl mx-auto">
+          <TutorialQuestBanner />
+        </div>
+
         {/* Loading State */}
         {isLoading && (
           <section className="px-4 py-16">

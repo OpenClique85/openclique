@@ -248,6 +248,7 @@ const App = () => {
                 <Route path="/admin/pilot/:instanceId" element={<ProtectedRoute requireAdmin><PilotControlRoom /></ProtectedRoute>} />
                 <Route path="/enterprise" element={<ProtectedRoute requireAdmin><EnterprisePortal /></ProtectedRoute>} />
                 <Route path="/feedback/:questId" element={<ProtectedRoute><FeedbackFlow /></ProtectedRoute>} />
+                <Route path="/tutorial-quest" element={<ProtectedRoute><TutorialQuest /></ProtectedRoute>} />
                 
                 {/* SIGNUP/FUNNEL PAGES */}
                 <Route path="/pilot" element={<Pilot />} />
