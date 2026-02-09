@@ -202,6 +202,7 @@ const App = () => {
           <Sonner />
           
           <BrowserRouter>
+            <ScrollToTop />
             {/* Tutorial components must be inside BrowserRouter since they use useNavigate */}
             <TutorialOverlay />
             <TutorialPrompt />
