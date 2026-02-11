@@ -77,9 +77,13 @@ export function useSquadWarmUp(squadId: string | null) {
         .from('quest_squads')
         .select('*')
         .eq('id', squadId)
-        .single();
+        .maybeSingle();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching squad:', error);
+        return null;
+      }
+      if (!data) return null;
       
       // Fetch quest instance separately - use instance_id if available, otherwise quest_id
       const instanceId = data.instance_id || data.quest_id;
@@ -87,7 +91,7 @@ export function useSquadWarmUp(squadId: string | null) {
         .from('quest_instances')
         .select('id, title, scheduled_date, start_time, objectives, meeting_point_name, meeting_point_address, what_to_bring, safety_notes')
         .eq('id', instanceId)
-        .single();
+        .maybeSingle();
       
       return {
         ...data,
@@ -162,12 +166,15 @@ export function useSquadWarmUp(squadId: string | null) {
       if (!squadId) return [];
       
       const { data, error } = await supabase
-        .from('squad_chat_messages' as 'quest_ratings') // Type cast for new table
+        .from('squad_chat_messages')
         .select('*')
-        .eq('squad_id' as 'quest_id', squadId)
+        .eq('squad_id', squadId)
         .order('created_at', { ascending: true });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching chat messages:', error);
+        return [];
+      }
       return (data as unknown as ChatMessage[]) || [];
     },
     enabled: !!squadId,

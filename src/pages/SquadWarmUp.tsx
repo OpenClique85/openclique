@@ -52,9 +52,10 @@ export default function SquadWarmUp() {
             )
           `)
           .eq('id', squadId)
-          .single();
+          .maybeSingle();
 
         if (squadError) throw squadError;
+        if (!squad) throw new Error('Squad not found');
 
         // Check if user is a member
         const { data: membership, error: memberError } = await supabase
@@ -83,7 +84,7 @@ export default function SquadWarmUp() {
       }
     },
     enabled: !!squadId && !!user && !authLoading,
-    retry: 2,
+    retry: 1,
   });
 
   // Loading states
